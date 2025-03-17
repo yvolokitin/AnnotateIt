@@ -1,4 +1,10 @@
 import "package:vap/pages/header.dart";
+
+import "package:vap/pages/about.dart";
+import "package:vap/pages/account.dart";
+import "package:vap/pages/learn.dart";
+import "package:vap/pages/projects.dart";
+
 import "package:flutter/material.dart";
 
 // Main page layout with Persistent Header and adaptive Left Drawer
@@ -64,10 +70,7 @@ class MainPageState extends State<MainPage> {
                     Expanded(
                       flex: 8,
                       child: Center(
-                        child: Text(
-                          "Selected Screen: ${selectedIndex == 0 ? "Projects" : selectedIndex == 1 ? "Account" : selectedIndex == 2 ? "Learn" : "About"}",
-                          style: TextStyle(fontSize: 24),
-                        ),
+                        child: getSelectedWidget(selectedIndex),
                       ),
                     ),
                   ],
@@ -88,6 +91,21 @@ class MainPageState extends State<MainPage> {
         );
       },
     );
+  }
+
+  Widget getSelectedWidget(int index) {
+    switch (index) {
+      case 0:
+        return ProjectsWidget();
+      case 1:
+        return AccountWidget();
+      case 2:
+        return LearnWidget();
+      case 3:
+        return AboutWidget();
+      default:
+        return ProjectsWidget();
+    }
   }
 }
 
@@ -200,11 +218,17 @@ class DrawerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 100,
-      // decoration: BoxDecoration(border: Border.all(color: Colors.yellow, width: 3)),
-      
+      alignment: Alignment.centerLeft, // Aligns content to the left
       child: ListTile(
-        leading: Icon(icon, color: isSelected ? Colors.blue : null),
-        title: fullMode ? Text(title) : null, // Hide text in compact mode
+        contentPadding: EdgeInsets.only(left: 10, right: 16),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center, // Ensures vertical alignment
+          children: [
+            Icon(icon, color: isSelected ? Colors.blue : null),
+            if (fullMode) SizedBox(width: 8), // Space between icon and text
+            if (fullMode) Text(title),
+          ],
+        ),
         selected: isSelected,
         onTap: onTap,
       ),

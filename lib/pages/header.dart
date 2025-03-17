@@ -33,7 +33,7 @@ class AppHeaderState extends State<AppHeader> {
               SizedBox(width: 10),
               Icon(Icons.widgets, color: Colors.white),
               SizedBox(width: 10),
-              Text("Annot@eIt", style: TextStyle(color: Colors.white, fontSize: 30)),
+              Text("Annot@It", style: TextStyle(color: Colors.white, fontSize: 30)),
             ],
           ),
         ),
