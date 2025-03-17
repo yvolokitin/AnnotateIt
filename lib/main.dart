@@ -1,7 +1,7 @@
 import "package:vap/widgets/debugborder.dart";
 import "package:vap/utils/theme.dart";
 
-import "package:vap/pages/main_page.dart";
+import "package:vap/pages/mainmenu.dart";
 // import "package:vap/pages/account.dart";
 // import "package:vap/pages/learn.dart";
 // import "package:vap/pages/about.dart";

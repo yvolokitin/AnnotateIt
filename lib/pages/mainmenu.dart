@@ -96,7 +96,7 @@ class MainPageState extends State<MainPage> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return ProjectsWidget();
+        return ProjectsPage();
       case 1:
         return AccountWidget();
       case 2:
@@ -104,7 +104,7 @@ class MainPageState extends State<MainPage> {
       case 3:
         return AboutWidget();
       default:
-        return ProjectsWidget();
+        return ProjectsPage();
     }
   }
 }
@@ -205,6 +205,7 @@ class DrawerItem extends StatelessWidget {
   final bool fullMode;
   final bool isSelected;
   final VoidCallback onTap;
+  final double textSize;
 
   const DrawerItem({
     required this.icon,
@@ -212,26 +213,88 @@ class DrawerItem extends StatelessWidget {
     this.fullMode = false,
     required this.isSelected,
     required this.onTap,
+    this.textSize = 28.0,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Base red color
+    final Color baseRed = Colors.red;
+    // Compute a 20% lighter color for the background
+    final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
+    
+    return Stack(
+      children: [
+        Container(
+          height: 100,
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+            color: isSelected ? lighterRed : Colors.transparent, // 20% lighter red when selected
+          ),
+          child: ListTile(
+            contentPadding: EdgeInsets.only(left: 10, right: 16),
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
+                if (fullMode) SizedBox(width: 16),
+                if (fullMode)
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: textSize,
+                      color: isSelected ? Colors.white : Colors.white,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+              ],
+            ),
+            selected: isSelected,
+            onTap: onTap,
+          ),
+        ),
+      
+        if (isSelected)
+          Positioned(
+            right: 0, // Align to the right
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 10, // 10px width
+              color: Colors.red, // Red color for the selection indicator
+            ),
+          ),
+      ],
+    );
+    
+    /*
     return Container(
       height: 100,
       alignment: Alignment.centerLeft, // Aligns content to the left
+      decoration: BoxDecoration(
+        // border: Border.all(color: Colors.yellow, width: 3), // 3px border
+        color: isSelected ? Colors.red.withOpacity(0.2) : Colors.transparent, // Red background if selected
+      ),
       child: ListTile(
         contentPadding: EdgeInsets.only(left: 10, right: 16),
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center, // Ensures vertical alignment
           children: [
-            Icon(icon, color: isSelected ? Colors.blue : null),
-            if (fullMode) SizedBox(width: 8), // Space between icon and text
-            if (fullMode) Text(title),
+            Icon(icon, color: isSelected ? Colors.red : null),
+            if (fullMode) SizedBox(width: 16), // Space between icon and text
+            if (fullMode)
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: textSize,
+                  color: isSelected ? Colors.red : Colors.white)
+              ),
           ],
         ),
         selected: isSelected,
         onTap: onTap,
       ),
     );
+    */
   }
 }
