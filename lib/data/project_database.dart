@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/project.dart'; // Import Project model
+import '../models/project.dart';
 
 class ProjectDatabase {
   static final ProjectDatabase instance = ProjectDatabase._init();
@@ -10,6 +10,7 @@ class ProjectDatabase {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
+    
     _database = await _initDB('projects.db');
     return _database!;
   }
@@ -36,6 +37,11 @@ class ProjectDatabase {
   Future<int> insertProject(Project project) async {
     final db = await database;
     return await db.insert('projects', project.toMap());
+  }
+
+  Future<int> deleteProject(int id) async {
+    final db = await database;
+    return await db.delete('projects', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<Project>> fetchProjects() async {

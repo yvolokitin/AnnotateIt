@@ -1,17 +1,19 @@
-import "package:vap/widgets/debugborder.dart";
-import "package:vap/utils/theme.dart";
-
 import "package:vap/pages/mainmenu.dart";
-// import "package:vap/pages/account.dart";
-// import "package:vap/pages/learn.dart";
-// import "package:vap/pages/about.dart";
+import "package:vap/utils/theme.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+// Import FFI for SQLite
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 ThemeData themeData = getSystemTheme();
 
 void main() {
+  // Initialize database for desktop (Windows, macOS, Linux)
+  sqfliteFfiInit(); 
+  databaseFactory = databaseFactoryFfi;
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
