@@ -27,7 +27,7 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
   String? _errorMessage;
 
   // Default random color for new label
-  String _newLabelColor = _generateRandomColor();
+  late String _newLabelColor;
 
   @override
   void initState() {
@@ -36,6 +36,8 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
     // Load existing labels and colors
     _labels = List.from(widget.project.labels);
     _labelColors = List.from(widget.project.labelColors);
+
+    _newLabelColor = _generateRandomColor();
   }
 
   // Function to generate a random color for a new label
@@ -53,14 +55,21 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
       setState(() => _errorMessage = "Label name cannot be empty.");
 
     } else if (_labels.contains(newLabel)) {
-      setState(() => _errorMessage = "Label '$newLabel' already exists!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Label '$newLabel' already exists!", style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      //setState(() => _errorMessage = "Label '$newLabel' already exists!");
 
     } else {
       setState(() {
         _labels.add(_labelController.text);
-        _labelColors.add(_generateRandomColor());
+        _labelColors.add(_newLabelColor); // use selected color
         _labelController.clear();
-        _errorMessage = null;
+        // Generate a new random color for next label
+        _newLabelColor = _generateRandomColor();
       });
     }
   }
@@ -108,6 +117,20 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
     );
   }
 
+  void _showNewLabelColorPicker() {
+    showDialog(
+      context: context,
+      builder: (context) => ColorPickerDialog(
+        initialColor: _newLabelColor,
+        onColorSelected: (newColor) {
+          setState(() {
+            _newLabelColor = newColor; // Update new label color before adding
+          });
+        },
+      ),
+    );
+  } 
+
 @override
 Widget build(BuildContext context) {
   double dialogWidth = MediaQuery.of(context).size.width * 0.9; // 90% of window width
@@ -123,19 +146,34 @@ Widget build(BuildContext context) {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 📌 Title
+          // Title
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "Edit Labels",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
           SizedBox(height: 12),
 
-          // 📌 Label Input Field
+          // Label Input Field
           Row(
             children: [
+              GestureDetector(
+                onTap: _showNewLabelColorPicker,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Color(int.parse(_newLabelColor.replaceAll('#', '0xFF'))),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1),
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 8),
+              // Label Name Input
               Expanded(
                 child: TextField(
                   controller: _labelController,
@@ -143,19 +181,21 @@ Widget build(BuildContext context) {
                     labelText: "Label Name",
                     filled: true,
                     fillColor: Colors.grey[850],
+                    errorText: _labels.contains(_labelController.text.trim()) ? "Label already exists!" : null,
                   ),
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-              SizedBox(width: 8),
+
+              // Create Label Button
               ElevatedButton(
                 onPressed: _addLabel,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent, // ✅ Match Create New Project button
+                  backgroundColor: Colors.redAccent,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
-                child: Text("Add", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text("Create Label", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -177,7 +217,7 @@ Widget build(BuildContext context) {
                   ),
                   child: Row(
                     children: [
-                      // ✅ Open Color Picker Dialog
+                      // Open Color Picker Dialog
                       GestureDetector(
                         onTap: () => _showColorPicker(index),
                         child: Container(
