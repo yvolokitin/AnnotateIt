@@ -67,6 +67,13 @@ class ProjectTile extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
 
+                  // Last update
+                  Text(
+                    "Updated: ${_formatDate(project.lastUpdated)}",
+                    style: TextStyle(color: Colors.white60, fontSize: 18),
+                  ),
+                  SizedBox(height: 8),
+
                   // Creation Date
                   Text(
                     "Created: ${_formatDate(project.creationDate)}",

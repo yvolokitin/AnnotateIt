@@ -18,6 +18,7 @@ class LabelSelectionDialog extends StatefulWidget {
 class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
   final TextEditingController _labelController = TextEditingController();
   List<String> _labels = [];
+  List<String> _labelColors = [];
 
   // 📌 Add Label to List
   void _addLabel() {
@@ -43,7 +44,9 @@ class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
       type: widget.projectType,
       icon: "folder",
       creationDate: DateTime.now(),
+      lastUpdated: DateTime.now(),
       labels: _labels,
+      labelColors: _labelColors,
     );
 
     await ProjectDatabase.instance.insertProject(newProject);
@@ -100,7 +103,7 @@ class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
           child: Text("Back"),
         ),
 
-        // ✅ Create Project Button
+        // Create Project Button
         ElevatedButton(
           onPressed: _createProject,
           child: Text("Create"),

@@ -1,9 +1,11 @@
 import "package:vap/pages/header.dart";
 
-import "package:vap/pages/about.dart";
+import "package:vap/pages/projects_page.dart";
+import "package:vap/pages/learn_page.dart";
+import "package:vap/pages/about_page.dart";
+
 import "package:vap/pages/account.dart";
-import "package:vap/pages/learn.dart";
-import "package:vap/pages/projects.dart";
+
 
 import "package:flutter/material.dart";
 

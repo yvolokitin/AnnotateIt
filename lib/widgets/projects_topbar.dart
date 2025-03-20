@@ -31,11 +31,12 @@ class ProjectsTopBar extends StatelessWidget {
             icon: Icon(Icons.swap_vert, color: Colors.white70),
             onSelected: (value) => onSortSelected(value),
             itemBuilder: (context) => [
-              PopupMenuItem(value: "A-Z", child: Text("A-Z")),
-              PopupMenuItem(value: "Z-A", child: Text("Z-A")),
+              PopupMenuItem(value: "Last updated", child: Text("Last updated")),
               PopupMenuItem(value: "Newest-Oldest", child: Text("Newest-Oldest")),
               PopupMenuItem(value: "Oldest-Newest", child: Text("Oldest-Newest")),
               PopupMenuItem(value: "Project Type", child: Text("Project Type")),
+              PopupMenuItem(value: "A-Z", child: Text("A-Z")),
+              PopupMenuItem(value: "Z-A", child: Text("Z-A")),
             ],
           ),
 

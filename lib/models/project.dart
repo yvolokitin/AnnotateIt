@@ -4,7 +4,9 @@ class Project {
   final String type;
   final String icon;
   final DateTime creationDate;
+  final DateTime lastUpdated; 
   final List<String> labels;
+  final List<String> labelColors;
 
   Project({
     this.id,
@@ -12,7 +14,9 @@ class Project {
     required this.type,
     required this.icon,
     required this.creationDate,
+    required this.lastUpdated,
     required this.labels,
+    required this.labelColors,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,7 +26,9 @@ class Project {
       'type': type,
       'icon': icon,
       'creationDate': creationDate.toIso8601String(),
+      'lastUpdated': lastUpdated.toIso8601String(),
       'labels': labels.join(','), // Store as comma-separated string
+      'labelColors': labelColors.join(','), // Store as comma-separated string hex values (#FF5733,#33FF57,...)
     };
   }
 
@@ -33,7 +39,11 @@ class Project {
       type: map['type'],
       icon: map['icon'],
       creationDate: DateTime.parse(map['creationDate']),
+      lastUpdated: DateTime.parse(map['lastUpdated']),
       labels: map['labels'].split(','), // Convert back to list
+      labelColors: (map['labelColors'] as String).isEmpty 
+          ? List.filled((map['labels'] as String).split(',').length, "#FFFFFF") // Default white
+          : (map['labelColors'] as String).split(','),
     );
   }
 }

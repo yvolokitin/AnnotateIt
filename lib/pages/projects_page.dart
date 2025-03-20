@@ -5,6 +5,8 @@ import '../models/project.dart';
 import '../widgets/project_tile.dart';
 import '../widgets/projects_topbar.dart';
 import '../widgets/create_project_dialog.dart';
+import '../widgets/edit_project_name.dart';
+import '../widgets/edit_labels_dialog.dart';
 
 class ProjectsPage extends StatefulWidget {
   @override
@@ -16,7 +18,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
   List<Project> _allProjects = [];
   List<Project> _filteredProjects = [];
   String _searchQuery = "";
-  String _sortOption = "A-Z"; // Default sort option
+  
+  // Default sort option
+  String _sortOption = "Last Updated";
 
   @override
   void initState() {
@@ -31,6 +35,38 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _filteredProjects = _applySearchAndSort(projects);
     });
   }
+
+  // Function to Edit a Project (Add Edit Logic)
+  void _editProjectName(Project project) {
+    print("Editing: ${project.name}");
+    showDialog(
+      context: context,
+      builder: (context) => EditProjectName(
+        project: project,
+        onProjectUpdated: () {
+          _loadProjects(); // Refresh project list after saving
+        },
+      ),
+    );
+  }
+
+  // Open Edit Labels Dialog
+  void _editProjectLabels(Project project) {
+    showDialog(
+      context: context,
+      builder: (context) => EditLabelsDialog(
+        project: project,
+        // Refresh projects after label update
+        onLabelsUpdated: _loadProjects,
+      ),
+    );
+  }
+
+  // Function to Delete a Project
+  Future<void> _deleteProject(Project project) async {
+    await ProjectDatabase.instance.deleteProject(project.id!);
+    _loadProjects(); // Refresh list after deletion
+  }  
 
   void _onSearchChanged(String query) {
     setState(() {
@@ -52,11 +88,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
     }).toList();
 
     switch (_sortOption) {
-      case "A-Z":
-        filtered.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case "Z-A":
-        filtered.sort((a, b) => b.name.compareTo(a.name));
+      case "Last Updated":
+        filtered.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
         break;
       case "Newest-Oldest":
         filtered.sort((a, b) => b.creationDate.compareTo(a.creationDate));
@@ -64,25 +97,18 @@ class _ProjectsPageState extends State<ProjectsPage> {
       case "Oldest-Newest":
         filtered.sort((a, b) => a.creationDate.compareTo(b.creationDate));
         break;
+      case "A-Z":
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case "Z-A":
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
       case "Project Type":
         filtered.sort((a, b) => a.type.compareTo(b.type));
         break;
     }
 
     return filtered;
-  }
-
-  Future<void> _addProject() async {
-    final newProject = Project(
-      name: "New Project",
-      type: "Classification",
-      icon: "folder",
-      creationDate: DateTime.now(),
-      labels: ["Label1", "Label2"],
-    );
-
-    await ProjectDatabase.instance.insertProject(newProject);
-    _loadProjects(); // Refresh list
   }
 
   @override
@@ -98,7 +124,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
               },
               onSortSelected: _onSortSelected,
               onCreateProject: () {
-                print("Pressed new project creation");
+                print("Started a new project creation");
                 showDialog(
                   context: context,
                   builder: (context) => CreateProjectDialog(),
@@ -139,11 +165,19 @@ class _ProjectsPageState extends State<ProjectsPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.edit, color: Colors.blue),
-                title: Text("Edit Project"),
+                leading: Icon(Icons.edit, color: Colors.green),
+                title: Text("Change Project Name"),
                 onTap: () {
                   Navigator.pop(context);
-                  _editProject(project);
+                  _editProjectName(project);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.label, color: Colors.orange), // ✅ Edit Labels Icon
+                title: Text("Edit Project Labels"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editProjectLabels(project);
                 },
               ),
               ListTile(
@@ -160,16 +194,4 @@ class _ProjectsPageState extends State<ProjectsPage> {
       },
     );
   }
-
-  // Function to Edit a Project (Add Edit Logic)
-  void _editProject(Project project) {
-    print("Editing: ${project.name}");
-    // Implement edit logic (e.g., open a dialog to edit project details)
-  }
-
-  // Function to Delete a Project
-  Future<void> _deleteProject(Project project) async {
-    await ProjectDatabase.instance.deleteProject(project.id!);
-    _loadProjects(); // Refresh list after deletion
-  }  
 }
