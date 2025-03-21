@@ -1,6 +1,6 @@
 import "package:vap/pages/header.dart";
 
-import "package:vap/pages/projects_page.dart";
+import "package:vap/pages/projects_list_page.dart";
 import "package:vap/pages/learn_page.dart";
 import "package:vap/pages/about_page.dart";
 
@@ -18,9 +18,9 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  int selectedIndex = 0;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  int selectedIndex = 0;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -62,12 +62,14 @@ class MainPageState extends State<MainPage> {
                           onItemSelected: _onItemTapped,
                         ),
                       ),
+
                     // NavigationRail for medium screens
                     if (isMediumScreen)
                       NavigationRailMenu(
                         selectedIndex: selectedIndex,
                         onItemSelected: _onItemTapped,
                       ),
+
                     // Main content area
                     Expanded(
                       flex: 8,
@@ -268,35 +270,6 @@ class DrawerItem extends StatelessWidget {
           ),
       ],
     );
-    
-    /*
-    return Container(
-      height: 100,
-      alignment: Alignment.centerLeft, // Aligns content to the left
-      decoration: BoxDecoration(
-        // border: Border.all(color: Colors.yellow, width: 3), // 3px border
-        color: isSelected ? Colors.red.withOpacity(0.2) : Colors.transparent, // Red background if selected
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.only(left: 10, right: 16),
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Ensures vertical alignment
-          children: [
-            Icon(icon, color: isSelected ? Colors.red : null),
-            if (fullMode) SizedBox(width: 16), // Space between icon and text
-            if (fullMode)
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: textSize,
-                  color: isSelected ? Colors.red : Colors.white)
-              ),
-          ],
-        ),
-        selected: isSelected,
-        onTap: onTap,
-      ),
-    );
-    */
+
   }
 }

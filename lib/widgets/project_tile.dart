@@ -1,8 +1,11 @@
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter/material.dart';
-
 import '../models/project.dart';
+
+import '../pages/project_details_screen.dart';
+
+import "labels_list.dart";
 
 class ProjectTile extends StatelessWidget {
   final Project project;
@@ -12,120 +15,111 @@ class ProjectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.grey.shade800, // Dark theme background
-      elevation: 3,
-      margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(0.0), // ensure image will be 100% in height and weight
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Thumbnail o(Left Side)
-            Container(
-              width: 350,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.grey[900], // Background color
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  'assets/images/default_project_image.svg',
-                  width: 40, // Adjust size
-                  height: 40,
-                  fit: BoxFit.cover,
-                  color: Colors.white,
+    return GestureDetector(
+      onTap: () {
+        print("Project '${project.name}' clicked!");
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ProjectDetailsScreen(),
+          ),
+        );
+      },
+      child: Card(
+        color: Colors.grey.shade800, // Dark theme background
+        elevation: 3,
+        margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(00.0), // ensure image will be 100% in height and weight
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Thumbnail o(Left Side)
+              Container(
+                width: 350,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[850], // Background color
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/images/default_project_image.svg',
+                    width: 45, // Adjust size
+                    height: 45,
+                    fit: BoxFit.cover,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 12),
+              SizedBox(width: 12),
 
-            // 📌 Project Details (Title, Type, Date, Labels)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Project Details: Title @ Type, Updated and creation Dates, Labels
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Project Name & Type
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: project.name,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextSpan(
+                              text: " @ ${project.type}",
+                              style: TextStyle(color: Colors.white70, fontSize: 24),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 4),
+
+                      // Last update
+                      Text(
+                        "Updated: ${_formatDate(project.lastUpdated)} / Created: ${_formatDate(project.creationDate)}",
+                        style: TextStyle(color: Colors.white60, fontSize: 18),
+                      ),
+                      SizedBox(height: 8),
+
+                      Divider(
+                        color: Colors.grey,
+                        thickness: 2,
+                        height: 32,
+                      ),
+
+                      // Labels Section (Colored Tags)
+                      LabelList(
+                        labels: project.labels.toList(),
+                        labelColors: project.labelColors.toList(),
+                      ),
+                    ],
+                  ), // Column
+                ), // Padding
+              ),  
+
+              // Right Side (Progress Indicator + More Options)
+              Column(
                 children: [
-                  // Project Name & Type
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: project.name,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " @ ${project.type}",
-                          style: TextStyle(color: Colors.white70, fontSize: 24),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 4),
-
-                  // Last update
-                  Text(
-                    "Updated: ${_formatDate(project.lastUpdated)}",
-                    style: TextStyle(color: Colors.white60, fontSize: 18),
-                  ),
-                  SizedBox(height: 8),
-
-                  // Creation Date
-                  Text(
-                    "Created: ${_formatDate(project.creationDate)}",
-                    style: TextStyle(color: Colors.white60, fontSize: 18),
-                  ),
-                  SizedBox(height: 8),
-
-                  // 📌 Labels Section (Colored Tags)
-                  Wrap(
-                    spacing: 8,
-                    children: project.labels.take(3).map((label) {
-                      return _buildLabel(label);
-                    }).toList(),
-                  ),
+                  IconButton(
+                    icon: Icon(Icons.more_vert, color: Colors.white),
+                    onPressed: onMorePressed,
+                  ),  
                 ],
               ),
-            ),
-
-            // 📌 Right Side (Progress Indicator + More Options)
-            Column(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.more_vert, color: Colors.white),
-                  onPressed: onMorePressed,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🔹 Label Builder with Different Colors
-  Widget _buildLabel(String label) {
-    final Map<String, Color> labelColors = {
-      "blue": Colors.blue,
-      "yellow": Colors.yellow,
-      "red": Colors.red,
-      "Normal": Colors.green,
-      "Anomalous": Colors.red,
-    };
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: labelColors[label] ?? Colors.white24, // Default color
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
+            ],
+          ),  
+        ),  
       ),
     );
   }
@@ -142,5 +136,5 @@ class ProjectTile extends StatelessWidget {
       "July", "August", "September", "October", "November", "December"
     ];
     return months[month - 1];
-  }
+  } 
 }

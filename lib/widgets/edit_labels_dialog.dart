@@ -172,7 +172,7 @@ Widget build(BuildContext context) {
                 ),
               ),
 
-              SizedBox(width: 8),
+              SizedBox(width: 40),
               // Label Name Input
               Expanded(
                 child: TextField(
@@ -187,6 +187,7 @@ Widget build(BuildContext context) {
                 ),
               ),
 
+              SizedBox(width: 40),
               // Create Label Button
               ElevatedButton(
                 onPressed: _addLabel,
@@ -195,7 +196,7 @@ Widget build(BuildContext context) {
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
-                child: Text("Create Label", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text("Create Label", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
