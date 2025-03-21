@@ -114,7 +114,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(title: Text("          ")),
       body: Column(
         children: [
           // 📌 Row with Create Button, Search Bar, and Sort Icon

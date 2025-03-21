@@ -32,6 +32,10 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // final sWidth = MediaQuery.of(context).size.width;
+        // final sHeight = MediaQuery.of(context).size.height;
+        // print('Screen width: $sWidth, height: $sHeight');
+
         double screenWidth = MediaQuery.of(context).size.width;
 
         // 16+ inches screens
@@ -270,6 +274,5 @@ class DrawerItem extends StatelessWidget {
           ),
       ],
     );
-
   }
 }

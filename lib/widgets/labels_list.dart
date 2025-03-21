@@ -4,18 +4,11 @@ class LabelList extends StatefulWidget {
   final List<String> labels;
   final List<String> labelColors;
 
-  // const LabelList({required this.labels, required this.labelColors});
   LabelList({
     required this.labels,
     required this.labelColors,
     super.key,
-  }) {
-    if (labels.length != labelColors.length) {
-      debugPrint("Warning: labels and labelColors have different lengths! Adjusting...");
-      // debugPrint('🔹 labels (${labels.length} items): $labels');
-      // debugPrint('🔸 labelColors (${labelColors.length} items): $labelColors');
-    }
-  }
+  });
   
   @override
   _LabelListState createState() => _LabelListState();
@@ -26,13 +19,23 @@ class _LabelListState extends State<LabelList> {
 
   @override
   Widget build(BuildContext context) {
-    final labelsToShow = _showAll ? widget.labels : widget.labels.take(13).toList();
+    final labelsToShow, toTake;
+    double screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth >= 1600) {
+      toTake = 13; labelsToShow = _showAll ? widget.labels : widget.labels.take(13).toList();
+    } else if (screenWidth > 980) {
+      toTake = 7; labelsToShow = _showAll ? widget.labels : widget.labels.take(7).toList();
+    } else {
+      toTake = 3; labelsToShow = _showAll ? widget.labels : widget.labels.take(3).toList();
+    }
+    
+    // final labelsToShow = _showAll ? widget.labels : widget.labels.take(13).toList();
 
     // If somehow labelColors has less size then labels -> fix it to make app more rubost
     final adjustedLabelColors = List<String>.generate(
       widget.labels.length,
       (index) =>
-          index < widget.labelColors.length ? widget.labelColors[index] : '#AAAAAA', // Серый цвет по умолчанию
+          index < widget.labelColors.length ? widget.labelColors[index] : '#AAAAAA', // Grey color by default
     );
 
     return Wrap(
@@ -46,7 +49,7 @@ class _LabelListState extends State<LabelList> {
           return _buildLabel(label, color);
         }),
 
-        if (!_showAll && widget.labels.length > 13)
+        if (!_showAll && widget.labels.length > toTake)
           GestureDetector(
             onTap: () {
               setState(() {
