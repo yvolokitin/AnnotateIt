@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 
@@ -5,9 +6,13 @@ import '../widgets/edit_labels_dialog.dart';
 import 'dataset_view_page.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
+  final Project project;
+
+  const ProjectDetailsScreen(this.project, {super.key});
+
   @override
-  _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
-}
+    _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
+  }
 
 class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {  
   @override
@@ -24,7 +29,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    print("Load project details");
+    print("Load project details, which is in fact nothing for now");
   }
 
   @override
@@ -50,7 +55,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 IconButton(
                   icon: Icon(Icons.arrow_forward, color: Colors.white),
                   onPressed: () {
-                    print("Forward button pressed");
+                    print("Forward button pressed, no actions yet");
                   },
                 ),
               ],
@@ -62,13 +67,53 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
             child : Row(
               children: [
                 // Full drawer for large screens
-                if (screenWidth >= 1600)
+                if (screenWidth >= 1600) // isLargeScreen)
                   Expanded(
                     flex: 2,
-                    child: AppDrawer(
-                      fullMode: true,
-                      selectedIndex: selectedIndex,
-                      onItemSelected: _onItemTapped,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(40.0),
+                          color: Colors.grey[850],
+                          height: 330,
+                          width: double.infinity,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.project.name,
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)
+                                ),
+
+                                SizedBox(height: 6),
+                                SvgPicture.asset(
+                                  'assets/images/default_project_image.svg',
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  color: Colors.white,
+                                ),
+                                Text(
+                                  "Type: ${widget.project.type}",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18)
+                                ),
+
+                                SizedBox(height: 6),
+                                Text(
+                                  "Created at ${_formatDate(widget.project.creationDate)}",
+                                  style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
+                                ),
+                              ],
+                            ),
+                        ),
+
+                        Expanded(
+                          child: AppDrawer(
+                            fullMode: true,
+                            selectedIndex: selectedIndex,
+                            onItemSelected: _onItemTapped,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -82,9 +127,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 // Main content area
                 Expanded(
                   flex: 8,
-                  child: Text(
-                    "Project: Opened",
-                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  child: Container(
+                    padding: const EdgeInsets.all(40.0),
+                    color: Colors.grey[900],
+                    child: DatasetViewPage(widget.project), // getSelectedWidget
                   ),
                 ),
               ],
@@ -98,14 +144,28 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return DatasetViewPage();
+        return DatasetViewPage(widget.project);
       case 1:
-        return DatasetViewPage(); // EditLabelsDialog();
+        // this is temporary solution, till the time when normal logic will be implemented
+        return DatasetViewPage(widget.project); // EditLabelsDialog();
       default:
-        return DatasetViewPage();
+        return DatasetViewPage(widget.project);
     }
   }
 
+  // Date Formatter
+  String _formatDate(DateTime date) {
+    return "${date.day} ${_getMonthName(date.month)} ${date.year} | ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+  }
+
+  // Convert month number to name
+  String _getMonthName(int month) {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return months[month - 1];
+  }
 }
 
 // Full Sidebar Drawer
@@ -209,7 +269,7 @@ class DrawerItem extends StatelessWidget {
             color: isSelected ? lighterRed : Colors.transparent, // 20% lighter red when selected
           ),
           child: ListTile(
-            contentPadding: EdgeInsets.only(left: 10, right: 16),
+            contentPadding: EdgeInsets.only(left: 40, right: 16),
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

@@ -1,9 +1,13 @@
 import 'dart:math';
+import 'package:uuid/uuid.dart';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/project.dart';
+import '../models/dataset.dart';
+
+import 'dataset_database.dart';
 
 class ProjectDatabase {
   static final ProjectDatabase instance = ProjectDatabase._init();
@@ -34,12 +38,54 @@ class ProjectDatabase {
         creationDate TEXT NOT NULL,
         lastUpdated TEXT NOT NULL,
         labels TEXT NOT NULL,
-        labelColors TEXT NOT NULL
+        labelColors TEXT NOT NULL,
+        defaultDatasetId TEXT
       )
     ''');
   }
 
-  Future<int> insertProject(Project project) async {
+  Future<Dataset> createDatasetForProject({required int projectId, String name = 'New Dataset', String description = '', bool isDefault = false,}) async {
+    final db = await database;
+
+    // Check if a default dataset already exists
+    if (isDefault) {
+      final List<Map<String, dynamic>> existing = await db.query(
+        'projects',
+        where: 'id = ? AND defaultDatasetId IS NOT NULL',
+        whereArgs: [projectId],
+      );
+
+      if (existing.isNotEmpty) {
+        throw Exception('Default dataset already exists for this project.');
+      }
+    }
+
+    // Create dataset
+    final dataset = Dataset(
+      id: uuid.v4(),
+      projectId: projectId,
+      name: name,
+      description: description,
+      createdAt: DateTime.now(),
+    );
+
+    await db.insert('datasets', dataset.toMap());
+
+    // If it's a default dataset, update the project record
+    if (isDefault) {
+      await db.update(
+        'projects',
+        {'defaultDatasetId': dataset.id},
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+    }
+
+  return dataset;
+}
+
+// TBD: Probably should be removed
+Future<int> insertProject(Project project) async {
     final db = await database;
     return await db.insert('projects', {
       'name': project.name,
@@ -54,7 +100,7 @@ class ProjectDatabase {
     });
   }
 
-  Future<int> updateProject(Project project) async {
+  Future<int> updateProjectName(Project project) async {
     final db = await database;
 
     // Fetch current project name from database
@@ -113,45 +159,37 @@ class ProjectDatabase {
     return result.map((map) => Project.fromMap(map)).toList();
   }
 
-  // this is for Development purposes only, if i need to update certain tables in the database
-  Future<void> runManualSQLUpdate() async {
-    final db = await ProjectDatabase.instance.database;
-    List<Map<String, dynamic>> columns = await db.rawQuery("PRAGMA table_info(projects)");
-    bool columnExists = columns.any((column) => column['name'] == 'labelColors');
-
-    if (!columnExists) {
-      print("Adding labelColors column...");
-      await db.execute("ALTER TABLE projects ADD COLUMN labelColors TEXT");
-    } else {
-      print("Column labelColors already exists.");
-    }
-
-    List<Map<String, dynamic>> projects = await db.query('projects');
-    for (var project in projects) {
-      String labelsString = project['labels'] as String;
-      int projectId = project['id'] as int;
-
-      if (labelsString.isNotEmpty) {
-        List<String> labels = labelsString.split(',');
-        List<String> labelColors = labels.map((_) => _generateRandomColor()).toList();
-        await db.update(
-          'projects',
-          {'labelColors': labelColors.join(',')},
-          where: 'id = ?',
-          whereArgs: [projectId],
-        );
-      print("Database updated successfully!");
-      }
-    }
-  }
-
-  String _generateRandomColor() {
-    Random random = Random();
-    return '#${(random.nextInt(0xFFFFFF) + 0x1000000).toRadixString(16).substring(1).toUpperCase()}';
-  }
-
   Future<void> closeDB() async {
     final db = await database;
     db.close();
   }
+
+  // this is for Development purposes only, if i need to update certain tables in the database
+  Future<void> runManualSQLUpdate() async {
+  final db = await ProjectDatabase.instance.database;
+
+  // Check if media_items table exists
+  final result = await db.rawQuery(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='media_items'"
+  );
+
+  final mediaTableExists = result.isNotEmpty;
+
+  if (!mediaTableExists) {
+    print("Creating 'media_items' table...");
+    await db.execute('''
+      CREATE TABLE media_items (
+        id TEXT PRIMARY KEY,
+        datasetId TEXT NOT NULL,
+        filePath TEXT NOT NULL,
+        type TEXT NOT NULL,
+        FOREIGN KEY (datasetId) REFERENCES datasets(id)
+      )
+    ''');
+    print("✅ 'media_items' table created successfully.");
+  } else {
+    print("ℹ️ 'media_items' table already exists.");
+  }
+}
+
 }

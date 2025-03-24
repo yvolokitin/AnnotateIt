@@ -42,7 +42,7 @@ class _EditProjectNameState extends State<EditProjectName> {
       labelColors: widget.project.labelColors,
     );
 
-    await ProjectDatabase.instance.updateProject(updatedProject);
+    await ProjectDatabase.instance.updateProjectName(updatedProject);
     widget.onProjectUpdated(); // Refresh UI after update
     Navigator.pop(context); // Close dialog
   }

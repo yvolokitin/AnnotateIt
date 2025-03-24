@@ -60,10 +60,21 @@ class MainPageState extends State<MainPage> {
                     if (isLargeScreen)
                       Expanded(
                         flex: 2,
-                        child: AppDrawer(
-                          fullMode: true,
-                          selectedIndex: selectedIndex,
-                          onItemSelected: _onItemTapped,
+                        child: Column(
+                          children: [
+                            Container(
+                              color: Colors.grey[300],
+                              child: SizedBox(height: 90),
+                            ),
+                            // Divider(),
+                            Expanded(
+                              child: AppDrawer(
+                                fullMode: true,
+                                selectedIndex: selectedIndex,
+                                onItemSelected: _onItemTapped,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
@@ -239,26 +250,31 @@ class DrawerItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected ? lighterRed : Colors.transparent, // 20% lighter red when selected
           ),
-          child: ListTile(
-            contentPadding: EdgeInsets.only(left: 10, right: 16),
-            title: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
-                if (fullMode) SizedBox(width: 16),
-                if (fullMode)
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: textSize,
-                      color: isSelected ? Colors.white : Colors.white,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-              ],
+          child: SizedBox.expand(
+            child: ListTile(
+              contentPadding: EdgeInsets.only(left: 40, right: 16),
+              title: SizedBox(
+                height: double.infinity,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
+                    if (fullMode) SizedBox(width: 16),
+                    if (fullMode)
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: textSize,
+                          color: isSelected ? Colors.white : Colors.white,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                  ],  
+                ),
+              ),
+              selected: isSelected,
+              onTap: onTap,
             ),
-            selected: isSelected,
-            onTap: onTap,
           ),
         ),
       

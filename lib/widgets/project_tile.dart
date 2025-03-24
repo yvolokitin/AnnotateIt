@@ -34,7 +34,7 @@ class _ProjectTileState extends State<ProjectTile> {
           print("Project '${widget.project.name}' clicked!");
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ProjectDetailsScreen(),
+              builder: (context) => ProjectDetailsScreen(widget.project),
             ),
           );
         },

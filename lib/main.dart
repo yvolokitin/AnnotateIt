@@ -7,14 +7,23 @@ import "package:flutter/services.dart";
 // Import FFI for SQLite
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import "data/dataset_database.dart";
+import "data/project_database.dart";
+
 ThemeData themeData = getSystemTheme();
 
-void main() {
+void main() async {
   // Initialize database for desktop (Windows, macOS, Linux)
   sqfliteFfiInit(); 
   databaseFactory = databaseFactoryFfi;
   
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the shared database
+  final db = await ProjectDatabase.instance.database;
+
+  // Inject it into DatasetDatabase
+  DatasetDatabase.instance.setDatabase(db);
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom]);
@@ -34,9 +43,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
 
   // changes the widget state when updating the theme through changing the theme variable to the given theme.
   updateTheme(ThemeData theme) {
-    setState(() {
-      this.theme = theme;
-    });
+    setState(() {this.theme = theme;});
     themeData = theme;
   }
 
