@@ -1,12 +1,11 @@
-import 'package:flutter_svg/flutter_svg.dart';
-
-import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
+import "package:flutter/material.dart";
 
 class NoMediaDialog extends StatefulWidget {
   final int project_id;
   final String dataset_id;
 
-  NoMediaDialog({
+  const NoMediaDialog({
     required this.project_id,
     required this.dataset_id,
     super.key,
@@ -17,43 +16,107 @@ class NoMediaDialog extends StatefulWidget {
 }
 
 class _NoMediaDialogState extends State<NoMediaDialog> {
-  bool _isHovered = false;
-
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      // color: Colors.grey[900], // background
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.yellow, width: 3), // 👈 Yellow border
-      ),
-      child: Row(
+      child: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[900],
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            ),
+          /*Container(
+            padding: EdgeInsets.all(40),
+            height: 120,
+            width: double.infinity,
+            // color: Colors.red,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("Import dataset", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),              ],
-            ),
-          ),
+                SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    print("Import dataset clicked for dataset ${widget.dataset_id}");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[900],
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: BorderSide(color: Colors.grey, width: 2),
+                    ),
+                  ),
+                  child: Text("Import dataset", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                ),
 
-          SizedBox(width: 20),
-
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[900],
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    print("Upload media clicked for dataset ${widget.dataset_id}");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[900],
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: BorderSide(color: Colors.grey, width: 2),
+                    ),
+                  ),
+                  child: Text("Upload media", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
-            child: Row(
-              children: [
-                Text("Upload media", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),              ],
+          ),*/
+          Expanded(
+            child: Container(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    if (screenWidth >= 800)
+                      SizedBox(height: 40),
+
+                    Text(
+                      "You have to upload images and videos",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24),
+                    ),
+
+                    if (screenWidth >= 800)
+                      Expanded (
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 0),
+                          child: SvgPicture.asset(
+                            'assets/images/media_upload.svg',
+                            fit: BoxFit.contain,
+                            // color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                    Text(
+                      "jpg, jpeg, bmp, png, jfif,",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 20),
+                    ),
+                    Text(
+                      "webp, tif, tiff, mp4, avi,",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 20),
+                    ),
+                    Text(
+                      "mkv, mov, webm, m4v",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 20),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

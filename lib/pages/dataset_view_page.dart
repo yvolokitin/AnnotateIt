@@ -1,15 +1,15 @@
-import "package:file_picker/file_picker.dart";
-import "package:uuid/uuid.dart";
-import "dart:io";
+import 'dart:io';
+import 'package:flutter/material.dart';
 
-import "package:flutter/material.dart";
+import '../models/project.dart';
+import '../models/dataset.dart';
+import '../models/media_item.dart';
 
-import "../models/project.dart";
-import "../models/dataset.dart";
-import "../models/media_item.dart";
+import '../data/dataset_database.dart';
 
-import "../data/dataset_database.dart";
-import "../widgets/no_media_dialog.dart";
+import '../widgets/no_media_dialog.dart';
+import '../widgets/dataset_upload_buttons.dart';
+import '../widgets/paginated_image_grid.dart';
 
 class DatasetViewPage extends StatefulWidget {
   final Project project;
@@ -22,8 +22,17 @@ class DatasetViewPage extends StatefulWidget {
 class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
   List<Dataset> datasets = [];
   Map<String, List<MediaItem>> mediaByDataset = {};
-  late TabController _tabController;
+  TabController? _tabController;
+
   bool isLoading = true;
+  bool _isUploading = false;
+  bool _uploadError = false;
+  bool _cancelUpload = false;
+
+  String? _uploadingFile;
+  int _currentFileIndex = 0;
+  int _totalFiles = 0;
+  double _uploadProgress = 0.0;
 
   @override
   void initState() {
@@ -31,39 +40,114 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     _loadDatasets();
   }
 
+  void _rebuildTabController() {
+    _tabController?.dispose();
+    _tabController = TabController(length: datasets.length, vsync: this);
+    _tabController!.addListener(_handleTabChange);
+  }
+
+  void _handleTabChange() {
+    final currentDataset = datasets[_tabController!.index];
+    if (currentDataset.id == 'add_new_tab') {
+      _createNewDataset();
+    } else {
+      _loadMediaForDataset(currentDataset);
+    }
+  }
+
+  void _handleUploadingChanged(bool uploading) {
+    setState(() {
+      _isUploading = uploading;
+      if (!uploading) _uploadingFile = null;
+    });
+  }
+
+  void _handleFileUploadProgress(String filename, int index, int total) {
+    setState(() {
+      _uploadingFile = filename;
+      _currentFileIndex = index;
+      _totalFiles = total;
+      _uploadProgress = index / total;
+    });
+  }
+
+  void _handleUploadSuccess() {
+    final currentDataset = datasets[_tabController!.index];
+
+    setState(() {
+      _uploadProgress = 1.0;
+      _uploadError = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("✅ Upload complete: $_currentFileIndex file(s)"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _uploadingFile = null;
+        _uploadProgress = 0.0;
+        _currentFileIndex = 0;
+        _totalFiles = 0;
+      });
+    });
+
+    _resetCancelUpload();
+    _loadMediaForDataset(currentDataset);
+  }
+
+  void _handleUploadError() {
+    setState(() {
+      _uploadError = true;
+      _isUploading = false;
+    });
+
+    _resetCancelUpload();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("❌ Upload failed")),
+    );
+  }
+
+  void _resetCancelUpload() {
+    setState(() {
+      _cancelUpload = false;
+    });
+  }
+
   Future<void> _loadDatasets() async {
     final fetchedDatasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
 
-    // Put default dataset first
     fetchedDatasets.sort((a, b) {
       if (a.id == widget.project.defaultDatasetId) return -1;
       if (b.id == widget.project.defaultDatasetId) return 1;
       return 0;
     });
 
-    // Add virtual "+ Add" dataset tab
-    final addTab = Dataset(
-      id: 'virtual-add-tab',
-      projectId: widget.project.id!,
-      name: '+',
-      description: '',
-      createdAt: DateTime.now(),
+    fetchedDatasets.add(
+      Dataset(
+        id: 'add_new_tab',
+        projectId: widget.project.id!,
+        name: '+',
+        description: '',
+        createdAt: DateTime.now(),
+      ),
     );
-    fetchedDatasets.add(addTab);
-
-    _tabController = TabController(length: fetchedDatasets.length, vsync: this);
-    _tabController.addListener(_handleTabChange);
 
     setState(() {
       datasets = fetchedDatasets;
       isLoading = false;
     });
 
+    _rebuildTabController();
     await _loadMediaForDataset(fetchedDatasets.first);
   }
 
   Future<void> _loadMediaForDataset(Dataset dataset) async {
-    if (dataset.id == 'virtual-add-tab') return;
+    if (dataset.id == 'add_new_tab') return;
 
     final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
     setState(() {
@@ -71,40 +155,26 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     });
   }
 
-  void _handleTabChange() {
-    final currentDataset = datasets[_tabController.index];
-    if (currentDataset.id == 'virtual-add-tab') {
-      _createNewDataset();
-    } else {
-      _loadMediaForDataset(currentDataset);
-    }
-  }
-
   Future<void> _createNewDataset() async {
     final newDataset = await DatasetDatabase.instance.createDatasetForProject(
       projectId: widget.project.id!,
-      name: 'Dataset ${datasets.length}', // Basic naming
+      name: 'Dataset ${datasets.length}',
     );
 
     setState(() {
-      datasets.insert(datasets.length - 1, newDataset); // Insert before + tab
+      datasets.insert(datasets.length - 1, newDataset);
       mediaByDataset[newDataset.id] = [];
-      _tabController = TabController(length: datasets.length, vsync: this);
-      _tabController.addListener(_handleTabChange);
-      _tabController.index = datasets.indexWhere((d) => d.id == newDataset.id);
     });
+
+    _rebuildTabController();
+    _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
 
     _loadMediaForDataset(newDataset);
   }
 
   Widget _buildMediaPreview(MediaItem media) {
     if (media.type == MediaType.image && File(media.filePath).existsSync()) {
-      return Image.file(
-        File(media.filePath),
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-      );
+      return Image.file(File(media.filePath), width: 48, height: 48, fit: BoxFit.cover);
     } else if (media.type == MediaType.video) {
       return Icon(Icons.videocam, size: 48, color: Colors.white70);
     } else {
@@ -112,90 +182,140 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     }
   }
 
-  Future<void> _uploadMedia(Dataset dataset) async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      for (final file in result.files) {
-        final ext = file.extension?.toLowerCase();
-        final type = (ext == 'mp4' || ext == 'mov')
-          ? MediaType.video
-          : MediaType.image;
-
-        final mediaItem = MediaItem(
-          id: Uuid().v4(),
-          datasetId: dataset.id,
-          filePath: file.path!,
-          type: type,
-        );
-
-        await DatasetDatabase.instance.insertMediaItem(mediaItem);
-      }
-
-      // Refresh the media list
-      _loadMediaForDataset(dataset);
-    }
-}
-
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: Colors.grey[900],
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (isLoading || _tabController == null) {
+      return Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabs: datasets.map((ds) => Tab(text: ds.name)).toList(),
-        labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        unselectedLabelColor: Colors.white60,
-      ),
-      body: Container(
-          padding: const EdgeInsets.all(40.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.red, width: 3),
-          ),
-          child: TabBarView(
-            controller: _tabController,
-            children: datasets.map((dataset) {
-              if (dataset.id == 'virtual-add-tab') {
-                return Center(child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)));
-              }
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabs: datasets.map((ds) => Tab(text: ds.name)).toList(),
+              labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              unselectedLabelColor: Colors.white60,
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: datasets.map((dataset) {
+                  if (dataset.id == 'add_new_tab') {
+                    return Center(
+                      child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)),
+                    );
+                  }
 
-              final mediaItems = mediaByDataset[dataset.id] ?? [];
-              if (mediaItems.isEmpty) {
-                return NoMediaDialog(project_id: widget.project.id!, dataset_id: dataset.id);
-              }
+                  final mediaItems = mediaByDataset[dataset.id] ?? [];
 
-              return ListView.builder(
-                itemCount: mediaItems.length,
-                itemBuilder: (context, index) {
-                  final media = mediaItems[index];
-                  return ListTile(
-                    leading: _buildMediaPreview(media),
-                    title: Text(media.filePath, style: TextStyle(color: Colors.white)),
-                    subtitle: Text(media.type.name, style: TextStyle(color: Colors.white70)),
+                  return Column(
+                    children: [
+                      DatasetUploadButtons(
+                        project_id: widget.project.id!,
+                        dataset_id: dataset.id,
+                        isUploading: _isUploading,
+                        onUploadingChanged: _handleUploadingChanged,
+                        onUploadSuccess: _handleUploadSuccess,
+                        onFileProgress: _handleFileUploadProgress,
+                        onUploadError: _handleUploadError,
+                        cancelUpload: _cancelUpload,
+                      ),
+
+                      Expanded(
+                        child: mediaItems.isEmpty
+                            ? NoMediaDialog(
+                                project_id: widget.project.id!,
+                                dataset_id: dataset.id,
+                              )
+                            : PaginatedImageGrid(mediaItems: mediaItems),
+                      ),
+
+                      /*Expanded(
+                        child: mediaItems.isEmpty
+                            ? NoMediaDialog(
+                                project_id: widget.project.id!,
+                                dataset_id: dataset.id,
+                              )
+                            : ListView.builder(
+                                itemCount: mediaItems.length,
+                                itemBuilder: (context, index) {
+                                  final media = mediaItems[index];
+                                  return ListTile(
+                                    leading: _buildMediaPreview(media),
+                                    title: Text(media.filePath, style: TextStyle(color: Colors.white)),
+                                    subtitle: Text(media.type.name, style: TextStyle(color: Colors.white70)),
+                                  );
+                                },
+                              ),
+                        ),*/
+                    ],
                   );
-                },
-              );
-            }).toList(),
-          ),
+                }).toList(),
+              ),
+            ),
+          ],
         ),
+
+        if (_isUploading)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              color: Colors.grey[850],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _uploadingFile ?? "Uploading...",
+                          style: TextStyle(color: Colors.white70),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4),
+                        LinearProgressIndicator(
+                          value: _uploadProgress,
+                          minHeight: 6,
+                          color: _uploadError ? Colors.orange : Colors.green,
+                          backgroundColor: Colors.grey[700],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    "${(_uploadProgress * 100).toInt()}%",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _cancelUpload = true;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Canceled upload")),
+                      );
+                    },
+                    icon: Icon(Icons.close, color: Colors.redAccent),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -1,9 +1,10 @@
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/material.dart';
-import '../models/project.dart';
+import "package:flutter_svg/flutter_svg.dart";
+import "package:flutter/material.dart";
 
-import '../widgets/edit_labels_dialog.dart';
-import 'dataset_view_page.dart';
+import "../models/project.dart";
+import "../utils/date_utils.dart";
+import "dataset_view_page.dart";
+// import "../widgets/edit_labels_dialog.dart";
 
 class ProjectDetailsScreen extends StatefulWidget {
   final Project project;
@@ -99,7 +100,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
                                 SizedBox(height: 6),
                                 Text(
-                                  "Created at ${_formatDate(widget.project.creationDate)}",
+                                  "Created at ${formatDate(widget.project.creationDate)}",
                                   style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
                                 ),
                               ],
@@ -128,7 +129,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 Expanded(
                   flex: 8,
                   child: Container(
-                    padding: const EdgeInsets.all(40.0),
+                    padding: const EdgeInsets.all(30.0),
                     color: Colors.grey[900],
                     child: DatasetViewPage(widget.project), // getSelectedWidget
                   ),
@@ -151,20 +152,6 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       default:
         return DatasetViewPage(widget.project);
     }
-  }
-
-  // Date Formatter
-  String _formatDate(DateTime date) {
-    return "${date.day} ${_getMonthName(date.month)} ${date.year} | ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-  }
-
-  // Convert month number to name
-  String _getMonthName(int month) {
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return months[month - 1];
   }
 }
 
