@@ -50,7 +50,7 @@ class _EditProjectNameState extends State<EditProjectName> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.grey[900], // Dark theme
+      backgroundColor: Colors.grey[850],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: 800, // Set width
@@ -66,19 +66,19 @@ class _EditProjectNameState extends State<EditProjectName> {
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 45),
 
             // 📌 Project Name Input
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: "Edit Project Name",
+                // labelText: "Edit Project Name",
                 filled: true,
                 fillColor: Colors.grey[850],
               ),
               style: TextStyle(color: Colors.white),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 45),
 
             // 📌 Action Buttons (Cancel, Save)
             Row(
@@ -100,9 +100,7 @@ class _EditProjectNameState extends State<EditProjectName> {
                     children: [
                       Text("Save", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                       SizedBox(width: 8),
-                      Icon(Icons.check, color: Colors.black),
                     ],)
-                    
                 ),
               ],
             ),

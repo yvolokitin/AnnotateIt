@@ -133,6 +133,20 @@ Future<int> insertProject(Project project) async {
     );
   }
 
+  Future<int> updateProjectIcon(int projectId, String new_project_icon) async {
+    final db = await database;
+
+    return await db.update(
+      'projects',
+      {
+        'icon': new_project_icon,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+  }
+
   Future<int> updateProjectLabels(int projectId, List<String> newLabels, List<String> newColors) async {
     final db = await database;
 

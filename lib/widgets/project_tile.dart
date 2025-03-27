@@ -2,7 +2,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../pages/project_details_screen.dart';
+
 import 'labels_list.dart';
+import 'project_icon.dart';
 
 class ProjectTile extends StatefulWidget {
   final Project project;
@@ -65,14 +67,12 @@ class _ProjectTileState extends State<ProjectTile> {
                       bottomLeft: Radius.circular(12),
                     ),
                   ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      'assets/images/default_project_image.svg',
-                      width: 45, // Adjust size
-                      height: 45,
-                      fit: BoxFit.cover,
-                      color: Colors.white,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
                     ),
+                    child: ProjectIcon(iconPath: widget.project.icon),
                   ),
                 ),
                 SizedBox(width: 12),
@@ -118,7 +118,7 @@ class _ProjectTileState extends State<ProjectTile> {
                           height: 32,
                         ),
 
-                        // Labels Section (Colored Tags)
+                        // to show Labels Section with colored tags in
                         LabelList(
                           labels: widget.project.labels.toList(),
                           labelColors: widget.project.labelColors.toList(),

@@ -1,12 +1,16 @@
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import 'dart:io';
 
-import '../models/media_item.dart';
-import '../data/dataset_database.dart';
+import "package:file_picker/file_picker.dart";
+import "package:flutter/material.dart";
+import "package:uuid/uuid.dart";
+
+import '../utils/image_utils.dart';
+import "../data/dataset_database.dart";
+import "../data/project_database.dart";
 
 class DatasetUploadButtons extends StatelessWidget {
   final int project_id;
+  final String project_icon;
   final String dataset_id;
 
   final bool isUploading;
@@ -19,6 +23,7 @@ class DatasetUploadButtons extends StatelessWidget {
 
   const DatasetUploadButtons({
     required this.project_id,
+    required this.project_icon,
     required this.dataset_id,
     required this.isUploading,
     required this.onUploadingChanged,
@@ -30,8 +35,6 @@ class DatasetUploadButtons extends StatelessWidget {
   });
 
   Future<void> _uploadMedia(BuildContext context) async {
-    onUploadingChanged(true);
-
     try {
       final result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
@@ -40,7 +43,16 @@ class DatasetUploadButtons extends StatelessWidget {
       );
 
       if (result != null && result.files.isNotEmpty) {
+        onUploadingChanged(true);
         final total = result.files.length;
+
+        if (project_icon.contains('default_project_image') || project_icon.contains('folder')) {
+          final platformFile = result.files[0];
+          final thumbnailFile = await generateThumbnailFromImage(File(platformFile.path!), project_id.toString());
+          if (thumbnailFile != null) {
+            await ProjectDatabase.instance.updateProjectIcon(project_id, thumbnailFile.path);
+          }
+        }
 
         for (int i = 0; i < total; i++) {
           if (cancelUpload) {
@@ -54,31 +66,17 @@ class DatasetUploadButtons extends StatelessWidget {
 
           final file = result.files[i];
           final ext = file.extension?.toLowerCase();
-          final type = (ext == 'mp4' || ext == 'mov')
-              ? MediaType.video
-              : MediaType.image;
-
-          final mediaItem = MediaItem(
-            id: const Uuid().v4(),
-            datasetId: dataset_id,
-            filePath: file.path!,
-            type: type,
-          );
-
-          await DatasetDatabase.instance.insertMediaItem(mediaItem);
+          await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
 
           onFileProgress?.call(file.name, i + 1, total);
         }
 
-        onUploadSuccess();
+        onUploadingChanged(false); onUploadSuccess();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Upload cancelled")),
-        );
         onUploadingChanged(false);
       }
     } catch (e) {
-      print("Upload error: $e");
+      print("_uploadMedia: Upload error: $e");
       onUploadError?.call();
     }
   }
@@ -115,7 +113,7 @@ Widget _buildButton(
 }) {
   return ElevatedButton(
     onPressed: isUploading
-        ? null // 👉 блокируем во время загрузки
+        ? null // block during upload
         : () async {
             await _uploadMedia(context);
           },

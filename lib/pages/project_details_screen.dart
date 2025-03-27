@@ -4,6 +4,8 @@ import "package:flutter/material.dart";
 import "../models/project.dart";
 import "../utils/date_utils.dart";
 import "dataset_view_page.dart";
+
+import "../widgets/buttons/hover_icon_button.dart";
 // import "../widgets/edit_labels_dialog.dart";
 
 class ProjectDetailsScreen extends StatefulWidget {
@@ -47,16 +49,17 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    Navigator.pop(context); // Go back when pressed
-                  },
+                HoverIconButton(
+                  icon: Icons.arrow_back,
+                  margin: EdgeInsets.only(left: 20.0),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                IconButton(
-                  icon: Icon(Icons.arrow_forward, color: Colors.white),
+
+                HoverIconButton(
+                  icon: Icons.help_outline,
+                  margin: EdgeInsets.only(right: 20.0),
                   onPressed: () {
-                    print("Forward button pressed, no actions yet");
+                    print("Help is not implemented yet");
                   },
                 ),
               ],

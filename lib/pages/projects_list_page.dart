@@ -34,11 +34,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _allProjects = projects;
       _filteredProjects = _applySearchAndSort(projects);
     });
+
+    for (var project in projects) {
+      print(project);
+    }
   }
 
   // Function to Edit a Project (Add Edit Logic)
   void _editProjectName(Project project) {
-    print("Editing: ${project.name}");
     showDialog(
       context: context,
       builder: (context) => EditProjectName(
@@ -119,11 +122,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
           // 📌 Row with Create Button, Search Bar, and Sort Icon
           ProjectsTopBar(
               onSearchPressed: () {
-                print("Project Search button pressed");
+                print("Project Search button pressed, not implemented yet");
               },
               onSortSelected: _onSortSelected,
               onCreateProject: () {
-                print("Started a new project creation");
+                print("Started a new project dialog creation");
                 showDialog(
                   context: context,
                   builder: (context) => CreateProjectDialog(),
@@ -131,7 +134,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
               },
           ),
 
-          // 📌 Project List
+          // Project List -> list of ProjectTile's (in widgets)
           Expanded(
             child: _filteredProjects.isEmpty
                 ? Center(child: Text("No projects found"))
@@ -165,15 +168,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
             children: [
               ListTile(
                 leading: Icon(Icons.edit, color: Colors.green),
-                title: Text("Change Project Name"),
+                title: Text("Edit Project Name"),
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectName(project);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.label, color: Colors.orange), // ✅ Edit Labels Icon
-                title: Text("Edit Project Labels"),
+                leading: Icon(Icons.label, color: Colors.orange),
+                title: Text("Update Project Labels"),
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectLabels(project);

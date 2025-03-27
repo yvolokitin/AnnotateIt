@@ -76,4 +76,8 @@ class Project {
     );
   }
 
+  @override
+  String toString() {
+    return 'Project(id: $id, name: $name, icon: $icon)';
+  }
 }

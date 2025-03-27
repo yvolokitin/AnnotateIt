@@ -91,9 +91,21 @@ class DatasetDatabase {
     return mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
   }
 
-  Future<void> insertMediaItem(MediaItem item) async {
+  // await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
+  Future<void> insertMediaItem(dataset_id, file_path, ext) async {
+    final type = (ext == 'mp4' || ext == 'mov')
+              ? MediaType.video
+              : MediaType.image;
+
+    MediaItem mediaItem = MediaItem(
+      id: const Uuid().v4(),
+      datasetId: dataset_id,
+      filePath: file_path!,
+      type: type,
+    );
+
     final db = await database;
-    await db.insert('media_items', item.toMap());
+    await db.insert('media_items', mediaItem.toMap());
   }
 
 }

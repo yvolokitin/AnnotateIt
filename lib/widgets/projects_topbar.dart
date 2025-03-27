@@ -13,7 +13,7 @@ class ProjectsTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -24,8 +24,7 @@ class ProjectsTopBar extends StatelessWidget {
             onPressed: onSearchPressed,
           ),
              
-          SizedBox(width: 16),
-
+          SizedBox(width: 20),
           // Sort Icon
           PopupMenuButton<String>(
             icon: Icon(Icons.swap_vert, color: Colors.white70),
@@ -40,7 +39,9 @@ class ProjectsTopBar extends StatelessWidget {
             ],
           ),
 
-          SizedBox(width: 16),
+          SizedBox(width: 20),
+          Divider(color: Colors.white70),
+          SizedBox(width: 20),
 
           // Create New Project Button
           ElevatedButton(
@@ -54,10 +55,12 @@ class ProjectsTopBar extends StatelessWidget {
               children: [
                 Text("Create new project", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                 SizedBox(width: 8),
-                Icon(Icons.arrow_drop_down, color: Colors.black),
+                // Icon(Icons.arrow_drop_down, color: Colors.black),
               ],
             ),
           ),
+
+          SizedBox(width: 20),
         ],
       ),
     );

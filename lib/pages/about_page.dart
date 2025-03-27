@@ -7,8 +7,8 @@ class AboutWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(56), // 56px padding on all sides
       decoration: BoxDecoration(
-        // border: Border.all(color: Colors.red, width: 3), // 3px border
-        borderRadius: BorderRadius.circular(8), // Optional: Rounded corners
+        // border: Border.all(color: Colors.red, width: 3), 
+        borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.topLeft, // Align text to top-left
       child: Column(

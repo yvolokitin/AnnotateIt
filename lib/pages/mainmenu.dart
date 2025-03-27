@@ -63,15 +63,19 @@ class MainPageState extends State<MainPage> {
                         child: Column(
                           children: [
                             Container(
-                              color: Colors.grey[300],
-                              child: SizedBox(height: 90),
+                              height: 95,
+                              width: double.infinity,
+                              color: Color(0xFF11191F), // Color(0xFF0F151C),
                             ),
-                            // Divider(),
+
                             Expanded(
-                              child: AppDrawer(
-                                fullMode: true,
-                                selectedIndex: selectedIndex,
-                                onItemSelected: _onItemTapped,
+                              child: Container(
+                                width: double.infinity,
+                                child: AppDrawer(
+                                  fullMode: true,
+                                  selectedIndex: selectedIndex,
+                                  onItemSelected: _onItemTapped,
+                                ),
                               ),
                             ),
                           ],

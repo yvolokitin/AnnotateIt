@@ -81,7 +81,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("✅ Upload complete: $_currentFileIndex file(s)"),
+        content: Text("Upload completed: $_currentFileIndex file(s)"),
         duration: Duration(seconds: 2),
       ),
     );
@@ -222,6 +222,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
                     children: [
                       DatasetUploadButtons(
                         project_id: widget.project.id!,
+                        project_icon: widget.project.icon,
                         dataset_id: dataset.id,
                         isUploading: _isUploading,
                         onUploadingChanged: _handleUploadingChanged,
@@ -239,25 +240,6 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
                               )
                             : PaginatedImageGrid(mediaItems: mediaItems),
                       ),
-
-                      /*Expanded(
-                        child: mediaItems.isEmpty
-                            ? NoMediaDialog(
-                                project_id: widget.project.id!,
-                                dataset_id: dataset.id,
-                              )
-                            : ListView.builder(
-                                itemCount: mediaItems.length,
-                                itemBuilder: (context, index) {
-                                  final media = mediaItems[index];
-                                  return ListTile(
-                                    leading: _buildMediaPreview(media),
-                                    title: Text(media.filePath, style: TextStyle(color: Colors.white)),
-                                    subtitle: Text(media.type.name, style: TextStyle(color: Colors.white70)),
-                                  );
-                                },
-                              ),
-                        ),*/
                     ],
                   );
                 }).toList(),

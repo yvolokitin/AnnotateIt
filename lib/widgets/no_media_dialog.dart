@@ -22,48 +22,6 @@ class _NoMediaDialogState extends State<NoMediaDialog> {
     return Container(
       child: Column(
         children: [
-          /*Container(
-            padding: EdgeInsets.all(40),
-            height: 120,
-            width: double.infinity,
-            // color: Colors.red,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    print("Import dataset clicked for dataset ${widget.dataset_id}");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[900],
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: BorderSide(color: Colors.grey, width: 2),
-                    ),
-                  ),
-                  child: Text("Import dataset", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                ),
-
-                SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    print("Upload media clicked for dataset ${widget.dataset_id}");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[900],
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: BorderSide(color: Colors.grey, width: 2),
-                    ),
-                  ),
-                  child: Text("Upload media", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-          ),*/
           Expanded(
             child: Container(
               child: Center(
