@@ -24,15 +24,21 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
   Map<String, List<MediaItem>> mediaByDataset = {};
   TabController? _tabController;
 
-  bool isLoading = true;
   bool _isUploading = false;
   bool _uploadError = false;
   bool _cancelUpload = false;
 
   String? _uploadingFile;
   int _currentFileIndex = 0;
-  int _totalFiles = 0;
+  int _file_count = 0;
   double _uploadProgress = 0.0;
+
+  // needed to show global spinner before datasets + media are fully ready
+  bool _initialLoading = true;
+  String? _lastLoadedDatasetId;
+
+  // cache map for dataset tabs to avoid blink when switching tabs
+  final Map<String, Widget> _datasetTabCache = {};
 
   @override
   void initState() {
@@ -41,6 +47,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
   }
 
   void _rebuildTabController() {
+    _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
     _tabController = TabController(length: datasets.length, vsync: this);
     _tabController!.addListener(_handleTabChange);
@@ -48,14 +55,21 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
   void _handleTabChange() {
     final currentDataset = datasets[_tabController!.index];
+
     if (currentDataset.id == 'add_new_tab') {
       _createNewDataset();
-    } else {
-      _loadMediaForDataset(currentDataset);
+      return;
     }
+
+    // Prevent duplicate calls
+    if (_lastLoadedDatasetId == currentDataset.id) return;
+
+    _lastLoadedDatasetId = currentDataset.id;
+    _loadMediaForDataset(currentDataset);
   }
 
   void _handleUploadingChanged(bool uploading) {
+    if (!mounted) return;
     setState(() {
       _isUploading = uploading;
       if (!uploading) _uploadingFile = null;
@@ -63,10 +77,10 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
   }
 
   void _handleFileUploadProgress(String filename, int index, int total) {
+    if (!mounted) return;
     setState(() {
       _uploadingFile = filename;
       _currentFileIndex = index;
-      _totalFiles = total;
       _uploadProgress = index / total;
     });
   }
@@ -74,6 +88,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
   void _handleUploadSuccess() {
     final currentDataset = datasets[_tabController!.index];
 
+    if (!mounted) return;
     setState(() {
       _uploadProgress = 1.0;
       _uploadError = false;
@@ -87,19 +102,23 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     );
 
     Future.delayed(Duration(seconds: 2), () {
+      if (!mounted) return;
       setState(() {
         _uploadingFile = null;
         _uploadProgress = 0.0;
         _currentFileIndex = 0;
-        _totalFiles = 0;
       });
     });
 
     _resetCancelUpload();
     _loadMediaForDataset(currentDataset);
+
+    // force rebuild after fresh data
+    _datasetTabCache.remove(currentDataset.id);
   }
 
   void _handleUploadError() {
+    if (!mounted) return;
     setState(() {
       _uploadError = true;
       _isUploading = false;
@@ -108,11 +127,12 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     _resetCancelUpload();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("❌ Upload failed")),
+      SnackBar(content: Text("Upload failed")),
     );
   }
 
   void _resetCancelUpload() {
+    if (!mounted) return;
     setState(() {
       _cancelUpload = false;
     });
@@ -137,22 +157,35 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
       ),
     );
 
+    if (!mounted) return;
     setState(() {
       datasets = fetchedDatasets;
-      isLoading = false;
     });
 
     _rebuildTabController();
+
     await _loadMediaForDataset(fetchedDatasets.first);
+
+    if (!mounted) return;
+    setState(() {
+      _initialLoading = false;
+    });
   }
 
   Future<void> _loadMediaForDataset(Dataset dataset) async {
     if (dataset.id == 'add_new_tab') return;
 
     final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
+
+    if (!mounted) return;
     setState(() {
       mediaByDataset[dataset.id] = media;
+      _file_count = media.length;
+      _datasetTabCache.remove(dataset.id);
     });
+
+    print("444 Loaded ${media.length} media items for dataset: ${dataset.name}");
+    await Future.delayed(Duration(milliseconds: 100));
   }
 
   Future<void> _createNewDataset() async {
@@ -161,6 +194,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
       name: 'Dataset ${datasets.length}',
     );
 
+    if (!mounted) return;
     setState(() {
       datasets.insert(datasets.length - 1, newDataset);
       mediaByDataset[newDataset.id] = [];
@@ -184,13 +218,14 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
   @override
   void dispose() {
+    _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading || _tabController == null) {
+    if (_initialLoading || _tabController == null) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -205,43 +240,49 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
               tabs: datasets.map((ds) => Tab(text: ds.name)).toList(),
               labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.white60,
-            ),
+            ),  
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: datasets.map((dataset) {
-                  if (dataset.id == 'add_new_tab') {
-                    return Center(
-                      child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)),
-                    );
+
+                  if (_datasetTabCache.containsKey(dataset.id)) {
+                    return _datasetTabCache[dataset.id]!;
                   }
 
-                  final mediaItems = mediaByDataset[dataset.id] ?? [];
+                  final mediaItems = mediaByDataset[dataset.id];
 
-                  return Column(
-                    children: [
-                      DatasetUploadButtons(
-                        project_id: widget.project.id!,
-                        project_icon: widget.project.icon,
-                        dataset_id: dataset.id,
-                        isUploading: _isUploading,
-                        onUploadingChanged: _handleUploadingChanged,
-                        onUploadSuccess: _handleUploadSuccess,
-                        onFileProgress: _handleFileUploadProgress,
-                        onUploadError: _handleUploadError,
-                        cancelUpload: _cancelUpload,
-                      ),
+                  final widgetToRender = dataset.id == 'add_new_tab'
+                    ? Center(child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)))
+                    : Column(
+                      children: [
+                        DatasetUploadButtons(
+                          project_id: widget.project.id!,
+                          project_icon: widget.project.icon,
+                          dataset_id: dataset.id,
+                          file_count: _file_count,
+                          isUploading: _isUploading,
+                          onUploadingChanged: _handleUploadingChanged,
+                          onUploadSuccess: _handleUploadSuccess,
+                          onFileProgress: _handleFileUploadProgress,
+                          onUploadError: _handleUploadError,
+                          cancelUpload: _cancelUpload,
+                        ),
+                        Expanded(
+                          child: (mediaItems == null || mediaItems.isEmpty)
+                          ? NoMediaDialog(
+                            project_id: widget.project.id!,
+                            dataset_id: dataset.id,
+                          )
+                          : PaginatedImageGrid(
+                            mediaItems: mediaItems,
+                          ),
+                        ),
+                      ],  
+                    );
 
-                      Expanded(
-                        child: mediaItems.isEmpty
-                            ? NoMediaDialog(
-                                project_id: widget.project.id!,
-                                dataset_id: dataset.id,
-                              )
-                            : PaginatedImageGrid(mediaItems: mediaItems),
-                      ),
-                    ],
-                  );
+                    _datasetTabCache[dataset.id] = widgetToRender;
+                    return widgetToRender;
                 }).toList(),
               ),
             ),

@@ -9,7 +9,7 @@ import "../data/dataset_database.dart";
 import "../data/project_database.dart";
 
 class DatasetUploadButtons extends StatelessWidget {
-  final int project_id;
+  final int project_id, file_count;
   final String project_icon;
   final String dataset_id;
 
@@ -25,6 +25,7 @@ class DatasetUploadButtons extends StatelessWidget {
     required this.project_id,
     required this.project_icon,
     required this.dataset_id,
+    required this.file_count,
     required this.isUploading,
     required this.onUploadingChanged,
     required this.onUploadSuccess,
@@ -35,6 +36,8 @@ class DatasetUploadButtons extends StatelessWidget {
   });
 
   Future<void> _uploadMedia(BuildContext context) async {
+    print("UI _uploadMedia: Uploading media... for dataset_id: $dataset_id");
+
     try {
       final result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
@@ -65,13 +68,15 @@ class DatasetUploadButtons extends StatelessWidget {
           }
 
           final file = result.files[i];
-          final ext = file.extension?.toLowerCase();
+          final ext = file.extension?.toLowerCase() ?? 'unknown';
           await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
 
           onFileProgress?.call(file.name, i + 1, total);
         }
 
+        await ProjectDatabase.instance.updateProjectlastUpdated(project_id);
         onUploadingChanged(false); onUploadSuccess();
+
       } else {
         onUploadingChanged(false);
       }
@@ -92,7 +97,7 @@ class DatasetUploadButtons extends StatelessWidget {
         children: [
           _buildButton(
             context,
-            label: "Upload dataset",
+            label: "Import dataset",
             borderColor: Colors.grey,
           ),
           SizedBox(width: 16),

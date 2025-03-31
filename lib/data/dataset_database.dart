@@ -92,16 +92,21 @@ class DatasetDatabase {
   }
 
   // await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
-  Future<void> insertMediaItem(dataset_id, file_path, ext) async {
+  Future<void> insertMediaItem(String datasetId, String filePath, String ext, {String? owner, int? numberOfFrames}) async {
     final type = (ext == 'mp4' || ext == 'mov')
-              ? MediaType.video
-              : MediaType.image;
+      ? MediaType.video
+      : MediaType.image;
 
     MediaItem mediaItem = MediaItem(
       id: const Uuid().v4(),
-      datasetId: dataset_id,
-      filePath: file_path!,
+      datasetId: datasetId,
+      filePath: filePath,
       type: type,
+      uploadDate: DateTime.now(),
+      owner: owner ?? 'system', // fallback if owner not provided
+      lastAnnotator: null,
+      lastAnnotatedDate: null,
+      numberOfFrames: type == MediaType.video ? numberOfFrames : null,
     );
 
     final db = await database;

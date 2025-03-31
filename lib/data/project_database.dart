@@ -25,10 +25,10 @@ class ProjectDatabase {
   Future<Database> _initDB(String fileName) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, fileName);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 1, onCreate: _createProjectDBTables);
   }
 
-  Future<void> _createDB(Database db, int version) async {
+  Future<void> _createProjectDBTables(Database db, int version) async {
     await db.execute('''
       CREATE TABLE projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,50 +42,36 @@ class ProjectDatabase {
         defaultDatasetId TEXT
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE datasets (
+        id TEXT PRIMARY KEY,
+        projectId INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (projectId) REFERENCES projects(id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE media_items (
+        id TEXT PRIMARY KEY,
+        datasetId TEXT,
+        filePath TEXT,
+        type TEXT,
+        uploadDate TEXT,
+        owner TEXT,
+        lastAnnotator TEXT,
+        lastAnnotatedDate TEXT,
+        numberOfFrames INTEGER,
+        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE
+      );
+    ''');
   }
 
-  Future<Dataset> createDatasetForProject({required int projectId, String name = 'New Dataset', String description = '', bool isDefault = false,}) async {
-    final db = await database;
-
-    // Check if a default dataset already exists
-    if (isDefault) {
-      final List<Map<String, dynamic>> existing = await db.query(
-        'projects',
-        where: 'id = ? AND defaultDatasetId IS NOT NULL',
-        whereArgs: [projectId],
-      );
-
-      if (existing.isNotEmpty) {
-        throw Exception('Default dataset already exists for this project.');
-      }
-    }
-
-    // Create dataset
-    final dataset = Dataset(
-      id: uuid.v4(),
-      projectId: projectId,
-      name: name,
-      description: description,
-      createdAt: DateTime.now(),
-    );
-
-    await db.insert('datasets', dataset.toMap());
-
-    // If it's a default dataset, update the project record
-    if (isDefault) {
-      await db.update(
-        'projects',
-        {'defaultDatasetId': dataset.id},
-        where: 'id = ?',
-        whereArgs: [projectId],
-      );
-    }
-
-  return dataset;
-}
-
-// TBD: Probably should be removed
-Future<int> insertProject(Project project) async {
+  // TBD: Probably should be removed
+  Future<int> insertProject(Project project) async {
     final db = await database;
     return await db.insert('projects', {
       'name': project.name,
@@ -130,6 +116,71 @@ Future<int> insertProject(Project project) async {
       },
       where: 'id = ?',
       whereArgs: [project.id],
+    );
+  }
+
+  Future<Dataset> createDatasetForProject({required int projectId, String name = 'New Dataset', String description = '', bool isDefault = false,}) async {
+    final db = await database;
+
+    // Check if a default dataset already exists
+    if (isDefault) {
+      final List<Map<String, dynamic>> existing = await db.query(
+        'projects',
+        where: 'id = ? AND defaultDatasetId IS NOT NULL',
+        whereArgs: [projectId],
+      );
+
+      if (existing.isNotEmpty) {
+        throw Exception('Default dataset already exists for this project.');
+      }
+    }
+
+    // Create dataset
+    final dataset = Dataset(
+      id: uuid.v4(),
+      projectId: projectId,
+      name: name,
+      description: description,
+      createdAt: DateTime.now(),
+    );
+
+    await db.insert('datasets', dataset.toMap());
+
+    // If it's a default dataset, update the project record
+    if (isDefault) {
+      await db.update(
+        'projects',
+        {
+          'defaultDatasetId': dataset.id,
+          'lastUpdated': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+
+    } else { // else update only lastUpdated timestamp
+      await db.update(
+        'projects',
+        {
+          'lastUpdated': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+    }
+
+    return dataset;
+  }
+
+  Future<void> updateProjectlastUpdated(int projectId) async {
+    final db = await database;
+    final currentTime = DateTime.now().toIso8601String();
+
+    await db.update(
+      'projects',
+      {'lastUpdated': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [projectId],
     );
   }
 
@@ -179,7 +230,7 @@ Future<int> insertProject(Project project) async {
   }
 
   // this is for Development purposes only, if i need to update certain tables in the database
-  Future<void> runManualSQLUpdate() async {
+Future<void> runManualSQLUpdate() async {
   final db = await ProjectDatabase.instance.database;
 
   // Check if media_items table exists
@@ -197,12 +248,46 @@ Future<int> insertProject(Project project) async {
         datasetId TEXT NOT NULL,
         filePath TEXT NOT NULL,
         type TEXT NOT NULL,
+        uploadDate TEXT NOT NULL,
+        owner TEXT NOT NULL,
+        lastAnnotator TEXT,
+        lastAnnotatedDate TEXT,
+        numberOfFrames INTEGER,
         FOREIGN KEY (datasetId) REFERENCES datasets(id)
       )
     ''');
     print("✅ 'media_items' table created successfully.");
   } else {
-    print("ℹ️ 'media_items' table already exists.");
+    print("ℹ️ 'media_items' table already exists. Checking for missing columns...");
+
+    // Add new columns if they don't exist
+    final columnCheck = await db.rawQuery("PRAGMA table_info(media_items)");
+    final existingColumns = columnCheck.map((row) => row['name']).toSet();
+
+    Future<void> tryAddColumn(String name, String type) async {
+      if (!existingColumns.contains(name)) {
+        print("➕ Adding missing column '$name'...");
+        await db.execute("ALTER TABLE media_items ADD COLUMN $name $type");
+      }
+    }
+
+    await tryAddColumn('uploadDate', 'TEXT');
+    await tryAddColumn('owner', 'TEXT');
+    await tryAddColumn('lastAnnotator', 'TEXT');
+    await tryAddColumn('lastAnnotatedDate', 'TEXT');
+    await tryAddColumn('numberOfFrames', 'INTEGER');
+
+    print("✅ Column structure ensured.");
+
+    // Set default values for old rows
+    print("🔄 Updating old media_items entries with default values...");
+    await db.execute('''
+      UPDATE media_items SET
+        uploadDate = COALESCE(uploadDate, datetime('now')),
+        owner = COALESCE(owner, 'system')
+    ''');
+
+    print("✅ Existing media items updated with default values.");
   }
 }
 
