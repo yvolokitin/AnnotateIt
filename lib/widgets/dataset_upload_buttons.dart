@@ -93,14 +93,19 @@ class DatasetUploadButtons extends StatelessWidget {
       height: 120,
       width: double.infinity,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        // mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          Text("$file_count files", style: TextStyle(color: Colors.white, fontSize: 20)),
+          Spacer(), // takes all available space between the text and buttons
+
+          SizedBox(width: 20),
           _buildButton(
             context,
             label: "Import dataset",
             borderColor: Colors.grey,
           ),
-          SizedBox(width: 16),
+
+          SizedBox(width: 20),
           _buildButton(
             context,
             label: "Upload media",

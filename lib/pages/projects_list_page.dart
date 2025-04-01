@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
-import '../data/project_database.dart';
-import '../models/project.dart';
+import "package:flutter/material.dart";
+import "../data/project_database.dart";
+import "../models/project.dart";
 
-import '../widgets/project_tile.dart';
-import '../widgets/projects_topbar.dart';
-import '../widgets/create_project_dialog.dart';
-import '../widgets/edit_project_name.dart';
-import '../widgets/edit_labels_dialog.dart';
+import "../widgets/project_tile.dart";
+import "../widgets/projects_topbar.dart";
+import "../widgets/create_project_dialog.dart";
+import "../widgets/edit_project_name.dart";
+import "../widgets/edit_labels_dialog.dart";
+
+import "project_details_screen.dart";
 
 class ProjectsPage extends StatefulWidget {
   @override
@@ -34,10 +36,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _allProjects = projects;
       _filteredProjects = _applySearchAndSort(projects);
     });
-
-    for (var project in projects) {
-      print(project);
-    }
   }
 
   // Function to Edit a Project (Add Edit Logic)
@@ -146,8 +144,19 @@ class _ProjectsPageState extends State<ProjectsPage> {
                         project: project,
                         onMorePressed: () {
                           _showProjectOptions(context, project);
-                        }
-                        );
+                        },
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProjectDetailsScreen(project),
+                            ),
+                          );
+                          if (result == true) {
+                            _loadProjects();
+                          }
+                        },
+                      );
                     },
                   ),
           ),

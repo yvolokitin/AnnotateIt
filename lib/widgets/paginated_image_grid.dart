@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/media_item.dart';
-import "image_tile.dart";
+
+import 'image_tile.dart';
+import 'media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
   final List<MediaItem> mediaItems;
@@ -23,14 +25,12 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final imageItems = widget.mediaItems
-        .where((m) => m.type == MediaType.image && File(m.filePath).existsSync())
-        .toList();
+    final mediaItems = widget.mediaItems;
 
-    final totalPages = (imageItems.length / widget.itemsPerPage).ceil();
+    final totalPages = (mediaItems.length / widget.itemsPerPage).ceil();
     final start = _currentPage * widget.itemsPerPage;
-    final end = (start + widget.itemsPerPage).clamp(0, imageItems.length);
-    final pageItems = imageItems.sublist(start, end);
+    final end = (start + widget.itemsPerPage).clamp(0, mediaItems.length);
+    final pageItems = mediaItems.sublist(start, end);
 
     return Column(
       children: [
@@ -46,7 +46,11 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
             ),
             itemBuilder: (context, index) {
               final media = pageItems[index];
-              return ImageTile(media: media);
+              if (media.type == MediaType.image) {
+                return ImageTile(media: media);
+              } else {
+                return MediaTile(media: media);
+              }
             },
           ),
         ),
@@ -80,4 +84,3 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
     );
   }
 }
-

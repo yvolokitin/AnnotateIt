@@ -11,6 +11,13 @@ import '../widgets/no_media_dialog.dart';
 import '../widgets/dataset_upload_buttons.dart';
 import '../widgets/paginated_image_grid.dart';
 
+enum MediaSortOption {
+  newestFirst,
+  oldestFirst,
+  // fileSize, not implemented yet in MediaSize
+  // type, not implemented yet in MediaSize
+}
+
 class DatasetViewPage extends StatefulWidget {
   final Project project;
   const DatasetViewPage(this.project, {super.key});
@@ -39,6 +46,8 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
   // cache map for dataset tabs to avoid blink when switching tabs
   final Map<String, Widget> _datasetTabCache = {};
+
+  MediaSortOption _sortOption = MediaSortOption.newestFirst;
 
   @override
   void initState() {
@@ -178,13 +187,27 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
 
     if (!mounted) return;
+
+    List<MediaItem> sortedMedia = [...media]; 
+    switch (_sortOption) {
+      case MediaSortOption.newestFirst:
+        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
+        break;
+      case MediaSortOption.oldestFirst:
+        sortedMedia.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
+        break;
+      default:
+        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
+        break;
+    }
+
     setState(() {
-      mediaByDataset[dataset.id] = media;
+      mediaByDataset[dataset.id] = sortedMedia;
+      // mediaByDataset[dataset.id] = media;
       _file_count = media.length;
       _datasetTabCache.remove(dataset.id);
     });
 
-    print("444 Loaded ${media.length} media items for dataset: ${dataset.name}");
     await Future.delayed(Duration(milliseconds: 100));
   }
 

@@ -52,7 +52,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 HoverIconButton(
                   icon: Icons.arrow_back,
                   margin: EdgeInsets.only(left: 20.0),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context, true),
                 ),
 
                 HoverIconButton(
@@ -134,7 +134,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(30.0),
                     color: Colors.grey[900],
-                    child: DatasetViewPage(widget.project), // getSelectedWidget
+                    child: DatasetViewPage(widget.project),
                   ),
                 ),
               ],

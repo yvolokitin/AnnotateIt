@@ -9,10 +9,12 @@ import 'project_icon.dart';
 class ProjectTile extends StatefulWidget {
   final Project project;
   final VoidCallback onMorePressed; // Callback for more options
+  final VoidCallback? onTap; // Callback on update list of projects
 
   ProjectTile({
     required this.project,
     required this.onMorePressed,
+    this.onTap,
     super.key,
   });
 
@@ -32,14 +34,17 @@ class _ProjectTileState extends State<ProjectTile> {
       onExit: (_) => setState(() => _isHovered = false), // Hover end
 
       child: GestureDetector(
-        onTap: () {
+        /*onTap: () {
           print("Project '${widget.project.name}' clicked!");
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ProjectDetailsScreen(widget.project),
             ),
           );
-        },
+        },*/
+        onTap: widget.onTap ??
+          () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
+
         child: Card(
           color: Colors.grey.shade800, // Dark theme background
           margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
