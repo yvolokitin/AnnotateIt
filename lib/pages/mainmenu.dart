@@ -3,9 +3,7 @@ import "package:vap/pages/header.dart";
 import "package:vap/pages/projects_list_page.dart";
 import "package:vap/pages/learn_page.dart";
 import "package:vap/pages/about_page.dart";
-
-import "package:vap/pages/account.dart";
-
+import "package:vap/pages/account_page.dart";
 
 import "package:flutter/material.dart";
 
@@ -121,7 +119,7 @@ class MainPageState extends State<MainPage> {
       case 0:
         return ProjectsPage();
       case 1:
-        return AccountWidget();
+        return AccountPage();
       case 2:
         return LearnWidget();
       case 3:
