@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/project_database.dart';
-import '../models/project.dart';
+
 
 class EditProjectName extends StatefulWidget {
   final Project project;

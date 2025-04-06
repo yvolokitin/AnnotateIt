@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import '../models/media_item.dart';
+
 
 import 'image_tile.dart';
 import 'media_tile.dart';

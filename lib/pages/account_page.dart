@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../data/user_database.dart';
-import '../models/user.dart';
+
 import '../widgets/account_profile.dart';
 import '../widgets/account_storage.dart';
 import '../widgets/account_settings.dart';

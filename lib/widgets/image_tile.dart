@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
-import '../models/media_item.dart';
+
 
 class ImageTile extends StatefulWidget {
   final MediaItem media;

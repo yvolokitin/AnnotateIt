@@ -6,7 +6,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import "color_picker_dialog.dart";
 
 import '../data/project_database.dart';
-import '../models/project.dart';
+
 
 class EditLabelsDialog extends StatefulWidget {
   final Project project;

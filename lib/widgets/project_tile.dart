@@ -1,6 +1,6 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
-import '../models/project.dart';
+
 import '../pages/project_details_screen.dart';
 
 import 'labels_list.dart';

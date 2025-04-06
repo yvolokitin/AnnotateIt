@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import '../models/user.dart';
+
 
 class AccountProfile extends StatefulWidget {
   final User user;

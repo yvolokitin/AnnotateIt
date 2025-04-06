@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
 
-import '../models/user.dart';
+
 import 'responsive/responsive_text.dart';
 
 

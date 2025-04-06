@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import "create_project_dialog.dart";
 
 import '../data/project_database.dart';
-import '../models/project.dart';
+
 
 class LabelSelectionDialog extends StatefulWidget {
   final String projectName;
