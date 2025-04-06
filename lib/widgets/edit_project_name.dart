@@ -1,6 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import '../data/project_database.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vap/data/providers.dart';
+import 'package:vap/data/app_database.dart';
 
 class EditProjectName extends StatefulWidget {
   final Project project;
@@ -42,7 +45,7 @@ class _EditProjectNameState extends State<EditProjectName> {
       labelColors: widget.project.labelColors,
     );
 
-    await ProjectDatabase.instance.updateProjectName(updatedProject);
+    await ref.watch(databaseProvider).updateProjectName(updatedProject);
     widget.onProjectUpdated(); // Refresh UI after update
     Navigator.pop(context); // Close dialog
   }

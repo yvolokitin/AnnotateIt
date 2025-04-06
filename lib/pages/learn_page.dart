@@ -1,26 +1,23 @@
-import "package:flutter/material.dart";
-import '../data/project_database.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:vap/data/providers.dart';
+import 'package:vap/data/app_database.dart';
 
-// Learn Widget
-class LearnWidget extends StatelessWidget {
+class LearnWidget extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
-      // Wrap with Column to allow multiple children
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          const Text(
             "Learn",
             style: TextStyle(fontSize: 24),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () async {
-              await ProjectDatabase.instance.runManualSQLUpdate();
-              print("Database updated manually!");
-            },
-            child: Text("Update DB"),
+            onPressed: () {},
+            child: const Text("Update DB"),
           ),
         ],
       ),

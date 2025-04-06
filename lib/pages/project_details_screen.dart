@@ -1,30 +1,36 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:flutter/material.dart";
+import 'package:logger/logger.dart';
 
-import "../models/project.dart";
 import "../utils/date_utils.dart";
 import "dataset_view_page.dart";
+
+import 'package:vap/data/app_database.dart';
 
 import "../widgets/buttons/hover_icon_button.dart";
 // import "../widgets/edit_labels_dialog.dart";
 
-class ProjectDetailsScreen extends StatefulWidget {
+class ProjectDetailsScreen extends ConsumerStatefulWidget {
   final Project project;
 
   const ProjectDetailsScreen(this.project, {super.key});
 
   @override
-    _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
-  }
+  ConsumerState<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
+}
 
-class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {  
+class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
+  final _logger = Logger();
+
+  int selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
     _loadProjectDetails();
   }
 
-  int selectedIndex = 0;
   void _onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
@@ -32,7 +38,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    print("Load project details, which is in fact nothing for now");
+    _logger.i("Load project details, which is in fact nothing for now");
   }
 
   @override
@@ -45,7 +51,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           Container(
             height: screenWidth >= 1600 ? 80 : 40,
             width: double.infinity,
-            color: Colors.grey[800], // Background color
+            color: Colors.grey[800],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -54,24 +60,20 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   margin: EdgeInsets.only(left: 20.0),
                   onPressed: () => Navigator.pop(context, true),
                 ),
-
                 HoverIconButton(
                   icon: Icons.help_outline,
                   margin: EdgeInsets.only(right: 20.0),
                   onPressed: () {
-                    print("Help is not implemented yet");
+                    _logger.w("Help is not implemented yet");
                   },
                 ),
               ],
             ),
           ),
-
-          // Expanded content below the bar
           Expanded(
-            child : Row(
+            child: Row(
               children: [
-                // Full drawer for large screens
-                if (screenWidth >= 1600) // isLargeScreen)
+                if (screenWidth >= 1600)
                   Expanded(
                     flex: 2,
                     child: Column(
@@ -82,34 +84,23 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                           height: 330,
                           width: double.infinity,
                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.project.name,
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)
-                                ),
-
-                                SizedBox(height: 6),
-                                SvgPicture.asset(
-                                  'assets/images/default_project_image.svg',
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  "Type: ${widget.project.type}",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18)
-                                ),
-
-                                SizedBox(height: 6),
-                                Text(
-                                  "Created at ${formatDate(widget.project.creationDate)}",
-                                  style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
-                                ),
-                              ],
-                            ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(widget.project.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+                              SizedBox(height: 6),
+                              SvgPicture.asset(
+                                'assets/images/default_project_image.svg',
+                                height: 100,
+                                fit: BoxFit.cover,
+                                color: Colors.white,
+                              ),
+                              Text("Type: ${widget.project.type}", style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18)),
+                              SizedBox(height: 6),
+                              Text("Created at ${formatDate(widget.project.creationDate)}",
+                                  style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18)),
+                            ],
+                          ),
                         ),
-
                         Expanded(
                           child: AppDrawer(
                             fullMode: true,
@@ -120,21 +111,17 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                       ],
                     ),
                   ),
-
-                // NavigationRail for medium screens
                 if (screenWidth < 1600)
                   NavigationRailMenu(
                     selectedIndex: selectedIndex,
                     onItemSelected: _onItemTapped,
                   ),
-
-                // Main content area
                 Expanded(
                   flex: 8,
                   child: Container(
                     padding: const EdgeInsets.all(30.0),
                     color: Colors.grey[900],
-                    child: DatasetViewPage(widget.project),
+                    child: getSelectedWidget(selectedIndex),
                   ),
                 ),
               ],
@@ -150,8 +137,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       case 0:
         return DatasetViewPage(widget.project);
       case 1:
-        // this is temporary solution, till the time when normal logic will be implemented
-        return DatasetViewPage(widget.project); // EditLabelsDialog();
+        return DatasetViewPage(widget.project); // placeholder for labels UI
       default:
         return DatasetViewPage(widget.project);
     }
@@ -159,7 +145,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 }
 
 // Full Sidebar Drawer
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends ConsumerWidget {
   final bool fullMode;
   final int selectedIndex;
   final Function(int) onItemSelected;
@@ -168,14 +154,14 @@ class AppDrawer extends StatelessWidget {
     this.fullMode = false,
     required this.selectedIndex,
     required this.onItemSelected,
+    super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Drawer(
       child: Column(
         children: [
-          // Drawer items
           DrawerItem(
             icon: Icons.image,
             title: "Datasets",
@@ -197,36 +183,38 @@ class AppDrawer extends StatelessWidget {
 }
 
 // Compact NavigationRail (for medium screens)
-class NavigationRailMenu extends StatelessWidget {
+class NavigationRailMenu extends ConsumerWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
   const NavigationRailMenu({
     required this.selectedIndex,
     required this.onItemSelected,
+    super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NavigationRail(
       selectedIndex: selectedIndex,
       onDestinationSelected: onItemSelected,
+      labelType: NavigationRailLabelType.all,
       destinations: [
-        NavigationRailDestination(icon: Icon(Icons.image), label: Text(
-          'Datasets',
-          style: Theme.of(context).textTheme.titleMedium,
-        )),
-        NavigationRailDestination(icon: Icon(Icons.label), label: Text(
-          'Labels',
-          style: Theme.of(context).textTheme.headlineMedium,
-        )),
+        NavigationRailDestination(
+          icon: Icon(Icons.image),
+          label: Text('Datasets', style: Theme.of(context).textTheme.titleMedium),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.label),
+          label: Text('Labels', style: Theme.of(context).textTheme.titleMedium),
+        ),
       ],
     );
   }
 }
 
 // Drawer List Item
-class DrawerItem extends StatelessWidget {
+class DrawerItem extends ConsumerWidget {
   final IconData icon;
   final String title;
   final bool fullMode;
@@ -241,36 +229,35 @@ class DrawerItem extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.textSize = 28.0,
+    super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Base red color
+  Widget build(BuildContext context, WidgetRef ref) {
     final Color baseRed = Colors.red;
-    // Compute a 20% lighter color for the background
-    final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
-    
+    final Color lighterRed = baseRed.withOpacity(0.1);
+
     return Stack(
       children: [
         Container(
           height: 100,
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
-            color: isSelected ? lighterRed : Colors.transparent, // 20% lighter red when selected
+            color: isSelected ? lighterRed : Colors.transparent,
           ),
           child: ListTile(
             contentPadding: EdgeInsets.only(left: 40, right: 16),
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
+                Icon(icon, color: isSelected ? Colors.red : null),
                 if (fullMode) SizedBox(width: 16),
                 if (fullMode)
                   Text(
                     title,
                     style: TextStyle(
                       fontSize: textSize,
-                      color: isSelected ? Colors.white : Colors.white,
+                      color: Colors.white,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
@@ -280,15 +267,14 @@ class DrawerItem extends StatelessWidget {
             onTap: onTap,
           ),
         ),
-      
         if (isSelected)
           Positioned(
-            right: 0, // Align to the right
+            right: 0,
             top: 0,
             bottom: 0,
             child: Container(
-              width: 10, // 10px width
-              color: Colors.red, // Red color for the selection indicator
+              width: 10,
+              color: Colors.red,
             ),
           ),
       ],

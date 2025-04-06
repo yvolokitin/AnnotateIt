@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
-
+import 'package:drift/drift.dart' as drift;
 
 import 'responsive/responsive_text.dart';
-
+import '../data/app_database.dart';
 
 class AccountStorage extends StatefulWidget {
   final User user;
@@ -31,20 +30,19 @@ class _AccountStorageState extends State<AccountStorage> {
   @override
   void initState() {
     super.initState();
-    _datasetController = TextEditingController(text: widget.user.datasetFolder);
-    _thumbnailController = TextEditingController(text: widget.user.thumbnailFolder);
+    _datasetController = TextEditingController(text: widget.user.datasetsFolderPath ?? '');
+    _thumbnailController = TextEditingController(text: widget.user.thumbnailsFolderPath ?? '');
   }
 
   @override
   void didUpdateWidget(covariant AccountStorage oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Update text controllers when user or edit state changes
-    if (oldWidget.user.datasetFolder != widget.user.datasetFolder) {
-      _datasetController.text = widget.user.datasetFolder;
+    if (oldWidget.user.datasetsFolderPath != widget.user.datasetsFolderPath) {
+      _datasetController.text = widget.user.datasetsFolderPath ?? '';
     }
-    if (oldWidget.user.thumbnailFolder != widget.user.thumbnailFolder) {
-      _thumbnailController.text = widget.user.thumbnailFolder;
+    if (oldWidget.user.thumbnailsFolderPath != widget.user.thumbnailsFolderPath) {
+      _thumbnailController.text = widget.user.thumbnailsFolderPath ?? '';
     }
   }
 
@@ -53,13 +51,6 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetController.dispose();
     _thumbnailController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickFolder(Function(String) onPathSelected) async {
-    final path = await getDirectoryPath();
-    if (path != null) {
-      onPathSelected(path);
-    }
   }
 
   @override
@@ -72,21 +63,23 @@ class _AccountStorageState extends State<AccountStorage> {
           editable: widget.isEditing,
           onPathSelected: (val) {
             _datasetController.text = val;
-            widget.onUserChange(widget.user.copyWith(datasetFolder: val));
+            widget.onUserChange(widget.user.copyWith(
+              datasetsFolderPath: drift.Value(val),
+            ));
           },
         ),
-
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _folderField(
           label: 'Thumbnails Folder',
           controller: _thumbnailController,
           editable: widget.isEditing,
           onPathSelected: (val) {
             _thumbnailController.text = val;
-            widget.onUserChange(widget.user.copyWith(thumbnailFolder: val));
+            widget.onUserChange(widget.user.copyWith(
+              thumbnailsFolderPath: drift.Value(val),
+            ));
           },
         ),
-
         Align(
           alignment: Alignment.topRight,
           child: TextButton(
@@ -94,17 +87,16 @@ class _AccountStorageState extends State<AccountStorage> {
             child: Text(widget.isEditing ? 'Save' : 'Edit'),
           ),
         ),
-
         Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: const [
               Icon(Icons.info_outline, size: 20),
               SizedBox(width: 8),
               Expanded(
@@ -148,7 +140,7 @@ class _AccountStorageState extends State<AccountStorage> {
           ),
         ),
         IconButton(
-          icon: Icon(Icons.folder_open),
+          icon: const Icon(Icons.folder_open),
           tooltip: 'Choose folder',
           onPressed: editable
               ? () async {

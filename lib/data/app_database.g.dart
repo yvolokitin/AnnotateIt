@@ -83,20 +83,29 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _darkModeMeta = const VerificationMeta(
-    'darkMode',
+  static const VerificationMeta _themeModeMeta = const VerificationMeta(
+    'themeMode',
   );
   @override
-  late final GeneratedColumn<bool> darkMode = GeneratedColumn<bool>(
-    'dark_mode',
+  late final GeneratedColumn<String> themeMode = GeneratedColumn<String>(
+    'theme_mode',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("dark_mode" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant('light'),
+  );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('en'),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -107,7 +116,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     iconPath,
     datasetsFolderPath,
     thumbnailsFolderPath,
-    darkMode,
+    themeMode,
+    language,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -168,10 +178,16 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         ),
       );
     }
-    if (data.containsKey('dark_mode')) {
+    if (data.containsKey('theme_mode')) {
       context.handle(
-        _darkModeMeta,
-        darkMode.isAcceptableOrUnknown(data['dark_mode']!, _darkModeMeta),
+        _themeModeMeta,
+        themeMode.isAcceptableOrUnknown(data['theme_mode']!, _themeModeMeta),
+      );
+    }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
       );
     }
     return context;
@@ -213,10 +229,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}thumbnails_folder_path'],
       ),
-      darkMode:
+      themeMode:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}dark_mode'],
+            DriftSqlType.string,
+            data['${effectivePrefix}theme_mode'],
+          )!,
+      language:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}language'],
           )!,
     );
   }
@@ -235,7 +256,8 @@ class User extends DataClass implements Insertable<User> {
   final String? iconPath;
   final String? datasetsFolderPath;
   final String? thumbnailsFolderPath;
-  final bool darkMode;
+  final String themeMode;
+  final String language;
   const User({
     required this.id,
     required this.name,
@@ -244,7 +266,8 @@ class User extends DataClass implements Insertable<User> {
     this.iconPath,
     this.datasetsFolderPath,
     this.thumbnailsFolderPath,
-    required this.darkMode,
+    required this.themeMode,
+    required this.language,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -266,7 +289,8 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || thumbnailsFolderPath != null) {
       map['thumbnails_folder_path'] = Variable<String>(thumbnailsFolderPath);
     }
-    map['dark_mode'] = Variable<bool>(darkMode);
+    map['theme_mode'] = Variable<String>(themeMode);
+    map['language'] = Variable<String>(language);
     return map;
   }
 
@@ -292,7 +316,8 @@ class User extends DataClass implements Insertable<User> {
           thumbnailsFolderPath == null && nullToAbsent
               ? const Value.absent()
               : Value(thumbnailsFolderPath),
-      darkMode: Value(darkMode),
+      themeMode: Value(themeMode),
+      language: Value(language),
     );
   }
 
@@ -313,7 +338,8 @@ class User extends DataClass implements Insertable<User> {
       thumbnailsFolderPath: serializer.fromJson<String?>(
         json['thumbnailsFolderPath'],
       ),
-      darkMode: serializer.fromJson<bool>(json['darkMode']),
+      themeMode: serializer.fromJson<String>(json['themeMode']),
+      language: serializer.fromJson<String>(json['language']),
     );
   }
   @override
@@ -327,7 +353,8 @@ class User extends DataClass implements Insertable<User> {
       'iconPath': serializer.toJson<String?>(iconPath),
       'datasetsFolderPath': serializer.toJson<String?>(datasetsFolderPath),
       'thumbnailsFolderPath': serializer.toJson<String?>(thumbnailsFolderPath),
-      'darkMode': serializer.toJson<bool>(darkMode),
+      'themeMode': serializer.toJson<String>(themeMode),
+      'language': serializer.toJson<String>(language),
     };
   }
 
@@ -339,7 +366,8 @@ class User extends DataClass implements Insertable<User> {
     Value<String?> iconPath = const Value.absent(),
     Value<String?> datasetsFolderPath = const Value.absent(),
     Value<String?> thumbnailsFolderPath = const Value.absent(),
-    bool? darkMode,
+    String? themeMode,
+    String? language,
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -354,7 +382,8 @@ class User extends DataClass implements Insertable<User> {
         thumbnailsFolderPath.present
             ? thumbnailsFolderPath.value
             : this.thumbnailsFolderPath,
-    darkMode: darkMode ?? this.darkMode,
+    themeMode: themeMode ?? this.themeMode,
+    language: language ?? this.language,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -371,7 +400,8 @@ class User extends DataClass implements Insertable<User> {
           data.thumbnailsFolderPath.present
               ? data.thumbnailsFolderPath.value
               : this.thumbnailsFolderPath,
-      darkMode: data.darkMode.present ? data.darkMode.value : this.darkMode,
+      themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
+      language: data.language.present ? data.language.value : this.language,
     );
   }
 
@@ -385,7 +415,8 @@ class User extends DataClass implements Insertable<User> {
           ..write('iconPath: $iconPath, ')
           ..write('datasetsFolderPath: $datasetsFolderPath, ')
           ..write('thumbnailsFolderPath: $thumbnailsFolderPath, ')
-          ..write('darkMode: $darkMode')
+          ..write('themeMode: $themeMode, ')
+          ..write('language: $language')
           ..write(')'))
         .toString();
   }
@@ -399,7 +430,8 @@ class User extends DataClass implements Insertable<User> {
     iconPath,
     datasetsFolderPath,
     thumbnailsFolderPath,
-    darkMode,
+    themeMode,
+    language,
   );
   @override
   bool operator ==(Object other) =>
@@ -412,7 +444,8 @@ class User extends DataClass implements Insertable<User> {
           other.iconPath == this.iconPath &&
           other.datasetsFolderPath == this.datasetsFolderPath &&
           other.thumbnailsFolderPath == this.thumbnailsFolderPath &&
-          other.darkMode == this.darkMode);
+          other.themeMode == this.themeMode &&
+          other.language == this.language);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -423,7 +456,8 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String?> iconPath;
   final Value<String?> datasetsFolderPath;
   final Value<String?> thumbnailsFolderPath;
-  final Value<bool> darkMode;
+  final Value<String> themeMode;
+  final Value<String> language;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -432,7 +466,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.iconPath = const Value.absent(),
     this.datasetsFolderPath = const Value.absent(),
     this.thumbnailsFolderPath = const Value.absent(),
-    this.darkMode = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.language = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -442,7 +477,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.iconPath = const Value.absent(),
     this.datasetsFolderPath = const Value.absent(),
     this.thumbnailsFolderPath = const Value.absent(),
-    this.darkMode = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.language = const Value.absent(),
   }) : name = Value(name);
   static Insertable<User> custom({
     Expression<int>? id,
@@ -452,7 +488,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? iconPath,
     Expression<String>? datasetsFolderPath,
     Expression<String>? thumbnailsFolderPath,
-    Expression<bool>? darkMode,
+    Expression<String>? themeMode,
+    Expression<String>? language,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -464,7 +501,8 @@ class UsersCompanion extends UpdateCompanion<User> {
         'datasets_folder_path': datasetsFolderPath,
       if (thumbnailsFolderPath != null)
         'thumbnails_folder_path': thumbnailsFolderPath,
-      if (darkMode != null) 'dark_mode': darkMode,
+      if (themeMode != null) 'theme_mode': themeMode,
+      if (language != null) 'language': language,
     });
   }
 
@@ -476,7 +514,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String?>? iconPath,
     Value<String?>? datasetsFolderPath,
     Value<String?>? thumbnailsFolderPath,
-    Value<bool>? darkMode,
+    Value<String>? themeMode,
+    Value<String>? language,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -486,7 +525,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       iconPath: iconPath ?? this.iconPath,
       datasetsFolderPath: datasetsFolderPath ?? this.datasetsFolderPath,
       thumbnailsFolderPath: thumbnailsFolderPath ?? this.thumbnailsFolderPath,
-      darkMode: darkMode ?? this.darkMode,
+      themeMode: themeMode ?? this.themeMode,
+      language: language ?? this.language,
     );
   }
 
@@ -516,8 +556,11 @@ class UsersCompanion extends UpdateCompanion<User> {
         thumbnailsFolderPath.value,
       );
     }
-    if (darkMode.present) {
-      map['dark_mode'] = Variable<bool>(darkMode.value);
+    if (themeMode.present) {
+      map['theme_mode'] = Variable<String>(themeMode.value);
+    }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
     }
     return map;
   }
@@ -532,7 +575,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('iconPath: $iconPath, ')
           ..write('datasetsFolderPath: $datasetsFolderPath, ')
           ..write('thumbnailsFolderPath: $thumbnailsFolderPath, ')
-          ..write('darkMode: $darkMode')
+          ..write('themeMode: $themeMode, ')
+          ..write('language: $language')
           ..write(')'))
         .toString();
   }
@@ -565,28 +609,76 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _iconPathMeta = const VerificationMeta(
-    'iconPath',
-  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String> iconPath = GeneratedColumn<String>(
-    'icon_path',
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _creationDateMeta = const VerificationMeta(
+    'creationDate',
   );
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
+  late final GeneratedColumn<DateTime> creationDate = GeneratedColumn<DateTime>(
+    'creation_date',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastUpdatedMeta = const VerificationMeta(
+    'lastUpdated',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUpdated = GeneratedColumn<DateTime>(
+    'last_updated',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelsMeta = const VerificationMeta('labels');
+  @override
+  late final GeneratedColumn<String> labels = GeneratedColumn<String>(
+    'labels',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelColorsMeta = const VerificationMeta(
+    'labelColors',
+  );
+  @override
+  late final GeneratedColumn<String> labelColors = GeneratedColumn<String>(
+    'label_colors',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _defaultDatasetIdMeta = const VerificationMeta(
+    'defaultDatasetId',
+  );
+  @override
+  late final GeneratedColumn<String> defaultDatasetId = GeneratedColumn<String>(
+    'default_dataset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _ownerIdMeta = const VerificationMeta(
     'ownerId',
@@ -598,13 +690,21 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
   );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     name,
-    iconPath,
-    createdAt,
+    type,
+    icon,
+    creationDate,
+    lastUpdated,
+    labels,
+    labelColors,
+    defaultDatasetId,
     ownerId,
   ];
   @override
@@ -630,17 +730,73 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('icon_path')) {
+    if (data.containsKey('type')) {
       context.handle(
-        _iconPathMeta,
-        iconPath.isAcceptableOrUnknown(data['icon_path']!, _iconPathMeta),
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
       );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
     }
-    if (data.containsKey('created_at')) {
+    if (data.containsKey('icon')) {
       context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
       );
+    } else if (isInserting) {
+      context.missing(_iconMeta);
+    }
+    if (data.containsKey('creation_date')) {
+      context.handle(
+        _creationDateMeta,
+        creationDate.isAcceptableOrUnknown(
+          data['creation_date']!,
+          _creationDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_creationDateMeta);
+    }
+    if (data.containsKey('last_updated')) {
+      context.handle(
+        _lastUpdatedMeta,
+        lastUpdated.isAcceptableOrUnknown(
+          data['last_updated']!,
+          _lastUpdatedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastUpdatedMeta);
+    }
+    if (data.containsKey('labels')) {
+      context.handle(
+        _labelsMeta,
+        labels.isAcceptableOrUnknown(data['labels']!, _labelsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelsMeta);
+    }
+    if (data.containsKey('label_colors')) {
+      context.handle(
+        _labelColorsMeta,
+        labelColors.isAcceptableOrUnknown(
+          data['label_colors']!,
+          _labelColorsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_labelColorsMeta);
+    }
+    if (data.containsKey('default_dataset_id')) {
+      context.handle(
+        _defaultDatasetIdMeta,
+        defaultDatasetId.isAcceptableOrUnknown(
+          data['default_dataset_id']!,
+          _defaultDatasetIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_defaultDatasetIdMeta);
     }
     if (data.containsKey('owner_id')) {
       context.handle(
@@ -669,14 +825,40 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
             DriftSqlType.string,
             data['${effectivePrefix}name'],
           )!,
-      iconPath: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}icon_path'],
-      ),
-      createdAt:
+      type:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}type'],
+          )!,
+      icon:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}icon'],
+          )!,
+      creationDate:
           attachedDatabase.typeMapping.read(
             DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
+            data['${effectivePrefix}creation_date'],
+          )!,
+      lastUpdated:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}last_updated'],
+          )!,
+      labels:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}labels'],
+          )!,
+      labelColors:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}label_colors'],
+          )!,
+      defaultDatasetId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}default_dataset_id'],
           )!,
       ownerId:
           attachedDatabase.typeMapping.read(
@@ -695,14 +877,24 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
 class Project extends DataClass implements Insertable<Project> {
   final int id;
   final String name;
-  final String? iconPath;
-  final DateTime createdAt;
+  final String type;
+  final String icon;
+  final DateTime creationDate;
+  final DateTime lastUpdated;
+  final String labels;
+  final String labelColors;
+  final String defaultDatasetId;
   final int ownerId;
   const Project({
     required this.id,
     required this.name,
-    this.iconPath,
-    required this.createdAt,
+    required this.type,
+    required this.icon,
+    required this.creationDate,
+    required this.lastUpdated,
+    required this.labels,
+    required this.labelColors,
+    required this.defaultDatasetId,
     required this.ownerId,
   });
   @override
@@ -710,10 +902,13 @@ class Project extends DataClass implements Insertable<Project> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || iconPath != null) {
-      map['icon_path'] = Variable<String>(iconPath);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['type'] = Variable<String>(type);
+    map['icon'] = Variable<String>(icon);
+    map['creation_date'] = Variable<DateTime>(creationDate);
+    map['last_updated'] = Variable<DateTime>(lastUpdated);
+    map['labels'] = Variable<String>(labels);
+    map['label_colors'] = Variable<String>(labelColors);
+    map['default_dataset_id'] = Variable<String>(defaultDatasetId);
     map['owner_id'] = Variable<int>(ownerId);
     return map;
   }
@@ -722,11 +917,13 @@ class Project extends DataClass implements Insertable<Project> {
     return ProjectsCompanion(
       id: Value(id),
       name: Value(name),
-      iconPath:
-          iconPath == null && nullToAbsent
-              ? const Value.absent()
-              : Value(iconPath),
-      createdAt: Value(createdAt),
+      type: Value(type),
+      icon: Value(icon),
+      creationDate: Value(creationDate),
+      lastUpdated: Value(lastUpdated),
+      labels: Value(labels),
+      labelColors: Value(labelColors),
+      defaultDatasetId: Value(defaultDatasetId),
       ownerId: Value(ownerId),
     );
   }
@@ -739,8 +936,13 @@ class Project extends DataClass implements Insertable<Project> {
     return Project(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      iconPath: serializer.fromJson<String?>(json['iconPath']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      type: serializer.fromJson<String>(json['type']),
+      icon: serializer.fromJson<String>(json['icon']),
+      creationDate: serializer.fromJson<DateTime>(json['creationDate']),
+      lastUpdated: serializer.fromJson<DateTime>(json['lastUpdated']),
+      labels: serializer.fromJson<String>(json['labels']),
+      labelColors: serializer.fromJson<String>(json['labelColors']),
+      defaultDatasetId: serializer.fromJson<String>(json['defaultDatasetId']),
       ownerId: serializer.fromJson<int>(json['ownerId']),
     );
   }
@@ -750,8 +952,13 @@ class Project extends DataClass implements Insertable<Project> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'iconPath': serializer.toJson<String?>(iconPath),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'type': serializer.toJson<String>(type),
+      'icon': serializer.toJson<String>(icon),
+      'creationDate': serializer.toJson<DateTime>(creationDate),
+      'lastUpdated': serializer.toJson<DateTime>(lastUpdated),
+      'labels': serializer.toJson<String>(labels),
+      'labelColors': serializer.toJson<String>(labelColors),
+      'defaultDatasetId': serializer.toJson<String>(defaultDatasetId),
       'ownerId': serializer.toJson<int>(ownerId),
     };
   }
@@ -759,22 +966,45 @@ class Project extends DataClass implements Insertable<Project> {
   Project copyWith({
     int? id,
     String? name,
-    Value<String?> iconPath = const Value.absent(),
-    DateTime? createdAt,
+    String? type,
+    String? icon,
+    DateTime? creationDate,
+    DateTime? lastUpdated,
+    String? labels,
+    String? labelColors,
+    String? defaultDatasetId,
     int? ownerId,
   }) => Project(
     id: id ?? this.id,
     name: name ?? this.name,
-    iconPath: iconPath.present ? iconPath.value : this.iconPath,
-    createdAt: createdAt ?? this.createdAt,
+    type: type ?? this.type,
+    icon: icon ?? this.icon,
+    creationDate: creationDate ?? this.creationDate,
+    lastUpdated: lastUpdated ?? this.lastUpdated,
+    labels: labels ?? this.labels,
+    labelColors: labelColors ?? this.labelColors,
+    defaultDatasetId: defaultDatasetId ?? this.defaultDatasetId,
     ownerId: ownerId ?? this.ownerId,
   );
   Project copyWithCompanion(ProjectsCompanion data) {
     return Project(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      iconPath: data.iconPath.present ? data.iconPath.value : this.iconPath,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      type: data.type.present ? data.type.value : this.type,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      creationDate:
+          data.creationDate.present
+              ? data.creationDate.value
+              : this.creationDate,
+      lastUpdated:
+          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      labels: data.labels.present ? data.labels.value : this.labels,
+      labelColors:
+          data.labelColors.present ? data.labelColors.value : this.labelColors,
+      defaultDatasetId:
+          data.defaultDatasetId.present
+              ? data.defaultDatasetId.value
+              : this.defaultDatasetId,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
     );
   }
@@ -784,59 +1014,112 @@ class Project extends DataClass implements Insertable<Project> {
     return (StringBuffer('Project(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('iconPath: $iconPath, ')
-          ..write('createdAt: $createdAt, ')
+          ..write('type: $type, ')
+          ..write('icon: $icon, ')
+          ..write('creationDate: $creationDate, ')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('labels: $labels, ')
+          ..write('labelColors: $labelColors, ')
+          ..write('defaultDatasetId: $defaultDatasetId, ')
           ..write('ownerId: $ownerId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, iconPath, createdAt, ownerId);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    type,
+    icon,
+    creationDate,
+    lastUpdated,
+    labels,
+    labelColors,
+    defaultDatasetId,
+    ownerId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Project &&
           other.id == this.id &&
           other.name == this.name &&
-          other.iconPath == this.iconPath &&
-          other.createdAt == this.createdAt &&
+          other.type == this.type &&
+          other.icon == this.icon &&
+          other.creationDate == this.creationDate &&
+          other.lastUpdated == this.lastUpdated &&
+          other.labels == this.labels &&
+          other.labelColors == this.labelColors &&
+          other.defaultDatasetId == this.defaultDatasetId &&
           other.ownerId == this.ownerId);
 }
 
 class ProjectsCompanion extends UpdateCompanion<Project> {
   final Value<int> id;
   final Value<String> name;
-  final Value<String?> iconPath;
-  final Value<DateTime> createdAt;
+  final Value<String> type;
+  final Value<String> icon;
+  final Value<DateTime> creationDate;
+  final Value<DateTime> lastUpdated;
+  final Value<String> labels;
+  final Value<String> labelColors;
+  final Value<String> defaultDatasetId;
   final Value<int> ownerId;
   const ProjectsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.iconPath = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.type = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.creationDate = const Value.absent(),
+    this.lastUpdated = const Value.absent(),
+    this.labels = const Value.absent(),
+    this.labelColors = const Value.absent(),
+    this.defaultDatasetId = const Value.absent(),
     this.ownerId = const Value.absent(),
   });
   ProjectsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    this.iconPath = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    required String type,
+    required String icon,
+    required DateTime creationDate,
+    required DateTime lastUpdated,
+    required String labels,
+    required String labelColors,
+    required String defaultDatasetId,
     required int ownerId,
   }) : name = Value(name),
+       type = Value(type),
+       icon = Value(icon),
+       creationDate = Value(creationDate),
+       lastUpdated = Value(lastUpdated),
+       labels = Value(labels),
+       labelColors = Value(labelColors),
+       defaultDatasetId = Value(defaultDatasetId),
        ownerId = Value(ownerId);
   static Insertable<Project> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<String>? iconPath,
-    Expression<DateTime>? createdAt,
+    Expression<String>? type,
+    Expression<String>? icon,
+    Expression<DateTime>? creationDate,
+    Expression<DateTime>? lastUpdated,
+    Expression<String>? labels,
+    Expression<String>? labelColors,
+    Expression<String>? defaultDatasetId,
     Expression<int>? ownerId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (iconPath != null) 'icon_path': iconPath,
-      if (createdAt != null) 'created_at': createdAt,
+      if (type != null) 'type': type,
+      if (icon != null) 'icon': icon,
+      if (creationDate != null) 'creation_date': creationDate,
+      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (labels != null) 'labels': labels,
+      if (labelColors != null) 'label_colors': labelColors,
+      if (defaultDatasetId != null) 'default_dataset_id': defaultDatasetId,
       if (ownerId != null) 'owner_id': ownerId,
     });
   }
@@ -844,15 +1127,25 @@ class ProjectsCompanion extends UpdateCompanion<Project> {
   ProjectsCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
-    Value<String?>? iconPath,
-    Value<DateTime>? createdAt,
+    Value<String>? type,
+    Value<String>? icon,
+    Value<DateTime>? creationDate,
+    Value<DateTime>? lastUpdated,
+    Value<String>? labels,
+    Value<String>? labelColors,
+    Value<String>? defaultDatasetId,
     Value<int>? ownerId,
   }) {
     return ProjectsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      iconPath: iconPath ?? this.iconPath,
-      createdAt: createdAt ?? this.createdAt,
+      type: type ?? this.type,
+      icon: icon ?? this.icon,
+      creationDate: creationDate ?? this.creationDate,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      labels: labels ?? this.labels,
+      labelColors: labelColors ?? this.labelColors,
+      defaultDatasetId: defaultDatasetId ?? this.defaultDatasetId,
       ownerId: ownerId ?? this.ownerId,
     );
   }
@@ -866,11 +1159,26 @@ class ProjectsCompanion extends UpdateCompanion<Project> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (iconPath.present) {
-      map['icon_path'] = Variable<String>(iconPath.value);
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (creationDate.present) {
+      map['creation_date'] = Variable<DateTime>(creationDate.value);
+    }
+    if (lastUpdated.present) {
+      map['last_updated'] = Variable<DateTime>(lastUpdated.value);
+    }
+    if (labels.present) {
+      map['labels'] = Variable<String>(labels.value);
+    }
+    if (labelColors.present) {
+      map['label_colors'] = Variable<String>(labelColors.value);
+    }
+    if (defaultDatasetId.present) {
+      map['default_dataset_id'] = Variable<String>(defaultDatasetId.value);
     }
     if (ownerId.present) {
       map['owner_id'] = Variable<int>(ownerId.value);
@@ -883,8 +1191,13 @@ class ProjectsCompanion extends UpdateCompanion<Project> {
     return (StringBuffer('ProjectsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('iconPath: $iconPath, ')
-          ..write('createdAt: $createdAt, ')
+          ..write('type: $type, ')
+          ..write('icon: $icon, ')
+          ..write('creationDate: $creationDate, ')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('labels: $labels, ')
+          ..write('labelColors: $labelColors, ')
+          ..write('defaultDatasetId: $defaultDatasetId, ')
           ..write('ownerId: $ownerId')
           ..write(')'))
         .toString();
@@ -898,21 +1211,8 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
   $DatasetsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -928,18 +1228,18 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id)',
+    ),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
@@ -952,13 +1252,24 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    name,
     projectId,
-    createdAt,
+    name,
     description,
+    createdAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -974,14 +1285,8 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
     } else if (isInserting) {
-      context.missing(_nameMeta);
+      context.missing(_idMeta);
     }
     if (data.containsKey('project_id')) {
       context.handle(
@@ -991,11 +1296,13 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
     } else if (isInserting) {
       context.missing(_projectIdMeta);
     }
-    if (data.containsKey('created_at')) {
+    if (data.containsKey('name')) {
       context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
       );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -1005,6 +1312,14 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
           _descriptionMeta,
         ),
       );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     return context;
   }
@@ -1017,28 +1332,28 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
     return Dataset(
       id:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}name'],
+            data['${effectivePrefix}id'],
           )!,
       projectId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
             data['${effectivePrefix}project_id'],
           )!,
-      createdAt:
+      name:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
           )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}created_at'],
+          )!,
     );
   }
 
@@ -1049,41 +1364,41 @@ class $DatasetsTable extends Datasets with TableInfo<$DatasetsTable, Dataset> {
 }
 
 class Dataset extends DataClass implements Insertable<Dataset> {
-  final int id;
-  final String name;
+  final String id;
   final int projectId;
-  final DateTime createdAt;
+  final String name;
   final String? description;
+  final DateTime createdAt;
   const Dataset({
     required this.id,
-    required this.name,
     required this.projectId,
-    required this.createdAt,
+    required this.name,
     this.description,
+    required this.createdAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
+    map['id'] = Variable<String>(id);
     map['project_id'] = Variable<int>(projectId);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
   DatasetsCompanion toCompanion(bool nullToAbsent) {
     return DatasetsCompanion(
       id: Value(id),
-      name: Value(name),
       projectId: Value(projectId),
-      createdAt: Value(createdAt),
+      name: Value(name),
       description:
           description == null && nullToAbsent
               ? const Value.absent()
               : Value(description),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -1093,46 +1408,46 @@ class Dataset extends DataClass implements Insertable<Dataset> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Dataset(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
+      id: serializer.fromJson<String>(json['id']),
       projectId: serializer.fromJson<int>(json['projectId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
+      'id': serializer.toJson<String>(id),
       'projectId': serializer.toJson<int>(projectId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
   Dataset copyWith({
-    int? id,
-    String? name,
+    String? id,
     int? projectId,
-    DateTime? createdAt,
+    String? name,
     Value<String?> description = const Value.absent(),
+    DateTime? createdAt,
   }) => Dataset(
     id: id ?? this.id,
-    name: name ?? this.name,
     projectId: projectId ?? this.projectId,
-    createdAt: createdAt ?? this.createdAt,
+    name: name ?? this.name,
     description: description.present ? description.value : this.description,
+    createdAt: createdAt ?? this.createdAt,
   );
   Dataset copyWithCompanion(DatasetsCompanion data) {
     return Dataset(
       id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
       projectId: data.projectId.present ? data.projectId.value : this.projectId,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      name: data.name.present ? data.name.value : this.name,
       description:
           data.description.present ? data.description.value : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -1140,77 +1455,86 @@ class Dataset extends DataClass implements Insertable<Dataset> {
   String toString() {
     return (StringBuffer('Dataset(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('projectId: $projectId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('description: $description')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, projectId, createdAt, description);
+  int get hashCode => Object.hash(id, projectId, name, description, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Dataset &&
           other.id == this.id &&
-          other.name == this.name &&
           other.projectId == this.projectId &&
-          other.createdAt == this.createdAt &&
-          other.description == this.description);
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt);
 }
 
 class DatasetsCompanion extends UpdateCompanion<Dataset> {
-  final Value<int> id;
-  final Value<String> name;
+  final Value<String> id;
   final Value<int> projectId;
-  final Value<DateTime> createdAt;
+  final Value<String> name;
   final Value<String?> description;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
   const DatasetsCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
     this.projectId = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DatasetsCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
+    required String id,
     required int projectId,
-    this.createdAt = const Value.absent(),
+    required String name,
     this.description = const Value.absent(),
-  }) : name = Value(name),
-       projectId = Value(projectId);
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       name = Value(name),
+       createdAt = Value(createdAt);
   static Insertable<Dataset> custom({
-    Expression<int>? id,
-    Expression<String>? name,
+    Expression<String>? id,
     Expression<int>? projectId,
-    Expression<DateTime>? createdAt,
+    Expression<String>? name,
     Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
       if (projectId != null) 'project_id': projectId,
-      if (createdAt != null) 'created_at': createdAt,
+      if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   DatasetsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
+    Value<String>? id,
     Value<int>? projectId,
-    Value<DateTime>? createdAt,
+    Value<String>? name,
     Value<String?>? description,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
   }) {
     return DatasetsCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
       projectId: projectId ?? this.projectId,
-      createdAt: createdAt ?? this.createdAt,
+      name: name ?? this.name,
       description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1218,19 +1542,22 @@ class DatasetsCompanion extends UpdateCompanion<Dataset> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (projectId.present) {
       map['project_id'] = Variable<int>(projectId.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
@@ -1239,10 +1566,11 @@ class DatasetsCompanion extends UpdateCompanion<Dataset> {
   String toString() {
     return (StringBuffer('DatasetsCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('projectId: $projectId, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
-          ..write('description: $description')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1268,11 +1596,11 @@ class $MediaItemsTable extends MediaItems
     'datasetId',
   );
   @override
-  late final GeneratedColumn<int> datasetId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> datasetId = GeneratedColumn<String>(
     'dataset_id',
     aliasedName,
     false,
-    type: DriftSqlType.int,
+    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _filePathMeta = const VerificationMeta(
@@ -1286,15 +1614,15 @@ class $MediaItemsTable extends MediaItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<int> type = GeneratedColumn<int>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<MediaType, int> type =
+      GeneratedColumn<int>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<MediaType>($MediaItemsTable.$convertertype);
   static const VerificationMeta _uploadDateMeta = const VerificationMeta(
     'uploadDate',
   );
@@ -1392,14 +1720,6 @@ class $MediaItemsTable extends MediaItems
     } else if (isInserting) {
       context.missing(_filePathMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
     if (data.containsKey('upload_date')) {
       context.handle(
         _uploadDateMeta,
@@ -1458,7 +1778,7 @@ class $MediaItemsTable extends MediaItems
       ),
       datasetId:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
+            DriftSqlType.string,
             data['${effectivePrefix}dataset_id'],
           )!,
       filePath:
@@ -1466,11 +1786,12 @@ class $MediaItemsTable extends MediaItems
             DriftSqlType.string,
             data['${effectivePrefix}file_path'],
           )!,
-      type:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}type'],
-          )!,
+      type: $MediaItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       uploadDate:
           attachedDatabase.typeMapping.read(
             DriftSqlType.dateTime,
@@ -1500,13 +1821,16 @@ class $MediaItemsTable extends MediaItems
   $MediaItemsTable createAlias(String alias) {
     return $MediaItemsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<MediaType, int, int> $convertertype =
+      const EnumIndexConverter<MediaType>(MediaType.values);
 }
 
 class MediaItem extends DataClass implements Insertable<MediaItem> {
   final String? id;
-  final int datasetId;
+  final String datasetId;
   final String filePath;
-  final int type;
+  final MediaType type;
   final DateTime uploadDate;
   final String owner;
   final String? lastAnnotator;
@@ -1529,9 +1853,11 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     if (!nullToAbsent || id != null) {
       map['id'] = Variable<String>(id);
     }
-    map['dataset_id'] = Variable<int>(datasetId);
+    map['dataset_id'] = Variable<String>(datasetId);
     map['file_path'] = Variable<String>(filePath);
-    map['type'] = Variable<int>(type);
+    {
+      map['type'] = Variable<int>($MediaItemsTable.$convertertype.toSql(type));
+    }
     map['upload_date'] = Variable<DateTime>(uploadDate);
     map['owner'] = Variable<String>(owner);
     if (!nullToAbsent || lastAnnotator != null) {
@@ -1576,9 +1902,11 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MediaItem(
       id: serializer.fromJson<String?>(json['id']),
-      datasetId: serializer.fromJson<int>(json['datasetId']),
+      datasetId: serializer.fromJson<String>(json['datasetId']),
       filePath: serializer.fromJson<String>(json['filePath']),
-      type: serializer.fromJson<int>(json['type']),
+      type: $MediaItemsTable.$convertertype.fromJson(
+        serializer.fromJson<int>(json['type']),
+      ),
       uploadDate: serializer.fromJson<DateTime>(json['uploadDate']),
       owner: serializer.fromJson<String>(json['owner']),
       lastAnnotator: serializer.fromJson<String?>(json['lastAnnotator']),
@@ -1593,9 +1921,11 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String?>(id),
-      'datasetId': serializer.toJson<int>(datasetId),
+      'datasetId': serializer.toJson<String>(datasetId),
       'filePath': serializer.toJson<String>(filePath),
-      'type': serializer.toJson<int>(type),
+      'type': serializer.toJson<int>(
+        $MediaItemsTable.$convertertype.toJson(type),
+      ),
       'uploadDate': serializer.toJson<DateTime>(uploadDate),
       'owner': serializer.toJson<String>(owner),
       'lastAnnotator': serializer.toJson<String?>(lastAnnotator),
@@ -1606,9 +1936,9 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
 
   MediaItem copyWith({
     Value<String?> id = const Value.absent(),
-    int? datasetId,
+    String? datasetId,
     String? filePath,
-    int? type,
+    MediaType? type,
     DateTime? uploadDate,
     String? owner,
     Value<String?> lastAnnotator = const Value.absent(),
@@ -1699,9 +2029,9 @@ class MediaItem extends DataClass implements Insertable<MediaItem> {
 
 class MediaItemsCompanion extends UpdateCompanion<MediaItem> {
   final Value<String?> id;
-  final Value<int> datasetId;
+  final Value<String> datasetId;
   final Value<String> filePath;
-  final Value<int> type;
+  final Value<MediaType> type;
   final Value<DateTime> uploadDate;
   final Value<String> owner;
   final Value<String?> lastAnnotator;
@@ -1722,9 +2052,9 @@ class MediaItemsCompanion extends UpdateCompanion<MediaItem> {
   });
   MediaItemsCompanion.insert({
     this.id = const Value.absent(),
-    required int datasetId,
+    required String datasetId,
     required String filePath,
-    required int type,
+    required MediaType type,
     required DateTime uploadDate,
     required String owner,
     this.lastAnnotator = const Value.absent(),
@@ -1738,7 +2068,7 @@ class MediaItemsCompanion extends UpdateCompanion<MediaItem> {
        owner = Value(owner);
   static Insertable<MediaItem> custom({
     Expression<String>? id,
-    Expression<int>? datasetId,
+    Expression<String>? datasetId,
     Expression<String>? filePath,
     Expression<int>? type,
     Expression<DateTime>? uploadDate,
@@ -1764,9 +2094,9 @@ class MediaItemsCompanion extends UpdateCompanion<MediaItem> {
 
   MediaItemsCompanion copyWith({
     Value<String?>? id,
-    Value<int>? datasetId,
+    Value<String>? datasetId,
     Value<String>? filePath,
-    Value<int>? type,
+    Value<MediaType>? type,
     Value<DateTime>? uploadDate,
     Value<String>? owner,
     Value<String?>? lastAnnotator,
@@ -1795,13 +2125,15 @@ class MediaItemsCompanion extends UpdateCompanion<MediaItem> {
       map['id'] = Variable<String>(id.value);
     }
     if (datasetId.present) {
-      map['dataset_id'] = Variable<int>(datasetId.value);
+      map['dataset_id'] = Variable<String>(datasetId.value);
     }
     if (filePath.present) {
       map['file_path'] = Variable<String>(filePath.value);
     }
     if (type.present) {
-      map['type'] = Variable<int>(type.value);
+      map['type'] = Variable<int>(
+        $MediaItemsTable.$convertertype.toSql(type.value),
+      );
     }
     if (uploadDate.present) {
       map['upload_date'] = Variable<DateTime>(uploadDate.value);
@@ -1870,7 +2202,8 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<String?> iconPath,
       Value<String?> datasetsFolderPath,
       Value<String?> thumbnailsFolderPath,
-      Value<bool> darkMode,
+      Value<String> themeMode,
+      Value<String> language,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
@@ -1881,8 +2214,33 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String?> iconPath,
       Value<String?> datasetsFolderPath,
       Value<String?> thumbnailsFolderPath,
-      Value<bool> darkMode,
+      Value<String> themeMode,
+      Value<String> language,
     });
+
+final class $$UsersTableReferences
+    extends BaseReferences<_$AppDatabase, $UsersTable, User> {
+  $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ProjectsTable, List<Project>> _projectsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.projects,
+    aliasName: $_aliasNameGenerator(db.users.id, db.projects.ownerId),
+  );
+
+  $$ProjectsTableProcessedTableManager get projectsRefs {
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.ownerId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_projectsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
   $$UsersTableFilterComposer({
@@ -1927,10 +2285,40 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get darkMode => $composableBuilder(
-    column: $table.darkMode,
+  ColumnFilters<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> projectsRefs(
+    Expression<bool> Function($$ProjectsTableFilterComposer f) f,
+  ) {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.ownerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableOrderingComposer
@@ -1977,8 +2365,13 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get darkMode => $composableBuilder(
-    column: $table.darkMode,
+  ColumnOrderings<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2017,8 +2410,36 @@ class $$UsersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get darkMode =>
-      $composableBuilder(column: $table.darkMode, builder: (column) => column);
+  GeneratedColumn<String> get themeMode =>
+      $composableBuilder(column: $table.themeMode, builder: (column) => column);
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
+
+  Expression<T> projectsRefs<T extends Object>(
+    Expression<T> Function($$ProjectsTableAnnotationComposer a) f,
+  ) {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.ownerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -2032,9 +2453,9 @@ class $$UsersTableTableManager
           $$UsersTableAnnotationComposer,
           $$UsersTableCreateCompanionBuilder,
           $$UsersTableUpdateCompanionBuilder,
-          (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
+          (User, $$UsersTableReferences),
           User,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool projectsRefs})
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -2056,7 +2477,8 @@ class $$UsersTableTableManager
                 Value<String?> iconPath = const Value.absent(),
                 Value<String?> datasetsFolderPath = const Value.absent(),
                 Value<String?> thumbnailsFolderPath = const Value.absent(),
-                Value<bool> darkMode = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+                Value<String> language = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
@@ -2065,7 +2487,8 @@ class $$UsersTableTableManager
                 iconPath: iconPath,
                 datasetsFolderPath: datasetsFolderPath,
                 thumbnailsFolderPath: thumbnailsFolderPath,
-                darkMode: darkMode,
+                themeMode: themeMode,
+                language: language,
               ),
           createCompanionCallback:
               ({
@@ -2076,7 +2499,8 @@ class $$UsersTableTableManager
                 Value<String?> iconPath = const Value.absent(),
                 Value<String?> datasetsFolderPath = const Value.absent(),
                 Value<String?> thumbnailsFolderPath = const Value.absent(),
-                Value<bool> darkMode = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+                Value<String> language = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
@@ -2085,7 +2509,8 @@ class $$UsersTableTableManager
                 iconPath: iconPath,
                 datasetsFolderPath: datasetsFolderPath,
                 thumbnailsFolderPath: thumbnailsFolderPath,
-                darkMode: darkMode,
+                themeMode: themeMode,
+                language: language,
               ),
           withReferenceMapper:
               (p0) =>
@@ -2093,11 +2518,39 @@ class $$UsersTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          BaseReferences(db, table, e),
+                          $$UsersTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({projectsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (projectsRefs) db.projects],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (projectsRefs)
+                    await $_getPrefetchedData<User, $UsersTable, Project>(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._projectsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).projectsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.ownerId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -2112,26 +2565,78 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableAnnotationComposer,
       $$UsersTableCreateCompanionBuilder,
       $$UsersTableUpdateCompanionBuilder,
-      (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
+      (User, $$UsersTableReferences),
       User,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool projectsRefs})
     >;
 typedef $$ProjectsTableCreateCompanionBuilder =
     ProjectsCompanion Function({
       Value<int> id,
       required String name,
-      Value<String?> iconPath,
-      Value<DateTime> createdAt,
+      required String type,
+      required String icon,
+      required DateTime creationDate,
+      required DateTime lastUpdated,
+      required String labels,
+      required String labelColors,
+      required String defaultDatasetId,
       required int ownerId,
     });
 typedef $$ProjectsTableUpdateCompanionBuilder =
     ProjectsCompanion Function({
       Value<int> id,
       Value<String> name,
-      Value<String?> iconPath,
-      Value<DateTime> createdAt,
+      Value<String> type,
+      Value<String> icon,
+      Value<DateTime> creationDate,
+      Value<DateTime> lastUpdated,
+      Value<String> labels,
+      Value<String> labelColors,
+      Value<String> defaultDatasetId,
       Value<int> ownerId,
     });
+
+final class $$ProjectsTableReferences
+    extends BaseReferences<_$AppDatabase, $ProjectsTable, Project> {
+  $$ProjectsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _ownerIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.projects.ownerId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager get ownerId {
+    final $_column = $_itemColumn<int>('owner_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ownerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$DatasetsTable, List<Dataset>> _datasetsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.datasets,
+    aliasName: $_aliasNameGenerator(db.projects.id, db.datasets.projectId),
+  );
+
+  $$DatasetsTableProcessedTableManager get datasetsRefs {
+    final manager = $$DatasetsTableTableManager(
+      $_db,
+      $_db.datasets,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_datasetsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$ProjectsTableFilterComposer
     extends Composer<_$AppDatabase, $ProjectsTable> {
@@ -2152,20 +2657,88 @@ class $$ProjectsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get iconPath => $composableBuilder(
-    column: $table.iconPath,
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnFilters<DateTime> get creationDate => $composableBuilder(
+    column: $table.creationDate,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get labels => $composableBuilder(
+    column: $table.labels,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get labelColors => $composableBuilder(
+    column: $table.labelColors,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultDatasetId => $composableBuilder(
+    column: $table.defaultDatasetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get ownerId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> datasetsRefs(
+    Expression<bool> Function($$DatasetsTableFilterComposer f) f,
+  ) {
+    final $$DatasetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.datasets,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DatasetsTableFilterComposer(
+            $db: $db,
+            $table: $db.datasets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableOrderingComposer
@@ -2187,20 +2760,63 @@ class $$ProjectsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get iconPath => $composableBuilder(
-    column: $table.iconPath,
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnOrderings<DateTime> get creationDate => $composableBuilder(
+    column: $table.creationDate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get labels => $composableBuilder(
+    column: $table.labels,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get labelColors => $composableBuilder(
+    column: $table.labelColors,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultDatasetId => $composableBuilder(
+    column: $table.defaultDatasetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get ownerId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ProjectsTableAnnotationComposer
@@ -2218,14 +2834,82 @@ class $$ProjectsTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get iconPath =>
-      $composableBuilder(column: $table.iconPath, builder: (column) => column);
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
 
-  GeneratedColumn<int> get ownerId =>
-      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+  GeneratedColumn<DateTime> get creationDate => $composableBuilder(
+    column: $table.creationDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get labels =>
+      $composableBuilder(column: $table.labels, builder: (column) => column);
+
+  GeneratedColumn<String> get labelColors => $composableBuilder(
+    column: $table.labelColors,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultDatasetId => $composableBuilder(
+    column: $table.defaultDatasetId,
+    builder: (column) => column,
+  );
+
+  $$UsersTableAnnotationComposer get ownerId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> datasetsRefs<T extends Object>(
+    Expression<T> Function($$DatasetsTableAnnotationComposer a) f,
+  ) {
+    final $$DatasetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.datasets,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DatasetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.datasets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableTableManager
@@ -2239,9 +2923,9 @@ class $$ProjectsTableTableManager
           $$ProjectsTableAnnotationComposer,
           $$ProjectsTableCreateCompanionBuilder,
           $$ProjectsTableUpdateCompanionBuilder,
-          (Project, BaseReferences<_$AppDatabase, $ProjectsTable, Project>),
+          (Project, $$ProjectsTableReferences),
           Project,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool ownerId, bool datasetsRefs})
         > {
   $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
     : super(
@@ -2258,28 +2942,48 @@ class $$ProjectsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<String?> iconPath = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> icon = const Value.absent(),
+                Value<DateTime> creationDate = const Value.absent(),
+                Value<DateTime> lastUpdated = const Value.absent(),
+                Value<String> labels = const Value.absent(),
+                Value<String> labelColors = const Value.absent(),
+                Value<String> defaultDatasetId = const Value.absent(),
                 Value<int> ownerId = const Value.absent(),
               }) => ProjectsCompanion(
                 id: id,
                 name: name,
-                iconPath: iconPath,
-                createdAt: createdAt,
+                type: type,
+                icon: icon,
+                creationDate: creationDate,
+                lastUpdated: lastUpdated,
+                labels: labels,
+                labelColors: labelColors,
+                defaultDatasetId: defaultDatasetId,
                 ownerId: ownerId,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
-                Value<String?> iconPath = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                required String type,
+                required String icon,
+                required DateTime creationDate,
+                required DateTime lastUpdated,
+                required String labels,
+                required String labelColors,
+                required String defaultDatasetId,
                 required int ownerId,
               }) => ProjectsCompanion.insert(
                 id: id,
                 name: name,
-                iconPath: iconPath,
-                createdAt: createdAt,
+                type: type,
+                icon: icon,
+                creationDate: creationDate,
+                lastUpdated: lastUpdated,
+                labels: labels,
+                labelColors: labelColors,
+                defaultDatasetId: defaultDatasetId,
                 ownerId: ownerId,
               ),
           withReferenceMapper:
@@ -2288,11 +2992,68 @@ class $$ProjectsTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          BaseReferences(db, table, e),
+                          $$ProjectsTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({ownerId = false, datasetsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (datasetsRefs) db.datasets],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (ownerId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ownerId,
+                            referencedTable: $$ProjectsTableReferences
+                                ._ownerIdTable(db),
+                            referencedColumn:
+                                $$ProjectsTableReferences._ownerIdTable(db).id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (datasetsRefs)
+                    await $_getPrefetchedData<Project, $ProjectsTable, Dataset>(
+                      currentTable: table,
+                      referencedTable: $$ProjectsTableReferences
+                          ._datasetsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).datasetsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.projectId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -2307,26 +3068,50 @@ typedef $$ProjectsTableProcessedTableManager =
       $$ProjectsTableAnnotationComposer,
       $$ProjectsTableCreateCompanionBuilder,
       $$ProjectsTableUpdateCompanionBuilder,
-      (Project, BaseReferences<_$AppDatabase, $ProjectsTable, Project>),
+      (Project, $$ProjectsTableReferences),
       Project,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool ownerId, bool datasetsRefs})
     >;
 typedef $$DatasetsTableCreateCompanionBuilder =
     DatasetsCompanion Function({
-      Value<int> id,
-      required String name,
+      required String id,
       required int projectId,
-      Value<DateTime> createdAt,
+      required String name,
       Value<String?> description,
+      required DateTime createdAt,
+      Value<int> rowid,
     });
 typedef $$DatasetsTableUpdateCompanionBuilder =
     DatasetsCompanion Function({
-      Value<int> id,
-      Value<String> name,
+      Value<String> id,
       Value<int> projectId,
-      Value<DateTime> createdAt,
+      Value<String> name,
       Value<String?> description,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
     });
+
+final class $$DatasetsTableReferences
+    extends BaseReferences<_$AppDatabase, $DatasetsTable, Dataset> {
+  $$DatasetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) => db.projects
+      .createAlias($_aliasNameGenerator(db.datasets.projectId, db.projects.id));
+
+  $$ProjectsTableProcessedTableManager get projectId {
+    final $_column = $_itemColumn<int>('project_id')!;
+
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$DatasetsTableFilterComposer
     extends Composer<_$AppDatabase, $DatasetsTable> {
@@ -2337,7 +3122,7 @@ class $$DatasetsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -2347,8 +3132,8 @@ class $$DatasetsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get projectId => $composableBuilder(
-    column: $table.projectId,
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2357,10 +3142,28 @@ class $$DatasetsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnFilters(column),
-  );
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$DatasetsTableOrderingComposer
@@ -2372,7 +3175,7 @@ class $$DatasetsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2382,8 +3185,8 @@ class $$DatasetsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get projectId => $composableBuilder(
-    column: $table.projectId,
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2392,10 +3195,28 @@ class $$DatasetsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnOrderings(column),
-  );
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$DatasetsTableAnnotationComposer
@@ -2407,22 +3228,42 @@ class $$DatasetsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<int> get projectId =>
-      $composableBuilder(column: $table.projectId, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$DatasetsTableTableManager
@@ -2436,9 +3277,9 @@ class $$DatasetsTableTableManager
           $$DatasetsTableAnnotationComposer,
           $$DatasetsTableCreateCompanionBuilder,
           $$DatasetsTableUpdateCompanionBuilder,
-          (Dataset, BaseReferences<_$AppDatabase, $DatasetsTable, Dataset>),
+          (Dataset, $$DatasetsTableReferences),
           Dataset,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool projectId})
         > {
   $$DatasetsTableTableManager(_$AppDatabase db, $DatasetsTable table)
     : super(
@@ -2453,31 +3294,35 @@ class $$DatasetsTableTableManager
               () => $$DatasetsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<int> projectId = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => DatasetsCompanion(
                 id: id,
-                name: name,
                 projectId: projectId,
-                createdAt: createdAt,
+                name: name,
                 description: description,
+                createdAt: createdAt,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                required String name,
+                required String id,
                 required int projectId,
-                Value<DateTime> createdAt = const Value.absent(),
+                required String name,
                 Value<String?> description = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
               }) => DatasetsCompanion.insert(
                 id: id,
-                name: name,
                 projectId: projectId,
-                createdAt: createdAt,
+                name: name,
                 description: description,
+                createdAt: createdAt,
+                rowid: rowid,
               ),
           withReferenceMapper:
               (p0) =>
@@ -2485,11 +3330,51 @@ class $$DatasetsTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          BaseReferences(db, table, e),
+                          $$DatasetsTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({projectId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (projectId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.projectId,
+                            referencedTable: $$DatasetsTableReferences
+                                ._projectIdTable(db),
+                            referencedColumn:
+                                $$DatasetsTableReferences
+                                    ._projectIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2504,16 +3389,16 @@ typedef $$DatasetsTableProcessedTableManager =
       $$DatasetsTableAnnotationComposer,
       $$DatasetsTableCreateCompanionBuilder,
       $$DatasetsTableUpdateCompanionBuilder,
-      (Dataset, BaseReferences<_$AppDatabase, $DatasetsTable, Dataset>),
+      (Dataset, $$DatasetsTableReferences),
       Dataset,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool projectId})
     >;
 typedef $$MediaItemsTableCreateCompanionBuilder =
     MediaItemsCompanion Function({
       Value<String?> id,
-      required int datasetId,
+      required String datasetId,
       required String filePath,
-      required int type,
+      required MediaType type,
       required DateTime uploadDate,
       required String owner,
       Value<String?> lastAnnotator,
@@ -2524,9 +3409,9 @@ typedef $$MediaItemsTableCreateCompanionBuilder =
 typedef $$MediaItemsTableUpdateCompanionBuilder =
     MediaItemsCompanion Function({
       Value<String?> id,
-      Value<int> datasetId,
+      Value<String> datasetId,
       Value<String> filePath,
-      Value<int> type,
+      Value<MediaType> type,
       Value<DateTime> uploadDate,
       Value<String> owner,
       Value<String?> lastAnnotator,
@@ -2549,7 +3434,7 @@ class $$MediaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get datasetId => $composableBuilder(
+  ColumnFilters<String> get datasetId => $composableBuilder(
     column: $table.datasetId,
     builder: (column) => ColumnFilters(column),
   );
@@ -2559,10 +3444,11 @@ class $$MediaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<MediaType, MediaType, int> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get uploadDate => $composableBuilder(
     column: $table.uploadDate,
@@ -2604,7 +3490,7 @@ class $$MediaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get datasetId => $composableBuilder(
+  ColumnOrderings<String> get datasetId => $composableBuilder(
     column: $table.datasetId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2657,13 +3543,13 @@ class $$MediaItemsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get datasetId =>
+  GeneratedColumn<String> get datasetId =>
       $composableBuilder(column: $table.datasetId, builder: (column) => column);
 
   GeneratedColumn<String> get filePath =>
       $composableBuilder(column: $table.filePath, builder: (column) => column);
 
-  GeneratedColumn<int> get type =>
+  GeneratedColumnWithTypeConverter<MediaType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<DateTime> get uploadDate => $composableBuilder(
@@ -2722,9 +3608,9 @@ class $$MediaItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String?> id = const Value.absent(),
-                Value<int> datasetId = const Value.absent(),
+                Value<String> datasetId = const Value.absent(),
                 Value<String> filePath = const Value.absent(),
-                Value<int> type = const Value.absent(),
+                Value<MediaType> type = const Value.absent(),
                 Value<DateTime> uploadDate = const Value.absent(),
                 Value<String> owner = const Value.absent(),
                 Value<String?> lastAnnotator = const Value.absent(),
@@ -2746,9 +3632,9 @@ class $$MediaItemsTableTableManager
           createCompanionCallback:
               ({
                 Value<String?> id = const Value.absent(),
-                required int datasetId,
+                required String datasetId,
                 required String filePath,
-                required int type,
+                required MediaType type,
                 required DateTime uploadDate,
                 required String owner,
                 Value<String?> lastAnnotator = const Value.absent(),

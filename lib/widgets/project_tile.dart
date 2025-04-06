@@ -2,6 +2,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/project_details_screen.dart';
+import 'package:vap/data/app_database.dart';
+
+import "../utils/date_utils.dart";
 
 import 'labels_list.dart';
 import 'project_icon.dart';
@@ -34,16 +37,8 @@ class _ProjectTileState extends State<ProjectTile> {
       onExit: (_) => setState(() => _isHovered = false), // Hover end
 
       child: GestureDetector(
-        /*onTap: () {
-          print("Project '${widget.project.name}' clicked!");
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProjectDetailsScreen(widget.project),
-            ),
-          );
-        },*/
         onTap: widget.onTap ??
-          () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
+            () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
 
         child: Card(
           color: Colors.grey.shade800, // Dark theme background
@@ -57,7 +52,7 @@ class _ProjectTileState extends State<ProjectTile> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(0.0), // ensure image will be 100% in height and weight
+            padding: const EdgeInsets.all(0.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -112,7 +107,7 @@ class _ProjectTileState extends State<ProjectTile> {
 
                         // Last update
                         Text(
-                          "Updated: ${_formatDate(widget.project.lastUpdated)} / Created: ${_formatDate(widget.project.creationDate)}",
+                          "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
                           style: TextStyle(color: Colors.white60, fontSize: 18),
                         ),
                         SizedBox(height: 8),
@@ -123,14 +118,14 @@ class _ProjectTileState extends State<ProjectTile> {
                           height: 32,
                         ),
 
-                        // to show Labels Section with colored tags in
+                        // Labels Section with colored tags in
                         LabelList(
-                          labels: widget.project.labels.toList(),
-                          labelColors: widget.project.labelColors.toList(),
+                          labels: widget.project.labels.split(','), // Split the string into a list
+                          labelColors: widget.project.labelColors.split(','), // Split the string into a list
                         ),
                       ],
-                    ), // Column
-                  ), // Padding
+                    ),
+                  ),
                 ),
 
                 // Right Side (Progress Indicator + More Options)
@@ -148,19 +143,5 @@ class _ProjectTileState extends State<ProjectTile> {
         ),
       ),
     );
-  }
-
-  // Date Formatter
-  String _formatDate(DateTime date) {
-    return "${date.day} ${_getMonthName(date.month)} ${date.year} | ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-  }
-
-  // Convert month number to name
-  String _getMonthName(int month) {
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return months[month - 1];
   }
 }

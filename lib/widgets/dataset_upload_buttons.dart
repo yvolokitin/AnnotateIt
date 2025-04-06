@@ -1,14 +1,14 @@
 import 'dart:io';
-
-import "package:file_picker/file_picker.dart";
-import "package:flutter/material.dart";
-import "package:uuid/uuid.dart";
+import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';  // Added Riverpod import
+import 'package:uuid/uuid.dart';
 
 import '../utils/image_utils.dart';
-import "../data/dataset_database.dart";
-import "../data/project_database.dart";
+import '../data/app_database.dart';
+import '../data/providers.dart';
 
-class DatasetUploadButtons extends StatelessWidget {
+class DatasetUploadButtons extends ConsumerWidget {  // Changed to ConsumerWidget
   final int project_id, file_count;
   final String project_icon;
   final String dataset_id;
@@ -35,7 +35,7 @@ class DatasetUploadButtons extends StatelessWidget {
     super.key,
   });
 
-  Future<void> _uploadMedia(BuildContext context) async {
+  Future<void> _uploadMedia(BuildContext context, WidgetRef ref) async {  // Added WidgetRef ref
     print("UI _uploadMedia: Uploading media... for dataset_id: $dataset_id");
 
     try {
@@ -53,7 +53,7 @@ class DatasetUploadButtons extends StatelessWidget {
           final platformFile = result.files[0];
           final thumbnailFile = await generateThumbnailFromImage(File(platformFile.path!), project_id.toString());
           if (thumbnailFile != null) {
-            await ProjectDatabase.instance.updateProjectIcon(project_id, thumbnailFile.path);
+            await ref.read(databaseProvider).updateProjectIcon(project_id, thumbnailFile.path);
           }
         }
 
@@ -69,14 +69,14 @@ class DatasetUploadButtons extends StatelessWidget {
 
           final file = result.files[i];
           final ext = file.extension?.toLowerCase() ?? 'unknown';
-          await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
+          await ref.read(databaseProvider).insertMediaItem(dataset_id, file.path!, ext);
 
           onFileProgress?.call(file.name, i + 1, total);
         }
 
-        await ProjectDatabase.instance.updateProjectlastUpdated(project_id);
-        onUploadingChanged(false); onUploadSuccess();
-
+        await ref.read(databaseProvider).updateProjectlastUpdated(project_id);
+        onUploadingChanged(false); 
+        onUploadSuccess();
       } else {
         onUploadingChanged(false);
       }
@@ -87,13 +87,12 @@ class DatasetUploadButtons extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {  // Added WidgetRef ref
     return Container(
       padding: EdgeInsets.all(40),
       height: 120,
       width: double.infinity,
       child: Row(
-        // mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text("$file_count files", style: TextStyle(color: Colors.white, fontSize: 20)),
           Spacer(), // takes all available space between the text and buttons
@@ -101,6 +100,7 @@ class DatasetUploadButtons extends StatelessWidget {
           SizedBox(width: 20),
           _buildButton(
             context,
+            ref,  // Added ref to button
             label: "Import dataset",
             borderColor: Colors.grey,
           ),
@@ -108,6 +108,7 @@ class DatasetUploadButtons extends StatelessWidget {
           SizedBox(width: 20),
           _buildButton(
             context,
+            ref,  // Added ref to button
             label: "Upload media",
             borderColor: Colors.red,
           ),
@@ -116,33 +117,35 @@ class DatasetUploadButtons extends StatelessWidget {
     );
   }
 
-Widget _buildButton(
-  BuildContext context, {
-  required String label,
-  required Color borderColor,
-}) {
-  return ElevatedButton(
-    onPressed: isUploading
-        ? null // block during upload
-        : () async {
-            await _uploadMedia(context);
-          },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.grey[900],
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-        side: BorderSide(color: borderColor, width: 2),
+  Widget _buildButton(
+    BuildContext context,
+    WidgetRef ref,  // Added ref
+    {
+    required String label,
+    required Color borderColor,
+  }) {
+    return ElevatedButton(
+      onPressed: isUploading
+          ? null // block during upload
+          : () async {
+              await _uploadMedia(context, ref);  // Added ref to function call
+            },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey[900],
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
       ),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

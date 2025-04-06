@@ -1,89 +1,90 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import "create_project_dialog.dart";
+import 'package:vap/data/app_database.dart';
+import 'package:vap/data/providers.dart'; 
 
-import '../data/project_database.dart';
+import 'create_project_dialog.dart';
 
-
-class LabelSelectionDialog extends StatefulWidget {
+class LabelSelectionDialog extends ConsumerStatefulWidget {
   final String projectName;
   final String projectType;
 
   const LabelSelectionDialog({required this.projectName, required this.projectType});
 
   @override
-  _LabelSelectionDialogState createState() => _LabelSelectionDialogState();
+  ConsumerState<LabelSelectionDialog> createState() => _LabelSelectionDialogState();
 }
 
-class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
+class _LabelSelectionDialogState extends ConsumerState<LabelSelectionDialog> {
   final TextEditingController _labelController = TextEditingController();
   List<String> _labels = [];
   List<String> _labelColors = [];
 
-  // 📌 Add Label to List
+  // Add label to the list
   void _addLabel() {
     if (_labelController.text.isNotEmpty) {
       setState(() {
         _labels.add(_labelController.text);
+        _labelColors.add('black'); // Default color (can be expanded later with color selection)
         _labelController.clear();
       });
     }
   }
 
-  // 📌 Remove Label
+  // Remove label from the list
   void _removeLabel(String label) {
     setState(() {
       _labels.remove(label);
+      _labelColors.removeAt(_labels.indexOf(label));
     });
   }
 
-  // 📌 Save Project & Close Window
+  // Create project function
   Future<void> _createProject() async {
-    final newProject = Project(
-      name: widget.projectName,
-      type: widget.projectType,
-      icon: "folder",
-      creationDate: DateTime.now(),
-      lastUpdated: DateTime.now(),
-      labels: _labels,
-      labelColors: _labelColors,
+    final newProject = ProjectsCompanion(
+      name: drift.Value(widget.projectName), // Wrap in Value for non-nullable fields
+      iconPath: drift.Value("folder"), // Wrap in Value for non-nullable fields
+      createdAt: drift.Value(DateTime.now()), // Wrap in Value for non-nullable fields
+      ownerId: drift.Value(1), // Wrap in Value for non-nullable fields (Replace with actual owner ID)
+      labels: drift.Value(_labels.join(',')), // Wrap the string for labels
+      labelColors: drift.Value(_labelColors.join(',')), // Wrap the string for label colors
     );
 
-    await ProjectDatabase.instance.insertProject(newProject);
-    Navigator.pop(context); // Close window
+    final db = ref.read(databaseProvider); // Access the database provider
+    await db.insertProject(newProject); // Insert the new project into the database
+    Navigator.pop(context); // Close the dialog
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Add Labels"),
+      title: const Text("Add Labels"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 📌 Label Input
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _labelController,
-                  decoration: InputDecoration(labelText: "Enter Label"),
+                  decoration: const InputDecoration(labelText: "Enter Label"),
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.add, color: Colors.blue),
+                icon: const Icon(Icons.add, color: Colors.blue),
                 onPressed: _addLabel,
               ),
             ],
           ),
-
-          // 📌 Label List
           Wrap(
             spacing: 8,
             children: _labels.map((label) {
               return Chip(
                 label: Text(label),
                 backgroundColor: Colors.blueAccent,
-                deleteIcon: Icon(Icons.close, color: Colors.white),
+                deleteIcon: const Icon(Icons.close, color: Colors.white),
                 onDeleted: () => _removeLabel(label),
               );
             }).toList(),
@@ -91,7 +92,7 @@ class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
         ],
       ),
       actions: [
-        // 🔙 Back Button (Go to Step 1)
+        // "Back" button to go to the previous screen
         TextButton(
           onPressed: () {
             Navigator.pop(context);
@@ -100,13 +101,13 @@ class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
               builder: (context) => CreateProjectDialog(),
             );
           },
-          child: Text("Back"),
+          child: const Text("Back"),
         ),
 
-        // Create Project Button
+        // "Create" button to create the new project
         ElevatedButton(
           onPressed: _createProject,
-          child: Text("Create"),
+          child: const Text("Create"),
         ),
       ],
     );

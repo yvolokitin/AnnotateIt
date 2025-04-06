@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -5,8 +6,9 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import "color_picker_dialog.dart";
 
-import '../data/project_database.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vap/data/providers.dart';
+import 'package:vap/data/app_database.dart';
 
 class EditLabelsDialog extends StatefulWidget {
   final Project project;
@@ -98,7 +100,7 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
       labelColors: _labelColors,
     );
 
-    await ProjectDatabase.instance.updateProjectLabels(widget.project.id!, _labels, _labelColors);
+    await ref.watch(databaseProvider).updateProjectLabels(widget.project.id!, _labels, _labelColors);
     widget.onLabelsUpdated(); // Refresh UI
     Navigator.pop(context); // Close dialog
   }

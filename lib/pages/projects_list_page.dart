@@ -1,21 +1,24 @@
-import "package:flutter/material.dart";
-import "../data/project_database.dart";
-import "../models/project.dart";
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 
-import "../widgets/project_tile.dart";
-import "../widgets/projects_topbar.dart";
-import "../widgets/create_project_dialog.dart";
-import "../widgets/edit_project_name.dart";
-import "../widgets/edit_labels_dialog.dart";
+import '../widgets/project_tile.dart';
+import '../widgets/projects_topbar.dart';
+import '../widgets/create_project_dialog.dart';
+import '../widgets/edit_project_name.dart';
+import '../widgets/edit_labels_dialog.dart';
 
-import "project_details_screen.dart";
+import 'project_details_screen.dart';
+import 'package:vap/data/app_database.dart';
+import 'package:vap/data/providers.dart';
 
-class ProjectsPage extends StatefulWidget {
+class ProjectsPage extends ConsumerStatefulWidget {
+  const ProjectsPage({super.key});
+
   @override
   _ProjectsPageState createState() => _ProjectsPageState();
 }
 
-class _ProjectsPageState extends State<ProjectsPage> {
+class _ProjectsPageState extends ConsumerState<ProjectsPage> {
   late Future<List<Project>> _projectsFuture;
   List<Project> _allProjects = [];
   List<Project> _filteredProjects = [];
@@ -31,7 +34,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 
   Future<void> _loadProjects() async {
-    List<Project> projects = await ProjectDatabase.instance.fetchProjects();
+    // Используем ref для получения данных из базы данных через databaseProvider
+    final db = ref.read(databaseProvider);
+    List<Project> projects = await db.getAllProjects();
     setState(() {
       _allProjects = projects;
       _filteredProjects = _applySearchAndSort(projects);
@@ -65,7 +70,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   // Function to Delete a Project
   Future<void> _deleteProject(Project project) async {
-    await ProjectDatabase.instance.deleteProject(project.id!);
+    final db = ref.read(databaseProvider);
+    await db.deleteProject(project.id!);
     _loadProjects(); // Refresh list after deletion
   }  
 
@@ -127,7 +133,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 print("Started a new project dialog creation");
                 showDialog(
                   context: context,
-                  builder: (context) => CreateProjectDialog(),
+                  builder: (context) => const CreateProjectDialog(),
                 );
               },
           ),
@@ -135,7 +141,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
           // Project List -> list of ProjectTile's (in widgets)
           Expanded(
             child: _filteredProjects.isEmpty
-                ? Center(child: Text("No projects found"))
+                ? const Center(child: Text("No projects found"))
                 : ListView.builder(
                     itemCount: _filteredProjects.length,
                     itemBuilder: (context, index) {
@@ -171,29 +177,29 @@ class _ProjectsPageState extends State<ProjectsPage> {
       context: context,
       builder: (context) {
         return Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.edit, color: Colors.green),
-                title: Text("Edit Project Name"),
+                leading: const Icon(Icons.edit, color: Colors.green),
+                title: const Text("Edit Project Name"),
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectName(project);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.label, color: Colors.orange),
-                title: Text("Update Project Labels"),
+                leading: const Icon(Icons.label, color: Colors.orange),
+                title: const Text("Update Project Labels"),
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectLabels(project);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
-                title: Text("Delete Project"),
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text("Delete Project"),
                 onTap: () {
                   Navigator.pop(context);
                   _deleteProject(project);
