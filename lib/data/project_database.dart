@@ -1,19 +1,22 @@
-import 'dart:math';
-import 'package:uuid/uuid.dart';
+// import 'dart:math';
+// import 'package:uuid/uuid.dart';
 
 import 'package:sqflite/sqflite.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 
 import '../models/project.dart';
 import '../models/dataset.dart';
 
-import 'dataset_database.dart';
+ // import 'dataset_database.dart';
 
 class ProjectDatabase {
   static final ProjectDatabase instance = ProjectDatabase._init();
   static Database? _database;
 
   ProjectDatabase._init();
+
+  final _log = Logger('ProjectDatabase');
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -39,7 +42,9 @@ class ProjectDatabase {
         lastUpdated TEXT NOT NULL,
         labels TEXT NOT NULL,
         labelColors TEXT NOT NULL,
-        defaultDatasetId TEXT
+        defaultDatasetId TEXT,
+        ownerId INTEGER NOT NULL,
+        FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
       )
     ''');
 
@@ -70,20 +75,47 @@ class ProjectDatabase {
     ''');
   }
 
-  // TBD: Probably should be removed
-  Future<int> insertProject(Project project) async {
+  Future<int> createProject(Project project) async {
     final db = await database;
-    return await db.insert('projects', {
-      'name': project.name,
+
+    // Fallback to 'Project' if name is null or empty
+    final String projectName = (project.name.trim().isEmpty) ? 'Project' : project.name.trim();
+
+    // Step 1: Insert project without defaultDatasetId
+    int projectId = await db.insert('projects', {
+      'name': projectName,
       'type': project.type,
       'icon': project.icon,
       'creationDate': project.creationDate.toIso8601String(),
-      
-      // When a project is created, lastUpdated is set to creationDate
       'lastUpdated': project.creationDate.toIso8601String(),
-      'labels': project.labels.join(','),
-      'labelColors': project.labelColors.join(','),
+      'labels': project.labels.join(','), // or jsonEncode()
+      'labelColors': project.labelColors.join(','), // or jsonEncode()
+      'ownerId': project.ownerId,
     });
+
+    // Step 2: Create the default dataset
+    final dataset = Dataset(
+      id: uuid.v4(),
+      projectId: projectId,
+      name: 'Default Dataset',
+      description: 'Default dataset for ${project.name}',
+      createdAt: DateTime.now(),
+    );
+
+    await db.insert('datasets', dataset.toMap());
+
+    // Step 3: Update the project with the defaultDatasetId
+    await db.update(
+      'projects',
+      {
+        'defaultDatasetId': dataset.id,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    return projectId;
   }
 
   Future<int> updateProjectName(Project project) async {
@@ -101,7 +133,7 @@ class ProjectDatabase {
       String currentName = result.first['name'];
       // If the name has not changed, do nothing and return 0 (no update)
       if (currentName == project.name) {
-        print("No changes detected, skipping update");
+        _log.info('No changes detected for project "${project.name}", skipping update.');
         return 0; // No update performed
       }
     }
@@ -174,7 +206,6 @@ class ProjectDatabase {
 
   Future<void> updateProjectlastUpdated(int projectId) async {
     final db = await database;
-    final currentTime = DateTime.now().toIso8601String();
 
     await db.update(
       'projects',
@@ -213,9 +244,42 @@ class ProjectDatabase {
     );
   }
 
-  Future<int> deleteProject(int id) async {
+  Future<int> deleteProject(int projectId) async {
     final db = await database;
-    return await db.delete('projects', where: 'id = ?', whereArgs: [id]);
+
+    return await db.transaction((txn) async {
+      // Step 1: Get all datasets linked to the project
+      final datasets = await txn.query(
+        'datasets',
+        where: 'projectId = ?',
+        whereArgs: [projectId],
+      );
+
+      for (var dataset in datasets) {
+        final datasetId = dataset['id'] as String;
+
+        // Step 2: Delete media items linked to the dataset
+        await txn.delete(
+          'media_items',
+          where: 'datasetId = ?',
+          whereArgs: [datasetId],
+        );
+      }
+
+      // Step 3: Delete datasets linked to the project
+      await txn.delete(
+        'datasets',
+        where: 'projectId = ?',
+        whereArgs: [projectId],
+      );
+
+      // Step 4: Delete the project itself
+      return await txn.delete(
+        'projects',
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+    });
   }
 
   Future<List<Project>> fetchProjects() async {
@@ -224,71 +288,18 @@ class ProjectDatabase {
     return result.map((map) => Project.fromMap(map)).toList();
   }
 
+  Future<List<Project>> fetchProjectsbyUser({required int userId}) async {
+    final db = await database;
+    final result = await db.query(
+      'projects',
+      where: 'ownerId = ?',
+      whereArgs: [userId],
+    );
+    return result.map((map) => Project.fromMap(map)).toList();
+  }
+
   Future<void> closeDB() async {
     final db = await database;
     db.close();
   }
-
-  // this is for Development purposes only, if i need to update certain tables in the database
-Future<void> runManualSQLUpdate() async {
-  final db = await ProjectDatabase.instance.database;
-
-  // Check if media_items table exists
-  final result = await db.rawQuery(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='media_items'"
-  );
-
-  final mediaTableExists = result.isNotEmpty;
-
-  if (!mediaTableExists) {
-    print("Creating 'media_items' table...");
-    await db.execute('''
-      CREATE TABLE media_items (
-        id TEXT PRIMARY KEY,
-        datasetId TEXT NOT NULL,
-        filePath TEXT NOT NULL,
-        type TEXT NOT NULL,
-        uploadDate TEXT NOT NULL,
-        owner TEXT NOT NULL,
-        lastAnnotator TEXT,
-        lastAnnotatedDate TEXT,
-        numberOfFrames INTEGER,
-        FOREIGN KEY (datasetId) REFERENCES datasets(id)
-      )
-    ''');
-    print("✅ 'media_items' table created successfully.");
-  } else {
-    print("ℹ️ 'media_items' table already exists. Checking for missing columns...");
-
-    // Add new columns if they don't exist
-    final columnCheck = await db.rawQuery("PRAGMA table_info(media_items)");
-    final existingColumns = columnCheck.map((row) => row['name']).toSet();
-
-    Future<void> tryAddColumn(String name, String type) async {
-      if (!existingColumns.contains(name)) {
-        print("➕ Adding missing column '$name'...");
-        await db.execute("ALTER TABLE media_items ADD COLUMN $name $type");
-      }
-    }
-
-    await tryAddColumn('uploadDate', 'TEXT');
-    await tryAddColumn('owner', 'TEXT');
-    await tryAddColumn('lastAnnotator', 'TEXT');
-    await tryAddColumn('lastAnnotatedDate', 'TEXT');
-    await tryAddColumn('numberOfFrames', 'INTEGER');
-
-    print("✅ Column structure ensured.");
-
-    // Set default values for old rows
-    print("🔄 Updating old media_items entries with default values...");
-    await db.execute('''
-      UPDATE media_items SET
-        uploadDate = COALESCE(uploadDate, datetime('now')),
-        owner = COALESCE(owner, 'system')
-    ''');
-
-    print("✅ Existing media items updated with default values.");
-  }
-}
-
 }

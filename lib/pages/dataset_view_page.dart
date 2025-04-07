@@ -196,9 +196,6 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
       case MediaSortOption.oldestFirst:
         sortedMedia.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
         break;
-      default:
-        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
-        break;
     }
 
     setState(() {

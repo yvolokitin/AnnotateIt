@@ -1,7 +1,9 @@
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
+// import '../pages/project_details_screen.dart';
+
 import 'package:flutter/material.dart';
 import '../models/project.dart';
-import '../pages/project_details_screen.dart';
+import "../utils/date_utils.dart";
 
 import 'labels_list.dart';
 import 'project_icon.dart';
@@ -12,17 +14,17 @@ class ProjectTile extends StatefulWidget {
   final VoidCallback? onTap; // Callback on update list of projects
 
   ProjectTile({
+    super.key,
     required this.project,
     required this.onMorePressed,
     this.onTap,
-    super.key,
   });
 
   @override
-  _ProjectTileState createState() => _ProjectTileState();
+  ProjectTileState createState() => ProjectTileState();
 }
 
-class _ProjectTileState extends State<ProjectTile> {
+class ProjectTileState extends State<ProjectTile> {
   bool _isHovered = false;
 
   @override
@@ -112,7 +114,7 @@ class _ProjectTileState extends State<ProjectTile> {
 
                         // Last update
                         Text(
-                          "Updated: ${_formatDate(widget.project.lastUpdated)} / Created: ${_formatDate(widget.project.creationDate)}",
+                          "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
                           style: TextStyle(color: Colors.white60, fontSize: 18),
                         ),
                         SizedBox(height: 8),
@@ -148,19 +150,5 @@ class _ProjectTileState extends State<ProjectTile> {
         ),
       ),
     );
-  }
-
-  // Date Formatter
-  String _formatDate(DateTime date) {
-    return "${date.day} ${_getMonthName(date.month)} ${date.year} | ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-  }
-
-  // Convert month number to name
-  String _getMonthName(int month) {
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return months[month - 1];
   }
 }

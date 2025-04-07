@@ -10,10 +10,10 @@ class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
   @override
-  _AccountPageState createState() => _AccountPageState();
+  AccountPageState createState() => AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> with SingleTickerProviderStateMixin {
+class AccountPageState extends State<AccountPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   User? _user;
   bool _loading = true;

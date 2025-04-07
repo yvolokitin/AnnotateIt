@@ -47,9 +47,11 @@ class _LabelSelectionDialogState extends State<LabelSelectionDialog> {
       lastUpdated: DateTime.now(),
       labels: _labels,
       labelColors: _labelColors,
+      defaultDatasetId: '',
+      ownerId: 1,
     );
 
-    await ProjectDatabase.instance.insertProject(newProject);
+    await ProjectDatabase.instance.createProject(newProject);
     Navigator.pop(context); // Close window
   }
 

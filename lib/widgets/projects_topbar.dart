@@ -6,6 +6,7 @@ class ProjectsTopBar extends StatelessWidget {
   final VoidCallback onCreateProject;
 
   const ProjectsTopBar({
+    super.key,
     required this.onSearchPressed,
     required this.onSortSelected,
     required this.onCreateProject,

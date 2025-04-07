@@ -27,7 +27,7 @@ class _EditProjectNameState extends State<EditProjectName> {
     super.dispose();
   }
 
-  // 📌 Update Project Name in Database
+  // Update Project Name in Database
   Future<void> _saveChanges() async {
     if (_nameController.text.isEmpty) return;
 
@@ -40,6 +40,7 @@ class _EditProjectNameState extends State<EditProjectName> {
       lastUpdated: widget.project.lastUpdated,
       labels: widget.project.labels,
       labelColors: widget.project.labelColors,
+      ownerId: widget.project.ownerId,
     );
 
     await ProjectDatabase.instance.updateProjectName(updatedProject);

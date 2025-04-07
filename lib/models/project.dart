@@ -8,6 +8,7 @@ class Project {
   final List<String> labels;
   final List<String> labelColors;
   final String? defaultDatasetId; // link to default dataset
+  final int ownerId;
 
   Project({
     this.id,
@@ -19,6 +20,7 @@ class Project {
     required this.labels,
     required this.labelColors,
     this.defaultDatasetId,
+    required this.ownerId,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,6 +34,7 @@ class Project {
       'labels': labels.join(','), // Store as comma-separated string
       'labelColors': labelColors.join(','), // Store as comma-separated string hex values (#FF5733,#33FF57,...)
       'defaultDatasetId': defaultDatasetId,
+      'ownerId': ownerId,
     };
   }
 
@@ -48,6 +51,7 @@ class Project {
           ? List.filled((map['labels'] as String).split(',').length, "#FFFFFF") // Default white
           : (map['labelColors'] as String).split(','),
       defaultDatasetId: map['defaultDatasetId'],
+      ownerId: map['ownerId'],
     );
   }
 
@@ -62,6 +66,7 @@ class Project {
     List<String>? labels,
     List<String>? labelColors,
     String? defaultDatasetId,
+    int? ownerId,
   }) {
     return Project(
       id: id ?? this.id,
@@ -73,6 +78,7 @@ class Project {
       labels: labels ?? this.labels,
       labelColors: labelColors ?? this.labelColors,
       defaultDatasetId: defaultDatasetId ?? this.defaultDatasetId,
+      ownerId: ownerId ?? this.ownerId,
     );
   }
 

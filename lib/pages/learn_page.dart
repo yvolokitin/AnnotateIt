@@ -17,7 +17,7 @@ class LearnWidget extends StatelessWidget {
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: () async {
-              await ProjectDatabase.instance.runManualSQLUpdate();
+              // await ProjectDatabase.instance.runManualSQLUpdate();
               print("Database updated manually!");
             },
             child: Text("Update DB"),

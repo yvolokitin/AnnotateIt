@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-// import 'edit_labels_dialog.dart'; // Previous step
-import 'label_selection_dialog.dart'; // Next step
+
+import '../models/project.dart';
+
+import 'edit_labels_dialog.dart';
+import 'create_project_dialog_task.dart';
 
 class CreateProjectDialog extends StatefulWidget {
+  // both parameters are optional and needed only if user pressed back from Label creation step
+  final String? initialName;
+  final String? initialType;
+  
+  const CreateProjectDialog({this.initialName, this.initialType});
+
   @override
   _CreateProjectDialogState createState() => _CreateProjectDialogState();
 }
@@ -15,7 +24,12 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this); // 5 tabs for project types
+
+    _nameController.text = widget.initialName ?? '';
+    _selectedTaskType = widget.initialType ?? 'Detection bounding box';
+  
+      // 5 tabs for project types: Detection, Segmentation, Classification, Anomaly, Chained tasks
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -27,16 +41,25 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
 
   @override
   Widget build(BuildContext context) {
-    double dialogWidth = MediaQuery.of(context).size.width * 0.9; // ✅ 80% of window width
-    double dialogHeight = MediaQuery.of(context).size.height * 0.9; // ✅ 80% of window height
+    double dialogWidth, dialogHeight;
+    final bool isLargeScreen = MediaQuery.of(context).size.width >= 1600;
+    final dialogPadding = isLargeScreen ? EdgeInsets.all(60) : EdgeInsets.all(12);
+
+    if (isLargeScreen)  {
+      dialogWidth = MediaQuery.of(context).size.width * 0.9;
+      dialogHeight = MediaQuery.of(context).size.height * 0.9;
+    } else {
+      dialogWidth = MediaQuery.of(context).size.width;
+      dialogHeight = MediaQuery.of(context).size.height;
+    }
 
     return Dialog(
-      backgroundColor: Colors.grey[900], // Dark background
+      backgroundColor: Colors.grey[850],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: dialogWidth,
         height: dialogHeight,
-        padding: EdgeInsets.all(60),
+        padding: dialogPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -54,20 +77,23 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
             ),
             SizedBox(height: 26),
 
-            // 📌 Project Name Input Field
+            // Project Name Input Field
             TextField(
               controller: _nameController,
               decoration: InputDecoration(labelText: "Project Name", filled: true, fillColor: Colors.grey[850]),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 20),
             ),
             SizedBox(height: 26),
 
-            // 📌 Tabs for Project Types
+            // Tabs for Project Types
             TabBar(
               controller: _tabController,
-              indicatorColor: Colors.blueAccent,
+              indicatorColor: Colors.red,
+              indicatorWeight: 3.0,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white70,
+              labelStyle: const TextStyle(fontSize: 24),
+              unselectedLabelStyle: const TextStyle(fontSize: 24),
               tabs: [
                 Tab(text: "Detection"),
                 Tab(text: "Segmentation"),
@@ -80,13 +106,15 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
 
             // 📌 Scrollable Content Area
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // 📌 Task Type Selection Cards
-                    _buildTaskTypeSelection(),
-                  ],
-                ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildDetectionTaskTypeSelection(),
+                  _buildSegmentationTaskTypeSelection(),
+                  _buildClassificationTaskTypeSelection(),
+                  _buildAnomalyTaskTypeSelection(),
+                  _buildChainedTasksSelection(),
+                ],
               ),
             ),
 
@@ -104,7 +132,7 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text("Back", style: TextStyle(color: Colors.white70)),
+                        child: Text("<- Back", style: TextStyle(color: Colors.white70)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -112,18 +140,30 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
                           Navigator.pop(context); // Close current step
                           showDialog(
                             context: context,
-                            builder: (context) => LabelSelectionDialog(
-                              projectName: _nameController.text,
-                              projectType: _selectedTaskType,
+                            builder: (context) => EditLabelsDialog(
+                              project: Project(
+                                id: null,
+                                name: _nameController.text,
+                                type: _selectedTaskType,
+                                icon: 'assets/images/default_project_image.svg',
+                                creationDate: DateTime.now(),
+                                lastUpdated: DateTime.now(),
+                                labels: [],
+                                labelColors: [],
+                                defaultDatasetId: '',
+                                ownerId: 1,
+                              ),
+                              onLabelsUpdated: () {},
+                              isFromCreationFlow: true,
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text("Next", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        child: Text("Next -> ", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -136,71 +176,98 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
     );
   }
 
-  // 📌 Task Type Selection Cards
-  Widget _buildTaskTypeSelection() {
-    return Row(
-      children: [
-        Expanded(child: _buildTaskOption("Detection bounding box", "Draw a rectangle around an object in an image.", true)),
-        SizedBox(width: 16),
-        Expanded(child: _buildTaskOption("Detection oriented", "Draw and enclose an object within a minimal rectangle.", false)),
+  Widget _buildDetectionTaskTypeSelection() {
+    return TaskTypeGrid(
+      selectedTaskType: _selectedTaskType,
+      onTaskSelected: (value) => setState(() => _selectedTaskType = value),
+      tasks: [
+        {
+          'title': 'Detection bounding box',
+          'description': 'Draw a rectangle around an object in an image.',
+          'image': 'assets/images/detection_bounding_box.jpg',
+        },
+        {
+          'title': 'Detection oriented',
+          'description': 'Draw and enclose an object within a minimal rectangle.',
+          'image': 'assets/images/detection_oriented.jpg',
+        },
       ],
     );
   }
 
-  // 📌 Single Selection Card
-  Widget _buildTaskOption(String title, String description, bool isLeft) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTaskType = title;
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[850], // Darker box
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: _selectedTaskType == title ? Colors.blueAccent : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        padding: EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Image.asset(
-              isLeft ? 'assets/images/detection_bounding_box.png' : 'assets/images/detection_oriented.png', // Example images
-              height: 100,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Radio<String>(
-                  value: title,
-                  groupValue: _selectedTaskType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTaskType = value!;
-                    });
-                  },
-                  activeColor: Colors.blueAccent,
-                ),
-                SizedBox(width: 4),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                      SizedBox(height: 4),
-                      Text(description, style: TextStyle(fontSize: 12, color: Colors.white70)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+  Widget _buildSegmentationTaskTypeSelection() {
+    return TaskTypeGrid(
+      selectedTaskType: _selectedTaskType,
+      onTaskSelected: (value) => setState(() => _selectedTaskType = value),
+      tasks: [
+        {
+          'title': 'Instance Segmentation',
+          'description': 'Detect and distinguish each individual object based on its unique features.',
+          'image': 'assets/images/instance_segmentation.jpg',
+        },
+        {
+          'title': 'Semantic Segmentation',
+          'description': 'Detect and classify all similar objects as a single entity.',
+          'image': 'assets/images/semantic_segmentation.jpg',
+        },
+      ]
+    );
+  }
+
+  Widget _buildClassificationTaskTypeSelection() {
+    return TaskTypeGrid(
+      selectedTaskType: _selectedTaskType,
+      onTaskSelected: (value) => setState(() => _selectedTaskType = value),
+      tasks: [
+        {
+          'title': 'Classification single label',
+          'description': 'Assign a label out of mutually exclusive labels.',
+          'image': 'assets/images/classification_single.png',
+        },
+        {
+          'title': 'Classification multi label',
+          'description': 'Assign label(s) out of non-mutually exclusive labels.',
+          'image': 'assets/images/classification_multi.png',
+        },
+        {
+          'title': 'Classification hierarchical',
+          'description': 'Assign label(s) with a hierarchical label structure.',
+          'image': 'assets/images/classification_hierarchical.png',
+        },
+      ]
+    );
+  }
+
+  Widget _buildAnomalyTaskTypeSelection() {
+    return TaskTypeGrid(
+      selectedTaskType: _selectedTaskType,
+      onTaskSelected: (value) => setState(() => _selectedTaskType = value),
+      tasks: [
+        {
+          'title': 'Anomaly Detection',
+          'description': 'Categorize images as normal or anomalous.',
+          'image': 'assets/images/anomaly_detection.png',
+        },
+      ]
+    );
+  }
+
+  Widget _buildChainedTasksSelection() {
+    return TaskTypeGrid(
+      selectedTaskType: _selectedTaskType,
+      onTaskSelected: (value) => setState(() => _selectedTaskType = value),
+      tasks: [
+        {
+          'title': 'Detection -> Classification',
+          'description': 'Detect objects using bounding boxes followed by classification.',
+          'image': 'assets/images/detection_to_classification.png',
+        },
+        {
+          'title': 'Detection -> Segmentation',
+          'description': 'Detect objects using bounding boxes followed by segmentation.',
+          'image': 'assets/images/detection_to_segmentation.png',
+        },
+      ]
     );
   }
 }

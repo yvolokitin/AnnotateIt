@@ -137,6 +137,7 @@ class AppDrawer extends StatelessWidget {
   final Function(int) onItemSelected;
 
   const AppDrawer({
+    super.key,
     this.fullMode = false,
     required this.selectedIndex,
     required this.onItemSelected,
@@ -242,8 +243,9 @@ class DrawerItem extends StatelessWidget {
     // Base red color
     final Color baseRed = Colors.red;
     // Compute a 20% lighter color for the background
-    final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
-    
+    // final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
+    final Color lighterRed = baseRed.withAlpha(26); // 10% of 255
+
     return Stack(
       children: [
         Container(

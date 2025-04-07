@@ -49,6 +49,7 @@ dependencies:
   video_player_web: ^2.3.4
   file_selector: ^1.0.3
   image_picker: ^1.1.2
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -78,8 +79,11 @@ flutter:
   assets:
      - assets/images/default_project_image.svg
      - assets/images/media_upload.svg
-  #   - images/a_dot_ham.jpeg
-
+     - assets/images/detection_bounding_box.jpg
+     - assets/images/detection_oriented.jpg
+     - assets/images/instance_segmentation.jpg
+     - assets/images/semantic_segmentation.jpg
+  
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

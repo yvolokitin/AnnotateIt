@@ -14,10 +14,12 @@ class ProjectDetailsScreen extends StatefulWidget {
   const ProjectDetailsScreen(this.project, {super.key});
 
   @override
-    _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
-  }
+  ProjectDetailsScreenState createState() => ProjectDetailsScreenState();
+  // _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
+}
 
-class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {  
+class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
+//class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {  
   @override
   void initState() {
     super.initState();

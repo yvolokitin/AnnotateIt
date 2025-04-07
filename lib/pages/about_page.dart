@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 
 // About Widget
 class AboutWidget extends StatelessWidget {
+  const AboutWidget({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Container(
