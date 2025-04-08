@@ -34,12 +34,11 @@ class _EditProjectNameState extends State<EditProjectName> {
     Project updatedProject = Project(
       id: widget.project.id,
       name: _nameController.text,
+      description: widget.project.description,
       type: widget.project.type,
       icon: widget.project.icon,
       creationDate: widget.project.creationDate,
       lastUpdated: widget.project.lastUpdated,
-      labels: widget.project.labels,
-      labelColors: widget.project.labelColors,
       ownerId: widget.project.ownerId,
     );
 

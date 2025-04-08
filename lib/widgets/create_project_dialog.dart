@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/project.dart';
+import '../models/label.dart';
 
 import 'edit_labels_dialog.dart';
 import 'create_project_dialog_task.dart';
@@ -9,14 +10,20 @@ class CreateProjectDialog extends StatefulWidget {
   // both parameters are optional and needed only if user pressed back from Label creation step
   final String? initialName;
   final String? initialType;
-  
-  const CreateProjectDialog({this.initialName, this.initialType});
+  final List<Label>? initialLabels;
+
+  const CreateProjectDialog({
+    super.key,
+    this.initialName,
+    this.initialType,
+    this.initialLabels,
+  });
 
   @override
-  _CreateProjectDialogState createState() => _CreateProjectDialogState();
+  CreateProjectDialogState createState() => CreateProjectDialogState();
 }
 
-class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTickerProviderStateMixin {
+class CreateProjectDialogState extends State<CreateProjectDialog> with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
   late TabController _tabController;
   String _selectedTaskType = "Detection bounding box"; // Default selection
@@ -136,27 +143,28 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> with SingleTi
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Close current step
-                          showDialog(
+                        onPressed: () async {
+                          final result = await showDialog<String>(
                             context: context,
                             builder: (context) => EditLabelsDialog(
                               project: Project(
                                 id: null,
                                 name: _nameController.text,
+                                description: '',
                                 type: _selectedTaskType,
                                 icon: 'assets/images/default_project_image.svg',
                                 creationDate: DateTime.now(),
                                 lastUpdated: DateTime.now(),
-                                labels: [],
-                                labelColors: [],
                                 defaultDatasetId: '',
                                 ownerId: 1,
                               ),
                               onLabelsUpdated: () {},
                               isFromCreationFlow: true,
+                              initialLabels: widget.initialLabels,
                             ),
                           );
+                          if (!mounted) return;
+                          Navigator.pop(context, result);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,

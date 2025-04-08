@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "../data/project_database.dart";
+import "../data/labels_database.dart";
 import "../models/project.dart";
 
 import "../widgets/project_tile.dart";
@@ -23,6 +24,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   
   // Default sort option
   String _sortOption = "Last Updated";
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -30,12 +32,29 @@ class _ProjectsPageState extends State<ProjectsPage> {
     _loadProjects();
   }
 
+  // preload labels and attach them to each project (as an extra field — not stored in DB, just in memory).
   Future<void> _loadProjects() async {
+    setState(() {
+      _isLoading = true;
+    });
+  
+    print("[_loadProjects] Fetching project list...");
     List<Project> projects = await ProjectDatabase.instance.fetchProjects();
+
+    print("[_loadProjects] Found ${projects.length} projects. Loading labels...");
+    // Load labels for each project
+    for (final project in projects) {
+      final labels = await LabelsDatabase.instance.fetchLabelsByProject(project.id!);
+      project.labels = labels; // attach in-memory only
+    }
+  
     setState(() {
       _allProjects = projects;
       _filteredProjects = _applySearchAndSort(projects);
+      _isLoading = false;
     });
+
+    print("[_loadProjects] Done");
   }
 
   // Function to Edit a Project (Add Edit Logic)
@@ -115,7 +134,18 @@ class _ProjectsPageState extends State<ProjectsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: _isLoading
+        ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(height: 12),
+              Text("Loading projects...", style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        )
+        : Column(
         children: [
           // 📌 Row with Create Button, Search Bar, and Sort Icon
           ProjectsTopBar(
@@ -123,12 +153,19 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 print("Project Search button pressed, not implemented yet");
               },
               onSortSelected: _onSortSelected,
-              onCreateProject: () {
-                print("Started a new project dialog creation");
-                showDialog(
+              onCreateProject: () async {
+                print("[ProjectsPage] Started a new project dialog creation");
+                
+                final result = await showDialog<String>(
                   context: context,
                   builder: (context) => CreateProjectDialog(),
                 );
+
+                print('[ProjectsPage] Received result: : $result');
+                // refresh project list
+                if (result == 'refresh') {
+                  _loadProjects();
+                }
               },
           ),
 
@@ -146,15 +183,16 @@ class _ProjectsPageState extends State<ProjectsPage> {
                           _showProjectOptions(context, project);
                         },
                         onTap: () async {
-                          final result = await Navigator.push(
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProjectDetailsScreen(project),
                             ),
                           );
-                          if (result == true) {
-                            _loadProjects();
-                          }
+                          
+                          // always reload after returning
+                          print("📦 Returned from ProjectDetailsScreen — reloading project list");
+                          _loadProjects();
                         },
                       );
                     },
@@ -164,6 +202,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
       ),
     );
   }
+
+  // Widget _buildProjectList() {  }
 
   // Function to Show Edit/Delete Options
   void _showProjectOptions(BuildContext context, Project project) {

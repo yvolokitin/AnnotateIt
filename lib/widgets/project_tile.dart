@@ -126,10 +126,7 @@ class ProjectTileState extends State<ProjectTile> {
                         ),
 
                         // to show Labels Section with colored tags in
-                        LabelList(
-                          labels: widget.project.labels.toList(),
-                          labelColors: widget.project.labelColors.toList(),
-                        ),
+                        LabelList(labels: widget.project.labels ?? []),
                       ],
                     ), // Column
                   ), // Padding

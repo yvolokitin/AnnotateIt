@@ -74,7 +74,7 @@ class DatasetUploadButtons extends StatelessWidget {
           onFileProgress?.call(file.name, i + 1, total);
         }
 
-        await ProjectDatabase.instance.updateProjectlastUpdated(project_id);
+        await ProjectDatabase.instance.updateProjectLastUpdated(project_id);
         onUploadingChanged(false); onUploadSuccess();
 
       } else {

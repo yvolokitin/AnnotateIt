@@ -1,14 +1,13 @@
-// import 'dart:math';
-// import 'package:uuid/uuid.dart';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:logging/logging.dart';
+
+import 'package:uuid/uuid.dart';
 import 'package:path/path.dart';
 
 import '../models/project.dart';
 import '../models/dataset.dart';
 
- // import 'dataset_database.dart';
+const String kDatabaseFileName = 'projects.db';
 
 class ProjectDatabase {
   static final ProjectDatabase instance = ProjectDatabase._init();
@@ -17,11 +16,12 @@ class ProjectDatabase {
   ProjectDatabase._init();
 
   final _log = Logger('ProjectDatabase');
+  final uuid = Uuid();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
     
-    _database = await _initDB('projects.db');
+    _database = await _initDB(kDatabaseFileName);
     return _database!;
   }
 
@@ -33,15 +33,48 @@ class ProjectDatabase {
 
   Future<void> _createProjectDBTables(Database db, int version) async {
     await db.execute('''
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firstName TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        email TEXT NOT NULL,
+        iconPath TEXT,
+        datasetFolder TEXT,
+        thumbnailFolder TEXT,
+        themeMode TEXT NOT NULL,
+        language TEXT NOT NULL,
+        autoSave INTEGER NOT NULL,
+        showTips INTEGER NOT NULL,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    ''');
+
+    final now = DateTime.now().toIso8601String();
+    await db.insert('users', {
+      'firstName': 'Captain',
+      'lastName': 'Annotator',
+      'email': 'captain@labelship.local',
+      'iconPath': '',
+      'datasetFolder': '/storage/emulated/0/AnnotationApp/datasets',
+      'thumbnailFolder': '/storage/emulated/0/AnnotationApp/thumbnails',
+      'themeMode': 'dark',
+      'language': 'en',
+      'autoSave': 1,
+      'showTips': 1,
+      'createdAt': now,
+      'updatedAt': now,
+    });
+
+    await db.execute('''
       CREATE TABLE projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        description TEXT,
         type TEXT NOT NULL,
         icon TEXT NOT NULL,
         creationDate TEXT NOT NULL,
         lastUpdated TEXT NOT NULL,
-        labels TEXT NOT NULL,
-        labelColors TEXT NOT NULL,
         defaultDatasetId TEXT,
         ownerId INTEGER NOT NULL,
         FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
@@ -55,7 +88,7 @@ class ProjectDatabase {
         name TEXT NOT NULL,
         description TEXT,
         createdAt TEXT NOT NULL,
-        FOREIGN KEY (projectId) REFERENCES projects(id)
+        FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE CASCADE
       )
     ''');
 
@@ -73,49 +106,83 @@ class ProjectDatabase {
         FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE
       );
     ''');
+
+    // Labels table (per project)
+    await db.execute('''
+      CREATE TABLE labels (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        color TEXT,
+        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+      );
+    ''');
+    
+    // Annotations table
+    await db.execute('''
+      CREATE TABLE annotations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        media_item_id INTEGER NOT NULL,
+        label_id INTEGER NOT NULL,
+        x REAL NOT NULL,
+        y REAL NOT NULL,
+        width REAL NOT NULL,
+        height REAL NOT NULL,
+        confidence REAL,
+        annotator TEXT,
+        created_at TEXT,
+        FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE,
+        FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE
+      );
+    ''');
   }
 
   Future<int> createProject(Project project) async {
     final db = await database;
 
-    // Fallback to 'Project' if name is null or empty
-    final String projectName = (project.name.trim().isEmpty) ? 'Project' : project.name.trim();
+    // Fallback name if empty
+    final String projectName = (project.name.trim().isEmpty)
+      ? 'Project'
+      : project.name.trim();
 
-    // Step 1: Insert project without defaultDatasetId
-    int projectId = await db.insert('projects', {
-      'name': projectName,
-      'type': project.type,
-      'icon': project.icon,
-      'creationDate': project.creationDate.toIso8601String(),
-      'lastUpdated': project.creationDate.toIso8601String(),
-      'labels': project.labels.join(','), // or jsonEncode()
-      'labelColors': project.labelColors.join(','), // or jsonEncode()
-      'ownerId': project.ownerId,
+    final now = DateTime.now().toIso8601String();
+
+    // Start a DB transaction
+    return await db.transaction<int>((txn) async {
+      // Step 1: Insert project without defaultDatasetId
+      final projectId = await txn.insert('projects', {
+        'name': projectName,
+        'type': project.type,
+        'icon': project.icon,
+        'creationDate': now,
+        'lastUpdated': now,
+        'ownerId': project.ownerId,
+      });
+
+      // Step 2: Create the default dataset
+      final dataset = Dataset(
+        id: uuid.v4(),
+        projectId: projectId,
+        name: 'Default Dataset',
+        description: 'Default dataset for $projectName',
+        createdAt: DateTime.now(),
+      );
+
+      await txn.insert('datasets', dataset.toMap());
+
+      // Step 3: Update the project with the defaultDatasetId
+      await txn.update(
+        'projects',
+        {
+          'defaultDatasetId': dataset.id,
+          'lastUpdated': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+
+      return projectId;
     });
-
-    // Step 2: Create the default dataset
-    final dataset = Dataset(
-      id: uuid.v4(),
-      projectId: projectId,
-      name: 'Default Dataset',
-      description: 'Default dataset for ${project.name}',
-      createdAt: DateTime.now(),
-    );
-
-    await db.insert('datasets', dataset.toMap());
-
-    // Step 3: Update the project with the defaultDatasetId
-    await db.update(
-      'projects',
-      {
-        'defaultDatasetId': dataset.id,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [projectId],
-    );
-
-    return projectId;
   }
 
   Future<int> updateProjectName(Project project) async {
@@ -204,7 +271,7 @@ class ProjectDatabase {
     return dataset;
   }
 
-  Future<void> updateProjectlastUpdated(int projectId) async {
+  Future<void> updateProjectLastUpdated(int projectId) async {
     final db = await database;
 
     await db.update(
@@ -222,21 +289,6 @@ class ProjectDatabase {
       'projects',
       {
         'icon': new_project_icon,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [projectId],
-    );
-  }
-
-  Future<int> updateProjectLabels(int projectId, List<String> newLabels, List<String> newColors) async {
-    final db = await database;
-
-    return await db.update(
-      'projects',
-      {
-        'labels': newLabels.join(','),
-        'labelColors': newColors.join(','),
         'lastUpdated': DateTime.now().toIso8601String(),
       },
       where: 'id = ?',

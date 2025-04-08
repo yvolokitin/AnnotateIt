@@ -15,11 +15,9 @@ class ProjectDetailsScreen extends StatefulWidget {
 
   @override
   ProjectDetailsScreenState createState() => ProjectDetailsScreenState();
-  // _ProjectDetailsScreenState createState() => _ProjectDetailsScreenState();
 }
 
 class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
-//class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {  
   @override
   void initState() {
     super.initState();
@@ -54,7 +52,8 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 HoverIconButton(
                   icon: Icons.arrow_back,
                   margin: EdgeInsets.only(left: 20.0),
-                  onPressed: () => Navigator.pop(context, true),
+                  // onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => Navigator.pop(context, 'refresh'),
                 ),
 
                 HoverIconButton(
