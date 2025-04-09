@@ -4,11 +4,20 @@ import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
 import '../models/media_item.dart';
+import '../pages/image_annotator_page.dart';
+
 
 class ImageTile extends StatefulWidget {
   final MediaItem media;
-
-  const ImageTile({super.key, required this.media});
+  final List<MediaItem> mediaItems;
+  final int index;
+  
+  const ImageTile({
+    super.key,
+    required this.media,
+    required this.mediaItems,
+    required this.index,
+  });
 
   @override
   State<ImageTile> createState() => _ImageTileState();
@@ -50,11 +59,24 @@ class _ImageTileState extends State<ImageTile> {
                 duration: const Duration(milliseconds: 200),
                 transform: transform,
                 transformAlignment: Alignment.center,
-                child: Image.file(
-                  file,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ImageAnnotatorPage( // ImagePage(
+                          mediaItems: widget.mediaItems,
+                          initialIndex: widget.index,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Image.file(
+                    file,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
                 ),
               ),
               // left-top select icon

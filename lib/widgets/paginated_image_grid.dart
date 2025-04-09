@@ -47,7 +47,11 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
             itemBuilder: (context, index) {
               final media = pageItems[index];
               if (media.type == MediaType.image) {
-                return ImageTile(media: media);
+                return ImageTile(
+                  media: media,
+                  mediaItems: mediaItems,
+                  index: index,
+                );
               } else {
                 return MediaTile(media: media);
               }
