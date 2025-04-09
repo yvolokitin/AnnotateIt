@@ -15,8 +15,9 @@ class ImageTile extends StatefulWidget {
 }
 
 class _ImageTileState extends State<ImageTile> {
+  bool _isSelected = false;
   bool _hovered = false;
-
+  
   @override
   Widget build(BuildContext context) {
     final file = File(widget.media.filePath);
@@ -29,11 +30,19 @@ class _ImageTileState extends State<ImageTile> {
     if (_hovered) transform.scale(1.15);
 
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: Container(
         width: 140,
         height: 140,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: _isSelected ? Colors.redAccent : Colors.transparent,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: ClipRRect(
           child: Stack(
             children: [
@@ -48,6 +57,38 @@ class _ImageTileState extends State<ImageTile> {
                   height: double.infinity,
                 ),
               ),
+              // left-top select icon
+              Positioned(
+                top: 4,
+                left: 4,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: _hovered || _isSelected ? 1.0 : 0.0,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isSelected = !_isSelected;
+                      });
+                    },
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.white30),
+                      ),
+                      child: Icon(
+                        _isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // right-top 3-dot menu
               Positioned(
                 top: 4,
                 right: 4,
