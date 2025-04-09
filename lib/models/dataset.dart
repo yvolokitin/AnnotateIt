@@ -1,13 +1,6 @@
-import 'package:uuid/uuid.dart';
-
-final uuid = Uuid();
-
 class Dataset {
   final String id;
-  
-  // Foreign key to Project
   final int projectId;
-
   final String name;
   final String description;
   final DateTime createdAt;
@@ -38,5 +31,26 @@ class Dataset {
       description: map['description'],
       createdAt: DateTime.parse(map['createdAt']),
     );
+  }
+
+  Dataset copyWith({
+    String? id,
+    int? projectId,
+    String? name,
+    String? description,
+    DateTime? createdAt,
+  }) {
+    return Dataset(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Dataset(id: $id, projectId: $projectId, name: $name, description: $description, createdAt: $createdAt)';
   }
 }

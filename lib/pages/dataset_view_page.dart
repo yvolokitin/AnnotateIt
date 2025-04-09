@@ -6,6 +6,7 @@ import '../models/dataset.dart';
 import '../models/media_item.dart';
 
 import '../data/dataset_database.dart';
+import '../data/project_database.dart';
 
 import '../widgets/no_media_dialog.dart';
 import '../widgets/dataset_upload_buttons.dart';
@@ -19,14 +20,14 @@ enum MediaSortOption {
 }
 
 class DatasetViewPage extends StatefulWidget {
-  final Project project;
-  const DatasetViewPage(this.project, {super.key});
+  Project project;
+  DatasetViewPage(this.project, {super.key});
 
   @override
-  _DatasetViewPageState createState() => _DatasetViewPageState();
+  DatasetViewPageState createState() => DatasetViewPageState();
 }
 
-class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
+class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
   List<Dataset> datasets = [];
   Map<String, List<MediaItem>> mediaByDataset = {};
   TabController? _tabController;
@@ -37,7 +38,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
   String? _uploadingFile;
   int _currentFileIndex = 0;
-  int _file_count = 0;
+  int _fileCount = 0;
   double _uploadProgress = 0.0;
 
   // needed to show global spinner before datasets + media are fully ready
@@ -200,8 +201,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
 
     setState(() {
       mediaByDataset[dataset.id] = sortedMedia;
-      // mediaByDataset[dataset.id] = media;
-      _file_count = media.length;
+      _fileCount = media.length;
       _datasetTabCache.remove(dataset.id);
     });
 
@@ -236,6 +236,86 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
     }
   }
 
+  void _renameDataset(Dataset dataset) async {
+    final controller = TextEditingController(text: dataset.name);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Rename Dataset'),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: 'New name'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: Text('Rename')),
+        ],
+      ),
+    );
+
+    if (result != null && result.trim().isNotEmpty) {
+      final updated = dataset.copyWith(name: result.trim());
+      await DatasetDatabase.instance.updateDataset(updated);
+      await ProjectDatabase.instance.updateProjectLastUpdated(updated.projectId);
+
+      setState(() {
+        final index = datasets.indexWhere((d) => d.id == dataset.id);
+        datasets[index] = updated;
+        _datasetTabCache.remove(updated.id);
+      });
+    }
+  }
+
+  void _setDefaultDataset(Dataset dataset) async {
+    await ProjectDatabase.instance.updateDefaultDataset(projectId: widget.project.id!, datasetId: dataset.id);
+    await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
+
+    setState(() {
+      widget.project = widget.project.copyWith(defaultDatasetId: dataset.id);
+
+      datasets.removeWhere((d) => d.id == dataset.id);
+      datasets.insert(0, dataset);
+
+      _rebuildTabController();
+      _tabController!.index = 0;
+
+      _datasetTabCache.clear();
+    });
+    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Default dataset set to '${dataset.name}'")));
+  }
+
+  void _deleteDataset(Dataset dataset) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Dataset'),
+        content: Text("Are you sure you want to delete '${dataset.name}'?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Delete')),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await DatasetDatabase.instance.deleteDataset(dataset.id);
+      await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
+
+      setState(() {
+        datasets.removeWhere((d) => d.id == dataset.id);
+        mediaByDataset.remove(dataset.id);
+        _datasetTabCache.remove(dataset.id);
+      });
+
+      _rebuildTabController();
+      if (_tabController!.index >= datasets.length) {
+        _tabController!.index = datasets.length - 1;
+      }
+
+      _loadMediaForDataset(datasets[_tabController!.index]);
+    }
+  }
+
   @override
   void dispose() {
     _tabController?.removeListener(_handleTabChange);
@@ -257,7 +337,61 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
             TabBar(
               controller: _tabController,
               isScrollable: true,
-              tabs: datasets.map((ds) => Tab(text: ds.name)).toList(),
+              tabs: List.generate(datasets.length, (i) {
+                final dataset = datasets[i];
+                final isSelected = _tabController!.index == i;
+                final isDefault = dataset.id == widget.project.defaultDatasetId;
+                final isAddTab = dataset.id == 'add_new_tab';
+
+                return Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        dataset.name,
+                        style: TextStyle(
+                          fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      if (!isAddTab && isSelected)
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'rename':
+                                _renameDataset(dataset);
+                                break;
+                              case 'set_default':
+                                _setDefaultDataset(dataset);
+                                break;
+                              case 'delete':
+                                _deleteDataset(dataset);
+                                break;
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'rename',
+                              child: Text('Rename'),
+                            ),
+                            if (!isDefault)
+                              const PopupMenuItem(
+                                value: 'set_default',
+                                child: Text('Set as Default'),
+                              ),
+                              if (!isDefault)
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Delete'),
+                                ),
+                            ],
+                          icon: Icon(Icons.more_vert, size: 18),
+                        ),
+                    ],
+                  ),
+                );
+              }),
+              indicatorColor: Colors.redAccent,
               labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.white60,
             ),  
@@ -280,7 +414,7 @@ class _DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSt
                           project_id: widget.project.id!,
                           project_icon: widget.project.icon,
                           dataset_id: dataset.id,
-                          file_count: _file_count,
+                          file_count: _fileCount,
                           isUploading: _isUploading,
                           onUploadingChanged: _handleUploadingChanged,
                           onUploadSuccess: _handleUploadSuccess,

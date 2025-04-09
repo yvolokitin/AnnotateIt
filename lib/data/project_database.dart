@@ -218,6 +218,22 @@ class ProjectDatabase {
     );
   }
 
+  Future<void> updateDefaultDataset({required int projectId, required String datasetId, }) async {
+    final db = await database;
+
+    await db.update(
+      'projects',
+      {
+        'defaultDatasetId': datasetId,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    _log.info('Set dataset $datasetId as default for project $projectId');
+  }
+
   Future<Dataset> createDatasetForProject({required int projectId, String name = 'New Dataset', String description = '', bool isDefault = false,}) async {
     final db = await database;
 

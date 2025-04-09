@@ -73,6 +73,37 @@ class DatasetDatabase {
     return dataset;
   }
 
+  Future<void> updateDataset(Dataset dataset) async {
+    final db = await database;
+
+    await db.update(
+      'datasets',
+      dataset.toMap(),
+      where: 'id = ?',
+      whereArgs: [dataset.id],
+    );
+  }
+
+  Future<void> deleteDataset(String datasetId) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Step 1: Delete media items linked to the dataset
+      await txn.delete(
+        'media_items',
+        where: 'datasetId = ?',
+        whereArgs: [datasetId],
+      );
+
+      // Step 2: Delete the dataset itself
+      await txn.delete(
+        'datasets',
+        where: 'id = ?',
+        whereArgs: [datasetId],
+      );
+    });
+  }
+
   Future<List<Dataset>> fetchDatasetsForProject(int projectId) async {
     final db = await database;
     final result = await db.query('datasets', where: 'projectId = ?', whereArgs: [projectId]);
@@ -91,7 +122,6 @@ class DatasetDatabase {
     return mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
   }
 
-  // await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
   Future<void> insertMediaItem(String datasetId, String filePath, String ext, {String? owner, int? numberOfFrames}) async {
     final type = (ext == 'mp4' || ext == 'mov')
       ? MediaType.video
