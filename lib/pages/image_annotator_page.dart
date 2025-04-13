@@ -1,10 +1,13 @@
 // image_annotator_page.dart
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../models/media_item.dart';
-import '../models/annotation.dart';
-import '../data/annotation_database.dart';
+import "dart:io";
+import "package:flutter/material.dart";
+import "package:flutter/services.dart";
+
+import "../models/media_item.dart";
+import "../models/annotation.dart";
+
+import "../data/annotation_database.dart";
+import "../session/user_session.dart";
 
 class AnnotationRect {
   final Rect rect;
@@ -33,23 +36,35 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   Offset? _currentPoint;
   bool _isDrawing = false;
   String _currentLabel = "Label";
+  int? _selectedLabelId;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
-    _loadAnnotations();
+    _loadBoundingBoxAnnotations();
   }
 
-  void _loadAnnotations() async {
+  void _loadBoundingBoxAnnotations() async {
     final mediaId = widget.mediaItems[_currentIndex].id!;
-    final loaded = await AnnotationDatabase.instance.fetchAnnotations(mediaId);
+    final loaded = await AnnotationDatabase.instance.fetchAnnotations(mediaId, type: 'bbox');
+
     setState(() {
-      _annotations = loaded.map((a) => AnnotationRect(
-        rect: Rect.fromLTWH(a.x, a.y, a.width, a.height),
-        label: "Label",
-      )).toList();
+      _annotations = loaded
+          .where((a) => a.annotationType == 'bbox')
+          .map((a) {
+            final data = a.data;
+            final x = (data['x'] as num?)?.toDouble() ?? 0.0;
+            final y = (data['y'] as num?)?.toDouble() ?? 0.0;
+            final width = (data['width'] as num?)?.toDouble() ?? 0.0;
+            final height = (data['height'] as num?)?.toDouble() ?? 0.0;
+
+            return AnnotationRect(
+              rect: Rect.fromLTWH(x, y, width, height),
+              label: "Label",
+            );
+        }).toList();
     });
   }
 
@@ -77,7 +92,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                             _currentIndex = index;
                             _annotations.clear();
                           });
-                          _loadAnnotations();
+                          _loadBoundingBoxAnnotations();
                         },
                         itemBuilder: (context, index) {
                           final media = widget.mediaItems[index];
@@ -215,20 +230,34 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
             child: ElevatedButton(
               onPressed: () async {
                 final mediaId = widget.mediaItems[_currentIndex].id!;
+                final currentUser = UserSession.instance.getUser();
+
+                if (_selectedLabelId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please select a label')),
+                  );
+                  return;
+                }
+
                 for (final ann in _annotations) {
                   final annotation = Annotation(
                     mediaItemId: mediaId,
-                    labelId: 1, // TODO: dynamic label selection
-                    x: ann.rect.left,
-                    y: ann.rect.top,
-                    width: ann.rect.width,
-                    height: ann.rect.height,
+                    labelId: _selectedLabelId,
+                    annotationType: 'bbox',
+                    data: {
+                      'x': ann.rect.left,
+                      'y': ann.rect.top,
+                      'width': ann.rect.width,
+                      'height': ann.rect.height,
+                    },
                     confidence: 1.0,
-                    annotator: 'admin',
+                    annotatorId: currentUser.id,
                     createdAt: DateTime.now(),
                   );
+
                   await AnnotationDatabase.instance.insertAnnotation(annotation);
                 }
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Annotations saved to database')),
                 );

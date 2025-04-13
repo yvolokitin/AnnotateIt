@@ -94,16 +94,19 @@ class ProjectDatabase {
 
     await db.execute('''
       CREATE TABLE media_items (
-        id TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
         datasetId TEXT,
         filePath TEXT,
+        extension TEXT,
         type TEXT,
         uploadDate TEXT,
-        owner TEXT,
+        owner_id INTEGER NOT NULL,
         lastAnnotator TEXT,
         lastAnnotatedDate TEXT,
         numberOfFrames INTEGER,
-        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE
+        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
+        FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
       );
     ''');
 
@@ -119,20 +122,21 @@ class ProjectDatabase {
     ''');
     
     // Annotations table
+    // annotation_type TEXT NOT NULL,        -- "bbox", "classification", "segmentation", "keypoints", etc.
+    // data TEXT NOT NULL,                   -- JSON-string with coordinates, masks, or key poinrts etc.
     await db.execute('''
       CREATE TABLE annotations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         media_item_id INTEGER NOT NULL,
-        label_id INTEGER NOT NULL,
-        x REAL NOT NULL,
-        y REAL NOT NULL,
-        width REAL NOT NULL,
-        height REAL NOT NULL,
+        label_id INTEGER,
+        annotation_type TEXT NOT NULL,
+        data TEXT NOT NULL,
         confidence REAL,
         annotator TEXT,
-        created_at TEXT,
+        annotator_id INTEGER,
         FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE,
-        FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE
+        FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE,
+        FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL
       );
     ''');
   }

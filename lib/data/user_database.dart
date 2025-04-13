@@ -6,10 +6,20 @@ import '../models/user.dart';
 
 class UserDatabase {
   static final UserDatabase instance = UserDatabase._init();
+  static Database? _db;
 
   UserDatabase._init();
 
-  Future<Database> get database async => await ProjectDatabase.instance.database;
+  void setDatabase(Database db) {
+    _db = db;
+  }
+
+  Future<Database> get database async {
+    if (_db != null) return _db!;
+    throw Exception("Database not set.");
+  }
+  
+  // Future<Database> get database async => await ProjectDatabase.instance.database;
 
   Future<User> create(User user) async {
     final db = await database;
@@ -31,6 +41,15 @@ class UserDatabase {
     } else {
       return null;
     }
+  }
+
+  Future<User?> getById(int id) async {
+    final db = await database;
+    final maps = await db.query('users', where: 'id = ?', whereArgs: [id], limit: 1);
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
   }
 
   Future<int> update(User user) async {

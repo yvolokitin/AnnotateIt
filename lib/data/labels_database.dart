@@ -1,21 +1,23 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 import '../models/label.dart';
 
 class LabelsDatabase {
   static final LabelsDatabase instance = LabelsDatabase._init();
-  static Database? _database;
+  static Database? _db;
 
   LabelsDatabase._init();
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'projects.db'); // uses the same DB as ProjectDatabase
-    _database = await openDatabase(path);
-    return _database!;
+  void setDatabase(Database db) {
+    _db = db;
   }
 
+  Future<Database> get database async {
+    if (_db != null) return _db!;
+    throw Exception("Database not set.");
+  }
+  
   /// Replaces all labels for a given project
   Future<void> updateProjectLabels(int projectId, List<Label> newLabels) async {
     final db = await database;
@@ -76,6 +78,6 @@ class LabelsDatabase {
   Future<void> close() async {
     final db = await database;
     await db.close();
-    _database = null;
+    _db = null;
   }
 }

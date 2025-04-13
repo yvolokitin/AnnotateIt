@@ -5,7 +5,7 @@ import 'package:image/image.dart' as img;
 
 import '../models/media_item.dart';
 import '../pages/image_annotator_page.dart';
-
+import "../data/user_database.dart";
 
 class ImageTile extends StatefulWidget {
   final MediaItem media;
@@ -239,13 +239,17 @@ class _ImageTileState extends State<ImageTile> {
     );
   }
 
-  void _showDetailsDialog(BuildContext context, MediaItem media) {
+  Future<void> _showDetailsDialog(BuildContext context, MediaItem media) async {
     final file = File(media.filePath);
     final stat = file.statSync();
     final created = DateFormat('dd.MM.yyyy HH:mm').format(stat.changed);
     final updated = DateFormat('dd.MM.yyyy HH:mm').format(media.uploadDate);
     final sizeKb = (stat.size / 1024).toStringAsFixed(1);
     final resolution = _getImageResolution(media.filePath);
+
+    // Fetch owner from database
+    final owner = await UserDatabase.instance.getById(media.ownerId);
+    final ownerName = owner != null ? "${owner.firstName} ${owner.lastName}" : "Unknown";
 
     showDialog(
       context: context,
@@ -264,7 +268,7 @@ class _ImageTileState extends State<ImageTile> {
               _infoRow("Resolution", resolution),
               _infoRow("Creation date", created),
               _infoRow("Upload date", updated),          
-              _infoRow("Owner", media.owner),
+              _infoRow("Owner", ownerName),
               _infoRow("Last annotater", "n/a"),
               _infoRow("Last annotation date", "n/a"),           
             ],
@@ -296,6 +300,7 @@ class _ImageTileState extends State<ImageTile> {
         ],
       ),
     );
+    return;
   }
 
   Widget _infoRow(String label, String value) {

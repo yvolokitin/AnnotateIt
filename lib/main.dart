@@ -7,8 +7,13 @@ import "package:flutter/services.dart";
 // Import FFI for SQLite
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'data/user_database.dart';
+import 'session/user_session.dart';
+
 import "data/dataset_database.dart";
+import "data/annotation_database.dart";
 import "data/project_database.dart";
+import "data/labels_database.dart";
 
 ThemeData themeData = getSystemTheme();
 
@@ -24,6 +29,15 @@ void main() async {
 
   // Inject it into DatasetDatabase
   DatasetDatabase.instance.setDatabase(db);
+  AnnotationDatabase.instance.setDatabase(db);
+  LabelsDatabase.instance.setDatabase(db);
+  UserDatabase.instance.setDatabase(db);
+
+  // Load the default user into session
+  final defaultUser = await UserDatabase.instance.getUser();
+  if (defaultUser != null) {
+    UserSession.instance.setUser(defaultUser);
+  }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom]);

@@ -122,18 +122,49 @@ class DatasetDatabase {
     return mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
   }
 
-  Future<void> insertMediaItem(String datasetId, String filePath, String ext, {String? owner, int? numberOfFrames}) async {
+  /// Inserts a new media item into the `media_items` table.
+  ///
+  /// This method creates a media record with the specified dataset ID, file path,
+  /// file extension, and owner ID. It determines the media type automatically
+  /// based on the extension (`image` or `video`).
+  ///
+  /// The database will auto-generate the `id` (INTEGER PRIMARY KEY AUTOINCREMENT).
+  ///
+  /// ### Parameters:
+  /// - [datasetId]: The ID of the dataset the media belongs to.
+  /// - [filePath]: The full file path of the media (e.g. `/images/cat.jpg`).
+  /// - [ext]: File extension (e.g. `jpg`, `png`, `mp4`). Will be lowercased internally.
+  /// - [ownerId]: The user ID (from the `users` table) who owns the media item.
+  /// - [numberOfFrames] (optional): Number of frames if the media is a video.
+  ///
+  /// ### Media Type Detection:
+  /// - If [ext] is `'mp4'` or `'mov'`, the media type is set to `MediaType.video`
+  /// - Otherwise, it defaults to `MediaType.image`
+  ///
+  /// Throws if the database is not initialized or [ownerId] is invalid.
+  ///
+  /// Example:
+  /// ```dart
+  /// await insertMediaItem(
+  ///   datasetId: 'ds123',
+  ///   filePath: '/data/sample.mp4',
+  ///   ext: 'mp4',
+  ///   ownerId: 1,
+  ///   numberOfFrames: 300,
+  /// );
+  /// ```
+  Future<void> insertMediaItem(String datasetId, String filePath, String ext, {required int ownerId, int? numberOfFrames,}) async {
     final type = (ext == 'mp4' || ext == 'mov')
       ? MediaType.video
       : MediaType.image;
 
-    MediaItem mediaItem = MediaItem(
-      id: const Uuid().v4(),
+    final mediaItem = MediaItem(
       datasetId: datasetId,
       filePath: filePath,
+      extension: ext.toLowerCase(),
       type: type,
       uploadDate: DateTime.now(),
-      owner: owner ?? 'system', // fallback if owner not provided
+      ownerId: ownerId,
       lastAnnotator: null,
       lastAnnotatedDate: null,
       numberOfFrames: type == MediaType.video ? numberOfFrames : null,
@@ -142,5 +173,4 @@ class DatasetDatabase {
     final db = await database;
     await db.insert('media_items', mediaItem.toMap());
   }
-
 }

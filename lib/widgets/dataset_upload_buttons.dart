@@ -4,9 +4,11 @@ import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:uuid/uuid.dart";
 
-import '../utils/image_utils.dart';
+import "../utils/image_utils.dart";
 import "../data/dataset_database.dart";
 import "../data/project_database.dart";
+
+import "../session/user_session.dart";
 
 class DatasetUploadButtons extends StatelessWidget {
   final int project_id, file_count;
@@ -69,7 +71,18 @@ class DatasetUploadButtons extends StatelessWidget {
 
           final file = result.files[i];
           final ext = file.extension?.toLowerCase() ?? 'unknown';
-          await DatasetDatabase.instance.insertMediaItem(dataset_id, file.path!, ext);
+          final currentUser = UserSession.instance.getUser();
+          if (currentUser.id == null) {
+            onUploadError?.call();
+            return;
+          }
+
+          await DatasetDatabase.instance.insertMediaItem(
+            dataset_id,
+            file.path!,
+            ext,
+            ownerId: currentUser.id!,
+          );
 
           onFileProgress?.call(file.name, i + 1, total);
         }
