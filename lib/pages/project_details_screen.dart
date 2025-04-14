@@ -32,7 +32,7 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    print("Load project details, which is in fact nothing for now");
+    print("Load project details for project: ${widget.project}");
   }
 
   @override

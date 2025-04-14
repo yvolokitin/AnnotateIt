@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:vap/models/project.dart';
 
 import '../models/media_item.dart';
+import '../models/project.dart';
 
 import 'image_tile.dart';
 import 'media_tile.dart';
@@ -9,9 +11,11 @@ import 'media_tile.dart';
 class PaginatedImageGrid extends StatefulWidget {
   final List<MediaItem> mediaItems;
   final int itemsPerPage;
+  final Project project;
 
   const PaginatedImageGrid({
     required this.mediaItems,
+    required this.project,
     this.itemsPerPage = 24,
     super.key,
   });
@@ -51,6 +55,7 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   media: media,
                   mediaItems: mediaItems,
                   index: index,
+                  project: widget.project,
                 );
               } else {
                 return MediaTile(media: media);

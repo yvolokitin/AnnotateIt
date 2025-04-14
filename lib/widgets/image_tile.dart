@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
 import '../models/media_item.dart';
+import '../models/project.dart';
 import '../pages/image_annotator_page.dart';
 import "../data/user_database.dart";
 
@@ -11,12 +12,14 @@ class ImageTile extends StatefulWidget {
   final MediaItem media;
   final List<MediaItem> mediaItems;
   final int index;
+  final Project project;
   
   const ImageTile({
     super.key,
     required this.media,
     required this.mediaItems,
     required this.index,
+    required this.project,
   });
 
   @override
@@ -67,6 +70,7 @@ class _ImageTileState extends State<ImageTile> {
                         builder: (_) => ImageAnnotatorPage( // ImagePage(
                           mediaItems: widget.mediaItems,
                           initialIndex: widget.index,
+                          project: widget.project,
                         ),
                       ),
                     );

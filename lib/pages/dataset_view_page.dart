@@ -430,6 +430,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                           )
                           : PaginatedImageGrid(
                             mediaItems: mediaItems,
+                            project: widget.project,
                           ),
                         ),
                       ],  
