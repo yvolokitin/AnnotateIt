@@ -1,5 +1,5 @@
 ---
-name: 🐛 Bug Report
+name: 🐞 Bug Report
 about: Report a bug to help us improve the project
 title: "[Bug] <short description>"
 labels: bug
@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-## 🐞 Describe the bug
+## 🐛 Describe the bug
 
 A clear and concise description of what the bug is.
 
@@ -25,6 +25,10 @@ What you expected to happen instead.
 ## 🖥️ Screenshots or logs
 
 If applicable, add logs, screenshots, or screen recordings.
+
+## 📦 Release version
+
+- Version of this project: [e.g. v1.2.3, commit hash, or branch name]
 
 ## 🧩 Environment
 
