@@ -12,6 +12,8 @@ import "../widgets/edit_labels_dialog.dart";
 import "project_details_screen.dart";
 
 class ProjectsPage extends StatefulWidget {
+  const ProjectsPage({super.key});
+
   @override
   _ProjectsPageState createState() => _ProjectsPageState();
 }
@@ -167,6 +169,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   _loadProjects();
                 }
               },
+              onCreateFromDataset: () => print("Dataset creation"),
+              onCreateFromExport: () => print("Exported project creation"),
           ),
 
           // Project List -> list of ProjectTile's (in widgets)
