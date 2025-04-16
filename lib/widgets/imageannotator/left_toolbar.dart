@@ -17,35 +17,30 @@ class LeftToolbar extends StatelessWidget {
       color: Colors.grey[900],
       child: Column(
         children: [
-          SizedBox(height: 10),
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.crop_square, color: Colors.white),
             onPressed: () {}, // TODO: Tool selection
           ),
 
-          SizedBox(height: 10),
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.polyline, color: Colors.white),
             onPressed: () {},
           ),
 
-          SizedBox(height: 10),
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.select_all, color: Colors.white),
             onPressed: () {},
           ),
 
-          SizedBox(height: 10),
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.white),
             onPressed: () {},
           ),
 
-          SizedBox(height: 12),
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),

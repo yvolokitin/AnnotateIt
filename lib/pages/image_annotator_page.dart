@@ -1,4 +1,3 @@
-// image_annotator_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -8,7 +7,8 @@ import '../models/project.dart';
 import '../data/annotation_database.dart';
 import '../session/user_session.dart';
 
-import '../widgets/imageannotator/annotation_canvas.dart';
+import '../widgets/imageannotator/annotation_canvas_demo.dart';
+import '../widgets/imageannotator/annotation_canvas_from_file.dart';
 import '../widgets/imageannotator/annotation_rect.dart';
 import '../widgets/imageannotator/left_toolbar.dart';
 import '../widgets/imageannotator/right_sidebar.dart';
@@ -40,7 +40,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   Offset? _startPoint;
   Offset? _currentPoint;
   bool _isDrawing = false;
-  String _currentLabel = "Label";
+  final String _currentLabel = "Label";
   int? _selectedLabelId;
   bool _mouseInsideImage = false;
 
@@ -134,7 +134,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   Widget build(BuildContext context) {
     final currentMedia = widget.mediaItems[_currentIndex];
     final file = File(currentMedia.filePath);
-    double _fillOpacity = 0.1;
+    double fillOpacity = 0.1;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -150,8 +150,8 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
             child: Row(
               children: [
                 LeftToolbar(
-                  opacity: _fillOpacity,
-                  onOpacityChanged: (value) => setState(() => _fillOpacity = value),
+                  opacity: fillOpacity,
+                  onOpacityChanged: (value) => setState(() => fillOpacity = value),
                 ),
                 Expanded(
                   child: Column(
@@ -182,102 +182,37 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                               cursor: _mouseInsideImage
                                 ? SystemMouseCursors.precise
                                 : SystemMouseCursors.basic,
-                              child: GestureDetector(
-                                onPanStart: (details) {
-                                  if (_mouseInsideImage) {
-                                    setState(() {
-                                      _isDrawing = true;
-                                      _startPoint = details.localPosition;
-                                      _currentPoint = _startPoint;
-                                    });
-                                  }
-                                },
-                                onPanUpdate: (details) {
-                                  if (_isDrawing && _mouseInsideImage) {
-                                    setState(() {
-                                      _currentPoint = details.localPosition;
-                                    });
-                                  }
-                                },
-                                onPanEnd: (details) {
-                                  if (_isDrawing && _startPoint != null && _currentPoint != null) {
-                                    final rect = Rect.fromPoints(_startPoint!, _currentPoint!);
-                                    setState(() {
-                                      _annotations.add(AnnotationRect(rect: rect, label: _currentLabel));
-                                      _isDrawing = false;
-                                      _startPoint = null;
-                                      _currentPoint = null;
-                                    });
-                                  }
-                                },
-                                child: AnnotationCanvas(
+                                // child: AnnotationCanvasDemo(imageFile: file, annotations: _annotations,),
+                                child: AnnotationCanvasFromFile(file: file, annotations: _annotations, labelDefinitions: []),
+                                /*child: AnnotationCanvas(
                                   imageFile: file,
                                   annotations: _annotations,
-                                  startPoint: _startPoint,
-                                  currentPoint: _currentPoint,
-                                  isDrawing: _isDrawing,
                                   label: _currentLabel,
-                                  fillOpacity: _fillOpacity,
+                                  fillOpacity: fillOpacity,
                                   labels: widget.project.labels ?? [],
-                                  onLabelSelected: (ann, newLabel) {
-                                    setState(() {
-                                      ann.label = newLabel;
-                                    });
-                                  },
-                                ),
-                              ),
+                                  scale: _scale,
+                                  onScaleChanged: (newScale) => setState(() => _scale = newScale),
+                                  onLabelSelected: (ann, newLabel) => setState(() => ann.label = newLabel),
+                                  onNewAnnotation: (ann) => setState(() => _annotations.add(ann)),
+                                ),*/
+                              //),
                             );
-
-/*
-                            return GestureDetector(
-                              onPanStart: (details) {
-                                setState(() {
-                                  _isDrawing = true;
-                                  _startPoint = details.localPosition;
-                                  _currentPoint = _startPoint;
-                                });
-                              },
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _currentPoint = details.localPosition;
-                                });
-                              },
-                              onPanEnd: (details) {
-                                if (_startPoint != null && _currentPoint != null) {
-                                  final rect = Rect.fromPoints(_startPoint!, _currentPoint!);
-                                  setState(() {
-                                    _annotations.add(AnnotationRect(rect: rect, label: _currentLabel));
-                                    _isDrawing = false;
-                                    _startPoint = null;
-                                    _currentPoint = null;
-                                  });
-                                }
-                              },
-                              child: AnnotationCanvas(
-                                imageFile: file,
-                                annotations: _annotations,
-                                startPoint: _startPoint,
-                                currentPoint: _currentPoint,
-                                isDrawing: _isDrawing,
-                                label: _currentLabel,
-                                fillOpacity: _fillOpacity,
-                                labels: widget.project.labels ?? [],
-                                onLabelSelected: (ann, newLabel) {
-                                  setState(() {
-                                    // assuming label is mutable
-                                    ann.label = newLabel;
-                                  });
-                                }
-                              ),
-                            );
-*/
                           },
                         ),
                       ),
+                      
                       BottomToolbar(
                         scale: _scale,
-                        onZoomIn: () => setState(() => _scale = (_scale + 0.1).clamp(0.5, 3.0)),
-                        onZoomOut: () => setState(() => _scale = (_scale - 0.1).clamp(0.5, 3.0)),
+                        onZoomIn: () {
+                          setState(() {
+                            _scale = (_scale + 0.1).clamp(0.5, 5.0);
+                          });
+                        },
+                        onZoomOut: () {
+                          setState(() {
+                            _scale = (_scale - 0.1).clamp(0.5, 5.0);
+                          });
+                        },
                       ),
                     ],
                   ),

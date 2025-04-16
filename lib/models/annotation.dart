@@ -1,5 +1,11 @@
 import 'dart:convert';
 
+import 'shape/shape.dart';
+import 'shape/rect_shape.dart';
+import 'shape/polygon_shape.dart';
+import 'shape/circle_shape.dart';
+import 'shape/rotated_rect_shape.dart';
+
 class Annotation {
   final int? id;
   final int mediaItemId;
@@ -21,7 +27,6 @@ class Annotation {
     required this.createdAt,
   });
 
-  // Convert Annotation instance to a map for database storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -35,7 +40,6 @@ class Annotation {
     };
   }
 
-  // Create an Annotation instance from a database map
   factory Annotation.fromMap(Map<String, dynamic> map) {
     return Annotation(
       id: map['id'],
@@ -51,8 +55,25 @@ class Annotation {
 
   @override
   String toString() {
-    return 'Annotation(id: $id, mediaItemId: $mediaItemId, labelId: $labelId, '
-           'annotationType: $annotationType, data: $data, confidence: $confidence, '
-           'annotator_id: $annotatorId, createdAt: $createdAt)';
+    return 'Annotation(id: \$id, mediaItemId: \$mediaItemId, labelId: \$labelId, '
+           'annotationType: \$annotationType, data: \$data, confidence: \$confidence, '
+           'annotator_id: \$annotatorId, createdAt: \$createdAt)';
+  }
+}
+
+extension AnnotationShapeExt on Annotation {
+  Shape? get shape {
+    switch (annotationType) {
+      case 'bbox':
+        return RectShape.fromJson(data);
+      case 'polygon':
+        return PolygonShape.fromJson(data);
+      case 'circle':
+        return CircleShape.fromJson(data);
+      case 'rotated_rect':
+        return RotatedRectShape.fromJson(data);      
+      default:
+        return null;
+    }
   }
 }
