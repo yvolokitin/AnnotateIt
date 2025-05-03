@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../models/project.dart';
-import '../models/label.dart';
+import '../../models/project.dart';
+import '../../models/label.dart';
 
-import 'edit_labels_dialog.dart';
-import 'create_project_dialog_task.dart';
+import '../../widgets/edit_labels_dialog.dart';
+import '../../widgets/create_project_dialog_task.dart';
 
-class CreateProjectDialog extends StatefulWidget {
+class CreateNewProjectDialog extends StatefulWidget {
   // both parameters are optional and needed only if user pressed back from Label creation step
   final String? initialName;
   final String? initialType;
   final List<Label>? initialLabels;
 
-  const CreateProjectDialog({
+  const CreateNewProjectDialog({
     super.key,
     this.initialName,
     this.initialType,
@@ -20,10 +20,10 @@ class CreateProjectDialog extends StatefulWidget {
   });
 
   @override
-  CreateProjectDialogState createState() => CreateProjectDialogState();
+  CreateNewProjectDialogState createState() => CreateNewProjectDialogState();
 }
 
-class CreateProjectDialogState extends State<CreateProjectDialog> with SingleTickerProviderStateMixin {
+class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
   late TabController _tabController;
   String _selectedTaskType = "Detection bounding box"; // Default selection

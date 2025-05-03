@@ -12,7 +12,7 @@ import '../data/labels_database.dart';
 import '../models/project.dart';
 import '../models/label.dart';
 
-import 'create_project_dialog.dart';
+import '../pages/project_creation/create_new_project_dialog.dart';
 
 class EditLabelsDialog extends StatefulWidget {
   final Project project;
@@ -347,7 +347,7 @@ class EditLabelsDialogState extends State<EditLabelsDialog> {
                             // Reopen CreateProjectDialog with previous data
                             showDialog(
                               context: context,
-                              builder: (_) => CreateProjectDialog(
+                              builder: (_) => CreateNewProjectDialog(
                                 initialName: widget.project.name,
                                 initialType: widget.project.type,
                                 initialLabels: _labels,

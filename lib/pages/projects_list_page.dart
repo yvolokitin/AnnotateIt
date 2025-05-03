@@ -5,11 +5,12 @@ import "../models/project.dart";
 
 import "../widgets/project_tile.dart";
 import "../widgets/projects_topbar.dart";
-import "../widgets/create_project_dialog.dart";
+import "project_creation/create_new_project_dialog.dart";
 import "../widgets/edit_project_name.dart";
 import "../widgets/edit_labels_dialog.dart";
 
 import "project_details_screen.dart";
+import "project_creation/create_from_dataset_dialog.dart";
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -156,11 +157,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
               },
               onSortSelected: _onSortSelected,
               onCreateProject: () async {
-                print("[ProjectsPage] Started a new project dialog creation");
-                
+                // print("[ProjectsPage] Started a new project dialog creation");
                 final result = await showDialog<String>(
                   context: context,
-                  builder: (context) => CreateProjectDialog(),
+                  builder: (context) => CreateNewProjectDialog(),
                 );
 
                 print('[ProjectsPage] Received result: : $result');
@@ -169,7 +169,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   _loadProjects();
                 }
               },
-              onCreateFromDataset: () => print("Dataset creation"),
+              onCreateFromDataset: () {
+                print("Dataset creation");
+                showDialog(
+                  context: context,
+                  builder: (_) => const CreateFromDatasetDialog(),
+                );
+
+              },
               onCreateFromExport: () => print("Exported project creation"),
           ),
 
