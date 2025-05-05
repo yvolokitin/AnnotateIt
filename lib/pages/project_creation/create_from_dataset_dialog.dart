@@ -22,8 +22,15 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       setState(() => _droppedFile = File(result.files.single.path!));
     }
   }
-
+/*
   void _handleFileDrop(File file) {
+    if (file.path.endsWith(".zip")) {
+      setState(() => _droppedFile = file);
+    }
+  }
+*/
+  void _handleFileDrop(DragTargetDetails<File> details) {
+    final file = details.data;
     if (file.path.endsWith(".zip")) {
       setState(() => _droppedFile = file);
     }
@@ -96,8 +103,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 200),
       child: DragTarget<File>(
-        onWillAccept: (data) => true,
-        onAccept: _handleFileDrop,
+        onWillAcceptWithDetails: (data) => true,
+        onAcceptWithDetails: _handleFileDrop,
         onMove: (_) => setState(() => _isDragging = true),
         onLeave: (_) => setState(() => _isDragging = false),
         builder: (context, candidateData, rejectedData) {
