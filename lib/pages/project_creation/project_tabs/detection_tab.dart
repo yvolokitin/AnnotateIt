@@ -27,6 +27,11 @@ class DetectionTab extends StatelessWidget {
           'description': 'Draw and enclose an object within a minimal rectangle.',
           'image': 'assets/images/detection_oriented.jpg',
         },
+        {
+          'title': 'Anomaly Detection',
+          'description': 'Categorize images as normal or anomalous.',
+          'image': 'assets/images/anomaly_detection.jpg',
+        },
       ],
     );
   }

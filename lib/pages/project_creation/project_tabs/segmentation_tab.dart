@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/create_project_dialog_task.dart';
+// import '../../../widgets/create_project_dialog_task.dart';
+import '../../../widgets/project_creation/task_type_grid.dart';
 
 class SegmentationTab extends StatelessWidget {
   final String selectedTaskType;

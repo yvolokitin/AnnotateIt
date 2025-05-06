@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/create_project_dialog_task.dart';
+import '../../../widgets/project_creation/task_type_grid.dart';
+// import '../../../widgets/create_project_dialog_task.dart';
 
 class ClassificationTab extends StatelessWidget {
   final String selectedTaskType;
@@ -18,18 +19,23 @@ class ClassificationTab extends StatelessWidget {
       onTaskSelected: onSelected,
       tasks: const [
         {
-          'title': 'Classification single label',
-          'description': 'Assign a label out of mutually exclusive labels.',
-          'image': 'assets/images/classification_single.png',
+          'title': 'Binary Classification',
+          'description': 'Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative).',
+          'image': 'assets/images/classification_binary.jpg',
         },
         {
-          'title': 'Classification multi label',
-          'description': 'Assign label(s) out of non-mutually exclusive labels.',
-          'image': 'assets/images/classification_multi.png',
+          'title': 'Multi-class Classification',
+          'description': 'Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird).',
+          'image': 'assets/images/classification_multi_class.jpg',
         },
         {
-          'title': 'Classification hierarchical',
-          'description': 'Assign label(s) with a hierarchical label structure.',
+          'title': 'Multi-label Classification',
+          'description': 'Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both "cat" and "dog")',
+          'image': 'assets/images/anomaly_detection.jpg', // 'assets/images/classification_multi_label.jpg',
+        },
+        {
+          'title': 'Hierarchical Classification',
+          'description': 'Assign labels from a hierarchy of classes, where categories are organized in multiple levels (e.g., Animal → Mammal → Dog).',
           'image': 'assets/images/classification_hierarchical.png',
         },
       ],
