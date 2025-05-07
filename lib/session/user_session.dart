@@ -1,4 +1,6 @@
+import 'dart:io';
 import '../models/user.dart';
+import 'package:logging/logging.dart';
 
 /// A singleton service that manages the current logged-in or active user in memory.
 ///
@@ -27,6 +29,8 @@ import '../models/user.dart';
 ///
 /// Throws if [getUser] is called before [setUser] has been used.
 class UserSession {
+  final _logger = Logger('UserSession');
+
   static final UserSession instance = UserSession._internal();
   UserSession._internal();
 
@@ -43,6 +47,26 @@ class UserSession {
       throw Exception("UserSession not initialized. Call setUser() first.");
     }
     return _currentUser!;
+  }
+
+  Future<String> getCurrentUserDatasetFolder() async {
+    final path = getUser().datasetFolder;
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      _logger.info('Created dataset folder: $path');
+    }
+    return path;
+  }
+
+  Future<String> getCurrentUserThumbnailFolder() async {
+    final path = getUser().thumbnailFolder;
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      _logger.info('Created thumbnail folder: $path');
+    }
+    return path;
   }
 
   void clear() {

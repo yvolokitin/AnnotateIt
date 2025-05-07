@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
-  final int currentStep; // 1-based: 1 = Upload, 2 = Confirm
+  final int currentStep; // 1 = Select, 2 = Extract, 3 = Detect, 4 = Labels, 5 = Create
 
   const DatasetStepProgressBar({super.key, required this.currentStep});
 
@@ -9,43 +9,97 @@ class DatasetStepProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildStepIndicator(step: 1, label: "Upload", isActive: currentStep == 1),
-        _buildConnector(),
-        _buildStepIndicator(step: 2, label: "Confirm", isActive: currentStep == 2),
+        _buildStep("1", "Dataset Selection", 1),
+        _buildLine(),
+        _buildStep("2", "Extract ZIP", 2),
+        _buildLine(),
+        _buildStep("3", "Detect Type", 3),
+        _buildLine(),
+        _buildStep("4", "Labels", 4),
+        _buildLine(),
+        _buildStep("5", "Create Project", 5),
       ],
     );
   }
 
-  Widget _buildStepIndicator({required int step, required String label, required bool isActive}) {
+  Widget _buildStep(String number, String label, int stepIndex) {
+    final isActive = currentStep == stepIndex;
+    final isCompleted = currentStep > stepIndex;
+    final icon = _getStepIcon(stepIndex);
+
     return Column(
       children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: isActive ? Colors.redAccent : Colors.grey[700],
-          child: Text(
-            step.toString(),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        Tooltip(
+          message: label,
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: Colors.redAccent.withOpacity(0.6),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : [],
+              color: isCompleted
+                  ? Colors.deepOrange[400]
+                  : isActive
+                      ? Colors.redAccent
+                      : Colors.grey[700],
+            ),
+            child: Center(
+              child: Icon(
+                isCompleted ? Icons.check : icon,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          label,
+        AnimatedDefaultTextStyle(
+          duration: Duration(milliseconds: 300),
           style: TextStyle(
-            color: isActive ? Colors.white : Colors.white54,
             fontSize: 14,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            color: isActive || isCompleted ? Colors.white : Colors.white54,
           ),
+          child: Text('$number. $label'),
         ),
       ],
     );
   }
 
-  Widget _buildConnector() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        height: 2,
-        color: Colors.white24,
-      ),
-    );
+  IconData _getStepIcon(int stepIndex) {
+    switch (stepIndex) {
+      case 1:
+        return Icons.folder_open;
+      case 2:
+        return Icons.unarchive;
+      case 3:
+        return Icons.search;
+      case 4:
+        return Icons.label_outline;
+      case 5:
+        return Icons.check_circle_outline;
+      default:
+        return Icons.circle;
+    }
   }
-}
+
+  Widget _buildLine() => Expanded(
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          height: 2,
+          color: Colors.deepOrange[300],
+        ),
+      );
+} 

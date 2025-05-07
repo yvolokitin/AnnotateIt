@@ -1,54 +1,22 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:isolate';
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:logging/logging.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../session/user_session.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/dataset_import_utils.dart';
 
-class DatasetStepProgressBar extends StatelessWidget {
-  final int currentStep;
+import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
+import '../../../widgets/project_creation/upload_prompt.dart';
+import '../../../widgets/project_creation/step_description_widget.dart';
+import '../../../widgets/project_creation/label_editor_widget.dart';
+import '../../../widgets/project_creation/task_confirmation_widget.dart';
 
-  const DatasetStepProgressBar({super.key, required this.currentStep});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _buildStep("1", "Dataset", currentStep == 1),
-        _buildLine(),
-        _buildStep("2", "Task Type", currentStep == 2),
-        _buildLine(),
-        _buildStep("3", "Labels", currentStep == 3),
-      ],
-    );
-  }
-
-  Widget _buildStep(String number, String label, bool isActive) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: isActive ? Colors.redAccent : Colors.grey[700],
-          child: Text(number, style: const TextStyle(color: Colors.white)),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(color: isActive ? Colors.white : Colors.white54),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLine() => Expanded(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          height: 2,
-          color: Colors.white24,
-        ),
-      );
-}
+import 'create_dataset_logic.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
   const CreateFromDatasetDialog({super.key});
@@ -58,227 +26,198 @@ class CreateFromDatasetDialog extends StatefulWidget {
 }
 
 class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
+  final Logger _logger = Logger('CreateFromDatasetDialog');
   File? _selectedFile;
   bool _isUploading = false;
   int _currentStep = 1;
   String? _detectedTaskType;
+  String? _extractedPath;
+  double _progress = 0.0;
 
   void _pickFile() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['zip']);
     if (result != null && result.files.single.path != null) {
       final file = File(result.files.single.path!);
       setState(() => _selectedFile = file);
-      await _uploadZip(file);
+      await _processZipLocally(file);
     }
   }
 
-  Future<void> _uploadZip(File file) async {
-    setState(() => _isUploading = true);
+  Future<void> _processZipLocally(File file) async {
+    setState(() {
+      _isUploading = true;
+      _progress = 0.0;
+      _currentStep = 2;
+    });
+
+    String? attemptedExtractDirPath;
+    final receivePort = ReceivePort();
 
     try {
-      final uri = Uri.parse("https://your-api.com/api/upload_dataset");
-      final request = http.MultipartRequest("POST", uri)
-        ..files.add(await http.MultipartFile.fromPath('file', file.path));
+      // final storagePath = await getDefaultStoragePath();
+      final storagePath = await getDefaultStoragePath(() => UserSession.instance.getCurrentUserDatasetFolder());
+      await Isolate.spawn(extractInIsolate, [file.path, storagePath, receivePort.sendPort]);
+      
+      await for (final message in receivePort) {
+        if (message is Map<String, dynamic> && message['type'] == 'extract_progress') {
+          setState(() {
+            _progress = message['progress'] ?? _progress;
+          });
+        } else if (message is Map<String, dynamic> && message['type'] == 'extract_done') {
+          attemptedExtractDirPath = message['path'];
+          setState(() {
+            _extractedPath = message['path'];
+            _currentStep = 3;
+            _progress = 0.0;
+          });
 
-      final response = await request.send();
+          final detectionReceivePort = ReceivePort();
+          await Isolate.spawn(detectInIsolate, [message['path'], detectionReceivePort.sendPort]);
 
-      if (response.statusCode == 200) {
-        final responseBody = await response.stream.bytesToString();
-        final data = json.decode(responseBody);
-        final taskType = data['task_type'];
+          await for (final detectionMessage in detectionReceivePort) {
+            if (detectionMessage is Map<String, dynamic> && detectionMessage['type'] == 'detect_progress') {
+              setState(() {
+                _progress = detectionMessage['progress'] ?? _progress;
+              });
+            } else if (detectionMessage is Map<String, dynamic> && detectionMessage['type'] == 'detect_done') {
+              setState(() {
+                _detectedTaskType = detectionMessage['taskType'];
+                _isUploading = false;
+                _progress = 1.0;
+              });
+              break;
+            }
+          }
 
-        setState(() {
-          _detectedTaskType = taskType;
-          _currentStep = 2;
-        });
-      } else {
-        throw Exception("Upload failed with status ${response.statusCode}");
+          break;
+        }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      _logger.warning('Failed to process ZIP file: $e', e, stack);
+      if (attemptedExtractDirPath != null) {
+        final dir = Directory(attemptedExtractDirPath);
+        if (await dir.exists()) {
+          await dir.delete(recursive: true);
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Upload failed: $e")),
+        SnackBar(content: Text("Import failed: $e")),
       );
-    } finally {
-      setState(() => _isUploading = false);
+      setState(() {
+        _isUploading = false;
+        _currentStep = 1;
+      });
     }
   }
 
   void _goToNextStep() {
-    if (_currentStep < 3) {
+    if (_currentStep < 5) {
       setState(() => _currentStep += 1);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final deviceType = getDeviceType(size.width);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLargeScreen = constraints.maxWidth >= 1600;
+        final isTablet = constraints.maxWidth >= 800 && constraints.maxWidth < 1600;
+        final dialogWidth = constraints.maxWidth * (isLargeScreen ? 0.9 : 1.0);
+        final dialogHeight = constraints.maxHeight * (isLargeScreen ? 0.9 : 1.0);
+        final dialogPadding = isLargeScreen
+            ? const EdgeInsets.all(60)
+            : isTablet
+                ? const EdgeInsets.all(24)
+                : const EdgeInsets.all(12);
 
-    double dialogWidth;
-    EdgeInsets padding;
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.grey[850],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          child: SizedBox(
+            width: dialogWidth,
+            height: dialogHeight,
+            child: Padding(
+              padding: dialogPadding,
+              child: _buildDialogContent(),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-    switch (deviceType) {
-      case DeviceType.desktop:
-        dialogWidth = size.width * 0.9;
-        padding = const EdgeInsets.all(60);
-        break;
-      case DeviceType.tablet:
-        dialogWidth = size.width * 0.85;
-        padding = const EdgeInsets.all(24);
-        break;
-      case DeviceType.mobile:
-      default:
-        dialogWidth = size.width;
-        padding = const EdgeInsets.all(12);
-        break;
-    }
-
-    return Dialog(
-      insetPadding: EdgeInsets.zero,
-      backgroundColor: Colors.grey[850],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-      child: SizedBox(
-        width: dialogWidth,
-        height: size.height * 0.9,
-        child: Padding(
-          padding: padding,
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Import Dataset to Create Project",
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _currentStep == 1
-                        ? "Upload a .zip file with COCO, YOLO, VOC, or Datumaro format"
-                        : _currentStep == 2
-                            ? "Detected task type: $_detectedTaskType"
-                            : "Edit your project labels",
-                    style: const TextStyle(fontSize: 22, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 32),
-                  DatasetStepProgressBar(currentStep: _currentStep),
-                  const SizedBox(height: 32),
-                  Expanded(
-                    child: Center(
-                      child: _isUploading
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(color: Colors.redAccent, strokeWidth: 5),
-                                SizedBox(height: 24),
-                                Text("Uploading...", style: TextStyle(color: Colors.white70, fontSize: 18)),
-                              ],
-                            )
-                          : _currentStep == 1
-                              ? _buildUploadPrompt()
-                              : _currentStep == 2
-                                  ? _buildTaskConfirmation()
-                                  : _buildLabelEditor(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(_detectedTaskType),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text("Close", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+  Widget _buildDialogContent() {
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Import Dataset to Create Project",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 4),
+            StepDescriptionWidget(
+              currentStep: _currentStep,
+              extractedPath: _extractedPath,
+              detectedTaskType: _detectedTaskType,
+            ),
+            const SizedBox(height: 32),
+            DatasetStepProgressBar(currentStep: _currentStep),
+            const SizedBox(height: 32),
+            Expanded(
+              child: Center(
+                child: _isUploading
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            color: Colors.redAccent,
+                            strokeWidth: 5,
+                            value: _progress == 0.0 || _progress == 1.0 ? null : _progress,
+                          ),
+                          const SizedBox(height: 24),
+                          Text("Processing... ${(100 * _progress).toInt()}%", style: const TextStyle(color: Colors.white70, fontSize: 18)),
+                        ],
+                      )
+                    : _currentStep == 1
+                        ? UploadPrompt(onPickFile: _pickFile)
+                        : _currentStep == 4
+                            ? const LabelEditorWidget()
+                            : const TaskConfirmationWidget(),
               ),
-              Positioned(
-                top: 5,
-                right: 5,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white70),
-                  tooltip: 'Close',
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
                 ),
-              ),
-            ],
-          ),
+                if (_currentStep == 3 && !_isUploading)
+                  ElevatedButton(
+                    onPressed: _goToNextStep,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text("Continue", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+              ],
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildUploadPrompt() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.cloud_upload_outlined, size: 64, color: Colors.white70),
-        const SizedBox(height: 16),
-        const Text(
-          "Select your dataset ZIP file to upload",
-          style: TextStyle(color: Colors.white70, fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _pickFile,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        Positioned(
+          top: 5,
+          right: 5,
+          child: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white70),
+            tooltip: 'Close',
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          child: const Text("Choose File", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        ),
-        const SizedBox(height: 12),
-        const Text("(COCO, YOLO, VOC, Datumaro) .zip only", style: TextStyle(color: Colors.white54, fontSize: 14)),
-      ],
-    );
-  }
-
-  Widget _buildTaskConfirmation() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 64),
-        const SizedBox(height: 16),
-        Text("Detected task type: $_detectedTaskType", style: const TextStyle(fontSize: 22, color: Colors.white)),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _goToNextStep,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text("Continue", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLabelEditor() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.label, size: 64, color: Colors.amber),
-        const SizedBox(height: 16),
-        const Text("Label setup will go here.", style: TextStyle(color: Colors.white, fontSize: 20)),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, {
-            "file": _selectedFile?.path,
-            "task_type": _detectedTaskType,
-          }),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text("Finish", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

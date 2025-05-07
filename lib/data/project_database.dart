@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:logging/logging.dart';
 
@@ -50,14 +52,24 @@ class ProjectDatabase {
       )
     ''');
 
+    final rootPath = await _getDefaultAnnotationRootPath();
+    final datasetPath = '$rootPath/datasets';
+    final thumbnailPath = '$rootPath/thumbnails';
+
+    // Create folders if they don't exist
+    await Directory(datasetPath).create(recursive: true);
+    await Directory(thumbnailPath).create(recursive: true);
+    
+    _log.info('_createProjectDBTables:: Created $datasetPath and $thumbnailPath folders');
+    
     final now = DateTime.now().toIso8601String();
     await db.insert('users', {
       'firstName': 'Captain',
       'lastName': 'Annotator',
       'email': 'captain@labelship.local',
       'iconPath': '',
-      'datasetFolder': '/storage/emulated/0/AnnotationApp/datasets',
-      'thumbnailFolder': '/storage/emulated/0/AnnotationApp/thumbnails',
+      'datasetFolder': datasetPath,
+      'thumbnailFolder': thumbnailPath,
       'themeMode': 'dark',
       'language': 'en',
       'autoSave': 1,
@@ -302,13 +314,13 @@ class ProjectDatabase {
     );
   }
 
-  Future<int> updateProjectIcon(int projectId, String new_project_icon) async {
+  Future<int> updateProjectIcon(int projectId, String newProjectIcon) async {
     final db = await database;
 
     return await db.update(
       'projects',
       {
-        'icon': new_project_icon,
+        'icon': newProjectIcon,
         'lastUpdated': DateTime.now().toIso8601String(),
       },
       where: 'id = ?',
@@ -373,5 +385,17 @@ class ProjectDatabase {
   Future<void> closeDB() async {
     final db = await database;
     db.close();
+  }
+
+  Future<String> _getDefaultAnnotationRootPath() async {
+    if (Platform.isWindows) {
+      return 'C:\\Users\\${Platform.environment['USERNAME']}\\Documents\\AnnotateItApp';
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      return '/home/${Platform.environment['USER']}/AnnotateItApp';
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      return '/storage/emulated/0/AnnotateItApp';
+    } else {
+      return '/AnnotateItApp';
+    }
   }
 }

@@ -7,7 +7,7 @@ import '../../widgets/edit_labels_dialog.dart';
 import 'project_tabs/detection_tab.dart';
 import 'project_tabs/segmentation_tab.dart';
 import 'project_tabs/classification_tab.dart';
-import 'project_tabs/anomaly_tab.dart';
+// import 'project_tabs/anomaly_tab.dart';
 // import 'project_tabs/chained_tasks_tab.dart';
 
 class CreateNewProjectDialog extends StatefulWidget {
@@ -36,7 +36,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with Sin
     super.initState();
     _nameController.text = widget.initialName ?? '';
     _selectedTaskType = widget.initialType ?? 'Detection bounding box';
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override

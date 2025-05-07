@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
 
-import '../models/user.dart';
-import 'responsive/responsive_text.dart';
+import '../../models/user.dart';
+import '../responsive/responsive_text.dart';
 
 
 class AccountStorage extends StatefulWidget {
@@ -99,7 +98,7 @@ class _AccountStorageState extends State<AccountStorage> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

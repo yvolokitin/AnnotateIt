@@ -4,6 +4,8 @@ import "package:vap/utils/theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+import 'package:logging/logging.dart';
+
 // Import FFI for SQLite
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -18,6 +20,18 @@ import "data/labels_database.dart";
 ThemeData themeData = getSystemTheme();
 
 void main() async {
+  // Setup logging
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
+    if (record.error != null) {
+      print('Error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      print('StackTrace: ${record.stackTrace}');
+    }
+  });
+
   // Initialize database for desktop (Windows, macOS, Linux)
   sqfliteFfiInit(); 
   databaseFactory = databaseFactoryFfi;

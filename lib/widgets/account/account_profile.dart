@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import '../models/user.dart';
+import '../../models/user.dart';
 
 class AccountProfile extends StatefulWidget {
   final User user;
@@ -45,24 +45,28 @@ class _AccountProfileState extends State<AccountProfile> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideLayout = screenWidth >= 800;
 
-    return isWideLayout
-        ? Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar (1/3 width, 90px tall)
-              Expanded(flex: 1, child: _buildAvatar(context, 90)),
-              SizedBox(width: 40),
-              // Fields (2/3 width, 3x 30px height)
-              Expanded(flex: 2, child: _buildForm()),
-            ],
-          )
-        : Column(
-            children: [
-              _buildAvatar(context, 60),
-              SizedBox(height: 30),
-              _buildForm(),
-            ],
-          );
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 24,
+        horizontal: isWideLayout ? 64 : 16,
+      ),
+      child: isWideLayout
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 1, child: _buildAvatar(context, 120)),
+                const SizedBox(width: 32),
+                Expanded(flex: 2, child: _buildForm(isWideLayout)),
+              ],
+            )
+          : Column(
+              children: [
+                _buildAvatar(context, 100),
+                const SizedBox(height: 24),
+                _buildForm(isWideLayout),
+              ],
+            ),
+    );
   }
 
   Widget _buildAvatar(BuildContext context, double size) {
@@ -116,44 +120,55 @@ class _AccountProfileState extends State<AccountProfile> {
     );
   }
 
-  Widget _buildForm() {
-    return SizedBox(
-      height: 90, // total height for 3 fields
-      child: Column(
-        children: [
-          Expanded(
-            child: TextFormField(
-              initialValue: widget.user.firstName,
-              enabled: widget.isEditing,
-              decoration: const InputDecoration(labelText: 'First Name'),
-              onChanged: (val) => widget.onUserChange(widget.user.copyWith(firstName: val)),
+  Widget _buildForm(bool isWideLayout) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                initialValue: widget.user.firstName,
+                enabled: widget.isEditing,
+                decoration: const InputDecoration(labelText: 'First Name'),
+                onChanged: (val) => widget.onUserChange(widget.user.copyWith(firstName: val)),
+              ),
             ),
+            if (isWideLayout) const SizedBox(width: 20),
+            if (isWideLayout)
+              Expanded(
+                child: TextFormField(
+                  initialValue: widget.user.lastName,
+                  enabled: widget.isEditing,
+                  decoration: const InputDecoration(labelText: 'Last Name'),
+                  onChanged: (val) => widget.onUserChange(widget.user.copyWith(lastName: val)),
+                ),
+              ),
+          ],
+        ),
+        if (!isWideLayout)
+          TextFormField(
+            initialValue: widget.user.lastName,
+            enabled: widget.isEditing,
+            decoration: const InputDecoration(labelText: 'Last Name'),
+            onChanged: (val) => widget.onUserChange(widget.user.copyWith(lastName: val)),
           ),
-          Expanded(
-            child: TextFormField(
-              initialValue: widget.user.lastName,
-              enabled: widget.isEditing,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-              onChanged: (val) => widget.onUserChange(widget.user.copyWith(lastName: val)),
-            ),
+        const SizedBox(height: 12),
+        TextFormField(
+          initialValue: widget.user.email,
+          enabled: widget.isEditing,
+          decoration: const InputDecoration(labelText: 'Email'),
+          onChanged: (val) => widget.onUserChange(widget.user.copyWith(email: val)),
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: widget.onToggleEdit,
+            child: Text(widget.isEditing ? 'Done' : 'Edit'),
           ),
-          Expanded(
-            child: TextFormField(
-              initialValue: widget.user.email,
-              enabled: widget.isEditing,
-              decoration: const InputDecoration(labelText: 'Email'),
-              onChanged: (val) => widget.onUserChange(widget.user.copyWith(email: val)),
-            ),
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: TextButton(
-              onPressed: widget.onToggleEdit,
-              child: Text(widget.isEditing ? 'Done' : 'Edit'),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
