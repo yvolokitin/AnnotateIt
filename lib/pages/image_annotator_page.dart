@@ -7,7 +7,6 @@ import '../models/project.dart';
 import '../data/annotation_database.dart';
 import '../session/user_session.dart';
 
-import '../widgets/imageannotator/annotation_canvas_demo.dart';
 import '../widgets/imageannotator/annotation_canvas_from_file.dart';
 import '../widgets/imageannotator/annotation_rect.dart';
 import '../widgets/imageannotator/left_toolbar.dart';

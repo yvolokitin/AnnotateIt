@@ -9,20 +9,18 @@ class DatasetStepProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildStep("1", "Dataset Selection", 1),
+        _buildStep("Dataset Selection", 1),
         _buildLine(),
-        _buildStep("2", "Extract ZIP", 2),
+        _buildStep("Extract ZIP", 2),
         _buildLine(),
-        _buildStep("3", "Detect Type", 3),
+        _buildStep("Dataset overview", 3),
         _buildLine(),
-        _buildStep("4", "Labels", 4),
-        _buildLine(),
-        _buildStep("5", "Create Project", 5),
+        _buildStep("Project creation", 4),
       ],
     );
   }
 
-  Widget _buildStep(String number, String label, int stepIndex) {
+  Widget _buildStep(String label, int stepIndex) {
     final isActive = currentStep == stepIndex;
     final isCompleted = currentStep > stepIndex;
     final icon = _getStepIcon(stepIndex);
@@ -70,7 +68,7 @@ class DatasetStepProgressBar extends StatelessWidget {
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             color: isActive || isCompleted ? Colors.white : Colors.white54,
           ),
-          child: Text('$number. $label'),
+          child: Text('$label'),
         ),
       ],
     );
@@ -85,8 +83,6 @@ class DatasetStepProgressBar extends StatelessWidget {
       case 3:
         return Icons.search;
       case 4:
-        return Icons.label_outline;
-      case 5:
         return Icons.check_circle_outline;
       default:
         return Icons.circle;

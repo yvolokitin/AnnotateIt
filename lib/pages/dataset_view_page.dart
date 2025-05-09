@@ -48,7 +48,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   // cache map for dataset tabs to avoid blink when switching tabs
   final Map<String, Widget> _datasetTabCache = {};
 
-  MediaSortOption _sortOption = MediaSortOption.newestFirst;
+  final MediaSortOption _sortOption = MediaSortOption.newestFirst;
 
   @override
   void initState() {

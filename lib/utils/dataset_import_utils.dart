@@ -2,9 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive_io.dart';
 
-import 'dart:io';
-import 'package:archive/archive.dart';
-
 Future<Directory> extractZipToAppFolder(
   File zipFile,
   String storagePath, {
