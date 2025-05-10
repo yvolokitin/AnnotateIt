@@ -1,21 +1,17 @@
 import 'dart:io';
-import 'dart:async';
-import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:logging/logging.dart';
 
 import '../../../session/user_session.dart';
-import '../../../utils/responsive_utils.dart';
 import '../../../utils/dataset_import_utils.dart';
+import '../../../models/dataset_info.dart';
 
 import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
 import '../../../widgets/project_creation/upload_prompt.dart';
 import '../../../widgets/project_creation/step_description_widget.dart';
 import '../../../widgets/project_creation/label_editor_widget.dart';
 import '../../widgets/project_creation/dataset_step_dataset_overview.dart';
-
-import 'create_dataset_logic.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
   const CreateFromDatasetDialog({super.key});
@@ -26,114 +22,86 @@ class CreateFromDatasetDialog extends StatefulWidget {
 
 class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   final Logger _logger = Logger('CreateFromDatasetDialog');
-  File? _selectedFile;
+
+  static const int DATASET_ISOLATE_THRESHOLD = 500 * 1024 * 1024;
+
   bool _isUploading = false;
+  bool _useIsolateMode = false;
   int _currentStep = 1;
-  String? _detectedTaskType;
-  String? _detectedDatasetType;
-  String? _extractedPath;
+  DatasetInfo? _datasetInfo;
   double _progress = 0.0;
-  int _mediaCount = 0;
-  int _annotationCount = 0;
-  List<String> _detectedLabels = [];
 
   void _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['zip']);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
     if (result != null && result.files.single.path != null) {
       final file = File(result.files.single.path!);
-      setState(() => _selectedFile = file);
-      await _processZipLocally(file);
+      await _processZip(file);
     }
   }
 
-  Future<void> _cleanupExtractedPath() async {
-    if (_extractedPath != null) {
-      final dir = Directory(_extractedPath!);
-      if (await dir.exists()) {
-        await dir.delete(recursive: true);
-        _logger.info('Cleaned up extracted directory: $_extractedPath');
-      }
-      try {
-        final rootFolder = dir.parent;
-        if (await rootFolder.exists()) {
-          final contents = rootFolder.listSync();
-          if (contents.isEmpty) {
-            await rootFolder.delete();
-            _logger.info('Cleaned up root folder: ${rootFolder.path}');
-          }
-        }
-      } catch (e) {
-        _logger.warning('Failed to remove root folder: $e');
-      }
-    }
-  }
-
-  Future<void> _processZipLocally(File file) async {
+  Future<void> _processZip(File file) async {
     setState(() {
       _isUploading = true;
       _progress = 0.0;
       _currentStep = 2;
+      _useIsolateMode = false;
     });
 
-    final receivePort = ReceivePort();
-
     try {
-      final storagePath = await getDefaultStoragePath(() => UserSession.instance.getCurrentUserDatasetFolder());
-      await Isolate.spawn(extractInIsolate, [file.path, storagePath, receivePort.sendPort]);
+      final storagePath = await getDefaultStoragePath(() =>
+          UserSession.instance.getCurrentUserDatasetFolder());
 
-      await for (final message in receivePort) {
-        if (message is Map<String, dynamic> && message['type'] == 'extract_progress') {
-          setState(() {
-            _progress = message['progress'] ?? _progress;
-          });
-        } else if (message is Map<String, dynamic> && message['type'] == 'extract_done') {
-          setState(() {
-            _extractedPath = message['path'];
-            _currentStep = 3;
-            _progress = 0.0;
-          });
+      final fileSize = await file.length();
 
-          final detectionReceivePort = ReceivePort();
-          await Isolate.spawn(detectInIsolate, [message['path'], detectionReceivePort.sendPort]);
+      final info = fileSize > DATASET_ISOLATE_THRESHOLD
+          ? await (() async {
+              _useIsolateMode = true;
+              return await processZipLocallyWithIsolates(
+                zipFile: file,
+                storagePath: storagePath,
+                onExtractProgress: (progress) => setState(() => _progress = progress),
+                onExtractDone: (path) => setState(() {
+                  _progress = 0.0;
+                  _currentStep = 3;
+                }),
+                onDetectProgress: (progress) => setState(() => _progress = progress),
+              );
+            })()
+          : await processZipLocally(
+              zipFile: file,
+              storagePath: storagePath,
+              onExtractProgress: (progress) => setState(() => _progress = progress),
+              onExtractDone: (path) => setState(() {
+                _progress = 0.0;
+                _currentStep = 3;
+              }),
+              onDetectProgress: (progress) => setState(() => _progress = progress),
+            );
 
-          await for (final detectionMessage in detectionReceivePort) {
-            if (detectionMessage is Map<String, dynamic> && detectionMessage['type'] == 'detect_progress') {
-              setState(() {
-                _progress = detectionMessage['progress'] ?? _progress;
-              });
-            } else if (detectionMessage is Map<String, dynamic> && detectionMessage['type'] == 'detect_done') {
-              final allFiles = Directory(message['path']).listSync(recursive: true).whereType<File>().toList();
-              final mediaExtensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.mkv'];
-              final annotationExtensions = ['.json', '.xml', '.txt'];
-
-              final mediaFiles = allFiles.where((f) => mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
-              final annotationFiles = allFiles.where((f) => annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
-
-              setState(() {
-                _detectedDatasetType = detectionMessage['datasetType'];
-                _detectedTaskType = detectionMessage['taskType'];
-                _detectedLabels = List<String>.from(detectionMessage['labels'] ?? []);
-                _mediaCount = mediaFiles.length;
-                _annotationCount = annotationFiles.length;
-                _isUploading = false;
-                _progress = 1.0;
-              });
-              break;
-            }
-          }
-
-          break;
-        }
-      }
+      setState(() {
+        _datasetInfo = info;
+        _isUploading = false;
+        _progress = 1.0;
+      });
     } catch (e, stack) {
       _logger.warning('Failed to process ZIP file: $e', e, stack);
-      await _cleanupExtractedPath();
+      if (_datasetInfo != null) {
+        await cleanupExtractedPath(
+          _datasetInfo!.datasetPath,
+          onLog: (msg) => _logger.info(msg),
+        );
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Import failed: $e")),
       );
       setState(() {
         _isUploading = false;
         _currentStep = 1;
+        _datasetInfo = null;
       });
     }
   }
@@ -144,7 +112,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     }
   }
 
-  void _handleCancel() async {
+  Future<void> _handleCancel() async {
     if (_isUploading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -154,7 +122,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       );
       return;
     }
-    if (_extractedPath != null) {
+
+    if (_datasetInfo != null) {
       final shouldCancel = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -178,9 +147,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       );
 
       if (shouldCancel != true) return;
+
+      await cleanupExtractedPath(
+        _datasetInfo!.datasetPath,
+        onLog: (msg) => _logger.info(msg),
+      );
     }
 
-    await _cleanupExtractedPath();
     Navigator.of(context).pop();
   }
 
@@ -210,7 +183,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               return false;
             }
 
-            if (_extractedPath != null) {
+            if (_datasetInfo != null) {
               final shouldCancel = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -234,8 +207,12 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               );
 
               if (shouldCancel != true) return false;
-              await _cleanupExtractedPath();
+              await cleanupExtractedPath(
+                _datasetInfo!.datasetPath,
+                onLog: (msg) => _logger.info(msg),
+              );
             }
+
             return true;
           },
           child: Dialog(
@@ -269,8 +246,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             const SizedBox(height: 4),
             StepDescriptionWidget(
               currentStep: _currentStep,
-              extractedPath: _extractedPath,
-              detectedTaskType: _detectedTaskType,
+              extractedPath: _datasetInfo?.datasetPath,
+              detectedTaskType: _datasetInfo?.taskType,
             ),
             const SizedBox(height: 32),
             DatasetStepProgressBar(currentStep: _currentStep),
@@ -287,23 +264,26 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                             value: _progress == 0.0 || _progress == 1.0 ? null : _progress,
                           ),
                           const SizedBox(height: 24),
-                          Text("Processing... ${(100 * _progress).toInt()}%", style: const TextStyle(color: Colors.white70, fontSize: 18)),
+                          Text(
+                            _progress == 0
+                                ? "Processing..."
+                                : "Processing... ${(100 * _progress).toInt()}%",
+                            style: const TextStyle(color: Colors.white70, fontSize: 18),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _useIsolateMode ? "Isolate Mode Enabled" : "Normal Mode",
+                            style: const TextStyle(color: Colors.white38, fontSize: 14),
+                          ),
                         ],
                       )
                     : _currentStep == 1
                         ? UploadPrompt(onPickFile: _pickFile)
                         : _currentStep == 4
                             ? const LabelEditorWidget()
-                            : StepDatasetOverview(
-                                info: DatasetInfo(
-                                  datasetPath: _extractedPath ?? 'Unknown',
-                                  mediaCount: _mediaCount,
-                                  annotationCount: _annotationCount,
-                                  datasetFormat: _detectedDatasetType ?? 'Unknown',
-                                  taskType: _detectedTaskType ?? 'Unknown',
-                                  labels: _detectedLabels,
-                                ),
-                              ),
+                            : _datasetInfo != null
+                                ? StepDatasetOverview(info: _datasetInfo!)
+                                : const Text("No dataset loaded.", style: TextStyle(color: Colors.white70)),
               ),
             ),
             const SizedBox(height: 24),
@@ -311,18 +291,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    if (_isUploading) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please wait until dataset is fully processed."),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      return;
-                    }
-                    _handleCancel();
-                  },
+                  onPressed: _handleCancel,
                   child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
                 ),
                 if (_currentStep == 3 && !_isUploading)
@@ -345,18 +314,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
           child: IconButton(
             icon: const Icon(Icons.close, color: Colors.white70),
             tooltip: 'Close',
-            onPressed: () {
-              if (_isUploading) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Please wait until dataset is fully processed."),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                return;
-              }
-              _handleCancel();
-            },
+            onPressed: _handleCancel,
           ),
         ),
       ],
