@@ -5,6 +5,7 @@ import 'package:archive/archive_io.dart';
 import 'package:xml/xml.dart';
 
 import '../models/dataset_info.dart';
+import 'dataset_task_type_detector.dart';
 
 class DatasetAnnotationStats {
   final int annotationCount;
@@ -18,7 +19,7 @@ class DatasetAnnotationStats {
   });
 }
 
-Future<DatasetAnnotationStats> countDatasetAnnotations(
+Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(
     Directory datasetDir, String datasetType) async {
   int annotationCount = 0;
   final annotatedMediaFiles = <String>{};
@@ -28,73 +29,34 @@ Future<DatasetAnnotationStats> countDatasetAnnotations(
 
   if (datasetType == 'COCO') {
     final cocoFile = allFiles.firstWhere(
-        (f) => f.path.toLowerCase().endsWith('.json'),
-        orElse: () => File(''));
+      (f) => f.path.toLowerCase().endsWith('.json'),
+      orElse: () => File(''));
 
     if (await cocoFile.exists()) {
-      final jsonMap = jsonDecode(await cocoFile.readAsString());
-      if (jsonMap is Map) {
-        // labels from categories
-        if (jsonMap.containsKey('categories')) {
-          final categories = jsonMap['categories'] as List;
-          for (final category in categories) {
-            if (category is Map && category.containsKey('name')) {
-              labels.add(category['name'].toString());
-            }
-          }
-        }
-        // annotation count + image_ids
-        if (jsonMap.containsKey('annotations')) {
-          final annotations = jsonMap['annotations'] as List;
-          annotationCount = annotations.length;
-          for (final annotation in annotations) {
-            if (annotation is Map) {
-              if (annotation.containsKey('image_id')) {
-                annotatedMediaFiles.add(annotation['image_id'].toString());
-              }
-              if (annotation.containsKey('category_id')) {
-                labels.add(annotation['category_id'].toString()); // fallback
-              }
-            }
-          }
-        }
-      }
+      await _parseCocoAnnotations(
+        cocoFile,
+        labels,
+        annotatedMediaFiles,
+        (count) => annotationCount = count,
+      );
     }
+
   } else if (datasetType == 'YOLO') {
-    final txtFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.txt'));
-    for (final file in txtFiles) {
-      final lines = await file.readAsLines();
-      if (lines.isNotEmpty) {
-        annotationCount += lines.length;
-        annotatedMediaFiles.add(file.uri.pathSegments.last.replaceAll('.txt', ''));
-        for (final line in lines) {
-          final parts = line.trim().split(' ');
-          if (parts.isNotEmpty) {
-            labels.add(parts.first); // class id as label
-          }
-        }
-      }
-    }
+    await _parseYOLOAnnotations(
+      allFiles,
+      labels,
+      annotatedMediaFiles,
+      (count) => annotationCount = count,
+    );
+
   } else if (datasetType == 'VOC') {
-    final xmlFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.xml'));
-    for (final file in xmlFiles) {
-      final document = XmlDocument.parse(await file.readAsString());
-      final objects = document.findAllElements('object').toList();
-      if (objects.isNotEmpty) {
-        annotationCount += objects.length;
-        final filenameElement = document.findAllElements('filename').firstOrNull;
-        if (filenameElement != null) {
-          annotatedMediaFiles.add(filenameElement.text);
-        }
-        // labels
-        for (final obj in objects) {
-          final nameElem = obj.findElements('name').firstOrNull;
-          if (nameElem != null) {
-            labels.add(nameElem.text);
-          }
-        }
-      }
-    }
+    await _parseVOCAnnotations(
+      allFiles,
+      labels,
+      annotatedMediaFiles,
+      (count) => annotationCount = count,
+    );
+
   } else if (datasetType == 'LabelMe') {
     final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
     for (final file in jsonFiles) {
@@ -112,45 +74,15 @@ Future<DatasetAnnotationStats> countDatasetAnnotations(
         }
       }
     }
+
   } else if (datasetType == 'Datumaro') {
-    final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
-    for (final file in jsonFiles) {
-      final jsonMap = jsonDecode(await file.readAsString());
-      if (jsonMap is Map) {
-        // labels from categories
-        if (jsonMap.containsKey('categories')) {
-          final categories = jsonMap['categories'] as Map;
-          for (final category in categories.values) {
-            if (category is Map && category.containsKey('labels')) {
-              final labelsList = category['labels'] as List;
-              for (final label in labelsList) {
-                if (label is Map && label.containsKey('name')) {
-                  labels.add(label['name'].toString());
-                }
-              }
-            }
-          }
-        }
-        // annotations + annotated items
-        if (jsonMap.containsKey('items') && jsonMap['items'] is List) {
-          final items = jsonMap['items'] as List;
-          for (final item in items) {
-            if (item is Map) {
-              final itemAnnotations = item['annotations'] as List? ?? [];
-              if (itemAnnotations.isNotEmpty) {
-                annotationCount += itemAnnotations.length;
-                annotatedMediaFiles.add(item['id'].toString());
-                for (final annotation in itemAnnotations) {
-                  if (annotation is Map && annotation.containsKey('label')) {
-                    labels.add(annotation['label'].toString());
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    await _parseDatumaroAnnotations(
+      allFiles,
+      labels,
+      annotatedMediaFiles,
+      (count) => annotationCount = count,
+    );
+
   } else {
     // fallback heuristic for unknown dataset types
     final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
@@ -166,6 +98,7 @@ Future<DatasetAnnotationStats> countDatasetAnnotations(
     }
   }
 
+  print('labels: $labels');
   return DatasetAnnotationStats(
     annotationCount: annotationCount,
     annotatedFilesCount: annotatedMediaFiles.length,
@@ -176,6 +109,232 @@ Future<DatasetAnnotationStats> countDatasetAnnotations(
 // Dart 3 helper extension
 extension FirstOrNullExtension<E> on Iterable<E> {
   E? get firstOrNull => isEmpty ? null : first;
+}
+
+Future<void> _parseCocoAnnotations(
+    File cocoFile,
+    Set<String> labels,
+    Set<String> annotatedMediaFiles,
+    void Function(int count) setAnnotationCount) async {
+
+  final jsonMap = jsonDecode(await cocoFile.readAsString());
+  if (jsonMap is! Map) return;
+
+  // Prepare categoryId → name map
+  final categoryIdToName = <int, String>{};
+  if (jsonMap.containsKey('categories')) {
+    final categories = jsonMap['categories'] as List;
+    for (final category in categories) {
+      if (category is Map &&
+          category.containsKey('id') &&
+          category.containsKey('name')) {
+        categoryIdToName[category['id']] = category['name'].toString();
+        labels.add(category['name'].toString());
+      }
+    }
+  }
+
+  // Count annotations + collect image_ids
+  if (jsonMap.containsKey('annotations')) {
+    final annotations = jsonMap['annotations'] as List;
+    setAnnotationCount(annotations.length);
+    for (final annotation in annotations) {
+      if (annotation is Map) {
+        if (annotation.containsKey('image_id')) {
+          annotatedMediaFiles.add(annotation['image_id'].toString());
+        }
+        if (annotation.containsKey('category_id')) {
+          final categoryId = annotation['category_id'];
+          if (categoryIdToName.containsKey(categoryId)) {
+            labels.add(categoryIdToName[categoryId]!);
+          }
+        }
+      }
+    }
+  }
+}
+
+Future<void> _parseYOLOAnnotations(
+  List<File> allFiles,
+  Set<String> labels,
+  Set<String> annotatedMediaFiles,
+  void Function(int count) setAnnotationCount,
+) async {
+  int annotationCount = 0;
+
+  // Exclude dataset split and metadata files
+  final excludedFiles = {'train.txt', 'val.txt', 'test.txt'};
+  final txtFiles = allFiles.where((f) =>
+      f.path.toLowerCase().endsWith('.txt') &&
+      !excludedFiles.contains(f.uri.pathSegments.last.toLowerCase())
+  );
+
+  // Step 1: Load classes.txt or obj.names if exists
+  Map<String, String> classMap = {};
+  final classesFile = allFiles.firstWhere(
+    (f) => f.path.toLowerCase().endsWith('classes.txt') ||
+           f.path.toLowerCase().endsWith('obj.names'),
+    orElse: () => File(''),
+  );
+
+  if (await classesFile.exists()) {
+    final lines = await classesFile.readAsLines();
+    for (int i = 0; i < lines.length; i++) {
+      final className = lines[i].trim();
+      if (className.isNotEmpty) {
+        classMap[i.toString()] = className;
+      }
+    }
+  }
+
+  // Step 2: Parse annotation files
+  for (final file in txtFiles) {
+    final fileName = file.uri.pathSegments.last.toLowerCase();
+    if (fileName == 'classes.txt' || fileName == 'obj.names') {
+      continue; // skip classes file
+    }
+
+    final lines = await file.readAsLines();
+    if (lines.isNotEmpty) {
+      annotationCount += lines.length;
+
+      // Add media file name (usually image file with same name)
+      annotatedMediaFiles.add(
+          file.uri.pathSegments.last.replaceAll('.txt', ''));
+
+      for (final line in lines) {
+        final parts = line.trim().split(RegExp(r'\s+'));
+        if (parts.isNotEmpty) {
+          final classId = parts.first;
+          // Use mapped label if available, otherwise fallback to class ID
+          labels.add(classMap[classId] ?? classId);
+        }
+      }
+    }
+  }
+
+  setAnnotationCount(annotationCount);
+}
+
+Future<void> _parseVOCAnnotations(
+    List<File> allFiles,
+    Set<String> labels,
+    Set<String> annotatedMediaFiles,
+    void Function(int count) setAnnotationCount) async {
+
+  int annotationCountLocal = 0;
+  final xmlFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.xml'));
+
+  if (xmlFiles.isNotEmpty) {
+    // Standard VOC XML parsing
+    for (final file in xmlFiles) {
+      final document = XmlDocument.parse(await file.readAsString());
+      final objects = document.findAllElements('object').toList();
+      if (objects.isNotEmpty) {
+        annotationCountLocal += objects.length;
+        final filenameElement =
+            document.findAllElements('filename').firstOrNull;
+        if (filenameElement != null) {
+          annotatedMediaFiles.add(filenameElement.text);
+        }
+        for (final obj in objects) {
+          final nameElem = obj.findElements('name').firstOrNull;
+          if (nameElem != null) {
+            labels.add(nameElem.text);
+          }
+        }
+      }
+    }
+  }
+
+  if (annotationCountLocal == 0) {
+    // Fallback: check for labelmap.txt (custom dataset style)
+    final labelmapFile = allFiles.firstWhere(
+        (f) => f.path.toLowerCase().endsWith('labelmap.txt'),
+        orElse: () => File(''));
+    if (await labelmapFile.exists()) {
+      final lines = await labelmapFile.readAsLines();
+      for (final line in lines) {
+        final trimmed = line.trim();
+        if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+
+        final parts = trimmed.split(':');
+        if (parts.isNotEmpty) {
+          final label = parts.first.trim();
+          // skip background + empty labels
+          if (label.toLowerCase() != 'background' && label.isNotEmpty) {
+            labels.add(label);
+          }
+        }
+      }
+    }
+
+    // Fallback: assume every image file belongs to dataset
+    final imageFiles = allFiles.where((f) =>
+        f.path.toLowerCase().endsWith('.jpg') ||
+        f.path.toLowerCase().endsWith('.jpeg') ||
+        f.path.toLowerCase().endsWith('.png') ||
+        f.path.toLowerCase().endsWith('.bmp') ||
+        f.path.toLowerCase().endsWith('.webp'));
+
+    annotatedMediaFiles.addAll(
+        imageFiles.map((f) => f.uri.pathSegments.last));
+
+    annotationCountLocal = imageFiles.length; // fake annotation count = image count
+  }
+
+  setAnnotationCount(annotationCountLocal);
+}
+
+Future<void> _parseDatumaroAnnotations(
+    List<File> allFiles,
+    Set<String> labels,
+    Set<String> annotatedMediaFiles,
+    void Function(int count) setAnnotationCount) async {
+
+  int annotationCountLocal = 0;
+  final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
+
+  for (final file in jsonFiles) {
+    final jsonMap = jsonDecode(await file.readAsString());
+    if (jsonMap is Map) {
+      // labels from categories
+      if (jsonMap.containsKey('categories')) {
+        final categories = jsonMap['categories'] as Map;
+        for (final category in categories.values) {
+          if (category is Map && category.containsKey('labels')) {
+            final labelsList = category['labels'] as List;
+            for (final label in labelsList) {
+              if (label is Map && label.containsKey('name')) {
+                labels.add(label['name'].toString());
+              }
+            }
+          }
+        }
+      }
+
+      // annotations + annotated items
+      if (jsonMap.containsKey('items') && jsonMap['items'] is List) {
+        final items = jsonMap['items'] as List;
+        for (final item in items) {
+          if (item is Map) {
+            final itemAnnotations = item['annotations'] as List? ?? [];
+            if (itemAnnotations.isNotEmpty) {
+              annotationCountLocal += itemAnnotations.length;
+              annotatedMediaFiles.add(item['id'].toString());
+              for (final annotation in itemAnnotations) {
+                if (annotation is Map && annotation.containsKey('label')) {
+                  labels.add(annotation['label'].toString());
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  setAnnotationCount(annotationCountLocal);
 }
 
 /// Extracts a ZIP file to the given [storagePath] folder.
@@ -297,7 +456,9 @@ Future<String> detectDatasetType(
       } else if (name.endsWith('.txt')) {
         // YOLO format heuristic
         final lines = await file.readAsLines();
-        if (lines.isNotEmpty) {
+        if (file.uri.pathSegments.last.toLowerCase() == 'labelmap.txt') {
+          isVOC = true;
+        } else if (lines.isNotEmpty) {
           final parts = lines.first.trim().split(' ');
           if (parts.length == 5 && parts.every((p) => double.tryParse(p) != null)) {
             isYOLO = true;
@@ -327,94 +488,6 @@ Future<String> detectDatasetType(
   if (hasImages && hasVideos) return 'ImagesAndVideos';
 
   return 'Unknown';
-}
-
-Future<String> detectDatasetTaskType(Directory datasetDir) async {
-  final annotationExtensions = ['.json', '.xml', '.txt'];
-  final allFiles = datasetDir.listSync(recursive: true).whereType<File>().toList();
-
-  final annotationFiles = allFiles.where((f) =>
-      annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
-
-  if (annotationFiles.isEmpty) {
-    return "Unknown";
-  }
-
-  final File firstAnnotation = annotationFiles.first;
-  final String name = firstAnnotation.path.toLowerCase();
-
-  try {
-    if (name.endsWith('.json')) {
-      final text = await firstAnnotation.readAsString();
-      final jsonMap = jsonDecode(text);
-
-      if (jsonMap is Map) {
-        // Datumaro format detection
-        if (jsonMap.containsKey('items') && jsonMap['items'] is List) {
-          final items = jsonMap['items'] as List;
-          if (items.isNotEmpty && items.first is Map) {
-            final item = items.first as Map;
-            if (item.containsKey('annotations') && item['annotations'] is List) {
-              final annotations = item['annotations'] as List;
-              if (annotations.isNotEmpty && annotations.first is Map) {
-                final annotation = annotations.first as Map;
-                final type = annotation['type'];
-                if (type == 'bbox') return "Detection";
-                if (type == 'polygon' || type == 'mask' || type == 'segmentation') return "Segmentation";
-              }
-            }
-          }
-        }
-
-        // COCO style
-        if (jsonMap.containsKey('annotations')) {
-          final annotations = jsonMap['annotations'];
-          if (annotations is List && annotations.isNotEmpty) {
-            final first = annotations.first;
-            if (first is Map) {
-              if (first.containsKey('bbox') || first.containsKey('oriented_bbox')) {
-                return "Detection";
-              }
-              if (first.containsKey('segmentation') || first.containsKey('mask') || first.containsKey('rle')) {
-                return "Segmentation";
-              }
-            }
-          }
-        }
-
-        // LabelMe style
-        if (jsonMap.containsKey('shapes')) {
-          return "Detection";
-        }
-
-        // Datumaro label-only dataset
-        if (jsonMap.containsKey('labels') || jsonMap.containsKey('categories')) {
-          return "Classification";
-        }
-      }
-    } else if (name.endsWith('.xml')) {
-      final text = await firstAnnotation.readAsString();
-      if (text.contains('<bndbox>') || text.contains('<oriented_bbox>')) {
-        return "Detection";
-      }
-      if (text.contains('<segmentation>') || text.contains('<mask>')) {
-        return "Segmentation";
-      }
-    } else if (name.endsWith('.txt')) {
-      final lines = await firstAnnotation.readAsLines();
-      if (lines.isNotEmpty) {
-        final parts = lines.first.trim().split(' ');
-        if (parts.length >= 5 && parts.every((p) => double.tryParse(p) != null || int.tryParse(p) != null)) {
-          return "Detection";
-        }
-        if (parts.length == 1) {
-          return "Classification";
-        }
-      }
-    }
-  } catch (_) {}
-
-  return "Unknown";
 }
 
 /// Deletes extracted dataset folder at [extractedPath].
@@ -474,7 +547,7 @@ Future<DatasetInfo> processZipLocally({
   );
 
   // Detect task type (Detection, Segmentation, Classification etc.)
-  String taskType = await detectDatasetTaskType(extractedDir);
+  List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
 
   // Get media files
   final allFiles = extractedDir.listSync(recursive: true).whereType<File>().toList();
@@ -483,7 +556,7 @@ Future<DatasetInfo> processZipLocally({
       mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
   // 🟢 Use new high-quality annotation stats function
-  final stats = await countDatasetAnnotations(extractedDir, datasetType);
+  final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
 
   // Just collect annotation file names for label list (same as before)
   final annotationExtensions = ['.json', '.xml', '.txt'];
@@ -491,12 +564,13 @@ Future<DatasetInfo> processZipLocally({
       annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
   return DatasetInfo(
+    zipFileName: zipFile.path.split(Platform.pathSeparator).last,
     datasetPath: extractedDir.path,
     mediaCount: mediaFiles.length,
     annotationCount: stats.annotationCount,
     annotatedFilesCount: stats.annotatedFilesCount,
     datasetFormat: datasetType,
-    taskType: taskType,
+    taskTypes: detectedTaskTypes,
     labels: stats.labels.toList(),
   );
 }
@@ -566,10 +640,10 @@ Future<DatasetInfo> processZipLocallyWithIsolates({
       mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
   // Count real annotation + annotated media files
-  final stats = await countDatasetAnnotations(extractedDir, datasetType);
+  final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
 
   // Detect task type based on dataset type + annotations
-  String taskType = await detectDatasetTaskType(extractedDir);
+  List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
 
   // Collect annotation file names for label list (same as before)
   final annotationExtensions = ['.json', '.xml', '.txt'];
@@ -577,12 +651,13 @@ Future<DatasetInfo> processZipLocallyWithIsolates({
       annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
   return DatasetInfo(
+    zipFileName: zipFile.path.split(Platform.pathSeparator).last,
     datasetPath: extractedPath,
     mediaCount: mediaFiles.length,
     annotationCount: stats.annotationCount,
     annotatedFilesCount: stats.annotatedFilesCount,
     datasetFormat: datasetType,
-    taskType: taskType,
+    taskTypes: detectedTaskTypes,
     labels: stats.labels.toList(),
   );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
-  final int currentStep; // 1 = Select, 2 = Extract, 3 = Detect, 4 = Labels, 5 = Create
+  final int currentStep; // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project
 
   const DatasetStepProgressBar({super.key, required this.currentStep});
 
@@ -13,9 +13,11 @@ class DatasetStepProgressBar extends StatelessWidget {
         _buildLine(),
         _buildStep("Extract ZIP", 2),
         _buildLine(),
-        _buildStep("Dataset overview", 3),
+        _buildStep("Dataset Overview", 3),
         _buildLine(),
-        _buildStep("Project creation", 4),
+        _buildStep("Task Confirmation", 4),
+        _buildLine(),
+        _buildStep("Project Creation", 5),
       ],
     );
   }
@@ -30,7 +32,7 @@ class DatasetStepProgressBar extends StatelessWidget {
         Tooltip(
           message: label,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             width: 48,
             height: 48,
@@ -62,13 +64,13 @@ class DatasetStepProgressBar extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         AnimatedDefaultTextStyle(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           style: TextStyle(
             fontSize: 14,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             color: isActive || isCompleted ? Colors.white : Colors.white54,
           ),
-          child: Text('$label'),
+          child: Text(label, textAlign: TextAlign.center),
         ),
       ],
     );
@@ -81,9 +83,11 @@ class DatasetStepProgressBar extends StatelessWidget {
       case 2:
         return Icons.unarchive;
       case 3:
-        return Icons.search;
+        return Icons.grid_view;
       case 4:
-        return Icons.check_circle_outline;
+        return Icons.checklist;
+      case 5:
+        return Icons.build_circle;
       default:
         return Icons.circle;
     }
@@ -91,11 +95,11 @@ class DatasetStepProgressBar extends StatelessWidget {
 
   Widget _buildLine() => Expanded(
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           height: 2,
           color: Colors.deepOrange[300],
         ),
       );
-} 
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/dataset_info.dart';
+import 'dataset_show_all_labels_dialog.dart';
 
 class StepDatasetOverview extends StatelessWidget {
   final DatasetInfo info;
@@ -9,44 +10,40 @@ class StepDatasetOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
             children: [
-              _buildInfoRow("Dataset Path", info.datasetPath),
-              _buildInfoRow("Dataset Type", info.datasetFormat),
-              _buildInfoRow("Task Type", info.taskType),
-              _buildInfoRow("Media Files", info.mediaCount.toString()),
-              _buildInfoRow("Annotated Media Files", info.annotatedFilesCount.toString()),
-              _buildInfoRow("Total Number Annotations", info.annotationCount.toString()),
-              const SizedBox(height: 16),
-              const Text(
-                "Detected Labels",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              _buildCard(
+                context,
+                "Dataset Name and Path",
+                [
+                  _buildRow(context, "Dataset ZIP File name", info.zipFileName),
+                  _buildRow(context, "Dataset Path", info.datasetPath),
+                  _buildRow(context, "Number of Media Files", info.mediaCount.toString()),
+                ],
               ),
-              const SizedBox(height: 8),
-              info.labels.isNotEmpty
-                  ? Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      alignment: WrapAlignment.center,
-                      children: info.labels
-                          .map((label) => Chip(
-                                label: Text(label,
-                                    style: const TextStyle(color: Colors.black)),
-                                backgroundColor: Colors.redAccent,
-                              ))
-                          .toList(),
-                    )
-                  : const Text("No labels detected.",
-                      style: TextStyle(color: Colors.white54)),
+              _buildCard(
+                context,
+                "Dataset Type and Format",
+                [
+                  _buildRow(context, "Dataset Format", info.datasetFormat),
+                  _buildTaskTypesRow(context, info.taskTypes),
+                ],
+              ),
+              _buildCard(
+                context,
+                "Dataset Annotations",
+                [
+                  _buildRow(context, "Number of Annotated Files", info.annotatedFilesCount.toString()),
+                  _buildRow(context, "Number of Annotations", info.annotationCount.toString()),
+                ],
+              ),
+              _buildLabelsCard(context, "Dataset Labels", info.labels),
             ],
           ),
         ),
@@ -54,23 +51,225 @@ class StepDatasetOverview extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String title, String value) {
+  Widget _buildCard(BuildContext context, String title, List<Widget> rows) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 280,
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            splashColor: Colors.redAccent.withOpacity(0.2),
+            onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.flutter_dash, color: Colors.redAccent, size: 30),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ...rows,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskTypesRow(BuildContext context, List<String> taskTypes) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Dataset Task(s):",
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: taskTypes
+                /*.map((task) => Chip(
+                      label: Text(task,
+                          style: const TextStyle(color: Colors.black)),
+                      backgroundColor: Colors.redAccent,
+                    ))*/
+                .map((task) => Text(task, style: const TextStyle(fontSize: 16))).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabelsCard(BuildContext context, String title, List<String> labels) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    int maxLabels = _getMaxLabelsForScreen(context);
+    bool hasMore = labels.length > maxLabels;
+    List<String> visibleLabels = labels.take(maxLabels).toList();
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 280,
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            splashColor: Colors.redAccent.withOpacity(0.2),
+            onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.flutter_dash, color: Colors.redAccent, size: 30),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "Total: ${labels.length}",
+                    style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 10),
+                  visibleLabels.isNotEmpty
+                      ? Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: visibleLabels
+                              .map((label) => Chip(
+                                    label: Text(label,
+                                        style: const TextStyle(color: Colors.black)),
+                                    backgroundColor: Colors.redAccent,
+                                  ))
+                              .toList(),
+                        )
+                      : Text("No labels detected.",
+                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+                  if (hasMore) ...[
+                    const SizedBox(height: 10),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _showAllLabelsDialog(context, labels),
+                      label: const Text("Show all labels"),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAllLabelsDialog(BuildContext context, List<String> labels) {
+    showDialog(
+      context: context,
+      builder: (context) => ShowAllLabelsDialog(labels: labels),
+    );
+  }
+
+  int _getMaxLabelsForScreen(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    if (width >= 1600) return 13; // desktop
+    if (width >= 800) return 7; // tablet
+    return 3; // small / mobile
+  }
+
+  Widget _buildRow(BuildContext context, String key, String value) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "$title: ",
-            style: const TextStyle(
-              color: Colors.white,
+            "$key: ",
+            style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
             ),
           ),
-          Flexible(
+          Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white70),
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

@@ -10,9 +10,8 @@ import '../../../models/dataset_info.dart';
 import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
 import '../../../widgets/project_creation/upload_prompt.dart';
 import '../../../widgets/project_creation/step_description_widget.dart';
-import '../../../widgets/project_creation/label_editor_widget.dart';
-
 import '../../widgets/project_creation/dataset_step_dataset_overview.dart';
+import '../../widgets/project_creation/step_dataset_task_confirmation.dart';
 import '../../widgets/project_creation/dataset_discard_confirmation_dialog.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
@@ -109,7 +108,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   }
 
   void _goToNextStep() {
-    if (_currentStep < 5) {
+    if (_currentStep == 3 && _datasetInfo != null) {
+      setState(() => _currentStep = 4);
+    } else if (_currentStep < 5) {
       setState(() => _currentStep += 1);
     }
   }
@@ -203,15 +204,15 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               "Import Dataset to Create Project",
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             StepDescriptionWidget(
               currentStep: _currentStep,
               extractedPath: _datasetInfo?.datasetPath,
-              detectedTaskType: _datasetInfo?.taskType,
+              datasetFormat: _datasetInfo?.datasetFormat,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             DatasetStepProgressBar(currentStep: _currentStep),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Expanded(
               child: Center(
                 child: _isUploading
@@ -227,7 +228,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                           Text(
                             _progress == 0
                                 ? "Processing..."
-                                : "Processing... ${(100 * _progress).toInt()}%",
+                                : "Processing... \${(100 * _progress).toInt()}%",
                             style: const TextStyle(color: Colors.white70, fontSize: 18),
                           ),
                           const SizedBox(height: 8),
@@ -237,13 +238,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                           ),
                         ],
                       )
-                    : _currentStep == 1
-                        ? UploadPrompt(onPickFile: _pickFile)
-                        : _currentStep == 4
-                            ? const LabelEditorWidget()
-                            : _datasetInfo != null
-                                ? StepDatasetOverview(info: _datasetInfo!)
-                                : const Text("No dataset loaded.", style: TextStyle(color: Colors.white70)),
+                    : _buildStepContent(),
               ),
             ),
             const SizedBox(height: 24),
@@ -254,7 +249,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                   onPressed: _handleCancel,
                   child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
                 ),
-                if (_currentStep == 3 && !_isUploading)
+                if ((_currentStep == 3 || _currentStep == 4) && !_isUploading)
                   ElevatedButton(
                     onPressed: _goToNextStep,
                     style: ElevatedButton.styleFrom(
@@ -262,7 +257,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text("Create Project", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      _currentStep == 3 ? "Next: Confirm Task" : "Create Project",
+                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
                   ),
               ],
             ),
@@ -279,5 +277,25 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         ),
       ],
     );
+  }
+
+  Widget _buildStepContent() {
+    if (_currentStep == 1) {
+      return UploadPrompt(onPickFile: _pickFile);
+    } else if (_currentStep == 3 && _datasetInfo != null) {
+      return StepDatasetOverview(info: _datasetInfo!);
+    } else if (_currentStep == 4 && _datasetInfo != null) {
+      return StepDatasetTaskConfirmation(
+        info: _datasetInfo!,
+        onConfirm: (selectedTask) {
+          setState(() {
+            _datasetInfo = _datasetInfo!.copyWith(selectedTaskType: selectedTask);
+            _currentStep = 5;
+          });
+        },
+      );
+    } else {
+      return const Text("No dataset loaded.", style: TextStyle(color: Colors.white70));
+    }
   }
 }

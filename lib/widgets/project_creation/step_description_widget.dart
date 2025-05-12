@@ -1,17 +1,16 @@
-// widgets/step_description_widget.dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StepDescriptionWidget extends StatelessWidget {
   final int currentStep;
   final String? extractedPath;
-  final String? detectedTaskType;
+  final String? datasetFormat;
 
   const StepDescriptionWidget({
     super.key,
     required this.currentStep,
     this.extractedPath,
-    this.detectedTaskType,
+    this.datasetFormat,
   });
 
   @override
@@ -47,7 +46,7 @@ class StepDescriptionWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Detected task type: $detectedTaskType",
+            "Detected task type: $datasetFormat",
             style: const TextStyle(fontSize: 22, color: Colors.white70),
           ),
         ],
