@@ -11,7 +11,9 @@ import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
 import '../../../widgets/project_creation/upload_prompt.dart';
 import '../../../widgets/project_creation/step_description_widget.dart';
 import '../../../widgets/project_creation/label_editor_widget.dart';
+
 import '../../widgets/project_creation/dataset_step_dataset_overview.dart';
+import '../../widgets/project_creation/dataset_discard_confirmation_dialog.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
   const CreateFromDatasetDialog({super.key});
@@ -124,28 +126,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     }
 
     if (_datasetInfo != null) {
-      final shouldCancel = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: const Text("Discard Imported Dataset?", style: TextStyle(color: Colors.white)),
-          content: const Text(
-            "You have already imported a dataset. Cancelling now will delete the extracted files. Are you sure you want to proceed?",
-            style: TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("Keep", style: TextStyle(color: Colors.white54)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("Discard", style: TextStyle(color: Colors.redAccent)),
-            ),
-          ],
-        ),
-      );
-
+      final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
       if (shouldCancel != true) return;
 
       await cleanupExtractedPath(
@@ -184,28 +165,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             }
 
             if (_datasetInfo != null) {
-              final shouldCancel = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: Colors.grey[900],
-                  title: const Text("Discard Imported Dataset?", style: TextStyle(color: Colors.white)),
-                  content: const Text(
-                    "You have already imported a dataset. Cancelling now will delete the extracted files. Are you sure you want to proceed?",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text("Keep", style: TextStyle(color: Colors.white54)),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text("Discard", style: TextStyle(color: Colors.redAccent)),
-                    ),
-                  ],
-                ),
-              );
-
+              final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
               if (shouldCancel != true) return false;
               await cleanupExtractedPath(
                 _datasetInfo!.datasetPath,
@@ -302,7 +262,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text("Continue", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    child: const Text("Create Project", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                   ),
               ],
             ),
