@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/project_creation/task_type_grid.dart';
-// import '../../../widgets/create_project_dialog_task.dart';
+
+import '../../../widgets/project_creation/dataset_task_type_grid.dart';
 
 class ClassificationTab extends StatelessWidget {
   final String selectedTaskType;

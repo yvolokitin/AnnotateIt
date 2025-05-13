@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/dataset_info.dart';
-import 'dataset_show_all_labels_dialog.dart';
+
+import 'dataset_dialog_show_all_labels.dart';
 
 class StepDatasetOverview extends StatelessWidget {
   final DatasetInfo info;
@@ -129,11 +130,6 @@ class StepDatasetOverview extends StatelessWidget {
             spacing: 6,
             runSpacing: 4,
             children: taskTypes
-                /*.map((task) => Chip(
-                      label: Text(task,
-                          style: const TextStyle(color: Colors.black)),
-                      backgroundColor: Colors.redAccent,
-                    ))*/
                 .map((task) => Text(task, style: const TextStyle(fontSize: 16))).toList(),
           ),
         ],

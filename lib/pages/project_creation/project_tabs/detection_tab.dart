@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/project_creation/task_type_grid.dart';
+
+import '../../../widgets/project_creation/dataset_task_type_grid.dart';
 
 class DetectionTab extends StatelessWidget {
   final String selectedTaskType;

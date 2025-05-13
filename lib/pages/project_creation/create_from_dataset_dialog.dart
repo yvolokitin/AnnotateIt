@@ -7,12 +7,13 @@ import '../../../session/user_session.dart';
 import '../../../utils/dataset_import_utils.dart';
 import '../../../models/dataset_info.dart';
 
+import '../../widgets/project_creation/dataset_upload_prompt.dart';
+import '../../widgets/project_creation/dataset_step_description_widget.dart';
+import '../../widgets/project_creation/dataset_step_task_confirmation.dart';
+
 import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
-import '../../../widgets/project_creation/upload_prompt.dart';
-import '../../../widgets/project_creation/step_description_widget.dart';
-import '../../widgets/project_creation/dataset_step_dataset_overview.dart';
-import '../../widgets/project_creation/step_dataset_task_confirmation.dart';
-import '../../widgets/project_creation/dataset_discard_confirmation_dialog.dart';
+import '../../../widgets/project_creation/dataset_step_dataset_overview.dart';
+import '../../../widgets/project_creation/dataset_dialog_discard_confirmation.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
   const CreateFromDatasetDialog({super.key});
@@ -287,10 +288,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     } else if (_currentStep == 4 && _datasetInfo != null) {
       return StepDatasetTaskConfirmation(
         info: _datasetInfo!,
-        onConfirm: (selectedTask) {
+        onSelectionChanged: (selectedTask) {
           setState(() {
             _datasetInfo = _datasetInfo!.copyWith(selectedTaskType: selectedTask);
-            _currentStep = 5;
+            // _currentStep = 5;
           });
         },
       );
