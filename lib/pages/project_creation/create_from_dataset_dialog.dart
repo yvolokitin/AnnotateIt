@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:logging/logging.dart';
 
+import '../../../models/dataset_info.dart';
 import '../../../session/user_session.dart';
 import '../../../utils/dataset_import_utils.dart';
-import '../../../models/dataset_info.dart';
+import '../../../utils/dataset_import_project_creation.dart';
 
 import '../../widgets/project_creation/dataset_upload_prompt.dart';
 import '../../widgets/project_creation/dataset_step_description_widget.dart';
 import '../../widgets/project_creation/dataset_step_task_confirmation.dart';
-
 import '../../../widgets/project_creation/dataset_step_progress_bar.dart';
 import '../../../widgets/project_creation/dataset_step_dataset_overview.dart';
+import '../../../widgets/project_creation/dataset_step_project_creation.dart';
+
 import '../../../widgets/project_creation/dataset_dialog_discard_confirmation.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
@@ -24,6 +26,7 @@ class CreateFromDatasetDialog extends StatefulWidget {
 
 class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   final Logger _logger = Logger('CreateFromDatasetDialog');
+  String? _projectCreationError;
 
   static const int DATASET_ISOLATE_THRESHOLD = 500 * 1024 * 1024;
 
@@ -108,9 +111,59 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     }
   }
 
-  void _goToNextStep() {
+  Future<void> _goToNextStep() async {
+    // move from Step 3 to Step 4 (task confirmation)
     if (_currentStep == 3 && _datasetInfo != null) {
+      _datasetInfo = _datasetInfo!.withDefaultSelectedTaskType();
       setState(() => _currentStep = 4);
+
+    // move from Step 4 to Step 5 (create project)
+    } else if (_currentStep == 4 && _datasetInfo != null) {
+      final selectedTask = _datasetInfo!.selectedTaskType?.trim();
+      if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
+        await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              backgroundColor: Colors.grey[850],
+              title: const Text(
+                'No any Project type selected',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: const Text(
+                'Please select a Project Type based on the detected annotation types in your dataset, or enable project type change to choose a different type.',
+                style: TextStyle(color: Colors.white70),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('OK', style: TextStyle(color: Colors.redAccent)),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
+          },
+        );
+        return;
+      }
+
+      setState(() {
+        _currentStep = 5;
+        _projectCreationError = null;
+      });
+
+      try {
+        await DatasetImportProjectCreation.createProjectWithDataset(_datasetInfo!);
+        if (!mounted) return;
+        Navigator.of(context).pop(); // Close full dialog after success
+
+      } catch (e) {
+        _logger.severe('Failed to create project: $e');
+        if (!mounted) return;
+        setState(() {
+          _projectCreationError = e.toString();
+        });
+      }
+
     } else if (_currentStep < 5) {
       setState(() => _currentStep += 1);
     }
@@ -283,18 +336,21 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   Widget _buildStepContent() {
     if (_currentStep == 1) {
       return UploadPrompt(onPickFile: _pickFile);
+    
     } else if (_currentStep == 3 && _datasetInfo != null) {
       return StepDatasetOverview(info: _datasetInfo!);
+
     } else if (_currentStep == 4 && _datasetInfo != null) {
       return StepDatasetTaskConfirmation(
         info: _datasetInfo!,
         onSelectionChanged: (selectedTask) {
           setState(() {
             _datasetInfo = _datasetInfo!.copyWith(selectedTaskType: selectedTask);
-            // _currentStep = 5;
           });
         },
       );
+    } else if (_currentStep == 5) {
+      return StepDatasetProjectCreation(errorMessage: _projectCreationError);
     } else {
       return const Text("No dataset loaded.", style: TextStyle(color: Colors.white70));
     }

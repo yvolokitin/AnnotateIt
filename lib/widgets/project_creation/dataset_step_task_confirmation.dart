@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'dataset_dialog_project_type_helper.dart';
 import '../../../models/dataset_info.dart';
 
 class StepDatasetTaskConfirmation extends StatefulWidget {
@@ -57,22 +59,50 @@ class StepDatasetTaskConfirmationState
           children: [
             Row(
               children: [
-                const Text(
-                  "Confirm Dataset Task",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                const Expanded(
+                  child: Text(
+                    "Choose your Project type based on detected annotations",
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
                 ),
-                const Spacer(),
                 Row(
                   children: [
-                    const Text("Ignore disabled", style: TextStyle(color: Colors.white70)),
+                    const Text("Allow Project Type Change",
+                        style: TextStyle(color: Colors.white70)),
                     Switch(
                       value: ignoreDisabled,
                       onChanged: (value) {
                         setState(() {
                           ignoreDisabled = value;
                         });
+
+                        // 👇 Auto-show helper dialog after enabling
+                        if (value) {
+                          Future.delayed(Duration.zero, () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  const DatasetImportProjectTypeHelper(),
+                            );
+                          });
+                        }
                       },
-                      activeColor: Colors.redAccent, // ✅ Red switch
+                      activeColor: Colors.redAccent,
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.help_outline, color: Colors.white70),
+                      tooltip: 'Help',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              const DatasetImportProjectTypeHelper(),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -105,7 +135,7 @@ class StepDatasetTaskConfirmationState
                           onTap: enabled
                               ? () => setState(() {
                                   selectedTask = title;
-                                  widget.onSelectionChanged?.call(title);  // ✅ Call parent callback
+                                  widget.onSelectionChanged?.call(title);
                                 })
                               : null,
                           child: Opacity(
@@ -118,7 +148,7 @@ class StepDatasetTaskConfirmationState
                                 color: Colors.grey[800],
                                 borderRadius: BorderRadius.circular(12),
                                 border: isSelected
-                                    ? Border.all(color: Colors.redAccent, width: 3) // ✅ Red border
+                                    ? Border.all(color: Colors.redAccent, width: 3)
                                     : null,
                                 boxShadow: enabled
                                     ? [

@@ -68,17 +68,30 @@ class DatasetInfo {
   @override
   String toString() {
     return '''
-  DatasetInfo(
-    zipFileName: $zipFileName,
-    datasetPath: $datasetPath,
-    mediaCount: $mediaCount,
-    annotationCount: $annotationCount,
-    annotatedFilesCount: $annotatedFilesCount,
-    datasetFormat: $datasetFormat,
-    taskTypes: ${taskTypes.join(', ')},
-    selectedTaskType: $selectedTaskType,
-    labels: ${labels.length} labels
-  )
-  ''';
+      DatasetInfo(
+      zipFileName: $zipFileName,
+      datasetPath: $datasetPath,
+      mediaCount: $mediaCount,
+      annotationCount: $annotationCount,
+      annotatedFilesCount: $annotatedFilesCount,
+      datasetFormat: $datasetFormat,
+      taskTypes: ${taskTypes.join(', ')},
+      selectedTaskType: $selectedTaskType,
+      labels: ${labels.length} labels
+    )
+    ''';
+  }
+
+  DatasetInfo withDefaultSelectedTaskType() {
+    if ((selectedTaskType != null && selectedTaskType!.isNotEmpty) || taskTypes.isEmpty) {
+      // already assigned or no detected types
+      return this;
+    }
+
+    final defaultType = (taskTypes.first == "Unknown")
+      ? "Detection bounding box"
+      : taskTypes.first;
+
+    return copyWith(selectedTaskType: defaultType);
   }
 }
