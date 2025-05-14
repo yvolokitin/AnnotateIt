@@ -201,6 +201,24 @@ class ProjectDatabase {
     });
   }
 
+  Future<String?> getDefaultDatasetId(int projectId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'projects',
+      columns: ['defaultDatasetId'],
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['defaultDatasetId'] as String?;
+    }
+
+    // project not found or no default dataset set
+    return null;
+  }
+
   Future<int> updateProjectName(Project project) async {
     final db = await database;
 

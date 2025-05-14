@@ -21,19 +21,6 @@ class DatasetDatabase {
     _db = db;
   }
 
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE datasets (
-        id TEXT PRIMARY KEY,
-        projectId INTEGER NOT NULL,
-        name TEXT NOT NULL,
-        description TEXT,
-        createdAt TEXT NOT NULL,
-        FOREIGN KEY (projectId) REFERENCES projects(id)
-      )
-    ''');
-  }
-
   Future<Dataset> createDatasetForProject({
     required int projectId,
     String name = 'New Dataset',
