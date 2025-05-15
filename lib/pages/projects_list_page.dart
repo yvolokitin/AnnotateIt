@@ -169,12 +169,32 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   _loadProjects();
                 }
               },
-              onCreateFromDataset: () {
-                print("Dataset creation");
-                showDialog(
+              onCreateFromDataset: () async {
+                print("Create Project from Dataset import");
+                final result = await showDialog<int>(
                   context: context,
                   builder: (_) => const CreateFromDatasetDialog(),
                 );
+
+                print('[ProjectsPage] Create Project from Dataset import result $result');
+                if (result != null) {
+                  final newProject = await ProjectDatabase.instance.fetchProjectById(result);
+                  if (newProject != null) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProjectDetailsScreen(newProject),
+                      ),
+                    );
+                    // reload after returning
+                    _loadProjects();
+                  }
+                }
+
+                /*showDialog(
+                  context: context,
+                  builder: (_) => const CreateFromDatasetDialog(),
+                );*/
 
               },
               onCreateFromExport: () => print("Exported project creation"),

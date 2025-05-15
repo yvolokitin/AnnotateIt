@@ -36,6 +36,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   DatasetInfo? _datasetInfo;
   double _progress = 0.0;
 
+  // progress callback for project creation step
+  void _onMediaImportProgress(int current, int total) {
+    setState(() {
+      _progress = (total > 0) ? (current / total).clamp(0.0, 1.0) : 0.0;
+    });
+  }
+
   void _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -112,12 +119,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   }
 
   Future<void> _goToNextStep() async {
-    // move from Step 3 to Step 4 (task confirmation)
     if (_currentStep == 3 && _datasetInfo != null) {
       _datasetInfo = _datasetInfo!.withDefaultSelectedTaskType();
       setState(() => _currentStep = 4);
 
-    // move from Step 4 to Step 5 (create project)
     } else if (_currentStep == 4 && _datasetInfo != null) {
       final selectedTask = _datasetInfo!.selectedTaskType?.trim();
       if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
@@ -127,11 +132,11 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             return AlertDialog(
               backgroundColor: Colors.grey[850],
               title: const Text(
-                'No any Project type selected',
+                'No Project Type Selected',
                 style: TextStyle(color: Colors.white),
               ),
               content: const Text(
-                'Please select a Project Type based on the detected annotation types in your dataset, or enable project type change to choose a different type.',
+                'Please select a Project Type based on the detected annotation types in your dataset.',
                 style: TextStyle(color: Colors.white70),
               ),
               actions: [
@@ -152,9 +157,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       });
 
       try {
-        await DatasetImportProjectCreation.createProjectWithDataset(_datasetInfo!);
+        final int newProjectId = await DatasetImportProjectCreation.createProjectWithDataset(
+          _datasetInfo!,
+          onProgress: _onMediaImportProgress,
+        );
         if (!mounted) return;
-        Navigator.of(context).pop(); // Close full dialog after success
+        // Navigator.of(context).pop();
+        Navigator.of(context).pop(newProjectId);
 
       } catch (e) {
         _logger.severe('Failed to create project: $e');
@@ -282,7 +291,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                           Text(
                             _progress == 0
                                 ? "Processing..."
-                                : "Processing... \${(100 * _progress).toInt()}%",
+                                : "Processing... ${(100 * _progress).toInt()}%",
                             style: const TextStyle(color: Colors.white70, fontSize: 18),
                           ),
                           const SizedBox(height: 8),
@@ -336,7 +345,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   Widget _buildStepContent() {
     if (_currentStep == 1) {
       return UploadPrompt(onPickFile: _pickFile);
-    
+
     } else if (_currentStep == 3 && _datasetInfo != null) {
       return StepDatasetOverview(info: _datasetInfo!);
 
@@ -349,8 +358,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
           });
         },
       );
+
     } else if (_currentStep == 5) {
-      return StepDatasetProjectCreation(errorMessage: _projectCreationError);
+      return StepDatasetProjectCreation(
+        errorMessage: _projectCreationError,
+        // onProgress: _onMediaImportProgress,
+      );
+
     } else {
       return const Text("No dataset loaded.", style: TextStyle(color: Colors.white70));
     }

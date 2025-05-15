@@ -128,7 +128,8 @@ class ProjectDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         project_id INTEGER NOT NULL,
         name TEXT NOT NULL,
-        color TEXT,
+        color TEXT NOT NULL,
+        description TEXT,
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
       );
     ''');
@@ -403,6 +404,22 @@ class ProjectDatabase {
   Future<void> closeDB() async {
     final db = await database;
     db.close();
+  }
+
+  Future<Project?> fetchProjectById(int projectId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'projects',
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    if (result.isNotEmpty) {
+      return Project.fromMap(result.first);
+    } else {
+      return null;
+    }
   }
 
   Future<String> _getDefaultAnnotationRootPath() async {

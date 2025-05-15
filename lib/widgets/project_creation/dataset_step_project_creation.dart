@@ -1,28 +1,55 @@
 import 'package:flutter/material.dart';
 
-class StepDatasetProjectCreation extends StatelessWidget {
+typedef ProgressCallback = void Function(int current, int total);
+
+class StepDatasetProjectCreation extends StatefulWidget {
   final String? errorMessage;
 
   const StepDatasetProjectCreation({super.key, this.errorMessage});
 
   @override
+  State<StepDatasetProjectCreation> createState() => _StepDatasetProjectCreationState();
+}
+
+class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation> {
+  int _currentProgress = 0;
+  int _totalProgress = 0;
+
+  void onMediaImportProgress(int current, int total) {
+    setState(() {
+      _currentProgress = current;
+      _totalProgress = total;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (errorMessage == null) {
-      // Normal progress screen
+    if (widget.errorMessage == null) {
+      final bool hasProgress = _totalProgress > 0;
+      final double progress = hasProgress ? _currentProgress / _totalProgress : 0.0;
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          CircularProgressIndicator(
-            color: Colors.redAccent,
-            strokeWidth: 5,
-          ),
-          SizedBox(height: 24),
+        children: [
+          hasProgress
+              ? CircularProgressIndicator(
+                  color: Colors.redAccent,
+                  strokeWidth: 5,
+                  value: progress.clamp(0.0, 1.0),
+                )
+              : const CircularProgressIndicator(
+                  color: Colors.redAccent,
+                  strokeWidth: 5,
+                ),
+          const SizedBox(height: 24),
           Text(
-            'Please wait...',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            hasProgress
+                ? 'Importing media ($_currentProgress / $_totalProgress)...'
+                : 'Please wait...',
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
-          SizedBox(height: 12),
-          Text(
+          const SizedBox(height: 12),
+          const Text(
             'All media files are being added into the database\n'
             'and all annotations are being parsed.\n\n'
             'This may take a few moments depending on dataset size.',
@@ -32,7 +59,6 @@ class StepDatasetProjectCreation extends StatelessWidget {
         ],
       );
     } else {
-      // Error screen
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
@@ -46,7 +72,7 @@ class StepDatasetProjectCreation extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Reason:\n$errorMessage',
+              'Reason:\n${widget.errorMessage}',
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
@@ -66,7 +92,7 @@ class StepDatasetProjectCreation extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop();
               },
             ),
           ],
