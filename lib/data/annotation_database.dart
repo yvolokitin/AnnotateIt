@@ -22,6 +22,18 @@ class AnnotationDatabase {
     await db.insert('annotations', annotation.toMap());
   }
 
+  // Insert multiple annotations in a single transaction
+  Future<void> insertAnnotationsBatch(List<Annotation> annotations) async {
+    if (annotations.isEmpty) return;
+  
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final annotation in annotations) {
+        await txn.insert('annotations', annotation.toMap());
+      }
+    });
+  }
+
   /// Fetches annotations for a specific media item.
   ///
   /// [mediaItemId] – ID of the media item to fetch annotations for.

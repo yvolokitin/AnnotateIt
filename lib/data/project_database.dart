@@ -145,8 +145,12 @@ class ProjectDatabase {
         annotation_type TEXT NOT NULL,
         data TEXT NOT NULL,
         confidence REAL,
-        annotator TEXT,
         annotator_id INTEGER,
+        comment TEXT,
+        status TEXT,
+        version INTEGER DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
         FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE,
         FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE,
         FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL

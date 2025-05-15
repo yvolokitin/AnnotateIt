@@ -5,29 +5,30 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 
 import "image_utils.dart";
+import 'dataset_annotation_importer.dart';
 
 import '../session/user_session.dart';
 import '../data/project_database.dart';
 import '../data/dataset_database.dart';
 import '../data/labels_database.dart';
+import '../data/annotation_database.dart';
 
 import '../models/label.dart';
 import '../models/project.dart';
 import '../models/dataset_info.dart';
+import '../models/media_item.dart';
 
 typedef ProgressCallback = void Function(int current, int total);
 
 class DatasetImportProjectCreation {
   static final Logger _logger = Logger('DatasetImportProjectCreation');
 
-  /// Call this to create a project + default dataset in DB
   static Future<int> createProjectWithDataset(
     DatasetInfo datasetInfo,
     {required ProgressCallback onProgress}
   ) async {
     final currentUser = UserSession.instance.getUser();
 
-    // Create new project
     final newProjectId = await ProjectDatabase.instance.createProject(
       Project(
         name: datasetInfo.zipFileName,
@@ -60,13 +61,26 @@ class DatasetImportProjectCreation {
     }
 
     if (datasetInfo.labels.isNotEmpty) {
-      await addLabelsToDataset(
+      await addLabelsToProject(
         projectId: newProjectId,
         labelNames: datasetInfo.labels,
       );
     } else {
       print("No labels detected in dataset. Skipping label import.");
     }
+
+    final mediaItemsMap = await fetchMediaItemsMap(defaultDatasetId);
+
+    final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
+    final addedCount = await importer.addAnnotationsToProjectFromDataset(
+      datasetPath: datasetInfo.datasetPath,
+      format: datasetInfo.datasetFormat,
+      mediaItemsMap: mediaItemsMap,
+      projectId: newProjectId,
+      annotatorId: currentUser.id ?? -1,
+    );
+
+    print('Added $addedCount annotations.');
 
     return newProjectId;
   }
@@ -78,7 +92,7 @@ class DatasetImportProjectCreation {
     required void Function(int current, int total) onProgress,
   }) async {
     final db = await DatasetDatabase.instance.database;
-    // get all media files recursively
+
     final mediaFiles = <File>[];
     final allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'jfif', 'webp', 'mp4', 'mov'];
     final imageExtensions = ['bmp', 'gif', 'jpeg', 'jfif', 'jpg', 'png', 'webp'];
@@ -122,9 +136,7 @@ class DatasetImportProjectCreation {
       throw Exception("No media files found. Nothing to insert.");
     }
 
-    // insert into DB with progress
     int current = 0;
-
     for (final file in mediaFiles) {
       final ext = p.extension(file.path).toLowerCase().replaceAll('.', '');
       await DatasetDatabase.instance.insertMediaItem(datasetId, file.path, ext, ownerId: ownerId);
@@ -137,11 +149,10 @@ class DatasetImportProjectCreation {
     }
 
     print("Finished inserting $total media files into dataset $datasetId");
-    
     return firstImagePath;
   }
 
-  static Future<void> addLabelsToDataset({
+  static Future<void> addLabelsToProject({
     required int projectId,
     required List<String> labelNames,
   }) async {
@@ -150,7 +161,6 @@ class DatasetImportProjectCreation {
       return;
     }
 
-    // generate random color as #RRGGBB
     final random = Random();
     String generateRandomColor() {
       final r = random.nextInt(256);
@@ -159,8 +169,8 @@ class DatasetImportProjectCreation {
       return '#${r.toRadixString(16).padLeft(2, '0')}'
             '${g.toRadixString(16).padLeft(2, '0')}'
             '${b.toRadixString(16).padLeft(2, '0')}';
-    } 
-  
+    }
+
     final labels = labelNames.map((name) => Label(
       id: null,
       projectId: projectId,
@@ -171,5 +181,22 @@ class DatasetImportProjectCreation {
 
     await LabelsDatabase.instance.updateProjectLabels(projectId, labels);
     print("Added ${labels.length} labels to project $projectId");
+  }
+
+  static Future<Map<String, MediaItem>> fetchMediaItemsMap(String datasetId) async {
+    final mediaItems = await DatasetDatabase.instance.fetchMediaForDataset(datasetId);
+
+    final map = <String, MediaItem>{};
+    for (final item in mediaItems) {
+      final normalizedPath = item.filePath.replaceAll('\\', '/');
+      final fileName = p.basename(normalizedPath).toLowerCase();
+      final fileNameNoExt = p.basenameWithoutExtension(normalizedPath).toLowerCase();
+
+      map[fileName] = item;
+      map[fileNameNoExt] = item;
+    }
+
+    _logger.info('[fetchMediaItemsMap] Loaded ${map.length} media items for dataset $datasetId');
+    return map;
   }
 }

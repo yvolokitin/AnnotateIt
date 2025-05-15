@@ -98,6 +98,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
         confidence: 1.0,
         annotatorId: currentUser.id,
         createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       await AnnotationDatabase.instance.insertAnnotation(annotation);

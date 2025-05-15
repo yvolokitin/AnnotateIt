@@ -10,11 +10,15 @@ class Annotation {
   final int? id;
   final int mediaItemId;
   final int? labelId;
-  final String annotationType; // 'bbox', 'classification', 'segmentation', 'keypoints', etc.
-  final Map<String, dynamic> data; // Annotation-specific data stored as JSON
+  final String annotationType;         // e.g., 'bbox', 'polygon', 'classification'
+  final Map<String, dynamic> data;     // flexible payload
   final double? confidence;
   final int? annotatorId;
+  final String? comment;
+  final String? status;
+  final int version;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   Annotation({
     this.id,
@@ -23,8 +27,12 @@ class Annotation {
     required this.annotationType,
     required this.data,
     this.confidence,
-    required this.annotatorId,
+    this.annotatorId,
+    this.comment,
+    this.status,
+    this.version = 1,
     required this.createdAt,
+    required this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -36,34 +44,36 @@ class Annotation {
       'data': jsonEncode(data),
       'confidence': confidence,
       'annotator_id': annotatorId,
+      'comment': comment,
+      'status': status,
+      'version': version,
       'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
 
   factory Annotation.fromMap(Map<String, dynamic> map) {
     return Annotation(
-      id: map['id'],
-      mediaItemId: map['media_item_id'],
-      labelId: map['label_id'],
-      annotationType: map['annotation_type'],
-      data: jsonDecode(map['data']),
-      confidence: map['confidence'],
-      annotatorId: map['annotator_id'],
+      id: map['id'] as int?,
+      mediaItemId: map['media_item_id'] as int,
+      labelId: map['label_id'] as int?,
+      annotationType: map['annotation_type'] as String,
+      data: jsonDecode(map['data'] as String),
+      confidence: map['confidence'] != null ? (map['confidence'] as num).toDouble() : null,
+      annotatorId: map['annotator_id'] as int?,
+      comment: map['comment'] as String?,
+      status: map['status'] as String?,
+      version: map['version'] ?? 1,
       createdAt: DateTime.parse(map['created_at']),
+      updatedAt: DateTime.parse(map['updated_at']),
     );
-  }
-
-  @override
-  String toString() {
-    return 'Annotation(id: \$id, mediaItemId: \$mediaItemId, labelId: \$labelId, '
-           'annotationType: \$annotationType, data: \$data, confidence: \$confidence, '
-           'annotator_id: \$annotatorId, createdAt: \$createdAt)';
   }
 }
 
 extension AnnotationShapeExt on Annotation {
+  /// Returns the shape object from annotation data.
   Shape? get shape {
-    switch (annotationType) {
+    switch (annotationType.toLowerCase()) {
       case 'bbox':
         return RectShape.fromJson(data);
       case 'polygon':
@@ -71,9 +81,21 @@ extension AnnotationShapeExt on Annotation {
       case 'circle':
         return CircleShape.fromJson(data);
       case 'rotated_rect':
-        return RotatedRectShape.fromJson(data);      
+        return RotatedRectShape.fromJson(data);
+      // You can extend easily here for future types
       default:
         return null;
     }
   }
+
+  /// Returns true if annotation has a reviewer comment
+  bool get hasComment => comment != null && comment!.trim().isNotEmpty;
+
+  /// Returns true if annotation has status info
+  bool get hasStatus => status != null && status!.trim().isNotEmpty;
+
+  /// Convenience: Returns human readable summary
+  String get summary => '[$annotationType] '
+      '${hasStatus ? "Status: $status, " : ""}'
+      '${hasComment ? "Comment: ${comment!}" : ""}';
 }
