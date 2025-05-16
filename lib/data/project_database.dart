@@ -437,4 +437,28 @@ class ProjectDatabase {
       return '/AnnotateItApp';
     }
   }
+
+  Future<int> getProjectCount() async {
+    final db = await instance.database;
+    final result = await db.rawQuery('SELECT COUNT(*) FROM projects');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<int> getLabelCount() async {
+    final db = await instance.database;
+    final result = await db.rawQuery('SELECT COUNT(*) FROM labels');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<int> getMediaCount() async {
+    final db = await instance.database;
+    final result = await db.rawQuery('SELECT COUNT(*) FROM media_items');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<int> getAnnotationCount() async {
+    final db = await instance.database;
+    final result = await db.rawQuery('SELECT COUNT(*) FROM annotations');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
 }

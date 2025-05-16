@@ -4,7 +4,8 @@ import 'package:logging/logging.dart';
 import '../data/user_database.dart';
 import '../models/user.dart';
 import '../session/user_session.dart';
-import '../widgets/account/account_profile.dart';
+
+import '../widgets/account/user_profile.dart';
 import '../widgets/account/account_storage.dart';
 import '../widgets/account/account_settings.dart';
 
@@ -108,7 +109,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                             children: [
                               if (bigScreen) Icon(Icons.person_outline),
                               if (bigScreen) SizedBox(width: 8),
-                              const Text('Profile'),
+                              const Text('User Profile'),
                             ],
                           ),
                         ),
@@ -118,7 +119,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                             children: [
                               if (bigScreen) Icon(Icons.folder_open),
                               if (bigScreen) SizedBox(width: 8),
-                              const Text('Storage'),
+                              const Text('Device Storage'),
                             ],
                           ),
                         ),
@@ -128,7 +129,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                             children: [
                               if (bigScreen) Icon(Icons.settings_outlined),
                               if (bigScreen) SizedBox(width: 8),
-                              const Text('Settings'),
+                              const Text('Application Settings'),
                             ],
                           ),
                         ),
@@ -138,16 +139,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          AccountProfile(
-                            user: _user!,
-                            isEditing: _isEditingProfile,
-                            onToggleEdit: () =>
-                                setState(() => _isEditingProfile = !_isEditingProfile),
-                            onUserChange: (updated) => setState(() {
-                              _user = updated;
-                              _updateUser();
-                            }),
-                          ),
+                          UserProfile(),
                           AccountStorage(
                             user: _user!,
                             isEditing: _isEditingStorage,
