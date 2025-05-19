@@ -1,0 +1,101 @@
+{
+  "@@locale": "en",
+
+  "createProjectTitle": "Create a New Project",
+  "@createProjectTitle": {
+    "description": "Dialog title for creating a new project"
+  },
+
+  "createProjectStepOneSubtitle": "Please, enter your new project name and select Project type",
+  "@createProjectStepOneSubtitle": {
+    "description": "Subtitle shown during step 1 of project creation"
+  },
+
+  "createProjectStepTwoSubtitle": "Please, create labels for a New project",
+  "@createProjectStepTwoSubtitle": {
+    "description": "Subtitle shown during step 2 of project creation"
+  },
+
+  "dialogCancel": "Cancel",
+  "@dialogCancel": {
+    "description": "Text for Cancel button in dialogs"
+  },
+
+  "dialogBack": "<- Back",
+  "@dialogBack": {
+    "description": "Text for the Back button in dialogs"
+  },
+
+  "dialogNext": "Next ->",
+  "@dialogNext": {
+    "description": "Text for the Next button in dialogs"
+  },
+
+  "dialogFinish": "Finish",
+  "@dialogFinish": {
+    "description": "Text for the Finish button in dialogs"
+  },
+
+  "dialogCloseTooltip": "Close",
+  "@dialogCloseTooltip": {
+    "description": "Tooltip for the close icon button in dialog"
+  },
+
+  "taskTypeRequiredTitle": "Task Type Required",
+  "@taskTypeRequiredTitle": {
+    "description": "Title of alert when task type is missing"
+  },
+
+  "taskTypeRequiredMessage": "You need to select a task type before continuing. The current tab '{tab}' has no task type selected. Each project must be associated with a task (e.g., object detection, classification, or segmentation) so the system knows how to process your data.",
+  "@taskTypeRequiredMessage": {
+    "description": "Error message when task type is not selected",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+
+  "taskTypeRequiredTips": "Click one of the available task type options below the '{tab}' tab. If you're unsure which task to choose, hover over the info icon next to each type to see a brief description.",
+  "@taskTypeRequiredTips": {
+    "description": "Helpful tips for selecting task type",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  
+  "menuProjects": "Projects",
+  "menuAccount": "Account",
+  "menuLearn": "Learn",
+  "menuAbout": "About",
+
+  "projectNameLabel": "Project Name",
+  "tabDetection": "Detection",
+  "tabClassification": "Classification",
+  "tabSegmentation": "Segmentation",
+
+  "createLabelButton": "Create Label",
+  "labelNameHint": "Enter a new Label name here",
+  "createdLabelsTitle": "Created Labels",
+
+  "labelEmptyTitle": "Label name cannot be empty!",
+  "labelEmptyMessage": "Please enter a label name. Labels help identify the objects or categories in your project. It is recommended to use short, clear, and descriptive names, such as \"Car\", \"Person\", or \"Tree\". Avoid special characters or spaces.",
+  "labelEmptyTips": "Tips for Label Naming:\n• Use short and descriptive names\n• Stick to letters, digits, underscores (e.g., cat, road_sign, background)\n• Avoid spaces and symbols (e.g., Person 1 → person_1)",
+
+  "labelDuplicateTitle": "Duplicate Label Name",
+  "labelDuplicateMessage": "The label '{label}' already exists in this project. Each label must have a unique name to avoid confusion during annotation and training.",
+  "@labelDuplicateMessage": {
+    "description": "Error message when label already exists",
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "labelDuplicateTips": "Why unique labels?\n• Reusing the same name can cause issues during dataset export and model training.\n• Unique label names help maintain clear, structured annotations.\n\nTip: Try adding a variation or number to differentiate (e.g., 'Car', 'Car_2').",
+
+  "binaryLimitTitle": "Binary Classification Limit",
+  "binaryLimitMessage": "You cannot create more than two labels for a Binary Classification project.\n\nBinary Classification is designed to distinguish between exactly two classes, such as 'Yes' vs 'No', or 'Spam' vs 'Not Spam'.",
+  "binaryLimitTips": "Need more than two labels?\nConsider switching your project type to Multi-Class Classification or another suitable task in order to support three or more categories.",
+
+  "noteBinaryClassification": "This project type allows exactly 2 labels. Binary Classification is used when your model needs to distinguish between two possible classes, such as \"Yes\" vs \"No\", or \"Dog\" vs \"Not Dog\". Please create only two distinct labels.",
+  "noteMultiClassClassification": "This project type supports multiple labels. Multi-Class Classification is suitable when your model needs to choose from three or more categories, like \"Cat\", \"Dog\", \"Rabbit\". You can add as many labels as needed.",
+  "noteDetectionOrSegmentation": "This project type supports multiple labels. For Object Detection or Segmentation, each label typically represents a different class of object (e.g., \"Car\", \"Pedestrian\", \"Bicycle\"). You can create as many labels as required for your dataset.",
+  "noteDefault": "You can create one or more labels depending on your project type. Each label helps define a category that your model will learn to recognize. Please refer to the documentation for best practices."
+}

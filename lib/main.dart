@@ -17,6 +17,9 @@ import "data/annotation_database.dart";
 import "data/project_database.dart";
 import "data/labels_database.dart";
 
+// 👇 Localization import
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 ThemeData themeData = getSystemTheme();
 
 void main() async {
@@ -69,19 +72,38 @@ class AnnotateItApp extends StatefulWidget {
 class AnnotateItAppState extends State<AnnotateItApp> {
   ThemeData theme = getSystemTheme();
 
-  // changes the widget state when updating the theme through changing the theme variable to the given theme.
-  updateTheme(ThemeData theme) {
-    setState(() {this.theme = theme;});
+  void updateTheme(ThemeData theme) {
+    setState(() {
+      this.theme = theme;
+    });
     themeData = theme;
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Annot@It",
       theme: theme,
       home: MainPage(),
+
+      // ✅ Localization setup
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+
+      // temporary solution: Hardcode to English
+      locale: const Locale('en'),
+
+      // Optional: Use system locale with fallback to English
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (locale != null) {
+          for (final supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              return supportedLocale;
+            }
+          }
+        }
+        return const Locale('en');
+      },
     );
   }
 }

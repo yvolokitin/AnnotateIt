@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/project_creation/dataset_task_type_grid.dart';
+import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class SegmentationTab extends StatelessWidget {
   final String selectedTaskType;

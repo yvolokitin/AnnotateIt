@@ -1,9 +1,7 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-// import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import "color_picker_dialog.dart";
+import "dialogs/color_picker_dialog.dart";
 
 import '../pages/project_details_screen.dart';
 import '../data/project_database.dart';
@@ -350,7 +348,7 @@ class EditLabelsDialogState extends State<EditLabelsDialog> {
                               builder: (_) => CreateNewProjectDialog(
                                 initialName: widget.project.name,
                                 initialType: widget.project.type,
-                                initialLabels: _labels,
+                                // initialLabels: _labels,
                               ),
                             );
                           },

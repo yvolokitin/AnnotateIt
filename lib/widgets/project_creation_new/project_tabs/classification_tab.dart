@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/project_creation/dataset_task_type_grid.dart';
+import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class ClassificationTab extends StatelessWidget {
   final String selectedTaskType;
@@ -33,11 +33,13 @@ class ClassificationTab extends StatelessWidget {
           'description': 'Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both "cat" and "dog")',
           'image': 'assets/images/anomaly_detection.jpg', // 'assets/images/classification_multi_label.jpg',
         },
+        /*
+        not implemented yet
         {
           'title': 'Hierarchical Classification',
           'description': 'Assign labels from a hierarchy of classes, where categories are organized in multiple levels (e.g., Animal → Mammal → Dog).',
           'image': 'assets/images/classification_hierarchical.png',
-        },
+        },*/
       ],
     );
   }

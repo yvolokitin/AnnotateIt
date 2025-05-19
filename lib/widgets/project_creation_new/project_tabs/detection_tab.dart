@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/project_creation/dataset_task_type_grid.dart';
+import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class DetectionTab extends StatelessWidget {
   final String selectedTaskType;
@@ -28,11 +28,13 @@ class DetectionTab extends StatelessWidget {
           'description': 'Draw and enclose an object within a minimal rectangle.',
           'image': 'assets/images/detection_oriented.jpg',
         },
+        /*
+        need to think if this is needed since binary classification probably doing exactly the same
         {
           'title': 'Anomaly Detection',
           'description': 'Categorize images as normal or anomalous.',
           'image': 'assets/images/anomaly_detection.jpg',
-        },
+        },*/
       ],
     );
   }

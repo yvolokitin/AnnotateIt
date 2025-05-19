@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/project.dart';
-import '../../models/label.dart';
+import '../../widgets/dialogs/alert_error_dialog.dart';
 
-import '../../widgets/edit_labels_dialog.dart';
-import 'project_tabs/detection_tab.dart';
-import 'project_tabs/segmentation_tab.dart';
-import 'project_tabs/classification_tab.dart';
-// import 'project_tabs/anomaly_tab.dart';
-// import 'project_tabs/chained_tasks_tab.dart';
+import '../../widgets/project_creation_new/create_new_project_step_task_selection.dart';
+import '../../widgets/project_creation_new/create_new_project_step_labels.dart';
 
 class CreateNewProjectDialog extends StatefulWidget {
   final String? initialName;
   final String? initialType;
-  final List<Label>? initialLabels;
+  final String? initialTab;
 
   const CreateNewProjectDialog({
     super.key,
     this.initialName,
     this.initialType,
-    this.initialLabels,
+    this.initialTab,
   });
 
   @override
   CreateNewProjectDialogState createState() => CreateNewProjectDialogState();
 }
 
-class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with SingleTickerProviderStateMixin {
+class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   final TextEditingController _nameController = TextEditingController();
-  late TabController _tabController;
-  String _selectedTaskType = "Detection bounding box";
+  final Map<String, String> _taskTypePerTab = {};
+  String _selectedTab = 'Detection';
+  int _step = 0;
+  final List<Map<String, dynamic>> _createdLabels = [];
+
+  /// Returns the task selected for the current tab.
+  String get _selectedTaskType => _taskTypePerTab[_selectedTab] ?? '';
 
   @override
   void initState() {
     super.initState();
     _nameController.text = widget.initialName ?? '';
-    _selectedTaskType = widget.initialType ?? 'Detection bounding box';
-    _tabController = TabController(length: 3, vsync: this);
+    _selectedTab = widget.initialTab ?? 'Detection';
+
+    // Initialize initial values if provided
+    if (widget.initialTab != null && widget.initialType != null) {
+      _taskTypePerTab[widget.initialTab!] = widget.initialType!;
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -52,7 +56,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with Sin
       builder: (context, constraints) {
         final isLargeScreen = constraints.maxWidth >= 1600;
         final isTablet = constraints.maxWidth >= 800 && constraints.maxWidth < 1600;
-        // final isMobile = constraints.maxWidth < 800;
 
         final dialogPadding = isLargeScreen
             ? const EdgeInsets.all(60)
@@ -63,8 +66,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with Sin
         final dialogWidth = constraints.maxWidth * (isLargeScreen ? 0.9 : 1.0);
         final dialogHeight = constraints.maxHeight * (isLargeScreen ? 0.9 : 1.0);
 
-        final content = _buildDialogContent();
-
         return Dialog(
           insetPadding: EdgeInsets.zero,
           backgroundColor: Colors.grey[850],
@@ -72,10 +73,58 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with Sin
           child: SizedBox(
             width: dialogWidth,
             height: dialogHeight,
-            // padding: dialogPadding,
             child: Padding(
               padding: dialogPadding,
-              child: content,
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!.createProjectTitle,
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _step == 0
+                                    ? AppLocalizations.of(context)!.createProjectStepOneSubtitle
+                                    : AppLocalizations.of(context)!.createProjectStepTwoSubtitle,
+                                style: const TextStyle(fontSize: 22, color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(color: Colors.grey),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
+                        ),
+                        _buildBottomButtons(),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white70),
+                      tooltip: 'Close',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -83,128 +132,86 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> with Sin
     );
   }
 
-  Widget _buildDialogContent() {
-    return Stack(
+  Widget _buildStepOne() {
+    return CreateNewProjectStepTaskSelection(
+      nameController: _nameController,
+      selectedTaskType: _selectedTaskType,
+      onTaskSelectionChanged: _setSelectedTabAndTask,
+    );
+  }
+
+  Widget _buildStepTwo() {
+    return CreateNewProjectStepLabels(
+      createdLabels: _createdLabels,
+      projectType: _selectedTaskType,
+      onLabelsChanged: (labels) {
+        setState(() {
+          _createdLabels
+            ..clear()
+            ..addAll(labels);
+        });
+      },
+    );
+  }
+
+  Widget _buildBottomButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("New Project Creation", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-                    SizedBox(height: 4),
-                    Text("Please, enter your new project name and select Project type", style: TextStyle(fontSize: 22, color: Colors.white70)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 26),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: "Project Name", filled: true, fillColor: Colors.grey[850]),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 20),
-              ),
-              const SizedBox(height: 26),
-              TabBar(
-                controller: _tabController,
-                indicatorColor: Colors.red,
-                indicatorWeight: 3.0,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                labelStyle: const TextStyle(fontSize: 24),
-                unselectedLabelStyle: const TextStyle(fontSize: 24),
-                tabs: const [
-                  Tab(text: "Detection"),
-                  Tab(text: "Classification"),
-                  Tab(text: "Segmentation"),
-                  // Tab(text: "Anomaly"),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    DetectionTab(selectedTaskType: _selectedTaskType, onSelected: _setSelectedTask),
-                    ClassificationTab(selectedTaskType: _selectedTaskType, onSelected: _setSelectedTask),
-                    SegmentationTab(selectedTaskType: _selectedTaskType, onSelected: _setSelectedTask),
-                    // AnomalyTab(selectedTaskType: _selectedTaskType, onSelected: _setSelectedTask),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel", style: TextStyle(color: Colors.white70)),
-                    ),
-                    Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("<- Back", style: TextStyle(color: Colors.white70)),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await showDialog<String>(
-                              context: context,
-                              builder: (context) => EditLabelsDialog(
-                                project: Project(
-                                  id: null,
-                                  name: _nameController.text,
-                                  description: '',
-                                  type: _selectedTaskType,
-                                  icon: 'assets/images/default_project_image.svg',
-                                  creationDate: DateTime.now(),
-                                  lastUpdated: DateTime.now(),
-                                  defaultDatasetId: '',
-                                  ownerId: 1,
-                                ),
-                                onLabelsUpdated: () {},
-                                isFromCreationFlow: true,
-                                initialLabels: widget.initialLabels,
-                              ),
-                            );
-                            if (!mounted) return;
-                            Navigator.pop(context, result);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text("Next -> ", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            AppLocalizations.of(context)!.dialogCancel,
+            style: TextStyle(color: Colors.white70)
           ),
         ),
-        Positioned(
-          top: 5,
-          right: 5,
-          child: IconButton(
-            icon: const Icon(Icons.close, color: Colors.white70),
-            tooltip: 'Close',
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+        Row(
+          children: [
+            if (_step > 0)
+              TextButton(
+                onPressed: () => setState(() => _step--),
+                child: Text(
+                  AppLocalizations.of(context)!.dialogBack,
+                  style: TextStyle(color: Colors.white70)
+                ),
+              ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                final currentTask = _taskTypePerTab[_selectedTab];
+                if (_step == 0 && (currentTask == null || currentTask.isEmpty)) {
+                  final l10n = AppLocalizations.of(context)!;
+                  AlertErrorDialog.show(
+                    context,
+                    l10n.taskTypeRequiredTitle,
+                    l10n.taskTypeRequiredMessage(_selectedTab),
+                    tips: l10n.taskTypeRequiredTips(_selectedTab),
+                  );
+                  return;
+                }
+
+                setState(() => _step++);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                _step == 0 ? AppLocalizations.of(context)!.dialogNext : AppLocalizations.of(context)!.dialogFinish,
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  void _setSelectedTask(String task) {
-    setState(() => _selectedTaskType = task);
+  void _setSelectedTabAndTask(String tab, String task) {
+    setState(() {
+      _selectedTab = tab;
+      _taskTypePerTab[tab] = task;
+    });
   }
 }

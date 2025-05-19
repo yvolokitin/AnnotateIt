@@ -1,3 +1,5 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import "package:vap/pages/header.dart";
 
 import "package:vap/pages/projects_list_page.dart";
@@ -67,7 +69,7 @@ class MainPageState extends State<MainPage> {
                             ),
 
                             Expanded(
-                              child: Container(
+                              child: SizedBox(
                                 width: double.infinity,
                                 child: AppDrawer(
                                   fullMode: true,
@@ -151,28 +153,28 @@ class AppDrawer extends StatelessWidget {
           // Drawer items
           DrawerItem(
             icon: Icons.work,
-            title: "Projects",
+            title: AppLocalizations.of(context)!.menuProjects,
             fullMode: fullMode,
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
           DrawerItem(
             icon: Icons.account_circle,
-            title: "Account",
+            title: AppLocalizations.of(context)!.menuAccount,
             fullMode: fullMode,
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
           ),
           DrawerItem(
             icon: Icons.school,
-            title: "Learn",
+            title: AppLocalizations.of(context)!.menuLearn,
             fullMode: fullMode,
             isSelected: selectedIndex == 2,
             onTap: () => onItemSelected(2),
           ),
           DrawerItem(
             icon: Icons.info,
-            title: "About",
+            title: AppLocalizations.of(context)!.menuAbout,
             fullMode: fullMode,
             isSelected: selectedIndex == 3,
             onTap: () => onItemSelected(3),
@@ -188,7 +190,7 @@ class NavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const NavigationRailMenu({
+  const NavigationRailMenu({super.key, 
     required this.selectedIndex,
     required this.onItemSelected,
   });
@@ -200,19 +202,19 @@ class NavigationRailMenu extends StatelessWidget {
       onDestinationSelected: onItemSelected,
       destinations: [
         NavigationRailDestination(icon: Icon(Icons.work), label: Text(
-          'Projects',
+          AppLocalizations.of(context)!.menuProjects,
           style: Theme.of(context).textTheme.titleMedium,
         )),
         NavigationRailDestination(icon: Icon(Icons.account_circle), label: Text(
-          'Account',
+          AppLocalizations.of(context)!.menuAccount,
           style: Theme.of(context).textTheme.headlineMedium,
         )),
         NavigationRailDestination(icon: Icon(Icons.school), label: Text(
-          'Learn',
+          AppLocalizations.of(context)!.menuLearn,
           style: Theme.of(context).textTheme.headlineMedium,
         )),
         NavigationRailDestination(icon: Icon(Icons.info), label: Text(
-          'About',
+          AppLocalizations.of(context)!.menuAbout,
           style: Theme.of(context).textTheme.headlineMedium,
         )),
       ],
@@ -229,7 +231,7 @@ class DrawerItem extends StatelessWidget {
   final VoidCallback onTap;
   final double textSize;
 
-  const DrawerItem({
+  const DrawerItem({super.key, 
     required this.icon,
     required this.title,
     this.fullMode = false,
@@ -284,12 +286,12 @@ class DrawerItem extends StatelessWidget {
       
         if (isSelected)
           Positioned(
-            right: 0, // Align to the right
+            right: 0,
             top: 0,
             bottom: 0,
             child: Container(
-              width: 10, // 10px width
-              color: Colors.red, // Red color for the selection indicator
+              width: 10,
+              color: Colors.red,
             ),
           ),
       ],
