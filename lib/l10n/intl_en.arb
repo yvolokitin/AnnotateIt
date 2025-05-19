@@ -72,6 +72,10 @@
   "tabClassification": "Classification",
   "tabSegmentation": "Segmentation",
 
+  "labelRequiredTitle": "At Least One Label Required",
+  "labelRequiredMessage": "You must create at least one label to proceed. Labels are essential for defining the annotation categories that will be used during dataset preparation.",
+  "labelRequiredTips": "Tip: Click the red button labeled Create Label after entering a label name to add your first label.",
+
   "createLabelButton": "Create Label",
   "labelNameHint": "Enter a new Label name here",
   "createdLabelsTitle": "Created Labels",

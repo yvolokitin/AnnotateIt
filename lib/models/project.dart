@@ -84,6 +84,19 @@ class Project {
 
   @override
   String toString() {
-    return 'Project(id: $id, name: $name, icon: $icon, labels: ${labels?.length ?? 0})';
+    final labelPreview = labels?.map((l) => l.name).join(', ') ?? 'None';
+    return '''
+      Project(
+        id: $id,
+        name: $name,
+        description: $description,
+        type: $type,
+        icon: $icon,
+        creationDate: $creationDate,
+        lastUpdated: $lastUpdated,
+        defaultDatasetId: $defaultDatasetId,
+        ownerId: $ownerId,
+        labels: [$labelPreview]
+    )''';
   }
 }

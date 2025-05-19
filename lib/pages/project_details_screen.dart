@@ -1,12 +1,17 @@
 import "package:flutter_svg/flutter_svg.dart";
 import "package:flutter/material.dart";
 
+import "../models/label.dart";
 import "../models/project.dart";
-import "../utils/date_utils.dart";
+
 import "dataset_view_page.dart";
 
 import "../widgets/buttons/hover_icon_button.dart";
-// import "../widgets/edit_labels_dialog.dart";
+
+import '../widgets/dialogs/label_list_dialog.dart';
+import '../widgets/dialogs/color_picker_dialog.dart';
+
+import '../widgets/dialogs/alert_error_dialog.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final Project project;
@@ -18,6 +23,11 @@ class ProjectDetailsScreen extends StatefulWidget {
 }
 
 class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+ // TODO: Replace with actual project labels and fetch from DB if needed
+  List<Label> labels = [];
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +42,24 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    print("Load project details for project: ${widget.project}");
+    // TODO: Fetch labels from database and update state
+    labels = List<Label>.from(widget.project.labels ?? []);
+    print("Loading project details:\n${widget.project}");
+  }
+
+  void _showColorPicker(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => ColorPickerDialog(
+        initialColor: labels[index].color,
+        onColorSelected: (newColor) {
+          setState(() {
+            labels[index] = labels[index].copyWith(color: newColor);
+          });
+          // TODO: Persist label color change to DB
+        },
+      ),
+    );
   }
 
   @override
@@ -45,17 +72,15 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           Container(
             height: screenWidth >= 1600 ? 80 : 40,
             width: double.infinity,
-            color: Colors.grey[800], // Background color
+            color: Colors.grey[800],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 HoverIconButton(
                   icon: Icons.arrow_back,
                   margin: EdgeInsets.only(left: 20.0),
-                  // onPressed: () => Navigator.pop(context, true),
                   onPressed: () => Navigator.pop(context, 'refresh'),
                 ),
-
                 HoverIconButton(
                   icon: Icons.help_outline,
                   margin: EdgeInsets.only(right: 20.0),
@@ -66,13 +91,10 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ],
             ),
           ),
-
-          // Expanded content below the bar
           Expanded(
             child : Row(
               children: [
-                // Full drawer for large screens
-                if (screenWidth >= 1600) // isLargeScreen)
+                if (screenWidth >= 1600)
                   Expanded(
                     flex: 2,
                     child: Column(
@@ -83,34 +105,31 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                           height: 330,
                           width: double.infinity,
                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.project.name,
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)
-                                ),
-
-                                SizedBox(height: 6),
-                                SvgPicture.asset(
-                                  'assets/images/default_project_image.svg',
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  "Type: ${widget.project.type}",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18)
-                                ),
-
-                                SizedBox(height: 6),
-                                Text(
-                                  "Created at ${formatDate(widget.project.creationDate)}",
-                                  style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
-                                ),
-                              ],
-                            ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.project.name,
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
+                              ),
+                              SizedBox(height: 6),
+                              SvgPicture.asset(
+                                'assets/images/default_project_image.svg',
+                                height: 100,
+                                fit: BoxFit.cover,
+                                color: Colors.white,
+                              ),
+                              Text(
+                                "Type: \${widget.project.type}",
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Created at \${formatDate(widget.project.creationDate)}",
+                                style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
+                              ),
+                            ],
+                          ),
                         ),
-
                         Expanded(
                           child: AppDrawer(
                             fullMode: true,
@@ -121,21 +140,17 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                       ],
                     ),
                   ),
-
-                // NavigationRail for medium screens
                 if (screenWidth < 1600)
                   NavigationRailMenu(
                     selectedIndex: selectedIndex,
                     onItemSelected: _onItemTapped,
                   ),
-
-                // Main content area
                 Expanded(
                   flex: 8,
                   child: Container(
                     padding: const EdgeInsets.all(30.0),
                     color: Colors.grey[900],
-                    child: DatasetViewPage(widget.project),
+                    child: getSelectedWidget(selectedIndex),
                   ),
                 ),
               ],
@@ -150,14 +165,51 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
     switch (index) {
       case 0:
         return DatasetViewPage(widget.project);
+
       case 1:
-        // this is temporary solution, till the time when normal logic will be implemented
-        return DatasetViewPage(widget.project); // EditLabelsDialog();
-      default:
-        return DatasetViewPage(widget.project);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Project Labels',
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ),
+            LabelListDialog(
+              labels: labels,
+              scrollController: _scrollController,
+              onColorTap: _showColorPicker,
+              onNameChanged: (index, newName) {
+                setState(() {
+                  labels[index] = labels[index].copyWith(name: newName);
+                });
+                // TODO: Save updated label name to database
+              },
+              onDelete: (label) {
+                setState(() {
+                  labels.remove(label);
+                });
+                // TODO: Delete label from database
+              },
+              onColorChanged: (index, newColor) {
+                setState(() {
+                  labels[index] = labels[index].copyWith(color: newColor);
+                });
+                // TODO: Update label color in database
+              },
+            ),
+          ],
+        );
+        default:
+          return DatasetViewPage(widget.project);
+      }
     }
   }
-}
+
+// AppDrawer and NavigationRailMenu classes remain unchanged
+
 
 // Full Sidebar Drawer
 class AppDrawer extends StatelessWidget {
@@ -165,7 +217,7 @@ class AppDrawer extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const AppDrawer({
+  const AppDrawer({super.key, 
     this.fullMode = false,
     required this.selectedIndex,
     required this.onItemSelected,
@@ -202,7 +254,7 @@ class NavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const NavigationRailMenu({
+  const NavigationRailMenu({super.key, 
     required this.selectedIndex,
     required this.onItemSelected,
   });
@@ -235,7 +287,7 @@ class DrawerItem extends StatelessWidget {
   final VoidCallback onTap;
   final double textSize;
 
-  const DrawerItem({
+  const DrawerItem({super.key, 
     required this.icon,
     required this.title,
     this.fullMode = false,

@@ -6,6 +6,15 @@ import '../../widgets/dialogs/alert_error_dialog.dart';
 import '../../widgets/project_creation_new/create_new_project_step_task_selection.dart';
 import '../../widgets/project_creation_new/create_new_project_step_labels.dart';
 
+import '../../session/user_session.dart';
+import '../project_details_screen.dart';
+
+import '../../data/project_database.dart';
+import '../../data/labels_database.dart';
+
+import '../../models/project.dart';
+import '../../models/label.dart';
+
 class CreateNewProjectDialog extends StatefulWidget {
   final String? initialName;
   final String? initialType;
@@ -27,7 +36,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   final Map<String, String> _taskTypePerTab = {};
   String _selectedTab = 'Detection';
   int _step = 0;
-  final List<Map<String, dynamic>> _createdLabels = [];
+  final List<Label> _createdLabels = [];
 
   /// Returns the task selected for the current tab.
   String get _selectedTaskType => _taskTypePerTab[_selectedTab] ?? '';
@@ -142,13 +151,19 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   Widget _buildStepTwo() {
     return CreateNewProjectStepLabels(
-      createdLabels: _createdLabels,
+      createdLabels: _createdLabels
+          .map((label) => {'name': label.name, 'color': label.color})
+          .toList(),
       projectType: _selectedTaskType,
-      onLabelsChanged: (labels) {
+      onLabelsChanged: (labelMaps) {
         setState(() {
           _createdLabels
             ..clear()
-            ..addAll(labels);
+            ..addAll(labelMaps.map((map) => Label(
+                  projectId: 0,
+                  name: map['name'],
+                  color: map['color'],
+                )));
         });
       },
     );
@@ -177,21 +192,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
               ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: () {
-                final currentTask = _taskTypePerTab[_selectedTab];
-                if (_step == 0 && (currentTask == null || currentTask.isEmpty)) {
-                  final l10n = AppLocalizations.of(context)!;
-                  AlertErrorDialog.show(
-                    context,
-                    l10n.taskTypeRequiredTitle,
-                    l10n.taskTypeRequiredMessage(_selectedTab),
-                    tips: l10n.taskTypeRequiredTips(_selectedTab),
-                  );
-                  return;
-                }
-
-                setState(() => _step++);
-              },
+              onPressed: _handleStepButtonPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -206,6 +207,92 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         ),
       ],
     );
+  }
+
+  void _handleStepButtonPressed() async {
+    final currentTask = _taskTypePerTab[_selectedTab];
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_step == 0 && (currentTask == null || currentTask.isEmpty)) {
+      AlertErrorDialog.show(
+        context,
+        l10n.taskTypeRequiredTitle,
+        l10n.taskTypeRequiredMessage(_selectedTab),
+        tips: l10n.taskTypeRequiredTips(_selectedTab),
+      );
+      return;
+    }
+
+    if (_step == 1) {
+      if (_createdLabels.isEmpty) {
+        AlertErrorDialog.show(
+          context,
+          l10n.labelRequiredTitle,
+          l10n.labelRequiredMessage,
+          tips: l10n.labelRequiredTips,
+        );
+        return;
+      }
+
+      final isBinary = _selectedTaskType.toLowerCase() == 'binary classification';
+      if (isBinary && _createdLabels.length != 2) {
+        AlertErrorDialog.show(
+          context,
+          l10n.binaryLimitTitle,
+          l10n.binaryLimitMessage,
+          tips: l10n.binaryLimitTips,
+        );
+        return;
+      }
+    }
+
+    if (_step == 0) {
+      setState(() => _step++);
+
+    } else {
+      try {
+        final currentUser = UserSession.instance.getUser();
+        final newProject = Project(
+          name: _nameController.text.trim(),
+          type: _selectedTaskType,
+          icon: "assets/images/default_project_image.svg",
+          creationDate: DateTime.now(),
+          lastUpdated: DateTime.now(),
+          defaultDatasetId: null,
+          ownerId: currentUser.id ?? -1,
+        );
+
+        final newProjectId = await ProjectDatabase.instance.createProject(newProject);
+        final labelsWithNewProjectId = _createdLabels
+          .map((label) => label.copyWith(projectId: newProjectId))
+          .toList();
+
+        await LabelsDatabase.instance.updateProjectLabels(newProjectId, labelsWithNewProjectId);
+
+        if (!mounted) return;
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProjectDetailsScreen(
+              newProject.copyWith(id: newProjectId),
+            ),
+          ),
+        );
+
+        if (!mounted) return;
+        Navigator.pop(context, 'refresh');
+
+      } catch (e, stack) {
+        debugPrint('Error while creating project: $e\n$stack');
+
+        AlertErrorDialog.show(
+          context,
+          'Unexpected Error',
+          'Something went wrong while creating your project. Please try again or contact support.',
+          tips: e.toString(),
+        );
+      }
+    }
   }
 
   void _setSelectedTabAndTask(String tab, String task) {
