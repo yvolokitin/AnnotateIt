@@ -4,29 +4,26 @@ typedef ProgressCallback = void Function(int current, int total);
 
 class StepDatasetProjectCreation extends StatefulWidget {
   final String? errorMessage;
-
-  const StepDatasetProjectCreation({super.key, this.errorMessage});
+  final int current;
+  final int total;
+  
+  const StepDatasetProjectCreation({
+    super.key,
+    this.errorMessage,
+    required this.current,
+    required this.total,
+  });
 
   @override
   State<StepDatasetProjectCreation> createState() => _StepDatasetProjectCreationState();
 }
 
 class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation> {
-  int _currentProgress = 0;
-  int _totalProgress = 0;
-
-  void onMediaImportProgress(int current, int total) {
-    setState(() {
-      _currentProgress = current;
-      _totalProgress = total;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.errorMessage == null) {
-      final bool hasProgress = _totalProgress > 0;
-      final double progress = hasProgress ? _currentProgress / _totalProgress : 0.0;
+      final bool hasProgress = widget.total > 0;
+      final double progress = hasProgress ? widget.current / widget.total : 0.0;
 
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +41,7 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
           const SizedBox(height: 24),
           Text(
             hasProgress
-                ? 'Importing media ($_currentProgress / $_totalProgress)...'
+                ? 'Importing media (${widget.current} / ${widget.total})...'
                 : 'Please wait...',
             style: const TextStyle(color: Colors.white, fontSize: 18),
           ),

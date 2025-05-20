@@ -23,11 +23,11 @@ class StepDatasetTaskConfirmationState
   static const tasks = [
     {'title': 'Detection bounding box', 'image': 'assets/images/detection_bounding_box.jpg'},
     {'title': 'Detection oriented', 'image': 'assets/images/detection_oriented.jpg'},
-    {'title': 'Anomaly detection', 'image': 'assets/images/anomaly_detection.jpg'},
+    // {'title': 'Anomaly detection', 'image': 'assets/images/anomaly_detection.jpg'}, - UNSUPPORTED UP TO NOW
     {'title': 'Binary Classification', 'image': 'assets/images/classification_binary.jpg'},
     {'title': 'Multi-class Classification', 'image': 'assets/images/classification_multi_class.jpg'},
     {'title': 'Multi-label Classification', 'image': 'assets/images/anomaly_detection.jpg'},
-    {'title': 'Hierarchical Classification', 'image': 'assets/images/anomaly_detection.jpg'},
+    // {'title': 'Hierarchical Classification', 'image': 'assets/images/anomaly_detection.jpg'}, - UNSUPPORTED UP TO NOW
     {'title': 'Instance Segmentation', 'image': 'assets/images/instance_segmentation.jpg'},
     {'title': 'Semantic Segmentation', 'image': 'assets/images/semantic_segmentation.jpg'},
   ];
@@ -43,7 +43,6 @@ class StepDatasetTaskConfirmationState
         : tasks.first['title'];
   }
 
-  /// ✅ Parent can retrieve current selection
   String? getSelectedTask() => selectedTask;
 
   @override
@@ -79,7 +78,7 @@ class StepDatasetTaskConfirmationState
                           ignoreDisabled = value;
                         });
 
-                        // 👇 Auto-show helper dialog after enabling
+                        //  Auto-show helper dialog after enabling
                         if (value) {
                           Future.delayed(Duration.zero, () {
                             showDialog(

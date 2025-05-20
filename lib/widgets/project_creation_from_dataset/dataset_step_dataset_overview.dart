@@ -25,7 +25,7 @@ class StepDatasetOverview extends StatelessWidget {
                 [
                   _buildRow(context, "Dataset ZIP File name", info.zipFileName),
                   _buildRow(context, "Dataset Path", info.datasetPath),
-                  _buildRow(context, "Number of Media Files", info.mediaCount.toString()),
+                  _buildRow(context, "Number of files in Dataset", info.mediaCount.toString()),
                 ],
               ),
               _buildCard(

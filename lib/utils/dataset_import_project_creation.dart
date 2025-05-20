@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
@@ -106,40 +107,71 @@ class DatasetImportProjectCreation {
     String? firstImagePath;
     int folderCount = 0;
     int fileCount = 0;
+
     await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      final path = entity.path;
+
+      if (path.contains('__MACOSX')) {
+        continue; // skip macOS metadata folders/files
+      }
+
       if (entity is Directory) {
         folderCount++;
       } else if (entity is File) {
         fileCount++;
 
-        final ext = p.extension(entity.path).toLowerCase().replaceAll('.', '');
-        if (allowedExtensions.contains(ext)) {
-          mediaFiles.add(entity);
+        final ext = p.extension(path).toLowerCase().replaceAll('.', '');
 
-          if (firstImagePath == null && imageExtensions.contains(ext)) {
-            firstImagePath = entity.path;
-            print("🖼️ First image for thumbnail: $firstImagePath");
-          }
-        } else {
-          print("ERROR: Skipped file (unsupported extension: .$ext): ${entity.path}");
+        if (!allowedExtensions.contains(ext)) {
+          print("Skipped unsupported file: $path");
+          continue;
         }
+
+        final fileLength = await entity.length();
+        if (fileLength < 100) {
+          print("Skipped tiny/corrupt file (<100 bytes): $path");
+          continue;
+        }
+
+        if (firstImagePath == null && imageExtensions.contains(ext)) {
+          try {
+            final bytes = await entity.readAsBytes();
+            await ui.instantiateImageCodec(bytes); // attempt decoding
+            firstImagePath = path;
+            print("First valid image for thumbnail: $firstImagePath");
+          } catch (e) {
+            print("Invalid image file skipped (cannot decode): $path\n$e");
+            continue;
+          }
+        }
+
+        mediaFiles.add(entity);
       } else {
-        print("Warning: Unknown entity type: ${entity.path}");
+        print("Unknown file system entity skipped: $path");
       }
     }
 
     print("Scan complete: $folderCount folders, $fileCount files found.");
     print("Total media files to insert: ${mediaFiles.length}");
 
-    final total = mediaFiles.length;
-    if (total == 0) {
-      throw Exception("No media files found. Nothing to insert.");
+    if (mediaFiles.isEmpty) {
+      throw Exception("No valid media files found. Nothing to insert.");
     }
 
     int current = 0;
+    final total = mediaFiles.length;
+
+    // show progress UI immediately
+    onProgress(0, total);
+
     for (final file in mediaFiles) {
       final ext = p.extension(file.path).toLowerCase().replaceAll('.', '');
-      await DatasetDatabase.instance.insertMediaItem(datasetId, file.path, ext, ownerId: ownerId);
+      await DatasetDatabase.instance.insertMediaItem(
+        datasetId,
+        file.path,
+        ext,
+        ownerId: ownerId,
+      );
 
       current++;
       if (current % 100 == 0 || current == total) {

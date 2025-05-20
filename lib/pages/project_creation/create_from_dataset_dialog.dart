@@ -31,6 +31,11 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   static const int DATASET_ISOLATE_THRESHOLD = 500 * 1024 * 1024;
 
   bool _isUploading = false;
+  bool _isCreatingProject = false;
+
+  int _progressCurrent = 0;
+  int _progressTotal = 0;
+
   bool _useIsolateMode = false;
   int _currentStep = 1;
   DatasetInfo? _datasetInfo;
@@ -38,8 +43,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   // progress callback for project creation step
   void _onMediaImportProgress(int current, int total) {
+    print('PROGRESS UI: $current / $total');
     setState(() {
-      _progress = (total > 0) ? (current / total).clamp(0.0, 1.0) : 0.0;
+      _progressCurrent = current;
+      _progressTotal = total;
     });
   }
 
@@ -157,12 +164,14 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       });
 
       try {
+        // set it true to block cancellation request
+        setState(() => _isCreatingProject = true);
+
         final int newProjectId = await DatasetImportProjectCreation.createProjectWithDataset(
           _datasetInfo!,
           onProgress: _onMediaImportProgress,
         );
         if (!mounted) return;
-        // Navigator.of(context).pop();
         Navigator.of(context).pop(newProjectId);
 
       } catch (e) {
@@ -171,6 +180,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         setState(() {
           _projectCreationError = e.toString();
         });
+
+      } finally {
+        setState(() => _isCreatingProject = false);
       }
 
     } else if (_currentStep < 5) {
@@ -183,6 +195,16 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please wait until dataset is fully processed."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_isCreatingProject) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please wait until project is fully created."),
           duration: Duration(seconds: 2),
         ),
       );
@@ -362,7 +384,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     } else if (_currentStep == 5) {
       return StepDatasetProjectCreation(
         errorMessage: _projectCreationError,
-        // onProgress: _onMediaImportProgress,
+        current: _progressCurrent,
+        total: _progressTotal,
       );
 
     } else {

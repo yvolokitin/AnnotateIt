@@ -6,9 +6,9 @@ class ProjectIcon extends StatelessWidget {
   final String iconPath;
 
   const ProjectIcon({
-    Key? key,
+    super.key,
     required this.iconPath,
-  }) : super(key: key);
+  });
 
   bool get isSvg => iconPath.toLowerCase().endsWith('.svg');
 
@@ -23,6 +23,7 @@ class ProjectIcon extends StatelessWidget {
           height: 45,
           child: SvgPicture.file(
             File(iconPath),
+            colorFilter: const ColorFilter.mode(Colors.white54, BlendMode.srcIn),
             fit: BoxFit.contain,
             placeholderBuilder: (context) => _placeholder(),
           ),
