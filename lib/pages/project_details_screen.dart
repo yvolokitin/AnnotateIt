@@ -13,6 +13,8 @@ import '../widgets/dialogs/color_picker_dialog.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 
+import '../widgets/project_details/project_details_sidebar.dart';
+
 class ProjectDetailsScreen extends StatefulWidget {
   final Project project;
 
@@ -40,7 +42,7 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    print("ProjectDetailsScreen: Loading project details:\n${widget.project}");
+    // print("ProjectDetailsScreen: Loading project details:\n${widget.project}");
     labels = List<Label>.from(widget.project.labels ?? []);
 
     if (widget.project.labels == null || widget.project.labels!.isEmpty) {
@@ -71,8 +73,9 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       backgroundColor: Colors.grey[850],
       body: Column(
         children: [
+          // title bar
           Container(
-            height: screenWidth >= 1600 ? 80 : 40,
+            height: screenWidth >= 1600 ? 80 : 45,
             width: double.infinity,
             color: Colors.grey[800],
             child: Row(
@@ -93,6 +96,8 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ],
             ),
           ),
+
+          // body
           Expanded(
             child : Row(
               children: [
@@ -101,36 +106,10 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                     flex: 2,
                     child: Column(
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(40.0),
-                          color: Colors.grey[850],
-                          height: 330,
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.project.name,
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
-                              ),
-                              SizedBox(height: 6),
-                              SvgPicture.asset(
-                                'assets/images/default_project_image.svg',
-                                height: 100,
-                                fit: BoxFit.cover,
-                                color: Colors.white,
-                              ),
-                              Text(
-                                "Type: \${widget.project.type}",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 18),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "Created at \${formatDate(widget.project.creationDate)}",
-                                style: TextStyle(color: Colors.white60, fontWeight: FontWeight.normal, fontSize: 18),
-                              ),
-                            ],
-                          ),
+                        ProjectDetailsSidebar(
+                          project: widget.project,
+                          selectedIndex: selectedIndex,
+                          onItemSelected: _onItemTapped,
                         ),
                         Expanded(
                           child: AppDrawer(
@@ -142,11 +121,13 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                       ],
                     ),
                   ),
+
                 if (screenWidth < 1600)
                   NavigationRailMenu(
                     selectedIndex: selectedIndex,
                     onItemSelected: _onItemTapped,
                   ),
+
                 Expanded(
                   flex: 8,
                   child: Container(
