@@ -232,34 +232,36 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
         ),
         const SizedBox(height: 12),
 
-        LabelListDialog(
-          labels: _labels,
-          scrollController: _scrollController,
-          onColorTap: _showColorPicker,
-          onNameChanged: (index, newName) {
-            setState(() {
-              _labels[index] = _labels[index].copyWith(name: newName);
-            });
-            widget.onLabelsChanged?.call(
-              _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-            );
-          },
-          onDelete: (label) {
-            setState(() {
-              _labels.remove(label);
-            });
-            widget.onLabelsChanged?.call(
-              _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-            );
-          },
-          onColorChanged: (index, newColor) {
-            setState(() {
-              _labels[index] = _labels[index].copyWith(color: newColor);
-            });
-            widget.onLabelsChanged?.call(
-              _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-            );
-          },
+        Flexible(
+          child: LabelListDialog(
+            labels: _labels,
+            scrollController: _scrollController,
+            onColorTap: _showColorPicker,
+            onNameChanged: (index, newName) {
+              setState(() {
+                _labels[index] = _labels[index].copyWith(name: newName);
+              });
+              widget.onLabelsChanged?.call(
+                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
+              );
+            },
+            onDelete: (label) {
+              setState(() {
+                _labels.remove(label);
+              });
+              widget.onLabelsChanged?.call(
+                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
+              );
+            },
+            onColorChanged: (index, newColor) {
+              setState(() {
+                _labels[index] = _labels[index].copyWith(color: newColor);
+              });
+              widget.onLabelsChanged?.call(
+                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
+              );
+            },
+          ),
         ),
       ],
     );

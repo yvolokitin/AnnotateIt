@@ -274,7 +274,10 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           context,
           MaterialPageRoute(
             builder: (_) => ProjectDetailsScreen(
-              newProject.copyWith(id: newProjectId),
+              newProject.copyWith(
+                id: newProjectId,
+                labels: labelsWithNewProjectId,
+              ),
             ),
           ),
         );

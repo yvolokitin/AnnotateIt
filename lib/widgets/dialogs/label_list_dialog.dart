@@ -24,8 +24,7 @@ class LabelListDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
+    return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Scrollbar(
           controller: scrollController,
@@ -144,7 +143,7 @@ class LabelListDialog extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      // ),
     );
   }
 }

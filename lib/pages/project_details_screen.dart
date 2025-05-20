@@ -24,8 +24,6 @@ class ProjectDetailsScreen extends StatefulWidget {
 
 class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   final ScrollController _scrollController = ScrollController();
-
- // TODO: Replace with actual project labels and fetch from DB if needed
   List<Label> labels = [];
 
   @override
@@ -42,9 +40,13 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _loadProjectDetails() async {
-    // TODO: Fetch labels from database and update state
+    print("ProjectDetailsScreen: Loading project details:\n${widget.project}");
     labels = List<Label>.from(widget.project.labels ?? []);
-    print("Loading project details:\n${widget.project}");
+
+    if (widget.project.labels == null || widget.project.labels!.isEmpty) {
+      // TODO: Fetch labels from database and update state
+      print("ProjectDetailsScreen: Loading project labels .... ");
+    }
   }
 
   void _showColorPicker(int index) {
@@ -171,36 +173,44 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(20),
               child: Text(
-                'Project Labels',
-                style: const TextStyle(fontSize: 20, color: Colors.white),
+                'Labels',
+                style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
-            LabelListDialog(
-              labels: labels,
-              scrollController: _scrollController,
-              onColorTap: _showColorPicker,
-              onNameChanged: (index, newName) {
-                setState(() {
-                  labels[index] = labels[index].copyWith(name: newName);
-                });
-                // TODO: Save updated label name to database
-              },
-              onDelete: (label) {
-                setState(() {
-                  labels.remove(label);
-                });
-                // TODO: Delete label from database
-              },
-              onColorChanged: (index, newColor) {
-                setState(() {
-                  labels[index] = labels[index].copyWith(color: newColor);
-                });
-                // TODO: Update label color in database
-              },
+
+            Divider(color: Colors.grey),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: LabelListDialog(
+                  labels: labels,
+                  scrollController: _scrollController,
+                  onColorTap: _showColorPicker,
+                  onNameChanged: (index, newName) {
+                    setState(() {
+                      labels[index] = labels[index].copyWith(name: newName);
+                    });
+                    // TODO: Save updated label name to database
+                  },
+                  onDelete: (label) {
+                    setState(() {
+                      labels.remove(label);
+                    });
+                    // TODO: Delete label from database
+                  },  
+                  onColorChanged: (index, newColor) {
+                    setState(() {
+                      labels[index] = labels[index].copyWith(color: newColor);
+                    });
+                    // TODO: Update label color in database
+                  },
+                ),
+              ),
             ),
-          ],
+          ],  
         );
         default:
           return DatasetViewPage(widget.project);

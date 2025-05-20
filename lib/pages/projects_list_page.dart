@@ -5,12 +5,11 @@ import "../models/project.dart";
 
 import "../widgets/project_tile.dart";
 import "../widgets/projects_topbar.dart";
-import "project_creation/create_new_project_dialog.dart";
 import "../widgets/edit_project_name.dart";
-import "../widgets/edit_labels_dialog.dart";
 
 import "project_details_screen.dart";
 import "project_creation/create_from_dataset_dialog.dart";
+import "project_creation/create_new_project_dialog.dart";
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -69,18 +68,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
         onProjectUpdated: () {
           _loadProjects(); // Refresh project list after saving
         },
-      ),
-    );
-  }
-
-  // Open Edit Labels Dialog
-  void _editProjectLabels(Project project) {
-    showDialog(
-      context: context,
-      builder: (context) => EditLabelsDialog(
-        project: project,
-        // Refresh projects after label update
-        onLabelsUpdated: _loadProjects,
       ),
     );
   }
@@ -252,14 +239,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectName(project);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.label, color: Colors.orange),
-                title: Text("Update Project Labels"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _editProjectLabels(project);
                 },
               ),
               ListTile(
