@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShowAllLabelsDialog extends StatelessWidget {
   final List<String> labels;
@@ -8,12 +9,13 @@ class ShowAllLabelsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sortedLabels = List<String>.from(labels)..sort();
+    final t = AppLocalizations.of(context)!;
 
     return AlertDialog(
       backgroundColor: Colors.grey[900],
-      title: const Text(
-        "All Labels",
-        style: TextStyle(color: Colors.white),
+      title: Text(
+        t.allLabels,
+        style: const TextStyle(color: Colors.white),
       ),
       content: SizedBox(
         width: 300,
@@ -34,7 +36,7 @@ class ShowAllLabelsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Close", style: TextStyle(color: Colors.redAccent)),
+          child: Text(t.close, style: const TextStyle(color: Colors.redAccent)),
         ),
       ],
     );

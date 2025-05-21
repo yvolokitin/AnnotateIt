@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
   const DatasetImportDiscardConfirmationDialog({super.key});
@@ -15,18 +16,21 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.grey[800],
-      title: const Text(
-        "Discard Dataset Import?",
+      title: Text(
+        AppLocalizations.of(context)!.discardDatasetImportTitle,
         style: TextStyle(color: Colors.white),
       ),
-      content: const Text(
-        "You have already extracted a dataset. Cancelling now will delete the extracted files and detected dataset details. Are you sure you want to proceed?",
+      content: Text(
+        AppLocalizations.of(context)!.discardDatasetImportMessage,
         style: TextStyle(color: Colors.white70),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text("Keep", style: TextStyle(color: Colors.white54)),
+          child: Text(
+            AppLocalizations.of(context)!.keep,
+            style: TextStyle(color: Colors.white54)
+          ),
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
@@ -35,7 +39,9 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text("Discard", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            AppLocalizations.of(context)!.discard,
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );
