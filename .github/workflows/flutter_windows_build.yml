@@ -11,6 +11,7 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,14 +19,23 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.19.0'  # Dart 3.7.3 included
           channel: stable
-          flutter-version: '3.19.0'
+
+      - name: Show Flutter & Dart version
+        run: flutter --version
+
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Enable Windows desktop support
-        run: flutter config --enable-windows-desktop
+      - name: Analyze (optional)
+        run: flutter analyze
+
+      - name: Run tests (optional)
+        run: flutter test
 
       - name: Build Windows app
         run: flutter build windows --release
