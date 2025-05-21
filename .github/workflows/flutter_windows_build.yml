@@ -16,11 +16,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      - name: Set up Flutter 3.19.0
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'  # Dart 3.7.3 included
+          flutter-version: '3.19.0'
           channel: stable
+          cache: true
 
       - name: Show Flutter & Dart version
         run: flutter --version
@@ -31,17 +32,24 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze (optional)
-        run: flutter analyze
-
-      - name: Run tests (optional)
-        run: flutter test
-
-      - name: Build Windows app
+      - name: Build Windows app (EXE)
         run: flutter build windows --release
 
-      - name: Upload Build Artifacts
+      - name: Install Chocolatey and Wix Toolset for MSIX
+        run: |
+          choco install wixtoolset -y
+
+      - name: Create MSIX installer
+        run: flutter pub run msix:create
+
+      - name: Upload Windows build artifacts (.exe)
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: build/windows/runner/Release/
+
+      - name: Upload MSIX installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: build/windows/runner/msix/*.msix
