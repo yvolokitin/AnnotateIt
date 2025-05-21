@@ -14,30 +14,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Flutter 3.19.0 manually
+      - name: Download and extract Flutter 3.19.0
         run: |
           curl -s -o flutter.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.19.0-stable.zip
           7z x flutter.zip -oC:\flutter
-          echo "C:\flutter\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Show Flutter & Dart version
-        run: flutter --version
+        run: C:\flutter\flutter\bin\flutter.bat --version
 
       - name: Enable Windows desktop support
-        run: flutter config --enable-windows-desktop
+        run: C:\flutter\flutter\bin\flutter.bat config --enable-windows-desktop
 
       - name: Install dependencies
-        run: flutter pub get
+        run: C:\flutter\flutter\bin\flutter.bat pub get
 
       - name: Build Windows app (EXE)
-        run: flutter build windows --release
+        run: C:\flutter\flutter\bin\flutter.bat build windows --release
 
-      - name: Install Chocolatey and WiX Toolset for MSIX
-        run: |
-          choco install wixtoolset -y
+      - name: Install WiX Toolset for MSIX
+        run: choco install wixtoolset -y
 
       - name: Create MSIX installer
-        run: flutter pub run msix:create
+        run: C:\flutter\flutter\bin\flutter.bat pub run msix:create
 
       - name: Upload Windows EXE build
         uses: actions/upload-artifact@v4
