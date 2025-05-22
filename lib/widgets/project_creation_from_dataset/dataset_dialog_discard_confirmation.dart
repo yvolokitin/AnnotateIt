@@ -39,7 +39,7 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text(
+          child: Text(
             AppLocalizations.of(context)!.discard,
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
