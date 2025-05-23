@@ -155,9 +155,33 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Text(
-                'Labels',
-                style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+              child: Row(
+                children: [
+                  Text('Labels', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),),
+
+                  Spacer(),
+
+                  SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[900],
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(color: Colors.red, width: 2),
+                      ),
+                    ),
+                    child: Text(
+                      "Create Label",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -198,9 +222,6 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       }
     }
   }
-
-// AppDrawer and NavigationRailMenu classes remain unchanged
-
 
 // Full Sidebar Drawer
 class AppDrawer extends StatelessWidget {
@@ -292,7 +313,8 @@ class DrawerItem extends StatelessWidget {
     // Base red color
     final Color baseRed = Colors.red;
     // Compute a 20% lighter color for the background
-    final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
+    // final Color lighterRed = baseRed.withOpacity(0.1); // 80% opacity for a lighter effect
+    final Color lighterRed = baseRed.withAlpha(26); // 10% of 255
     
     return Stack(
       children: [
@@ -304,21 +326,24 @@ class DrawerItem extends StatelessWidget {
           ),
           child: ListTile(
             contentPadding: EdgeInsets.only(left: 40, right: 16),
-            title: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
-                if (fullMode) SizedBox(width: 16),
-                if (fullMode)
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: textSize,
-                      color: isSelected ? Colors.white : Colors.white,
-                      fontWeight: FontWeight.normal,
+            title: SizedBox(
+              height: double.infinity,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
+                  if (fullMode) SizedBox(width: 16),
+                  if (fullMode)
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: textSize,
+                        color: isSelected ? Colors.white : Colors.white,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             selected: isSelected,
             onTap: onTap,
