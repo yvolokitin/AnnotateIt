@@ -14,6 +14,7 @@ import '../widgets/dialogs/color_picker_dialog.dart';
 import '../widgets/dialogs/alert_error_dialog.dart';
 
 import '../widgets/project_details/project_details_sidebar.dart';
+import '../widgets/project_details/project_details_add_label.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final Project project;
@@ -64,6 +65,23 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         },
       ),
     );
+  }
+
+  void _handleAddNewLabel(String name, String color) {
+    final newLabel = Label(
+      projectId: widget.project.id ?? 0,
+      name: name,
+      color: color,
+    );
+
+    setState(() {
+      labels.add(newLabel);
+      widget.project.labels ??= [];
+      widget.project.labels!.add(newLabel); 
+    });
+
+    // Optional: print or do something else
+    print('New label added: $name - $color');
   }
 
   @override
@@ -157,36 +175,20 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Text('Labels', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),),
-
-                  Spacer(),
-
-                  SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[900],
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: BorderSide(color: Colors.red, width: 2),
-                      ),
-                    ),
-                    child: Text(
-                      "Create Label",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  Text('Labels', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
 
             Divider(color: Colors.grey),
+            SizedBox(height: 25),
 
+            ProjectDetailsAddLabel(
+              labels: labels,
+              projectType: widget.project.type,
+              onAddNewLabel: _handleAddNewLabel,
+            ),
+        
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20),
