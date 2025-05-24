@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
+import 'package:image/image.dart' as img;
 
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
@@ -111,9 +112,7 @@ class DatasetImportProjectCreation {
     await for (final entity in dir.list(recursive: true, followLinks: false)) {
       final path = entity.path;
 
-      if (path.contains('__MACOSX')) {
-        continue; // skip macOS metadata folders/files
-      }
+      if (path.contains('__MACOSX')) continue;
 
       if (entity is Directory) {
         folderCount++;
@@ -121,7 +120,6 @@ class DatasetImportProjectCreation {
         fileCount++;
 
         final ext = p.extension(path).toLowerCase().replaceAll('.', '');
-
         if (!allowedExtensions.contains(ext)) {
           print("Skipped unsupported file: $path");
           continue;
@@ -136,7 +134,7 @@ class DatasetImportProjectCreation {
         if (firstImagePath == null && imageExtensions.contains(ext)) {
           try {
             final bytes = await entity.readAsBytes();
-            await ui.instantiateImageCodec(bytes); // attempt decoding
+            await ui.instantiateImageCodec(bytes); // Validate
             firstImagePath = path;
             print("First valid image for thumbnail: $firstImagePath");
           } catch (e) {
@@ -146,31 +144,61 @@ class DatasetImportProjectCreation {
         }
 
         mediaFiles.add(entity);
-      } else {
-        print("Unknown file system entity skipped: $path");
       }
     }
 
+    final total = mediaFiles.length;
     print("Scan complete: $folderCount folders, $fileCount files found.");
-    print("Total media files to insert: ${mediaFiles.length}");
+    print("Total media files to insert: $total");
 
-    if (mediaFiles.isEmpty) {
+    if (total == 0) {
       throw Exception("No valid media files found. Nothing to insert.");
     }
 
-    int current = 0;
-    final total = mediaFiles.length;
+    final extractMetadata = total <= 5000; // ⚠️ Threshold logic here
+    print("Metadata extraction: ${extractMetadata ? 'ENABLED' : 'DISABLED'}");
 
-    // show progress UI immediately
+    int current = 0;
     onProgress(0, total);
 
     for (final file in mediaFiles) {
       final ext = p.extension(file.path).toLowerCase().replaceAll('.', '');
+      final isVideo = ['mp4', 'mov'].contains(ext);
+
+      int? width;
+      int? height;
+      double? duration;
+      double? fps;
+      int? numberOfFrames;
+
+      if (extractMetadata) {
+        if (isVideo) {
+          final meta = await getVideoMetadata(file.path);
+          width = meta['width'];
+          height = meta['height'];
+          duration = meta['duration'];
+          fps = meta['fps'];
+          numberOfFrames = (duration != null && fps != null)
+            ? (duration * fps).round()
+            : null;
+        } else {
+          final meta = await getImageMetadata(file.path);
+          width = meta['width'];
+          height = meta['height'];
+        }
+      }
+
       await DatasetDatabase.instance.insertMediaItem(
         datasetId,
         file.path,
         ext,
         ownerId: ownerId,
+        width: width,
+        height: height,
+        duration: duration,
+        fps: fps,
+        numberOfFrames: numberOfFrames,
+        source: 'imported.' + datasetPath,
       );
 
       current++;
@@ -230,5 +258,29 @@ class DatasetImportProjectCreation {
 
     _logger.info('[fetchMediaItemsMap] Loaded ${map.length} media items for dataset $datasetId');
     return map;
+  }
+
+  static Future<Map<String, dynamic>> getImageMetadata(String path) async {
+    final bytes = await File(path).readAsBytes();
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) {
+      // throw Exception("Unable to decode image: $path");
+      print("Warning: Unable to decode image: $path");
+      return {'width': 0, 'height': 0};
+    }
+
+    return {
+      'width': decoded.width,
+      'height': decoded.height,
+    };
+  }
+
+  static Future<Map<String, dynamic>> getVideoMetadata(String path) async {
+    return {
+      'width': 0,
+      'height': 0,
+      'duration': 0.0,
+      'fps': 0.0,
+    };
   }
 }
