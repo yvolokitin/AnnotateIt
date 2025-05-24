@@ -104,23 +104,37 @@ class ProjectDatabase {
       )
     ''');
 
-    await db.execute('''
-      CREATE TABLE media_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uuid TEXT UNIQUE,
-        datasetId TEXT,
-        filePath TEXT,
-        extension TEXT,
-        type TEXT,
-        uploadDate TEXT,
-        owner_id INTEGER NOT NULL,
-        lastAnnotator TEXT,
-        lastAnnotatedDate TEXT,
-        numberOfFrames INTEGER,
-        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
-        FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-    ''');
+  await db.execute('''
+    CREATE TABLE media_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Internal DB ID
+      uuid TEXT UNIQUE,                              -- Unique UUID for external reference
+      datasetId TEXT,                                -- Foreign key to datasets table
+      filePath TEXT,                                 -- Absolute or relative path to file
+      extension TEXT,                                -- File extension (e.g., .jpg, .mp4)
+      type TEXT,                                     -- "image" or "video"
+
+      width INTEGER,                                 -- Media width (in pixels)
+      height INTEGER,                                -- Media height (in pixels)
+      duration REAL,                                 -- Duration in seconds (only for videos)
+      fps REAL,                                      -- Frames per second (only for videos)
+      source TEXT,                                   -- Source of media: "uploaded", "imported", or "url"
+
+      uploadDate TEXT,                               -- ISO 8601 date-time string
+      owner_id INTEGER NOT NULL,                     -- Foreign key to users (owner of the media)
+
+      lastAnnotator TEXT,                            -- Name or ID of last annotator (nullable)
+      lastAnnotatedDate TEXT,                        -- ISO date-time string of last annotation
+      numberOfFrames INTEGER,                        -- Total frames (useful for videos)
+
+      isAnnotated INTEGER DEFAULT 0,                 -- 0 = not annotated, 1 = annotated
+      annotationCount INTEGER DEFAULT 0,             -- Cached number of annotations
+      classificationLabelName TEXT,                  -- If type is classification: assigned label name
+      classificationLabelColor TEXT,                 -- HEX color of classification label (e.g., #FF6600)
+
+      FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
+      FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  ''');
 
     // Labels table (per project)
     await db.execute('''

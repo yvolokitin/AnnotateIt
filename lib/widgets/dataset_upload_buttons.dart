@@ -77,13 +77,38 @@ class DatasetUploadButtons extends StatelessWidget {
             return;
           }
 
+          int? width;
+          int? height;
+          double? duration;
+          double? fps;
+          final isVideo = ['mp4', 'mov'].contains(ext);
+  
+          if (isVideo) {
+            // TODO: Replace with actual video metadata extractor
+            final videoMeta = await getVideoMetadata(file.path!);
+            width = videoMeta['width'];
+            height = videoMeta['height'];
+            duration = videoMeta['duration'];
+            fps = videoMeta['fps'];
+  
+          } else {
+            final imageMeta = await getImageMetadata(file.path!);
+            width = imageMeta['width'];
+            height = imageMeta['height'];
+          }
+
           await DatasetDatabase.instance.insertMediaItem(
             dataset_id,
             file.path!,
             ext,
             ownerId: currentUser.id!,
+            width: width,
+            height: height,
+            duration: duration,
+            fps: fps,
+            source: 'local',
           );
-
+  
           onFileProgress?.call(file.name, i + 1, total);
         }
 
@@ -97,6 +122,26 @@ class DatasetUploadButtons extends StatelessWidget {
       print("_uploadMedia: Upload error: $e");
       onUploadError?.call();
     }
+  }
+
+  Future<Map<String, dynamic>> getImageMetadata(String path) async {
+    final file = File(path);
+    final bytes = await file.readAsBytes();
+    final decodedImage = await decodeImageFromList(bytes);
+    return {
+      'width': decodedImage.width,
+      'height': decodedImage.height,
+    };
+  }
+
+  Future<Map<String, dynamic>> getVideoMetadata(String path) async {
+    print('getVideoMetadata (stub with zeros) called for: $path');
+    return {
+      'width': 0,
+      'height': 0,
+      'duration': 0.0,
+      'fps': 0.0,
+    };
   }
 
   @override
