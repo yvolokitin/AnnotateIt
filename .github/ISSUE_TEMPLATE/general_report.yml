@@ -54,8 +54,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: 📦 Release version
-      description: Version of this project: [e.g. v1.2.3, commit hash, or branch name]
+      label: 📦 Project version
+      description: Version of this project (e.g. `v1.2.3`, commit hash, or branch name)
       placeholder: "e.g. v1.2.3"
 
   - type: input
