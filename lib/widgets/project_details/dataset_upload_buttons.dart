@@ -1,14 +1,14 @@
 import 'dart:io';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
-import "package:uuid/uuid.dart";
+// import "package:uuid/uuid.dart";
 
-import "../utils/image_utils.dart";
-import "../data/dataset_database.dart";
-import "../data/project_database.dart";
+import "../../utils/image_utils.dart";
+import "../../data/dataset_database.dart";
+import "../../data/project_database.dart";
 
-import "../session/user_session.dart";
+import "../../session/user_session.dart";
 
 class DatasetUploadButtons extends StatelessWidget {
   final int project_id, file_count;
@@ -146,6 +146,7 @@ class DatasetUploadButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.all(40),
       height: 120,
@@ -159,14 +160,14 @@ class DatasetUploadButtons extends StatelessWidget {
           SizedBox(width: 20),
           _buildButton(
             context,
-            label: "Import dataset",
+            label: l10n.importDataset,
             borderColor: Colors.grey,
           ),
 
           SizedBox(width: 20),
           _buildButton(
             context,
-            label: "Upload media",
+            label: l10n.uploadMedia,
             borderColor: Colors.red,
           ),
         ],
@@ -179,28 +180,56 @@ Widget _buildButton(
   required String label,
   required Color borderColor,
 }) {
-  return ElevatedButton(
-    onPressed: isUploading
-        ? null // block during upload
-        : () async {
-            await _uploadMedia(context);
-          },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.grey[900],
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-        side: BorderSide(color: borderColor, width: 2),
+  final screenWidth = MediaQuery.of(context).size.width;
+  final bool isCompact = screenWidth < 750;
+
+  final IconData icon = label.toLowerCase().contains("upload")
+      ? Icons.upload
+      : Icons.dataset;
+
+  if (isCompact) {
+    // Icon-only button for small screens
+    return IconButton(
+      onPressed: isUploading
+          ? null
+          : () async {
+              await _uploadMedia(context);
+            },
+      icon: Icon(icon, color: Colors.white, size: 36),
+      tooltip: label,
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.grey[900],
+        shape: CircleBorder(
+          side: BorderSide(color: borderColor, width: 2),
+        ),
       ),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
+    );
+  } else {
+    // Text-only button for large screens
+    return ElevatedButton(
+      onPressed: isUploading
+          ? null
+          : () async {
+              await _uploadMedia(context);
+            },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey[900],
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+          side: BorderSide(color: borderColor, width: 2),
+        ),
       ),
-    ),
-  );
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
 }
+
 }

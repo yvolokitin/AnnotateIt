@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import '../models/project.dart';
-import '../models/dataset.dart';
-import '../models/media_item.dart';
+import '../../models/project.dart';
+import '../../models/dataset.dart';
+import '../../models/media_item.dart';
 
-import '../data/dataset_database.dart';
-import '../data/project_database.dart';
+import '../../data/dataset_database.dart';
+import '../../data/project_database.dart';
 
-import '../widgets/no_media_dialog.dart';
-import '../widgets/dataset_upload_buttons.dart';
-import '../widgets/paginated_image_grid.dart';
+import '../no_media_dialog.dart';
+import 'dataset_upload_buttons.dart';
+import '../paginated_image_grid.dart';
 
 enum MediaSortOption {
   newestFirst,

@@ -1,18 +1,13 @@
-import "package:flutter_svg/flutter_svg.dart";
+// import "package:flutter_svg/flutter_svg.dart";
 import "package:flutter/material.dart";
 
 import "../models/label.dart";
 import "../models/project.dart";
 
-import "dataset_view_page.dart";
-
-import "../widgets/buttons/hover_icon_button.dart";
-
 import '../widgets/dialogs/label_list_dialog.dart';
 import '../widgets/dialogs/color_picker_dialog.dart';
-
-import '../widgets/dialogs/alert_error_dialog.dart';
-
+import "../widgets/buttons/hover_icon_button.dart";
+import "../widgets/project_details/dataset_view_page.dart";
 import '../widgets/project_details/project_details_sidebar.dart';
 import '../widgets/project_details/project_details_add_label.dart';
 

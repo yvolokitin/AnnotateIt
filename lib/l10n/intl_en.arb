@@ -3,6 +3,8 @@
   "keep": "Keep",
   "discard": "Discard",
   "close": "Close",
+  "importDataset": "Import dataset",
+  "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
   "createProjectStepOneSubtitle": "Please, enter your new project name and select Project type",
   "createProjectStepTwoSubtitle": "Please, create labels for a New project",
