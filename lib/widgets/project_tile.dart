@@ -1,6 +1,3 @@
-// import 'package:flutter_svg/flutter_svg.dart';
-// import '../pages/project_details_screen.dart';
-
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import "../utils/date_utils.dart";
@@ -36,14 +33,6 @@ class ProjectTileState extends State<ProjectTile> {
       onExit: (_) => setState(() => _isHovered = false), // Hover end
 
       child: GestureDetector(
-        /*onTap: () {
-          print("Project '${widget.project.name}' clicked!");
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProjectDetailsScreen(widget.project),
-            ),
-          );
-        },*/
         onTap: widget.onTap ??
           () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
 

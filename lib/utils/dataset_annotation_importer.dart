@@ -18,6 +18,7 @@ class DatasetAnnotationImporter {
 
   Future<int> addAnnotationsToProjectFromDataset({
     required String datasetPath,
+    required String taskType,
     required String format,
     required Map<String, MediaItem> mediaItemsMap,
     required int projectId,
@@ -27,6 +28,7 @@ class DatasetAnnotationImporter {
       case 'coco':
         return await COCOParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,
@@ -36,6 +38,7 @@ class DatasetAnnotationImporter {
       case 'yolo':
         return await YOLOParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,
@@ -45,6 +48,7 @@ class DatasetAnnotationImporter {
       case 'voc':
         return await VOCParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,
@@ -54,6 +58,7 @@ class DatasetAnnotationImporter {
       case 'datumaro':
         return await DatumaroParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,
@@ -63,6 +68,7 @@ class DatasetAnnotationImporter {
       case 'labelme':
         return await LabelMeParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,
@@ -72,6 +78,7 @@ class DatasetAnnotationImporter {
       case 'cvat':
         return await CVATParser.parse(
           datasetPath: datasetPath,
+          taskType: taskType,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
           projectId: projectId,

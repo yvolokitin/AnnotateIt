@@ -12,6 +12,7 @@ class DatumaroParser {
 
   static Future<int> parse({
     required String datasetPath,
+    required String taskType,    
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,
     required int projectId,
@@ -48,7 +49,7 @@ class DatumaroParser {
 
     int addedCount = 0;
 
-    // ✅ CASE 1: Old format with "annotations"
+    // CASE 1: Old format with "annotations"
     if (data.containsKey('annotations')) {
       final annotations = data['annotations'];
       if (annotations is Map<String, dynamic>) {
@@ -65,7 +66,8 @@ class DatumaroParser {
           if (annotationList is List) {
             for (final ann in annotationList) {
               if (ann is Map<String, dynamic>) {
-                await annotationDb.insertAnnotation(
+                await annotationDb.insertAnnotationAndUpdateMediaItem(
+                // await annotationDb.insertAnnotation(
                   Annotation(
                     id: null,
                     mediaItemId: mediaItem.id!,
@@ -79,6 +81,7 @@ class DatumaroParser {
                     createdAt: DateTime.now(),
                     updatedAt: DateTime.now(),
                   ),
+                  taskType,
                 );
                 addedCount++;
               }
@@ -87,7 +90,7 @@ class DatumaroParser {
         }
       }
 
-    // ✅ CASE 2: New Datumaro 2.x+ format with "items"
+    // CASE 2: New Datumaro 2.x+ format with "items"
     } else if (data.containsKey('items')) {
       final items = data['items'];
       if (items is List) {
@@ -108,7 +111,8 @@ class DatumaroParser {
             if (annotationList is List) {
               for (final ann in annotationList) {
                 if (ann is Map<String, dynamic>) {
-                  await annotationDb.insertAnnotation(
+                  await annotationDb.insertAnnotationAndUpdateMediaItem(
+                  // await annotationDb.insertAnnotation(
                     Annotation(
                       id: null,
                       mediaItemId: mediaItem.id!,
@@ -122,6 +126,7 @@ class DatumaroParser {
                       createdAt: DateTime.now(),
                       updatedAt: DateTime.now(),
                     ),
+                    taskType,
                   );
                   addedCount++;
                 }

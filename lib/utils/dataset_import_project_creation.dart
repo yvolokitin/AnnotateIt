@@ -76,6 +76,7 @@ class DatasetImportProjectCreation {
     final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
     final addedCount = await importer.addAnnotationsToProjectFromDataset(
       datasetPath: datasetInfo.datasetPath,
+      taskType: datasetInfo.selectedTaskType ?? 'Unknown',
       format: datasetInfo.datasetFormat,
       mediaItemsMap: mediaItemsMap,
       projectId: newProjectId,

@@ -11,6 +11,7 @@ class CVATParser {
 
   static Future<int> parse({
     required String datasetPath,
+    required String taskType,
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,
     required int projectId,
@@ -43,7 +44,6 @@ class CVATParser {
           continue;
         }
 
-        // parse boxes
         final boxes = image.findElements('box');
         for (final box in boxes) {
           final label = box.getAttribute('label');
@@ -55,8 +55,9 @@ class CVATParser {
           if (xtl == null || ytl == null || xbr == null || ybr == null) continue;
 
           final annotation = Annotation(
+            id: null,
             mediaItemId: mediaItem.id!,
-            labelId: null, // optional: map label to your label table
+            labelId: null, // TODO: Map `label` to actual label ID if available
             annotationType: 'bbox',
             data: {
               'x': xtl,
@@ -70,7 +71,7 @@ class CVATParser {
             updatedAt: DateTime.now(),
           );
 
-          await annotationDb.insertAnnotation(annotation);
+          await annotationDb.insertAnnotationAndUpdateMediaItem(annotation, taskType);
           addedCount++;
         }
       }

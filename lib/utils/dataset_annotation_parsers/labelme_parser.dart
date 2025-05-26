@@ -11,6 +11,7 @@ class LabelMeParser {
 
   static Future<int> parse({
     required String datasetPath,
+    required String taskType,
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,
     required int projectId,
@@ -45,7 +46,7 @@ class LabelMeParser {
       for (final shape in shapes) {
         if (shape is! Map<String, dynamic>) continue;
 
-        final label = shape['label'];
+        final label = shape['label']; // string name of the label
         final points = shape['points'] as List<dynamic>?;
 
         if (points == null || points.isEmpty) continue;
@@ -59,8 +60,9 @@ class LabelMeParser {
         }).where((p) => p != null).toList();
 
         final annotation = Annotation(
+          id: null,
           mediaItemId: mediaItem.id!,
-          labelId: null, // optional: map label to label table
+          labelId: null, // TODO: map 'label' string to label ID
           annotationType: 'polygon',
           data: {
             'points': pointList,
@@ -71,7 +73,7 @@ class LabelMeParser {
           updatedAt: DateTime.now(),
         );
 
-        await annotationDb.insertAnnotation(annotation);
+        await annotationDb.insertAnnotationAndUpdateMediaItem(annotation, taskType);
         addedCount++;
       }
     }

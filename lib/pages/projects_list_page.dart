@@ -6,6 +6,7 @@ import "../models/project.dart";
 import "../widgets/project_tile.dart";
 import "../widgets/projects_topbar.dart";
 import "../widgets/edit_project_name.dart";
+import "../widgets/empty_project_placeholder.dart";
 
 import "project_details_screen.dart";
 import "project_creation/create_from_dataset_dialog.dart";
@@ -121,6 +122,37 @@ class _ProjectsPageState extends State<ProjectsPage> {
     return filtered;
   }
 
+  void _handleCreateNewProject() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => CreateNewProjectDialog(),
+    );
+
+    if (result == 'refresh') {
+      _loadProjects(); // Refresh the list if new project was created
+    }
+  }
+
+  void _handleImportFromDataset() async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (_) => const CreateFromDatasetDialog(),
+    );
+
+    if (result != null) {
+      final newProject = await ProjectDatabase.instance.fetchProjectById(result);
+      if (newProject != null) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProjectDetailsScreen(newProject),
+          ),
+        );  
+        _loadProjects(); // Refresh after returning from details
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,85 +175,49 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 print("Project Search button pressed, not implemented yet");
               },
               onSortSelected: _onSortSelected,
-              onCreateProject: () async {
-                // print("[ProjectsPage] Started a new project dialog creation");
-                final result = await showDialog<String>(
-                  context: context,
-                  builder: (context) => CreateNewProjectDialog(),
-                );
-
-                print('[ProjectsPage] Received result: : $result');
-                // refresh project list
-                if (result == 'refresh') {
-                  _loadProjects();
-                }
-              },
-              onCreateFromDataset: () async {
-                print("Create Project from Dataset import");
-                final result = await showDialog<int>(
-                  context: context,
-                  builder: (_) => const CreateFromDatasetDialog(),
-                );
-
-                print('[ProjectsPage] Create Project from Dataset import result $result');
-                if (result != null) {
-                  final newProject = await ProjectDatabase.instance.fetchProjectById(result);
-                  if (newProject != null) {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProjectDetailsScreen(newProject),
-                      ),
-                    );
-                    // reload after returning
-                    _loadProjects();
-                  }
-                }
-
-                /*showDialog(
-                  context: context,
-                  builder: (_) => const CreateFromDatasetDialog(),
-                );*/
-
-              },
-              onCreateFromExport: () => print("Exported project creation"),
+              onCreateProject: _handleCreateNewProject,
+              onCreateFromDataset: _handleImportFromDataset,
+              onCreateFromExport: _handleImportFromDataset,
           ),
 
           // Project List -> list of ProjectTile's (in widgets)
           Expanded(
             child: _filteredProjects.isEmpty
-                ? Center(child: Text("No projects found"))
-                : ListView.builder(
-                    itemCount: _filteredProjects.length,
-                    itemBuilder: (context, index) {
-                      final project = _filteredProjects[index];
-                      return ProjectTile(
-                        project: project,
-                        onMorePressed: () {
-                          _showProjectOptions(context, project);
-                        },
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProjectDetailsScreen(project),
-                            ),
-                          );
-                          
-                          // always reload after returning
-                          print("📦 Returned from ProjectDetailsScreen — reloading project list");
-                          _loadProjects();
-                        },
-                      );
-                    },
+              ? SingleChildScrollView(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: EmptyProjectPlaceholder(
+                    onCreateNewProject: _handleCreateNewProject,
+                    onImportFromDataset: _handleImportFromDataset,
                   ),
+                ),
+              )                
+              : ListView.builder(
+                itemCount: _filteredProjects.length,
+                itemBuilder: (context, index) {
+                  final project = _filteredProjects[index];
+                  return ProjectTile(
+                    project: project,
+                    onMorePressed: () {
+                      _showProjectOptions(context, project);
+                    },
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProjectDetailsScreen(project),
+                        ),
+                      );
+                      _loadProjects();
+                    },
+                  );
+                },
+              ),
           ),
         ],
       ),
     );
   }
-
-  // Widget _buildProjectList() {  }
 
   // Function to Show Edit/Delete Options
   void _showProjectOptions(BuildContext context, Project project) {
