@@ -56,7 +56,7 @@ body:
     attributes:
       label: 📦 Geti version
       description: Version of this project (e.g. `2.10.0`, commit hash, or branch name)
-      placeholder: "e.g. 2.10.0"
+      placeholder: "2.10.0"
     validations:
       required: true
 
@@ -64,25 +64,26 @@ body:
     id: os
     attributes:
       label: 🖥️ Operating System
-      placeholder: "e.g. Windows 11, Ubuntu 22.04"
+      placeholder: "Windows 11, Ubuntu 22.04"
 
   - type: input
     id: openvino
     attributes:
       label: Browser (if applicable)
-      placeholder: "e.g. Chrome, version 136.0.7103.114"
+      placeholder: "Chrome, version 136.0.7103.114"
 
   - type: input
     id: python-version
     attributes:
       label: Python Version (if relevant)
-      placeholder: "e.g. 3.10"
+      placeholder: "3.10"
 
-  - type: input
+  - type: textarea
     id: hardware
     attributes:
       label: Hardware
-      placeholder: "e.g. Intel CPU, GPU, RAM"
+      description: Intel CPU, GPU, RAM
+      placeholder: "Intel CPU, GPU, RAM"
 
   - type: textarea
     id: context
