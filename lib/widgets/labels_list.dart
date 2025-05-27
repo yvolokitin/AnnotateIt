@@ -3,8 +3,13 @@ import '../models/label.dart';
 
 class LabelList extends StatelessWidget {
   final List<Label> labels;
+  final double fontSize;
 
-  const LabelList({Key? key, required this.labels}) : super(key: key);
+  const LabelList({
+    required this.labels,
+    this.fontSize = 16,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +77,7 @@ class LabelList extends StatelessWidget {
           ),
           Text(
             label.name,
-            style: const TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: fontSize),
           ),
         ],
       ),

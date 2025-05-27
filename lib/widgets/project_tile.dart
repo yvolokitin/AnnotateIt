@@ -26,6 +26,14 @@ class ProjectTileState extends State<ProjectTile> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Adaptive sizes
+    final nameFontSize = screenWidth < 600 ? 18.0 : screenWidth < 1000 ? 20.0 : 24.0;
+    final typeFontSize = screenWidth < 600 ? 16.0 : screenWidth < 1000 ? 18.0 : 22.0;
+    final dateFontSize = screenWidth < 600 ? 14.0 : screenWidth < 1000 ? 16.0 : 18.0;
+    final verticalSpacing = screenWidth < 600 ? 2.0 : 4.0;
+    final labelFontSize = screenWidth < 600 ? 14.0 : 16.0;
+
     return MouseRegion(
       // Change cursor to hand when hovering
       cursor: SystemMouseCursors.click,
@@ -53,25 +61,26 @@ class ProjectTileState extends State<ProjectTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Thumbnail (Left Side)
-                Container(
-                  width: 350,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[850], // Background color
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
+                if (screenWidth >= 650)
+                  Container(
+                    width: 350,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850], // Background color
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                      ),
+                      child: ProjectIcon(iconPath: widget.project.icon),
                     ),
                   ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                    child: ProjectIcon(iconPath: widget.project.icon),
-                  ),
-                ),
-                SizedBox(width: 12),
+                  SizedBox(width: 12),
 
                 // Project Details: Title @ Type, Updated and creation Dates, Labels
                 Expanded(
@@ -80,73 +89,40 @@ class ProjectTileState extends State<ProjectTile> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Project Name & Type
-/*                        
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: widget.project.name,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: " @ ${widget.project.type}",
-                                style: TextStyle(color: Colors.white70, fontSize: 24),
-                              ),
-                            ],
+                        // Project Name (line 1)
+                        Text(
+                          widget.project.name,
+                          style: TextStyle(
+                            fontSize: nameFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
 
-                        // Last update
+                        // Project Type (line 2)
+                        Text(
+                          "@ ${widget.project.type}",
+                          style: TextStyle(
+                            fontSize: typeFontSize,
+                            color: Colors.white70,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        SizedBox(height: verticalSpacing),
+                        // Updated / Created (line 3)
                         Text(
                           "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
-                          style: TextStyle(color: Colors.white60, fontSize: 18),
+                          style: TextStyle(
+                            color: Colors.white60,
+                            fontSize: dateFontSize,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 8),
-*/
-
-// Project Name (line 1)
-Text(
-  widget.project.name,
-  style: const TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  ),
-  maxLines: 1,
-  overflow: TextOverflow.ellipsis,
-),
-
-// Project Type (line 2)
-Text(
-  "@ ${widget.project.type}",
-  style: const TextStyle(
-    fontSize: 22,
-    color: Colors.white70,
-  ),
-  maxLines: 1,
-  overflow: TextOverflow.ellipsis,
-),
-
-const SizedBox(height: 4),
-
-// Updated / Created (line 3)
-Text(
-  "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
-  style: const TextStyle(
-    color: Colors.white60,
-    fontSize: 18,
-  ),
-  maxLines: 1,
-  overflow: TextOverflow.ellipsis,
-),
-
-
 
                         Divider(
                           color: Colors.grey,
@@ -155,7 +131,10 @@ Text(
                         ),
 
                         // to show Labels Section with colored tags in
-                        LabelList(labels: widget.project.labels ?? []),
+                        LabelList(
+                          labels: widget.project.labels ?? [],
+                          fontSize: labelFontSize
+                        ),
                       ],
                     ), // Column
                   ), // Padding
