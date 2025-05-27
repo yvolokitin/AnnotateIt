@@ -1,61 +1,62 @@
 import 'package:flutter/material.dart';
 import '../models/label.dart';
 
-class LabelList extends StatefulWidget {
+class LabelList extends StatelessWidget {
   final List<Label> labels;
 
-  const LabelList({
-    required this.labels,
-    super.key,
-  });
-
-  @override
-  LabelListState createState() => LabelListState();
-}
-
-class LabelListState extends State<LabelList> {
-  bool _showAll = false;
+  const LabelList({Key? key, required this.labels}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final labelsToShow;
-    final int toTake;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        const spacing = 8.0;
+        const runSpacing = 4.0;
+        const fontSize = 18.0;
 
-    double screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth >= 1600) {
-      toTake = 13;
-    } else if (screenWidth > 980) {
-      toTake = 7;
-    } else {
-      toTake = 3;
-    }
+        double usedWidth = 0;
+        final moreChipWidth = _measureTextWidth('+ more...', fontSize: fontSize) + 24;
+        final List<Widget> visibleChips = [];
 
-    labelsToShow = _showAll
-        ? widget.labels
-        : widget.labels.take(toTake).toList();
+        for (int i = 0; i < labels.length; i++) {
+          final label = labels[i];
+          final chipWidth = _estimateChipWidth(label, fontSize: fontSize);
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children: [
-        ...labelsToShow.map((label) => _buildLabel(label)),
+          final remaining = labels.length - i;
+          final shouldReserveForMore = remaining > 1;
+          final projectedUsed = usedWidth + chipWidth + spacing;
+          final projectedWithMore = projectedUsed + (shouldReserveForMore ? moreChipWidth + spacing : 0);
 
-        if (!_showAll && widget.labels.length > toTake)
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _showAll = true;
-              });
-            },
-            child: Chip(
-              label: Text('+ more...'),
+          if (projectedWithMore < availableWidth) {
+            visibleChips.add(_buildChip(label));
+            usedWidth = projectedUsed;
+          } else {
+            break;
+          }
+        }
+
+        if (visibleChips.length < labels.length) {
+          visibleChips.add(
+            GestureDetector(
+              onTap: () => _showAllLabelsDialog(context, labels),
+              child: Chip(
+                label: const Text('+ more...'),
+              ),
             ),
-          ),
-      ],
+          );
+        }
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: runSpacing,
+          children: visibleChips,
+        );
+      },
     );
   }
 
-  Widget _buildLabel(Label label) {
+  Widget _buildChip(Label label) {
     return Chip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
@@ -63,7 +64,7 @@ class LabelListState extends State<LabelList> {
           Container(
             width: 16,
             height: 16,
-            margin: EdgeInsets.only(right: 6),
+            margin: const EdgeInsets.only(right: 6),
             decoration: BoxDecoration(
               color: _fromHex(label.color),
               shape: BoxShape.circle,
@@ -71,14 +72,49 @@ class LabelListState extends State<LabelList> {
           ),
           Text(
             label.name,
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
         ],
       ),
     );
   }
 
-  Color _fromHex(String hexString) {
+  void _showAllLabelsDialog(BuildContext context, List<Label> labels) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('All Labels'),
+        content: SingleChildScrollView(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: labels.map(_buildChip).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static double _estimateChipWidth(Label label, {required double fontSize}) {
+    final labelWidth = _measureTextWidth(label.name, fontSize: fontSize);
+    return labelWidth + 42; // 16px color circle + 6 margin + ~20 padding
+  }
+
+  static double _measureTextWidth(String text, {required double fontSize}) {
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return textPainter.width;
+  }
+
+  static Color _fromHex(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('FF');
     buffer.write(hexString.replaceFirst('#', ''));

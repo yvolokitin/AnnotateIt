@@ -156,6 +156,36 @@ class _ImageTileState extends State<ImageTile> {
                   ),
                 ),
               ),
+
+// annotation badge (bottom-right)
+if (widget.media.isAnnotated == true)
+  Positioned(
+    bottom: 6,
+    right: 6,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.label_important, size: 16, color: Colors.amber),
+          const SizedBox(width: 4),
+          Text(
+            '${widget.media.annotationCount ?? 0}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+
+
             ],
           ),
         ),

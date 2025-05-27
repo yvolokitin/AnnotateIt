@@ -164,13 +164,13 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        // return DatasetViewPage(widget.project);
-        return Container(
+        return DatasetViewPage(widget.project);
+        /*return Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.yellow, width: 3),
           ),
           child: DatasetViewPage(widget.project),
-        );
+        );*/
 
       case 1:
         return Column(

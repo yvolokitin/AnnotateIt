@@ -81,6 +81,7 @@ class ProjectTileState extends State<ProjectTile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Project Name & Type
+/*                        
                         RichText(
                           text: TextSpan(
                             children: [
@@ -107,6 +108,45 @@ class ProjectTileState extends State<ProjectTile> {
                           style: TextStyle(color: Colors.white60, fontSize: 18),
                         ),
                         SizedBox(height: 8),
+*/
+
+// Project Name (line 1)
+Text(
+  widget.project.name,
+  style: const TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  ),
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+),
+
+// Project Type (line 2)
+Text(
+  "@ ${widget.project.type}",
+  style: const TextStyle(
+    fontSize: 22,
+    color: Colors.white70,
+  ),
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+),
+
+const SizedBox(height: 4),
+
+// Updated / Created (line 3)
+Text(
+  "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
+  style: const TextStyle(
+    color: Colors.white60,
+    fontSize: 18,
+  ),
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+),
+
+
 
                         Divider(
                           color: Colors.grey,
