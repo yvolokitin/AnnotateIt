@@ -8,9 +8,9 @@ import '../../models/media_item.dart';
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 
-import '../no_media_dialog.dart';
+import 'no_media_dialog.dart';
 import 'dataset_upload_buttons.dart';
-import '../paginated_image_grid.dart';
+import 'paginated_image_grid.dart';
 
 enum MediaSortOption {
   newestFirst,
@@ -226,16 +226,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     _loadMediaForDataset(newDataset);
   }
 
-  Widget _buildMediaPreview(MediaItem media) {
-    if (media.type == MediaType.image && File(media.filePath).existsSync()) {
-      return Image.file(File(media.filePath), width: 48, height: 48, fit: BoxFit.cover);
-    } else if (media.type == MediaType.video) {
-      return Icon(Icons.videocam, size: 48, color: Colors.white70);
-    } else {
-      return Icon(Icons.insert_drive_file, size: 48, color: Colors.white38);
-    }
-  }
-
   void _renameDataset(Dataset dataset) async {
     final controller = TextEditingController(text: dataset.name);
     final result = await showDialog<String>(
@@ -395,6 +385,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
               labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.white60,
             ),  
+
             Expanded(
               child: TabBarView(
                 controller: _tabController,

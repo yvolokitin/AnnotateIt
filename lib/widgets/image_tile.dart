@@ -244,6 +244,8 @@ class _ImageTileState extends State<ImageTile> {
   }
 
   Future<void> _showDetailsDialog(BuildContext context, MediaItem media) async {
+    print("Media details for: ${media}");
+
     final file = File(media.filePath);
     final stat = file.statSync();
     final created = DateFormat('dd.MM.yyyy HH:mm').format(stat.changed);

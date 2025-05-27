@@ -82,6 +82,10 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double contentPadding = (screenWidth > 1600) ? 30.0 : (screenWidth > 900) ? 15.0 : 2.0;
+
+    print("screenWidth: $screenWidth");
+
     return Scaffold(
       backgroundColor: Colors.grey[850],
       body: Column(
@@ -144,7 +148,7 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 Expanded(
                   flex: 8,
                   child: Container(
-                    padding: const EdgeInsets.all(30.0),
+                    padding: EdgeInsets.all(contentPadding),
                     color: Colors.grey[900],
                     child: getSelectedWidget(selectedIndex),
                   ),
@@ -160,7 +164,13 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return DatasetViewPage(widget.project);
+        // return DatasetViewPage(widget.project);
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.yellow, width: 3),
+          ),
+          child: DatasetViewPage(widget.project),
+        );
 
       case 1:
         return Column(

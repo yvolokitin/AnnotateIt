@@ -198,7 +198,7 @@ class ProjectDatabase {
       final dataset = Dataset(
         id: uuid.v4(),
         projectId: projectId,
-        name: 'Default Dataset',
+        name: 'Dataset',
         description: 'Default dataset for $projectName',
         createdAt: DateTime.now(),
       );

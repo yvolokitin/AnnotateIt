@@ -1,12 +1,12 @@
-import 'dart:io';
+// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:vap/models/project.dart';
 
-import '../models/media_item.dart';
-import '../models/project.dart';
+import '../../models/media_item.dart';
+import '../../models/project.dart';
 
-import 'image_tile.dart';
-import 'media_tile.dart';
+import '../image_tile.dart';
+import '../media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
   final List<MediaItem> mediaItems;
