@@ -3,7 +3,7 @@ import "../data/project_database.dart";
 import "../data/labels_database.dart";
 import "../models/project.dart";
 
-import "../widgets/project_tile.dart";
+import "../widgets/project_list/project_tile.dart";
 import "../widgets/projects_topbar.dart";
 import "../widgets/edit_project_name.dart";
 import "../widgets/empty_project_placeholder.dart";

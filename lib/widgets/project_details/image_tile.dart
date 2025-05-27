@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
-import '../models/media_item.dart';
-import '../models/project.dart';
-import '../pages/image_annotator_page.dart';
-import "../data/user_database.dart";
+import '../../models/media_item.dart';
+import '../../models/project.dart';
+import '../../pages/image_annotator_page.dart';
+import "../../data/user_database.dart";
 
 class ImageTile extends StatefulWidget {
   final MediaItem media;

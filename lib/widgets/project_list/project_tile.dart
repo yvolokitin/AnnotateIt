@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/project.dart';
-import "../utils/date_utils.dart";
+import '../../models/project.dart';
+import "../../utils/date_utils.dart";
 
 import 'labels_list.dart';
 import 'project_icon.dart';
@@ -133,7 +133,9 @@ class ProjectTileState extends State<ProjectTile> {
                         // to show Labels Section with colored tags in
                         LabelList(
                           labels: widget.project.labels ?? [],
-                          fontSize: labelFontSize
+                          projectName: widget.project.name,
+                          iconPath: widget.project.icon,
+                          fontLabelSize: labelFontSize,
                         ),
                       ],
                     ), // Column

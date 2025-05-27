@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '../models/media_item.dart';
+
+import '../../models/media_item.dart';
 
 class MediaTile extends StatefulWidget {
   final MediaItem media;
