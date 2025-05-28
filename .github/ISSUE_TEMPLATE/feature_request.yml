@@ -8,28 +8,32 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: 📄 Feature description
-      description: Clearly describe the feature you'd like to request.
-      placeholder: "What would you like to see added or changed?"
+      label: 📄 Description
+      description: Provide a brief overview of the proposed feature.
     validations:
       required: true
 
   - type: textarea
-    id: motivation
+    id: objective
     attributes:
-      label: 🚀 Motivation
-      description: Why is this feature important or useful?
-      placeholder: "Explain the problem this feature solves, or the value it adds."
-  
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: 🔁 Alternatives
-      description: Have you considered other solutions or workarounds?
+      label: 🎯 Objective
+      description: What is the main goal of this feature?
+    validations:
+      required: true
 
   - type: textarea
-    id: context
+    id: user-story
     attributes:
-      label: ➕ Additional context
-      description: Add links, screenshots, or other context here.
+      label: 🧑‍💻 User Story
+      description: Describe this feature from the user’s perspective.
+      placeholder: "As a <type of user>, I want to <do something> so that <benefit>."
+    validations:
+      required: true
 
+  - type: textarea
+    id: requirements
+    attributes:
+      label: 📌 Requirements Covered
+      description: Mention any specific requirements, use cases, or problems this feature addresses.
+    validations:
+      required: false
