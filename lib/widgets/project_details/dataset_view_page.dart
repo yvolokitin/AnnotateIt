@@ -56,6 +56,66 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     _loadDatasets();
   }
 
+  Future<void> _loadDatasets() async {
+    final fetchedDatasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+
+    fetchedDatasets.sort((a, b) {
+      if (a.id == widget.project.defaultDatasetId) return -1;
+      if (b.id == widget.project.defaultDatasetId) return 1;
+      return 0;
+    });
+
+    fetchedDatasets.add(
+      Dataset(
+        id: 'add_new_tab',
+        projectId: widget.project.id!,
+        name: '+',
+        description: '',
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      datasets = fetchedDatasets;
+    });
+
+    _rebuildTabController();
+
+    await _loadMediaForDataset(fetchedDatasets.first);
+
+    if (!mounted) return;
+    setState(() {
+      _initialLoading = false;
+    });
+  }
+
+  Future<void> _loadMediaForDataset(Dataset dataset) async {
+    if (dataset.id == 'add_new_tab') return;
+
+    final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
+
+    if (!mounted) return;
+
+    List<MediaItem> sortedMedia = [...media]; 
+    switch (_sortOption) {
+      case MediaSortOption.newestFirst:
+        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
+        break;
+      case MediaSortOption.oldestFirst:
+        sortedMedia.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
+        break;
+    }
+
+    setState(() {
+      mediaByDataset[dataset.id] = sortedMedia;
+      _fileCount = media.length;
+      _datasetTabCache.remove(dataset.id);
+    });
+
+    await Future.delayed(Duration(milliseconds: 100));
+  }
+
   void _rebuildTabController() {
     _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
@@ -146,66 +206,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     setState(() {
       _cancelUpload = false;
     });
-  }
-
-  Future<void> _loadDatasets() async {
-    final fetchedDatasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
-
-    fetchedDatasets.sort((a, b) {
-      if (a.id == widget.project.defaultDatasetId) return -1;
-      if (b.id == widget.project.defaultDatasetId) return 1;
-      return 0;
-    });
-
-    fetchedDatasets.add(
-      Dataset(
-        id: 'add_new_tab',
-        projectId: widget.project.id!,
-        name: '+',
-        description: '',
-        createdAt: DateTime.now(),
-      ),
-    );
-
-    if (!mounted) return;
-    setState(() {
-      datasets = fetchedDatasets;
-    });
-
-    _rebuildTabController();
-
-    await _loadMediaForDataset(fetchedDatasets.first);
-
-    if (!mounted) return;
-    setState(() {
-      _initialLoading = false;
-    });
-  }
-
-  Future<void> _loadMediaForDataset(Dataset dataset) async {
-    if (dataset.id == 'add_new_tab') return;
-
-    final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
-
-    if (!mounted) return;
-
-    List<MediaItem> sortedMedia = [...media]; 
-    switch (_sortOption) {
-      case MediaSortOption.newestFirst:
-        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
-        break;
-      case MediaSortOption.oldestFirst:
-        sortedMedia.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
-        break;
-    }
-
-    setState(() {
-      mediaByDataset[dataset.id] = sortedMedia;
-      _fileCount = media.length;
-      _datasetTabCache.remove(dataset.id);
-    });
-
-    await Future.delayed(Duration(milliseconds: 100));
   }
 
   Future<void> _createNewDataset() async {
