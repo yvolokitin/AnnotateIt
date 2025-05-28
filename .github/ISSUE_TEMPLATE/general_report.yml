@@ -11,11 +11,7 @@ body:
       label: 🧩 Issue type
       description: What type of issue is this?
       options:
-        - Bug 🐞
-        - Feature Request ✨
-        - Enhancement 🛠️
-        - Documentation 📚
-        - Question ❓
+        - 🐞 Report a bug
     validations:
       required: true
 
