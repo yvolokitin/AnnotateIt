@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'annotation_tool.dart';
 
 class LeftToolbar extends StatelessWidget {
   final double opacity;
   final ValueChanged<double> onOpacityChanged;
+  final ValueChanged<AnnotationTool> onToolSelected;
 
   const LeftToolbar({
     super.key,
     required this.opacity,
     required this.onOpacityChanged,
+    required this.onToolSelected,
   });
 
   @override
@@ -20,7 +23,7 @@ class LeftToolbar extends StatelessWidget {
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.crop_square, color: Colors.white),
-            onPressed: () {}, // TODO: Tool selection
+            onPressed: () => onToolSelected(AnnotationTool.bbox),
           ),
 
           const Divider(color: Colors.white30, height: 20),

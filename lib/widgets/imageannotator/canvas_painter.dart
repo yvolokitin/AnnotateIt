@@ -38,8 +38,9 @@ class CanvasPainter extends CustomPainter {
   final List<Label> labels;
   final Map<String, Label> labelById;
   final double scale;
+  final Rect? previewRect;
 
-  CanvasPainter(this.image, this.annotations, this.labels, this.scale): labelById = { for (var v in labels) v.id.toString() : v };
+  CanvasPainter(this.image, this.annotations, this.labels, this.scale, {this.previewRect}): labelById = { for (var v in labels) v.id.toString() : v };
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -81,6 +82,24 @@ class CanvasPainter extends CustomPainter {
             break;*/
         }
       }
+    }
+
+    // Draw the preview rectangle if it exists
+    if (previewRect != null) {
+      final Paint previewPaint = Paint()
+        ..color = Colors.lightBlueAccent.withOpacity(0.7) // Distinct color for preview
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5 / scale; // Make stroke width responsive to zoom
+
+      // Normalize the rectangle for drawing to handle negative width/height during drag
+      // Rect.fromLTRB ensures left < right and top < bottom.
+      Rect normalizedPreviewRect = Rect.fromLTRB(
+          min(previewRect!.left, previewRect!.right),
+          min(previewRect!.top, previewRect!.bottom),
+          max(previewRect!.left, previewRect!.right),
+          max(previewRect!.top, previewRect!.bottom)
+      );
+      canvas.drawRect(normalizedPreviewRect, previewPaint);
     }
   }
 
@@ -186,7 +205,11 @@ class CanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
-    return false;
+    return image != oldDelegate.image ||
+        annotations != oldDelegate.annotations ||
+        labels != oldDelegate.labels ||
+        scale != oldDelegate.scale ||
+        previewRect != oldDelegate.previewRect;
   }
   @override
   bool shouldRebuildSemantics(CanvasPainter oldDelegate) => false;

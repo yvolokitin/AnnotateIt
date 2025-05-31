@@ -10,14 +10,30 @@ import 'canvas_painter.dart';
 
 import '../../models/annotation.dart';
 import '../../models/label.dart';
+import 'annotation_tool.dart';
+import 'dart:math'; // For min/max
+import '../../models/shape/rect_shape.dart';
 
 class Canvas extends StatefulWidget {
 
   final ui.Image image;
   final List<Annotation>? annotations;
   final List<Label> labelDefinitions;
+  final AnnotationTool currentTool;
+  final int currentMediaItemId;
+  final int? selectedLabelId;
+  final ValueChanged<Annotation> onAnnotationCreated;
 
-  const Canvas({required this.image, this.annotations, required this.labelDefinitions, super.key});
+  const Canvas({
+    required this.image,
+    this.annotations,
+    required this.labelDefinitions,
+    required this.currentTool,
+    required this.currentMediaItemId,
+    this.selectedLabelId,
+    required this.onAnnotationCreated,
+    super.key
+  });
 
   @override
   State<Canvas> createState() => _CanvasState();
@@ -30,6 +46,9 @@ class _CanvasState extends State<Canvas> {
     ..scale(0.9);
   Matrix4 inverse = Matrix4.identity();
   bool done = false;
+
+  Offset? _drawStartPoint; // In image coordinates
+  Rect? _currentDrawingRect; // In image coordinates, for preview
 
   @override
   void initState() {
@@ -90,23 +109,96 @@ class _CanvasState extends State<Canvas> {
             decoration: const BoxDecoration(shape: BoxShape.rectangle),
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onScaleStart: (_) {
-                prevScale = 1;
+              onScaleStart: (details) {
+                if (widget.currentTool == AnnotationTool.bbox && details.pointerCount == 1) return; // If bbox tool is active and it's a single pointer, might be start of a pan for drawing. Let onPanStart handle it.
+                // If multi-touch or not bbox tool, proceed with scaling.
+                prevScale = 1; // prevScale must be a member of _CanvasState
               },
               onDoubleTap: () {
                 setState(() {
-                  matrix = setTransformToFit(widget.image);
+                  matrix = setTransformToFit(widget.image); // matrix must be a member
                 });
               },
               onScaleUpdate: (ScaleUpdateDetails d) {
+                if (widget.currentTool == AnnotationTool.bbox && d.pointerCount == 1) return; // Ignore single pointer scale updates if bbox tool is active
+
                 final scale = 1 - (prevScale - d.scale);
                 prevScale = d.scale;
                 final zoom = matrix.getMaxScaleOnAxis();
-                scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale);
+                scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale); // scaleCanvas and other vars must be members
                 setState(() {
                     matrix.translate(d.focalPointDelta.dx / zoom, d.focalPointDelta.dy / zoom, 0.0);
                 });
               },
+              onPanStart: (DragStartDetails details) {
+                if (widget.currentTool != AnnotationTool.bbox) return;
+                if (matrix == null) return; // Ensure matrix is initialized
+
+                final Offset localPosition = details.localPosition;
+                final Matrix4 currentInverse = Matrix4.inverted(matrix); // Calculate inverse if not already up-to-date member
+                final Offset imagePosition = currentInverse.transformPoint(localPosition);
+
+                setState(() {
+                  _drawStartPoint = imagePosition;
+                  _currentDrawingRect = Rect.fromPoints(imagePosition, imagePosition);
+                });
+              },
+              onPanUpdate: (DragUpdateDetails details) {
+                if (widget.currentTool != AnnotationTool.bbox || _drawStartPoint == null) return;
+                if (matrix == null) return;
+
+                final Offset localPosition = details.localPosition;
+                final Matrix4 currentInverse = Matrix4.inverted(matrix);
+                final Offset imagePosition = currentInverse.transformPoint(localPosition);
+
+                setState(() {
+                  _currentDrawingRect = Rect.fromPoints(_drawStartPoint!, imagePosition);
+                });
+              },
+              onPanEnd: (DragEndDetails details) {
+                if (widget.currentTool != AnnotationTool.bbox || _drawStartPoint == null || _currentDrawingRect == null) return;
+
+                // Normalize the rectangle
+                final Rect normalizedRect = Rect.fromLTRB(
+                  min(_drawStartPoint!.dx, _currentDrawingRect!.left), // Corrected: use _currentDrawingRect!.left
+                  min(_drawStartPoint!.dy, _currentDrawingRect!.top),  // Corrected: use _currentDrawingRect!.top
+                  max(_drawStartPoint!.dx, _currentDrawingRect!.right), // Corrected: use _currentDrawingRect!.right
+                  max(_drawStartPoint!.dy, _currentDrawingRect!.bottom) // Corrected: use _currentDrawingRect!.bottom
+                );
+
+                // Check for significant size
+                // This threshold (5) is in image pixels.
+                if (normalizedRect.width < 5 || normalizedRect.height < 5) {
+                  setState(() {
+                    _drawStartPoint = null;
+                    _currentDrawingRect = null;
+                  });
+                  return;
+                }
+
+                final newAnnotation = Annotation(
+                  mediaItemId: widget.currentMediaItemId,
+                  labelId: widget.selectedLabelId,
+                  annotationType: 'bbox',
+                  data: RectShape(
+                    normalizedRect.left,
+                    normalizedRect.top,
+                    normalizedRect.width,
+                    normalizedRect.height,
+                  ).toJson(),
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                  // annotatorId and confidence can be set later by ImageAnnotatorPage if needed
+                );
+
+                widget.onAnnotationCreated(newAnnotation);
+
+                setState(() {
+                  _drawStartPoint = null;
+                  _currentDrawingRect = null;
+                });
+              },
+              // Keep existing Listener for PointerScrollEvent for mouse wheel zoom
               child: Listener(
                 behavior: HitTestBehavior.translucent,
                 onPointerSignal: (p) {
@@ -116,12 +208,19 @@ class _CanvasState extends State<Canvas> {
                   }
                 },
                 child: Transform(
-                  transform: matrix,
+                  transform: matrix, // Ensure matrix is a state variable
                   alignment: FractionalOffset.topLeft,
                   child: Builder(
                     builder: (context) {
+                      // Pass _currentDrawingRect to CanvasPainter in the next step
                       return CustomPaint(
-                        painter: CanvasPainter(widget.image, widget.annotations, widget.labelDefinitions, matrix.getMaxScaleOnAxis()),
+                        painter: CanvasPainter(
+                          widget.image,
+                          widget.annotations,
+                          widget.labelDefinitions,
+                          matrix.getMaxScaleOnAxis(), // Assuming matrix is a state variable
+                          previewRect: _currentDrawingRect, // Pass the new parameter
+                        ),
                         child: Container(),
                       );
                     }
