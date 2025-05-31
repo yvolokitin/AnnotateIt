@@ -5,8 +5,6 @@ import 'package:image/image.dart' as img;
 
 import '../../models/media_item.dart';
 import '../../models/project.dart';
-import '../../models/annotation.dart';
-import '../../models/label.dart';
 import '../../models/annotated_labeled_media.dart';
 import '../../pages/image_annotator_page.dart';
 import "../../data/user_database.dart";

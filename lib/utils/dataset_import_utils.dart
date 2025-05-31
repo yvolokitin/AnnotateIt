@@ -555,7 +555,7 @@ Future<DatasetInfo> processZipLocally({
   final mediaFiles = allFiles.where((f) =>
       mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
-  // 🟢 Use new high-quality annotation stats function
+  // Use new high-quality annotation stats function
   final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
 
   // Just collect annotation file names for label list (same as before)
