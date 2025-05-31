@@ -1,20 +1,17 @@
-// import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:vap/models/project.dart';
-
-import '../../models/media_item.dart';
 import '../../models/project.dart';
-
+import '../../models/annotated_labeled_media.dart';
+import '../../models/media_item.dart'; // Ensure MediaType is defined here
 import 'image_tile.dart';
-import 'media_tile.dart';
+import 'video_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
-  final List<MediaItem> mediaItems;
+  final List<AnnotatedLabeledMedia> annotatedMediaItems;
   final int itemsPerPage;
   final Project project;
 
   const PaginatedImageGrid({
-    required this.mediaItems,
+    required this.annotatedMediaItems,
     required this.project,
     this.itemsPerPage = 24,
     super.key,
@@ -29,12 +26,12 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaItems = widget.mediaItems;
+    final annotatedItems = widget.annotatedMediaItems;
 
-    final totalPages = (mediaItems.length / widget.itemsPerPage).ceil();
+    final totalPages = (annotatedItems.length / widget.itemsPerPage).ceil();
     final start = _currentPage * widget.itemsPerPage;
-    final end = (start + widget.itemsPerPage).clamp(0, mediaItems.length);
-    final pageItems = mediaItems.sublist(start, end);
+    final end = (start + widget.itemsPerPage).clamp(0, annotatedItems.length);
+    final pageItems = annotatedItems.sublist(start, end);
 
     return Column(
       children: [
@@ -49,16 +46,23 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               childAspectRatio: 1,
             ),
             itemBuilder: (context, index) {
-              final media = pageItems[index];
+              final item = pageItems[index];
+              final media = item.mediaItem;
+
               if (media.type == MediaType.image) {
                 return ImageTile(
-                  media: media,
-                  mediaItems: mediaItems,
-                  index: index,
+                  annotated: item,
+                  allAnnotated: annotatedItems,
+                  index: start + index,
                   project: widget.project,
                 );
               } else {
-                return MediaTile(media: media);
+                return VideoTile(
+                  annotated: item,
+                  allAnnotated: annotatedItems,
+                  index: start + index,
+                  project: widget.project,
+                );
               }
             },
           ),

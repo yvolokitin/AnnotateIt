@@ -5,19 +5,22 @@ import 'package:image/image.dart' as img;
 
 import '../../models/media_item.dart';
 import '../../models/project.dart';
+import '../../models/annotation.dart';
+import '../../models/label.dart';
+import '../../models/annotated_labeled_media.dart';
 import '../../pages/image_annotator_page.dart';
 import "../../data/user_database.dart";
 
 class ImageTile extends StatefulWidget {
-  final MediaItem media;
-  final List<MediaItem> mediaItems;
+  final AnnotatedLabeledMedia annotated;
+  final List<AnnotatedLabeledMedia> allAnnotated;
   final int index;
   final Project project;
-  
+
   const ImageTile({
     super.key,
-    required this.media,
-    required this.mediaItems,
+    required this.annotated,
+    required this.allAnnotated,
     required this.index,
     required this.project,
   });
@@ -29,10 +32,11 @@ class ImageTile extends StatefulWidget {
 class _ImageTileState extends State<ImageTile> {
   bool _isSelected = false;
   bool _hovered = false;
-  
+
   @override
   Widget build(BuildContext context) {
-    final file = File(widget.media.filePath);
+    final media = widget.annotated.mediaItem;
+    final file = File(media.filePath);
 
     if (!file.existsSync()) {
       return _errorContainer("File not found");
@@ -67,8 +71,8 @@ class _ImageTileState extends State<ImageTile> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ImageAnnotatorPage( // ImagePage(
-                          mediaItems: widget.mediaItems,
+                        builder: (_) => ImageAnnotatorPage(
+                          annotatedItems: widget.allAnnotated,
                           initialIndex: widget.index,
                           project: widget.project,
                         ),
@@ -83,7 +87,6 @@ class _ImageTileState extends State<ImageTile> {
                   ),
                 ),
               ),
-              // left-top select icon
               Positioned(
                 top: 4,
                 left: 4,
@@ -113,8 +116,6 @@ class _ImageTileState extends State<ImageTile> {
                   ),
                 ),
               ),
-
-              // right-top 3-dot menu
               Positioned(
                 top: 4,
                 right: 4,
@@ -131,11 +132,11 @@ class _ImageTileState extends State<ImageTile> {
                       icon: const Icon(Icons.more_vert, color: Colors.white),
                       onSelected: (value) {
                         if (value == 'delete') {
-                          _confirmDelete(context, widget.media);
+                          _confirmDelete(context, media);
                         } else if (value == 'details') {
-                          _showDetailsDialog(context, widget.media);
+                          _showDetailsDialog(context, media);
                         } else if (value == 'seticon') {
-                          _confirmSetIcon(context, widget.media);
+                          _confirmSetIcon(context, media);
                         }
                       },
                       itemBuilder: (context) => <PopupMenuEntry<String>>[
@@ -156,9 +157,7 @@ class _ImageTileState extends State<ImageTile> {
                   ),
                 ),
               ),
-
-              // annotation badge (bottom-right)
-              if (widget.media.isAnnotated == true)
+              if (media.isAnnotated == true)
                 Positioned(
                   bottom: 6,
                   right: 6,
@@ -168,22 +167,42 @@ class _ImageTileState extends State<ImageTile> {
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.label_important, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.media.annotationCount ?? 0}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.label_important, size: 16, color: Colors.amber),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${media.annotationCount ?? 0}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              if (widget.annotated.labels.isNotEmpty)
+                Positioned(
+                  bottom: 6,
+                  left: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      widget.annotated.labels.first.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -218,7 +237,7 @@ class _ImageTileState extends State<ImageTile> {
       builder: (context) => AlertDialog(
         title: const Text("Set as Project Icon?"),
         content: Text(
-          "Do you want to use '${media.filePath}' as the icon for this project? "
+          "Do you want to use '\${media.filePath}' as the icon for this project? "
           "This will replace any previously set icon"),
         actions: [
           TextButton(
@@ -242,7 +261,7 @@ class _ImageTileState extends State<ImageTile> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Do you want to remove that file from Dataset?"),
-        content: Text("File '${media.filePath}' will be removed from Dataset"),
+        content: Text("File '\${media.filePath}' will be removed from Dataset"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -252,7 +271,6 @@ class _ImageTileState extends State<ImageTile> {
             onPressed: () {
               try {
                 File(media.filePath).deleteSync();
-                // TODO: Remove from DB
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("File removed from Dataset")),
@@ -272,18 +290,14 @@ class _ImageTileState extends State<ImageTile> {
   }
 
   Future<void> _showDetailsDialog(BuildContext context, MediaItem media) async {
-    print("Media details for: ${media}");
-
     final file = File(media.filePath);
     final stat = file.statSync();
     final created = DateFormat('dd.MM.yyyy HH:mm').format(stat.changed);
     final updated = DateFormat('dd.MM.yyyy HH:mm').format(media.uploadDate);
     final sizeKb = (stat.size / 1024).toStringAsFixed(1);
     final resolution = _getImageResolution(media.filePath);
-
-    // Fetch owner from database
     final owner = await UserDatabase.instance.getById(media.ownerId);
-    final ownerName = owner != null ? "${owner.firstName} ${owner.lastName}" : "Unknown";
+    final ownerName = owner != null ? "\${owner.firstName} \${owner.lastName}" : "Unknown";
 
     showDialog(
       context: context,
@@ -298,13 +312,13 @@ class _ImageTileState extends State<ImageTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _infoRow("File path", media.filePath),
-              _infoRow("Size", "$sizeKb KB"),
+              _infoRow("Size", "\$sizeKb KB"),
               _infoRow("Resolution", resolution),
               _infoRow("Creation date", created),
-              _infoRow("Upload date", updated),          
+              _infoRow("Upload date", updated),
               _infoRow("Owner", ownerName),
               _infoRow("Last annotater", "n/a"),
-              _infoRow("Last annotation date", "n/a"),           
+              _infoRow("Last annotation date", "n/a"),
             ],
           ),
         ),
@@ -321,7 +335,7 @@ class _ImageTileState extends State<ImageTile> {
                   side: BorderSide(color: Colors.red, width: 2),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 "Close",
                 style: TextStyle(
                   color: Colors.white,
@@ -334,7 +348,6 @@ class _ImageTileState extends State<ImageTile> {
         ],
       ),
     );
-    return;
   }
 
   Widget _infoRow(String label, String value) {
@@ -369,7 +382,7 @@ class _ImageTileState extends State<ImageTile> {
       final bytes = File(path).readAsBytesSync();
       final image = img.decodeImage(bytes);
       if (image != null) {
-        return "${image.width}×${image.height}";
+        return "\${image.width}×\${image.height}";
       } else {
         return "unknown resolution";
       }

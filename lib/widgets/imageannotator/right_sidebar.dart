@@ -44,7 +44,7 @@ class RightSidebar extends StatelessWidget {
               itemBuilder: (context, index) {
                 final annotation = annotations[index];
                 return ListTile(
-                  title: Text(annotation.label, style: const TextStyle(color: Colors.white)),
+                  title: Text('Yura Label', style: const TextStyle(color: Colors.white)),
                   subtitle: Text(annotation.rect.toString(), style: const TextStyle(color: Colors.white38)),
                 );
               },

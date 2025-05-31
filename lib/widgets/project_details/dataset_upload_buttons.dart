@@ -1,14 +1,12 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import "package:file_picker/file_picker.dart";
-import "package:flutter/material.dart";
-// import "package:uuid/uuid.dart";
 
-import "../../utils/image_utils.dart";
-import "../../data/dataset_database.dart";
-import "../../data/project_database.dart";
-
-import "../../session/user_session.dart";
+import '../../utils/image_utils.dart';
+import '../../data/dataset_database.dart';
+import '../../data/project_database.dart';
+import '../../session/user_session.dart';
 
 class DatasetUploadButtons extends StatelessWidget {
   final int project_id, file_count;
@@ -16,7 +14,7 @@ class DatasetUploadButtons extends StatelessWidget {
   final String dataset_id;
 
   final bool isUploading;
-  final bool cancelUpload;
+  final bool Function() cancelUpload;
 
   final Function(bool) onUploadingChanged;
   final VoidCallback onUploadSuccess;
@@ -38,8 +36,6 @@ class DatasetUploadButtons extends StatelessWidget {
   });
 
   Future<void> _uploadMedia(BuildContext context) async {
-    print("UI _uploadMedia: Uploading media... for dataset_id: $dataset_id");
-
     try {
       final result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
@@ -60,11 +56,11 @@ class DatasetUploadButtons extends StatelessWidget {
         }
 
         for (int i = 0; i < total; i++) {
-          if (cancelUpload) {
+          if (cancelUpload()) {
             onUploadingChanged(false);
             onUploadError?.call();
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Upload stopped")),
+              const SnackBar(content: Text("Upload stopped")),
             );
             return;
           }
@@ -81,16 +77,13 @@ class DatasetUploadButtons extends StatelessWidget {
           int? height;
           double? duration;
           double? fps;
-          final isVideo = ['mp4', 'mov'].contains(ext);
-  
-          if (isVideo) {
-            // TODO: Replace with actual video metadata extractor
+
+          if (['mp4', 'mov'].contains(ext)) {
             final videoMeta = await getVideoMetadata(file.path!);
             width = videoMeta['width'];
             height = videoMeta['height'];
             duration = videoMeta['duration'];
             fps = videoMeta['fps'];
-  
           } else {
             final imageMeta = await getImageMetadata(file.path!);
             width = imageMeta['width'];
@@ -108,18 +101,17 @@ class DatasetUploadButtons extends StatelessWidget {
             fps: fps,
             source: 'local',
           );
-  
+
           onFileProgress?.call(file.name, i + 1, total);
         }
 
         await ProjectDatabase.instance.updateProjectLastUpdated(project_id);
-        onUploadingChanged(false); onUploadSuccess();
-
+        onUploadingChanged(false);
+        onUploadSuccess();
       } else {
         onUploadingChanged(false);
       }
     } catch (e) {
-      print("_uploadMedia: Upload error: $e");
       onUploadError?.call();
     }
   }
@@ -135,7 +127,6 @@ class DatasetUploadButtons extends StatelessWidget {
   }
 
   Future<Map<String, dynamic>> getVideoMetadata(String path) async {
-    print('getVideoMetadata (stub with zeros) called for: $path');
     return {
       'width': 0,
       'height': 0,
@@ -148,23 +139,20 @@ class DatasetUploadButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(40),
+      padding: const EdgeInsets.all(40),
       height: 120,
       width: double.infinity,
       child: Row(
-        // mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text("$file_count files", style: TextStyle(color: Colors.white, fontSize: 20)),
-          Spacer(), // takes all available space between the text and buttons
-
-          SizedBox(width: 20),
+          Text("$file_count files", style: const TextStyle(color: Colors.white, fontSize: 20)),
+          const Spacer(),
+          const SizedBox(width: 20),
           _buildButton(
             context,
             label: l10n.importDataset,
             borderColor: Colors.grey,
           ),
-
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           _buildButton(
             context,
             label: l10n.uploadMedia,
@@ -175,61 +163,50 @@ class DatasetUploadButtons extends StatelessWidget {
     );
   }
 
-Widget _buildButton(
-  BuildContext context, {
-  required String label,
-  required Color borderColor,
-}) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final bool isCompact = screenWidth < 750;
+  Widget _buildButton(
+    BuildContext context, {
+    required String label,
+    required Color borderColor,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isCompact = screenWidth < 750;
 
-  final IconData icon = label.toLowerCase().contains("upload")
-      ? Icons.upload
-      : Icons.dataset;
+    final IconData icon = label.toLowerCase().contains("upload")
+        ? Icons.upload
+        : Icons.dataset;
 
-  if (isCompact) {
-    // Icon-only button for small screens
-    return IconButton(
-      onPressed: isUploading
-          ? null
-          : () async {
-              await _uploadMedia(context);
-            },
-      icon: Icon(icon, color: Colors.white, size: 36),
-      tooltip: label,
-      style: IconButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        shape: CircleBorder(
-          side: BorderSide(color: borderColor, width: 2),
+    if (isCompact) {
+      return IconButton(
+        onPressed: isUploading ? null : () async => await _uploadMedia(context),
+        icon: Icon(icon, color: Colors.white, size: 36),
+        tooltip: label,
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.grey[900],
+          shape: CircleBorder(
+            side: BorderSide(color: borderColor, width: 2),
+          ),
         ),
-      ),
-    );
-  } else {
-    // Text-only button for large screens
-    return ElevatedButton(
-      onPressed: isUploading
-          ? null
-          : () async {
-              await _uploadMedia(context);
-            },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: BorderSide(color: borderColor, width: 2),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: isUploading ? null : () async => await _uploadMedia(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[900],
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: BorderSide(color: borderColor, width: 2),
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
-
 }

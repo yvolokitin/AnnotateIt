@@ -1,19 +1,20 @@
 import 'dart:ui';
+import '../../models/label.dart';
 
 class AnnotationRect {
   Rect rect;
-  String label;
+  Label label;
   double opacity;
 
   AnnotationRect({
     required this.rect,
-    this.label = '',
+    required this.label,
     this.opacity = 0.2,
   });
 
   AnnotationRect copyWith({
     Rect? rect,
-    String? label,
+    Label? label,
     double? opacity,
   }) {
     return AnnotationRect(
@@ -22,11 +23,4 @@ class AnnotationRect {
       opacity: opacity ?? this.opacity,
     );
   }
-}
-
-class Label {
-  final String name;
-  final String color; // e.g. "#FF0000"
-
-  Label({required this.name, required this.color});
 }

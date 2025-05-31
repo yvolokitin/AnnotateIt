@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
+
+import '../../models/label.dart';
 import 'annotation_rect.dart';
 
 class AnnotationCanvasDemo extends StatefulWidget {

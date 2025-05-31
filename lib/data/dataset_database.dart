@@ -3,6 +3,9 @@ import 'package:uuid/uuid.dart';
 
 import '../models/dataset.dart';
 import '../models/media_item.dart';
+import '../models/annotation.dart';
+import '../models/label.dart';
+import '../models/annotated_labeled_media.dart';
 
 class DatasetDatabase {
   static final DatasetDatabase instance = DatasetDatabase._init();
@@ -149,5 +152,64 @@ class DatasetDatabase {
 
     final db = await database;
     await db.insert('media_items', mediaItem.toMap());
+  }
+
+  Future<List<AnnotatedLabeledMedia>> fetchAnnotatedLabeledMediaBatch({
+    required String datasetId,
+    required int offset,
+    required int limit,
+  }) async {
+    final db = await database;
+
+    // Step 1: Fetch paginated media items
+    final mediaMaps = await db.query(
+      'media_items',
+      where: 'datasetId = ?',
+      whereArgs: [datasetId],
+      offset: offset,
+      limit: limit,
+    );
+    final mediaItems = mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
+
+    if (mediaItems.isEmpty) return [];
+
+    // Step 2: Fetch annotations for these media items
+    final mediaIds = mediaItems.map((m) => m.id).toList();
+    final annotationMaps = await db.query(
+      'annotations',
+      where: 'media_item_id IN (${List.filled(mediaIds.length, '?').join(',')})',
+      whereArgs: mediaIds,
+    );
+    final annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+
+    // Step 3: Fetch unique label IDs used in annotations (excluding nulls)
+    final Set<int> labelIds = annotations
+      .where((a) => a.labelId != null)
+      .map((a) => a.labelId!)
+      .toSet();
+
+    final List<Label> labels = labelIds.isEmpty
+      ? []
+      : await db.query(
+          'labels',
+          where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
+          whereArgs: labelIds.toList(),
+        ).then((rows) => rows.map((e) => Label.fromMap(e)).toList());
+
+    // Step 4: Group annotations by mediaId
+    final Map<int, List<Annotation>> annotationsByMediaId = {};
+    for (final annotation in annotations) {
+      annotationsByMediaId.putIfAbsent(annotation.mediaItemId, () => []).add(annotation);
+    }
+
+    // Step 5: Assemble AnnotatedLabeledMedia list
+    return mediaItems.map((media) {
+      final itemAnnotations = annotationsByMediaId[media.id] ?? [];
+      return AnnotatedLabeledMedia(
+        mediaItem: media,
+        annotations: itemAnnotations,
+        labels: labels,
+      );
+    }).toList();
   }
 }
