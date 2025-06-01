@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../models/annotated_labeled_media.dart';
 import '../models/media_item.dart';
 import '../models/annotation.dart';
 import '../models/project.dart';
@@ -15,7 +16,7 @@ import '../widgets/imageannotator/bottom_toolbar.dart';
 import '../widgets/imageannotator/top_toolbar.dart';
 
 class ImageAnnotatorPage extends StatefulWidget {
-  final List<MediaItem> mediaItems;
+  final List<AnnotatedLabeledMedia> mediaItems;
   final int initialIndex;
   final Project project;
 
@@ -52,7 +53,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   }
 
   void _loadBoundingBoxAnnotations() async {
-    final mediaId = widget.mediaItems[_currentIndex].id!;
+    final mediaId = widget.mediaItems[_currentIndex].mediaItem.id!;
     final loaded = await AnnotationDatabase.instance.fetchAnnotations(mediaId, type: 'bbox');
 
     setState(() {
@@ -74,7 +75,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   }
 
   Future<void> _saveAnnotations() async {
-    final mediaId = widget.mediaItems[_currentIndex].id!;
+    final mediaId = widget.mediaItems[_currentIndex].mediaItem.id!;
     final currentUser = UserSession.instance.getUser();
 
     if (_selectedLabelId == null) {
@@ -132,7 +133,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentMedia = widget.mediaItems[_currentIndex];
+    final currentMedia = widget.mediaItems[_currentIndex].mediaItem;
     final file = File(currentMedia.filePath);
     double fillOpacity = 0.1;
 
@@ -168,7 +169,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                             _loadBoundingBoxAnnotations();
                           },
                           itemBuilder: (context, index) {
-                            final media = widget.mediaItems[index];
+                            final media = widget.mediaItems[index].mediaItem;
                             final file = File(media.filePath);
 
                             return MouseRegion(

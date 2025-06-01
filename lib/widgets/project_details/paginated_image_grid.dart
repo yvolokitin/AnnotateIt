@@ -1,7 +1,6 @@
-// import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:vap/models/project.dart';
 
+import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
 import '../../models/project.dart';
 
@@ -9,13 +8,20 @@ import 'image_tile.dart';
 import 'media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
-  final List<MediaItem> mediaItems;
-  final int itemsPerPage;
+  final void Function(int newPage) onPageChanged;
+
+  final List<AnnotatedLabeledMedia> annotatedMediaItems;
+  final totalCount, totalPages, currentPage;
   final Project project;
+  final int itemsPerPage;
 
   const PaginatedImageGrid({
-    required this.mediaItems,
+    required this.annotatedMediaItems,
+    required this.totalCount,
+    required this.totalPages,
+    required this.currentPage,
     required this.project,
+    required this.onPageChanged,
     this.itemsPerPage = 24,
     super.key,
   });
@@ -29,19 +35,14 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaItems = widget.mediaItems;
-
-    final totalPages = (mediaItems.length / widget.itemsPerPage).ceil();
-    final start = _currentPage * widget.itemsPerPage;
-    final end = (start + widget.itemsPerPage).clamp(0, mediaItems.length);
-    final pageItems = mediaItems.sublist(start, end);
+    final mediaItems = widget.annotatedMediaItems;
 
     return Column(
       children: [
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: pageItems.length,
+            itemCount: widget.annotatedMediaItems.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 6,
               crossAxisSpacing: 12,
@@ -49,10 +50,10 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               childAspectRatio: 1,
             ),
             itemBuilder: (context, index) {
-              final media = pageItems[index];
+              final media = widget.annotatedMediaItems[index].mediaItem;
               if (media.type == MediaType.image) {
                 return ImageTile(
-                  media: media,
+                  media: widget.annotatedMediaItems[index],
                   mediaItems: mediaItems,
                   index: index,
                   project: widget.project,
@@ -69,20 +70,20 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: _currentPage > 0
-                    ? () => setState(() => _currentPage--)
+                onPressed: widget.currentPage > 0
+                    ? () => widget.onPageChanged(widget.currentPage - 1)
                     : null,
                 child: const Text("<- Back"),
               ),
               const SizedBox(width: 20),
               Text(
-                "Page ${_currentPage + 1} from $totalPages",
+                "Page ${widget.currentPage + 1} from ${widget.totalPages}",
                 style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
-                onPressed: _currentPage < totalPages - 1
-                    ? () => setState(() => _currentPage++)
+                onPressed: widget.currentPage < widget.totalPages - 1
+                    ? () => widget.onPageChanged(widget.currentPage + 1)
                     : null,
                 child: const Text("Next ->"),
               ),

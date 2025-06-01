@@ -126,11 +126,6 @@ class ProjectDatabase {
       lastAnnotatedDate TEXT,                        -- ISO date-time string of last annotation
       numberOfFrames INTEGER,                        -- Total frames (useful for videos)
 
-      isAnnotated INTEGER DEFAULT 0,                 -- 0 = not annotated, 1 = annotated
-      annotationCount INTEGER DEFAULT 0,             -- Cached number of annotations
-      classificationLabelName TEXT,                  -- If type is classification: assigned label name
-      classificationLabelColor TEXT,                 -- HEX color of classification label (e.g., #FF6600)
-
       FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
       FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
     );

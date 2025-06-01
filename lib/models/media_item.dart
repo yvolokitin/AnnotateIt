@@ -18,12 +18,6 @@ class MediaItem {
   final DateTime? lastAnnotatedDate;
   final int? numberOfFrames;
 
-  // Annotation summary fields
-  final bool isAnnotated;
-  final int annotationCount;
-  final String? classificationLabelName;
-  final String? classificationLabelColor;
-
   MediaItem({
     this.id,
     required this.uuid,
@@ -41,10 +35,6 @@ class MediaItem {
     this.lastAnnotator,
     this.lastAnnotatedDate,
     this.numberOfFrames,
-    this.isAnnotated = false,
-    this.annotationCount = 0,
-    this.classificationLabelName,
-    this.classificationLabelColor,
   });
 
   Map<String, dynamic> toMap() {
@@ -65,10 +55,6 @@ class MediaItem {
       'lastAnnotator': lastAnnotator,
       'lastAnnotatedDate': lastAnnotatedDate?.toIso8601String(),
       'numberOfFrames': numberOfFrames,
-      'isAnnotated': isAnnotated ? 1 : 0,
-      'annotationCount': annotationCount,
-      'classificationLabelName': classificationLabelName,
-      'classificationLabelColor': classificationLabelColor,
     };
   }
 
@@ -92,10 +78,6 @@ class MediaItem {
           ? DateTime.parse(map['lastAnnotatedDate'])
           : null,
       numberOfFrames: map['numberOfFrames'],
-      isAnnotated: map['isAnnotated'] == 1,
-      annotationCount: map['annotationCount'] ?? 0,
-      classificationLabelName: map['classificationLabelName'],
-      classificationLabelColor: map['classificationLabelColor'],
     );
   }
 
@@ -118,18 +100,11 @@ class MediaItem {
         'lastAnnotator: $lastAnnotator, '
         'lastAnnotatedDate: ${lastAnnotatedDate?.toIso8601String()}, '
         'numberOfFrames: $numberOfFrames, '
-        'isAnnotated: $isAnnotated, '
-        'annotationCount: $annotationCount, '
-        'classificationLabelName: $classificationLabelName, '
-        'classificationLabelColor: $classificationLabelColor'
-        ')';
+      ')';
   }
 
   bool get isVideo => type == MediaType.video;
   bool get isImage => type == MediaType.image;
-
-  bool get hasClassification =>
-      classificationLabelName != null && classificationLabelColor != null;
 
   MediaItem updateAnnotationSummary({
     required int newCount,
@@ -153,10 +128,6 @@ class MediaItem {
       lastAnnotator: lastAnnotator,
       lastAnnotatedDate: lastAnnotatedDate,
       numberOfFrames: numberOfFrames,
-      isAnnotated: newCount > 0,
-      annotationCount: newCount,
-      classificationLabelName: newLabel,
-      classificationLabelColor: newColor,
     );
   }
 }

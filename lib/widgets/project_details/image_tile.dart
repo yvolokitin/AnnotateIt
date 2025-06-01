@@ -1,16 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:image/image.dart' as img;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../dialogs/image_details_dialog.dart';
+import '../dialogs/set_image_icon_dialog.dart';
+import '../../pages/image_annotator_page.dart';
+
+import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
 import '../../models/project.dart';
-import '../../pages/image_annotator_page.dart';
-import "../../data/user_database.dart";
 
 class ImageTile extends StatefulWidget {
-  final MediaItem media;
-  final List<MediaItem> mediaItems;
+  final AnnotatedLabeledMedia media;
+  final List<AnnotatedLabeledMedia> mediaItems;
   final int index;
   final Project project;
   
@@ -29,10 +31,11 @@ class ImageTile extends StatefulWidget {
 class _ImageTileState extends State<ImageTile> {
   bool _isSelected = false;
   bool _hovered = false;
-  
+  final GlobalKey _popupKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
-    final file = File(widget.media.filePath);
+    final file = File(widget.media.mediaItem.filePath);
 
     if (!file.existsSync()) {
       return _errorContainer("File not found");
@@ -67,7 +70,7 @@ class _ImageTileState extends State<ImageTile> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ImageAnnotatorPage( // ImagePage(
+                        builder: (_) => ImageAnnotatorPage(
                           mediaItems: widget.mediaItems,
                           initialIndex: widget.index,
                           project: widget.project,
@@ -122,34 +125,71 @@ class _ImageTileState extends State<ImageTile> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _hovered ? 1.0 : 0.0,
                   child: Container(
+                    key: _popupKey,
                     decoration: BoxDecoration(
                       color: Colors.black45,
                       shape: BoxShape.circle,
                     ),
                     child: PopupMenuButton<String>(
                       color: Colors.grey[900],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                       icon: const Icon(Icons.more_vert, color: Colors.white),
-                      onSelected: (value) {
-                        if (value == 'delete') {
-                          _confirmDelete(context, widget.media);
-                        } else if (value == 'details') {
-                          _showDetailsDialog(context, widget.media);
+                      onSelected: (value) async {
+                        if (value == 'details') {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => ImageDetailsDialog(media: widget.media),
+                          );                                  
+
+                        } else if (value == 'delete') {
+                          _confirmDelete(context, widget.media.mediaItem);
+
                         } else if (value == 'seticon') {
-                          _confirmSetIcon(context, widget.media);
+                          showDialog(
+                            context: context,
+                            builder: (context) => SetImageIconDialog(
+                              media: widget.media.mediaItem,
+                            onConfirmed: () {
+                              // Your logic to update icon
+                              print('Set project icon to: ${widget.media.mediaItem.filePath}');
+                            },
+                            ),
+                          );
                         }
                       },
+
                       itemBuilder: (context) => <PopupMenuEntry<String>>[
                         const PopupMenuItem<String>(
                           value: 'details',
-                          child: Text('Details'),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Text('Delete'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, size: 22),
+                              SizedBox(width: 8),
+                              Text('Details', style: TextStyle(fontWeight: FontWeight.normal)),
+                            ],
+                          ),
                         ),
                         const PopupMenuItem<String>(
                           value: 'seticon',
-                          child: Text('SetIcon'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.image_outlined, size: 22),
+                              SizedBox(width: 8),
+                              Text('Set as Icon', style: TextStyle(fontWeight: FontWeight.normal)),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 22),
+                              SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(fontWeight: FontWeight.normal)),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -158,7 +198,7 @@ class _ImageTileState extends State<ImageTile> {
               ),
 
               // annotation badge (bottom-right)
-              if (widget.media.isAnnotated == true)
+              if (widget.media.hasAnnotations == true)
                 Positioned(
                   bottom: 6,
                   right: 6,
@@ -269,112 +309,5 @@ class _ImageTileState extends State<ImageTile> {
         ],
       ),
     );
-  }
-
-  Future<void> _showDetailsDialog(BuildContext context, MediaItem media) async {
-    print("Media details for: ${media}");
-
-    final file = File(media.filePath);
-    final stat = file.statSync();
-    final created = DateFormat('dd.MM.yyyy HH:mm').format(stat.changed);
-    final updated = DateFormat('dd.MM.yyyy HH:mm').format(media.uploadDate);
-    final sizeKb = (stat.size / 1024).toStringAsFixed(1);
-    final resolution = _getImageResolution(media.filePath);
-
-    // Fetch owner from database
-    final owner = await UserDatabase.instance.getById(media.ownerId);
-    final ownerName = owner != null ? "${owner.firstName} ${owner.lastName}" : "Unknown";
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[850],
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-        title: const Text("File details", style: TextStyle(color: Colors.white)),
-        content: Padding(
-          padding: const EdgeInsets.all(0.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _infoRow("File path", media.filePath),
-              _infoRow("Size", "$sizeKb KB"),
-              _infoRow("Resolution", resolution),
-              _infoRow("Creation date", created),
-              _infoRow("Upload date", updated),          
-              _infoRow("Owner", ownerName),
-              _infoRow("Last annotater", "n/a"),
-              _infoRow("Last annotation date", "n/a"),           
-            ],
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[850],
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  side: BorderSide(color: Colors.red, width: 2),
-                ),
-              ),
-              child: Text(
-                "Close",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
-
-  Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: SelectableText.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: "$label: ",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'monospace',
-              ),
-            ),
-            TextSpan(
-              text: value,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontFamily: 'monospace',
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getImageResolution(String path) {
-    try {
-      final bytes = File(path).readAsBytesSync();
-      final image = img.decodeImage(bytes);
-      if (image != null) {
-        return "${image.width}×${image.height}";
-      } else {
-        return "unknown resolution";
-      }
-    } catch (e) {
-      return "Could not read image resolution";
-    }
   }
 }

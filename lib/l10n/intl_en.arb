@@ -3,6 +3,7 @@
   "keep": "Keep",
   "discard": "Discard",
   "close": "Close",
+  "cancel": "Cancel",
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
@@ -75,5 +76,13 @@
   "projectTypeWhenUseTitle": "When should I use this option?",
   "projectTypeWhenUseBody": "You should only enable this option if:\n\n- You accidentally imported the wrong dataset.\n- You want to start a new annotation project with a different type.\n- Your dataset structure changed after import.\n\nIf you are unsure, we strongly recommend keeping the default selection to avoid data loss.",
 
-  "allLabels": "All Labels"
+  "allLabels": "All Labels",
+  "setAsProjectIcon": "Set as Project Icon",
+  "setAsProjectIconConfirm": "Do you want to use '{filePath}' as the icon for this project? This will replace any previously set icon.",
+  "@setAsProjectIconConfirm": {
+    "description": "Confirmation message in the set icon dialog",
+    "placeholders": {
+      "filePath": {}
+    }
+   }
 }

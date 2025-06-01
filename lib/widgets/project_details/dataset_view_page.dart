@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../../models/annotated_labeled_media.dart';
 import '../../models/project.dart';
 import '../../models/dataset.dart';
-import '../../models/media_item.dart';
 
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
@@ -29,7 +28,8 @@ class DatasetViewPage extends StatefulWidget {
 
 class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
   List<Dataset> datasets = [];
-  Map<String, List<MediaItem>> mediaByDataset = {};
+  Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
+
   TabController? _tabController;
 
   bool _isUploading = false;
@@ -39,6 +39,9 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   String? _uploadingFile;
   int _currentFileIndex = 0;
   int _fileCount = 0;
+  int _itemsPerPage = 24;
+  int _totalPages = 0;
+  int _currentPage = 0;
   double _uploadProgress = 0.0;
 
   // needed to show global spinner before datasets + media are fully ready
@@ -47,7 +50,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
   // cache map for dataset tabs to avoid blink when switching tabs
   final Map<String, Widget> _datasetTabCache = {};
-
   final MediaSortOption _sortOption = MediaSortOption.newestFirst;
 
   @override
@@ -81,8 +83,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _rebuildTabController();
-
-    await _loadMediaForDataset(fetchedDatasets.first);
+    loadMediaForDataset(widget.project.defaultDatasetId!, _itemsPerPage, 0);
 
     if (!mounted) return;
     setState(() {
@@ -90,30 +91,62 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
   }
 
-  Future<void> _loadMediaForDataset(Dataset dataset) async {
-    if (dataset.id == 'add_new_tab') return;
+  Future<void> loadMediaForDataset(String datasetId, int itemsPerPage, int pageIndex) async {
+    if (datasetId == 'add_new_tab') return;
 
-    final media = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
+    final totalCount = await DatasetDatabase.instance.countMediaItemsInDataset(datasetId);
+    print('Total media items: $totalCount for dataset $datasetId');
+
+    final totalPages = (totalCount / _itemsPerPage).ceil();
+    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, pageIndex);
 
     if (!mounted) return;
-
-    List<MediaItem> sortedMedia = [...media]; 
-    switch (_sortOption) {
-      case MediaSortOption.newestFirst:
-        sortedMedia.sort((a, b) => b.uploadDate.compareTo(a.uploadDate));
-        break;
-      case MediaSortOption.oldestFirst:
-        sortedMedia.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
-        break;
-    }
-
     setState(() {
-      mediaByDataset[dataset.id] = sortedMedia;
-      _fileCount = media.length;
-      _datasetTabCache.remove(dataset.id);
+      annotatedMediaByDataset[datasetId] = annotatedList;
+      _fileCount = totalCount;
+      _totalPages = totalPages;
+      _currentPage = 0;
+      _datasetTabCache.remove(datasetId);
     });
 
     await Future.delayed(Duration(milliseconds: 100));
+  }
+
+  Future<List<AnnotatedLabeledMedia>> loadAnnotatedMediaForDataset(String datasetId, int pageSize, int pageIndex) async {
+    final offset = pageIndex * pageSize;
+    final annotatedList = await DatasetDatabase.instance.fetchAnnotatedLabeledMediaBatch(
+      datasetId: datasetId,
+      offset: offset,
+      limit: pageSize,
+    );
+
+    switch (_sortOption) {
+      case MediaSortOption.newestFirst:
+        annotatedList.sort((a, b) => b.mediaItem.uploadDate.compareTo(a.mediaItem.uploadDate));
+        break;
+      case MediaSortOption.oldestFirst:
+        annotatedList.sort((a, b) => a.mediaItem.uploadDate.compareTo(b.mediaItem.uploadDate));
+        break;
+    }
+
+    print("Loaded ${annotatedList.length} annotated media for dataset $datasetId at page $pageIndex");
+    return annotatedList;
+  }
+
+  void _handlePageChanged(int newPage) async {
+    final datasetId = datasets[_tabController!.index].id;
+
+    final annotatedList = await loadAnnotatedMediaForDataset(
+      datasetId,
+      _itemsPerPage,
+      newPage,
+    );
+
+    setState(() {
+      annotatedMediaByDataset[datasetId] = annotatedList;
+      _currentPage = newPage;
+      _datasetTabCache.remove(datasetId);
+    });
   }
 
   void _rebuildTabController() {
@@ -135,7 +168,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (_lastLoadedDatasetId == currentDataset.id) return;
 
     _lastLoadedDatasetId = currentDataset.id;
-    _loadMediaForDataset(currentDataset);
+    loadMediaForDataset(currentDataset.id, _itemsPerPage, 0);
   }
 
   void _handleUploadingChanged(bool uploading) {
@@ -181,7 +214,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _resetCancelUpload();
-    _loadMediaForDataset(currentDataset);
+    loadMediaForDataset(currentDataset.id, _itemsPerPage, _currentPage);
 
     // force rebuild after fresh data
     _datasetTabCache.remove(currentDataset.id);
@@ -217,13 +250,12 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (!mounted) return;
     setState(() {
       datasets.insert(datasets.length - 1, newDataset);
-      mediaByDataset[newDataset.id] = [];
+      annotatedMediaByDataset[newDataset.id] = [];
     });
 
     _rebuildTabController();
     _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
-
-    _loadMediaForDataset(newDataset);
+    // loadMediaForDataset(newDataset.name, _itemsPerPage, 0);
   }
 
   void _renameDataset(Dataset dataset) async {
@@ -271,7 +303,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
       _datasetTabCache.clear();
     });
-    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Default dataset set to '${dataset.name}'")));
   }
 
   void _deleteDataset(Dataset dataset) async {
@@ -293,7 +324,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
       setState(() {
         datasets.removeWhere((d) => d.id == dataset.id);
-        mediaByDataset.remove(dataset.id);
+        annotatedMediaByDataset.remove(dataset.id);
         _datasetTabCache.remove(dataset.id);
       });
 
@@ -302,7 +333,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
         _tabController!.index = datasets.length - 1;
       }
 
-      _loadMediaForDataset(datasets[_tabController!.index]);
+      loadMediaForDataset(datasets[_tabController!.index].id, _itemsPerPage, 0);
     }
   }
 
@@ -395,7 +426,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                     return _datasetTabCache[dataset.id]!;
                   }
 
-                  final mediaItems = mediaByDataset[dataset.id];
+                  final mediaItems = annotatedMediaByDataset[dataset.id];
 
                   final widgetToRender = dataset.id == 'add_new_tab'
                     ? Center(child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)))
@@ -414,15 +445,21 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                           cancelUpload: _cancelUpload,
                         ),
                         Expanded(
-                          child: (mediaItems == null || mediaItems.isEmpty)
-                          ? NoMediaDialog(
-                            project_id: widget.project.id!,
-                            dataset_id: dataset.id,
-                          )
-                          : PaginatedImageGrid(
-                            mediaItems: mediaItems,
-                            project: widget.project,
-                          ),
+                          child: (mediaItems == null)
+                            ? Center (child: CircularProgressIndicator())
+                            : mediaItems.isEmpty
+                              ? NoMediaDialog(
+                                  project_id: widget.project.id!,
+                                  dataset_id: dataset.id,
+                                )
+                              : PaginatedImageGrid(
+                                  annotatedMediaItems: annotatedMediaByDataset[dataset.id]!,
+                                  totalCount: _fileCount,
+                                  totalPages: _totalPages,
+                                  currentPage: _currentPage,
+                                  project: widget.project,
+                                  onPageChanged: _handlePageChanged,
+                                ),
                         ),
                       ],  
                     );
