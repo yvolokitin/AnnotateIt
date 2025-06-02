@@ -88,7 +88,7 @@ ThemeData createTheme({
         side: BorderSide(color: Colors.red, width: 3),
       ),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       shape: RoundedRectangleBorder(
         side: BorderSide(color: Colors.red, width: 3),
       ),

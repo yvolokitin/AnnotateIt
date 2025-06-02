@@ -1,8 +1,7 @@
 import 'dart:io';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
-// import "package:uuid/uuid.dart";
 
 import "../../utils/image_utils.dart";
 import "../../data/dataset_database.dart";
@@ -23,6 +22,9 @@ class DatasetUploadButtons extends StatelessWidget {
   final void Function(String filename, int index, int total)? onFileProgress;
   final VoidCallback? onUploadError;
 
+  final int selectedCount;
+  final VoidCallback? onDeleteSelected;
+
   const DatasetUploadButtons({
     required this.project_id,
     required this.project_icon,
@@ -31,9 +33,11 @@ class DatasetUploadButtons extends StatelessWidget {
     required this.isUploading,
     required this.onUploadingChanged,
     required this.onUploadSuccess,
+    required this.cancelUpload,
+    required this.selectedCount,
     this.onFileProgress,
     this.onUploadError,
-    required this.cancelUpload,
+    this.onDeleteSelected,
     super.key,
   });
 
@@ -147,6 +151,7 @@ class DatasetUploadButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    print('1111111 selectedCount: $selectedCount');
     return Container(
       padding: EdgeInsets.all(40),
       height: 120,
@@ -154,7 +159,20 @@ class DatasetUploadButtons extends StatelessWidget {
       child: Row(
         // mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text("$file_count files", style: TextStyle(color: Colors.white, fontSize: 20)),
+          Text(
+            selectedCount > 0
+              ? "$file_count files / $selectedCount selected"
+              : "$file_count files",
+            style: const TextStyle(color: Colors.white, fontSize: 20),
+          ),
+
+          if (selectedCount > 0)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
+              tooltip: "Delete selected",
+              onPressed: onDeleteSelected,
+            ),
+
           Spacer(), // takes all available space between the text and buttons
 
           SizedBox(width: 20),

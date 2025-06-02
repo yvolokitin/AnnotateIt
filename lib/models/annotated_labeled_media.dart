@@ -7,10 +7,13 @@ class AnnotatedLabeledMedia {
   final List<Annotation> annotations;
   final List<Label> labels;
 
+  bool isSelected;
+
   AnnotatedLabeledMedia({
     required this.mediaItem,
     required this.annotations,
     required this.labels,
+    this.isSelected = false,
   });
 
   /// Returns true if any annotations are associated with this media.

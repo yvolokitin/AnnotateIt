@@ -18,7 +18,8 @@ import "data/project_database.dart";
 import "data/labels_database.dart";
 
 // 👇 Localization import
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 ThemeData themeData = getSystemTheme();
 
@@ -86,7 +87,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
       theme: theme,
       home: MainPage(),
 
-      // ✅ Localization setup
+      // Localization setup
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
 

@@ -8,6 +8,8 @@ import 'image_tile.dart';
 import 'media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
+  final void Function(List<AnnotatedLabeledMedia>)? onSelectionChanged;
+
   final void Function(int newPage) onPageChanged;
 
   final List<AnnotatedLabeledMedia> annotatedMediaItems;
@@ -23,6 +25,7 @@ class PaginatedImageGrid extends StatefulWidget {
     required this.project,
     required this.onPageChanged,
     this.itemsPerPage = 24,
+    this.onSelectionChanged,
     super.key,
   });
 
@@ -57,6 +60,15 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   mediaItems: mediaItems,
                   index: index,
                   project: widget.project,
+                  onSelectedChanged: (isSelected) {
+                    print("PaginatedImageGrid:: $index: $isSelected");
+                    setState(() {
+                      widget.annotatedMediaItems[index].isSelected = isSelected;
+                    });
+                    widget.onSelectionChanged?.call(
+                      widget.annotatedMediaItems.where((item) => item.isSelected).toList(),
+                    );
+                  },
                 );
               } else {
                 return MediaTile(media: media);

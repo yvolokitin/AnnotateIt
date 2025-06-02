@@ -106,6 +106,17 @@ class MediaItem {
   bool get isVideo => type == MediaType.video;
   bool get isImage => type == MediaType.image;
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+      other is MediaItem &&
+      id != null &&
+      other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
   MediaItem updateAnnotationSummary({
     required int newCount,
     String? newLabel,

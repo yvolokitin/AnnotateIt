@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../dialogs/image_details_dialog.dart';
 import '../dialogs/set_image_icon_dialog.dart';
+import '../dialogs/delete_image_dialog.dart';
 import '../../pages/image_annotator_page.dart';
 
 import '../../models/annotated_labeled_media.dart';
-import '../../models/media_item.dart';
 import '../../models/project.dart';
 
 class ImageTile extends StatefulWidget {
@@ -15,13 +14,16 @@ class ImageTile extends StatefulWidget {
   final List<AnnotatedLabeledMedia> mediaItems;
   final int index;
   final Project project;
-  
+
+  final void Function(bool isSelected)? onSelectedChanged;
+
   const ImageTile({
     super.key,
     required this.media,
     required this.mediaItems,
     required this.index,
     required this.project,
+    this.onSelectedChanged,
   });
 
   @override
@@ -29,7 +31,6 @@ class ImageTile extends StatefulWidget {
 }
 
 class _ImageTileState extends State<ImageTile> {
-  bool _isSelected = false;
   bool _hovered = false;
   final GlobalKey _popupKey = GlobalKey();
 
@@ -44,6 +45,8 @@ class _ImageTileState extends State<ImageTile> {
     final Matrix4 transform = Matrix4.identity();
     if (_hovered) transform.scale(1.15);
 
+    final bool isSelected = widget.media.isSelected;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
@@ -53,7 +56,7 @@ class _ImageTileState extends State<ImageTile> {
         height: 140,
         decoration: BoxDecoration(
           border: Border.all(
-            color: _isSelected ? Colors.redAccent : Colors.transparent,
+            color: isSelected ? Colors.redAccent : Colors.transparent,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -86,18 +89,17 @@ class _ImageTileState extends State<ImageTile> {
                   ),
                 ),
               ),
+
               // left-top select icon
               Positioned(
                 top: 4,
                 left: 4,
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
-                  opacity: _hovered || _isSelected ? 1.0 : 0.0,
+                  opacity: _hovered || isSelected ? 1.0 : 0.0,
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _isSelected = !_isSelected;
-                      });
+                      widget.onSelectedChanged?.call(!isSelected);
                     },
                     child: Container(
                       width: 32,
@@ -108,7 +110,7 @@ class _ImageTileState extends State<ImageTile> {
                         border: Border.all(color: Colors.white30),
                       ),
                       child: Icon(
-                        _isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+                        isSelected ? Icons.check_box : Icons.check_box_outline_blank,
                         color: Colors.white,
                         size: 20,
                       ),
@@ -141,25 +143,29 @@ class _ImageTileState extends State<ImageTile> {
                           await showDialog(
                             context: context,
                             builder: (context) => ImageDetailsDialog(media: widget.media),
-                          );                                  
-
+                          );
                         } else if (value == 'delete') {
-                          _confirmDelete(context, widget.media.mediaItem);
-
+                          showDialog(
+                            context: context,
+                            builder: (context) => DeleteImageDialog(
+                              mediaItems: [widget.media.mediaItem],
+                              onConfirmed: () {
+                                print('File Delete: ${widget.media.mediaItem.filePath}');
+                              },
+                            ),
+                          );
                         } else if (value == 'seticon') {
                           showDialog(
                             context: context,
                             builder: (context) => SetImageIconDialog(
                               media: widget.media.mediaItem,
-                            onConfirmed: () {
-                              // Your logic to update icon
-                              print('Set project icon to: ${widget.media.mediaItem.filePath}');
-                            },
+                              onConfirmed: () {
+                                print('Set project icon to: ${widget.media.mediaItem.filePath}');
+                              },
                             ),
                           );
                         }
                       },
-
                       itemBuilder: (context) => <PopupMenuEntry<String>>[
                         const PopupMenuItem<String>(
                           value: 'details',
@@ -208,22 +214,22 @@ class _ImageTileState extends State<ImageTile> {
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.label_important, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.media.annotationCount ?? 0}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.label_important, size: 16, color: Colors.amber),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.media.annotationCount ?? 0}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -247,65 +253,6 @@ class _ImageTileState extends State<ImageTile> {
           const Icon(Icons.broken_image, color: Colors.white24, size: 40),
           const SizedBox(height: 8),
           Text(message, style: const TextStyle(color: Colors.white38, fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  void _confirmSetIcon(BuildContext context, MediaItem media) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Set as Project Icon?"),
-        content: Text(
-          "Do you want to use '${media.filePath}' as the icon for this project? "
-          "This will replace any previously set icon"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              print('To be implemented');
-              Navigator.pop(context);
-            },
-            child: const Text("Set as Project Icon", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, MediaItem media) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Do you want to remove that file from Dataset?"),
-        content: Text("File '${media.filePath}' will be removed from Dataset"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              try {
-                File(media.filePath).deleteSync();
-                // TODO: Remove from DB
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("File removed from Dataset")),
-                );
-              } catch (e) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Deletion error :-()")),
-                );
-              }
-            },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
-          ),
         ],
       ),
     );

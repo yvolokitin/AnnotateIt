@@ -12,7 +12,6 @@ class YOLOParser {
 
   static Future<int> parse({
     required String datasetPath,
-    required String taskType,    
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,
     required int projectId,

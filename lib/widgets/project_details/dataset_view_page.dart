@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../dialogs/delete_image_dialog.dart';
+
 import '../../models/annotated_labeled_media.dart';
+import '../../models/media_item.dart';
 import '../../models/project.dart';
 import '../../models/dataset.dart';
 
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 
-import 'no_media_dialog.dart';
-import 'dataset_upload_buttons.dart';
-import 'paginated_image_grid.dart';
-
-enum MediaSortOption {
-  newestFirst,
-  oldestFirst,
-  // fileSize, not implemented yet in MediaSize
-  // type, not implemented yet in MediaSize
-}
+import 'dataset_tab_content.dart';
+import 'dataset_tab_bar.dart';
 
 class DatasetViewPage extends StatefulWidget {
   Project project;
@@ -44,13 +39,13 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   int _currentPage = 0;
   double _uploadProgress = 0.0;
 
-  // needed to show global spinner before datasets + media are fully ready
   bool _initialLoading = true;
   String? _lastLoadedDatasetId;
 
-  // cache map for dataset tabs to avoid blink when switching tabs
   final Map<String, Widget> _datasetTabCache = {};
   final MediaSortOption _sortOption = MediaSortOption.newestFirst;
+
+  final Set<MediaItem> _selectedMediaItems = {};
 
   @override
   void initState() {
@@ -67,15 +62,13 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       return 0;
     });
 
-    fetchedDatasets.add(
-      Dataset(
-        id: 'add_new_tab',
-        projectId: widget.project.id!,
-        name: '+',
-        description: '',
-        createdAt: DateTime.now(),
-      ),
-    );
+    fetchedDatasets.add(Dataset(
+      id: 'add_new_tab',
+      projectId: widget.project.id!,
+      name: '+',
+      description: '',
+      createdAt: DateTime.now(),
+    ));
 
     if (!mounted) return;
     setState(() {
@@ -83,7 +76,9 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _rebuildTabController();
-    loadMediaForDataset(widget.project.defaultDatasetId!, _itemsPerPage, 0);
+    if (widget.project.defaultDatasetId != null) {
+      loadMediaForDataset(widget.project.defaultDatasetId!, _itemsPerPage, 0);
+    }
 
     if (!mounted) return;
     setState(() {
@@ -95,8 +90,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (datasetId == 'add_new_tab') return;
 
     final totalCount = await DatasetDatabase.instance.countMediaItemsInDataset(datasetId);
-    print('Total media items: $totalCount for dataset $datasetId');
-
     final totalPages = (totalCount / _itemsPerPage).ceil();
     final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, pageIndex);
 
@@ -108,8 +101,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       _currentPage = 0;
       _datasetTabCache.remove(datasetId);
     });
-
-    await Future.delayed(Duration(milliseconds: 100));
   }
 
   Future<List<AnnotatedLabeledMedia>> loadAnnotatedMediaForDataset(String datasetId, int pageSize, int pageIndex) async {
@@ -129,24 +120,42 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
         break;
     }
 
-    print("Loaded ${annotatedList.length} annotated media for dataset $datasetId at page $pageIndex");
     return annotatedList;
   }
 
   void _handlePageChanged(int newPage) async {
     final datasetId = datasets[_tabController!.index].id;
 
-    final annotatedList = await loadAnnotatedMediaForDataset(
-      datasetId,
-      _itemsPerPage,
-      newPage,
-    );
+    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, _itemsPerPage, newPage);
 
     setState(() {
       annotatedMediaByDataset[datasetId] = annotatedList;
       _currentPage = newPage;
       _datasetTabCache.remove(datasetId);
     });
+  }
+
+  void _handleDeleteSelectedMedia() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => DeleteImageDialog(
+        mediaItems: _selectedMediaItems.toList(),
+        onConfirmed: () => Navigator.pop(context, true),
+      ),
+    );
+
+    if (confirmed == true) {
+      for (final media in _selectedMediaItems) {
+        await DatasetDatabase.instance.deleteMediaItemWithAnnotations(media.id!);
+      }
+
+      final datasetId = datasets[_tabController!.index].id;
+      await loadMediaForDataset(datasetId, _itemsPerPage, _currentPage);
+
+      setState(() {
+        _selectedMediaItems.clear();
+      });
+    }
   }
 
   void _rebuildTabController() {
@@ -164,7 +173,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       return;
     }
 
-    // Prevent duplicate calls
     if (_lastLoadedDatasetId == currentDataset.id) return;
 
     _lastLoadedDatasetId = currentDataset.id;
@@ -197,14 +205,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       _uploadError = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Upload completed: $_currentFileIndex file(s)"),
-        duration: Duration(seconds: 2),
-      ),
-    );
-
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() {
         _uploadingFile = null;
@@ -215,8 +216,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
     _resetCancelUpload();
     loadMediaForDataset(currentDataset.id, _itemsPerPage, _currentPage);
-
-    // force rebuild after fresh data
     _datasetTabCache.remove(currentDataset.id);
   }
 
@@ -228,10 +227,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _resetCancelUpload();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Upload failed")),
-    );
   }
 
   void _resetCancelUpload() {
@@ -255,7 +250,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
     _rebuildTabController();
     _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
-    // loadMediaForDataset(newDataset.name, _itemsPerPage, 0);
   }
 
   void _renameDataset(Dataset dataset) async {
@@ -263,14 +257,14 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Rename Dataset'),
+        title: const Text('Rename Dataset'),
         content: TextField(
           controller: controller,
-          decoration: InputDecoration(hintText: 'New name'),
+          decoration: const InputDecoration(hintText: 'New name'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: Text('Rename')),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('Rename')),
         ],
       ),
     );
@@ -309,11 +303,11 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Dataset'),
-        content: Text("Are you sure you want to delete '${dataset.name}'?"),
+        title: const Text('Delete Dataset'),
+        content: Text("Are you sure you want to delete '\${dataset.name}'?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
         ],
       ),
     );
@@ -347,181 +341,78 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   @override
   Widget build(BuildContext context) {
     if (_initialLoading || _tabController == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabs: List.generate(datasets.length, (i) {
-                final dataset = datasets[i];
-                final isSelected = _tabController!.index == i;
-                final isDefault = dataset.id == widget.project.defaultDatasetId;
-                final isAddTab = dataset.id == 'add_new_tab';
+        DatasetTabBar(
+          controller: _tabController!,
+          datasets: datasets,
+          defaultDatasetId: widget.project.defaultDatasetId,
+          onMenuAction: (dataset, action) {
+            switch (action) {
+              case 'rename':
+                _renameDataset(dataset);
+                break;
+              case 'set_default':
+                _setDefaultDataset(dataset);
+                break;
+              case 'delete':
+                _deleteDataset(dataset);
+                break;
+            }
+          },
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: datasets.map((dataset) {
+              if (_datasetTabCache.containsKey(dataset.id)) {
+                return _datasetTabCache[dataset.id]!;
+              }
 
-                return Tab(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        dataset.name,
-                        style: TextStyle(
-                          fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      if (!isAddTab && isSelected)
-                        PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          onSelected: (value) {
-                            switch (value) {
-                              case 'rename':
-                                _renameDataset(dataset);
-                                break;
-                              case 'set_default':
-                                _setDefaultDataset(dataset);
-                                break;
-                              case 'delete':
-                                _deleteDataset(dataset);
-                                break;
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'rename',
-                              child: Text('Rename'),
-                            ),
-                            if (!isDefault)
-                              const PopupMenuItem(
-                                value: 'set_default',
-                                child: Text('Set as Default'),
-                              ),
-                              if (!isDefault)
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text('Delete'),
-                                ),
-                            ],
-                          icon: Icon(Icons.more_vert, size: 18),
-                        ),
-                    ],
-                  ),
-                );
-              }),
-              indicatorColor: Colors.redAccent,
-              labelStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              unselectedLabelColor: Colors.white60,
-            ),  
+              final mediaItems = annotatedMediaByDataset[dataset.id];
 
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: datasets.map((dataset) {
-
-                  if (_datasetTabCache.containsKey(dataset.id)) {
-                    return _datasetTabCache[dataset.id]!;
-                  }
-
-                  final mediaItems = annotatedMediaByDataset[dataset.id];
-
-                  final widgetToRender = dataset.id == 'add_new_tab'
-                    ? Center(child: Text("Creating new dataset...", style: TextStyle(color: Colors.white60)))
-                    : Column(
-                      children: [
-                        DatasetUploadButtons(
-                          project_id: widget.project.id!,
-                          project_icon: widget.project.icon,
-                          dataset_id: dataset.id,
-                          file_count: _fileCount,
-                          isUploading: _isUploading,
-                          onUploadingChanged: _handleUploadingChanged,
-                          onUploadSuccess: _handleUploadSuccess,
-                          onFileProgress: _handleFileUploadProgress,
-                          onUploadError: _handleUploadError,
-                          cancelUpload: _cancelUpload,
-                        ),
-                        Expanded(
-                          child: (mediaItems == null)
-                            ? Center (child: CircularProgressIndicator())
-                            : mediaItems.isEmpty
-                              ? NoMediaDialog(
-                                  project_id: widget.project.id!,
-                                  dataset_id: dataset.id,
-                                )
-                              : PaginatedImageGrid(
-                                  annotatedMediaItems: annotatedMediaByDataset[dataset.id]!,
-                                  totalCount: _fileCount,
-                                  totalPages: _totalPages,
-                                  currentPage: _currentPage,
-                                  project: widget.project,
-                                  onPageChanged: _handlePageChanged,
-                                ),
-                        ),
-                      ],  
+              final widgetToRender = dataset.id == 'add_new_tab'
+                  ? const Center(child: Text("Creating new dataset..."))
+                  : DatasetTabContent(
+                      project: widget.project,
+                      dataset: dataset,
+                      mediaItems: mediaItems,
+                      fileCount: _fileCount,
+                      totalPages: _totalPages,
+                      currentPage: _currentPage,
+                      isUploading: _isUploading,
+                      cancelUpload: _cancelUpload,
+                      selectedCount: _selectedMediaItems.length,
+                      onUploadingChanged: _handleUploadingChanged,
+                      onUploadSuccess: _handleUploadSuccess,
+                      onFileProgress: _handleFileUploadProgress,
+                      onUploadError: _handleUploadError,
+                      onPageChanged: _handlePageChanged,
+                      onSelectionChanged: (selectedItems) {
+                        setState(() {
+                          _selectedMediaItems
+                            ..clear()
+                            ..addAll(selectedItems.map((e) => e.mediaItem));
+                        });
+                      },
+                      onDeleteSelected: _handleDeleteSelectedMedia,
                     );
 
-                    _datasetTabCache[dataset.id] = widgetToRender;
-                    return widgetToRender;
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-
-        if (_isUploading)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              color: Colors.grey[850],
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _uploadingFile ?? "Uploading...",
-                          style: TextStyle(color: Colors.white70),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4),
-                        LinearProgressIndicator(
-                          value: _uploadProgress,
-                          minHeight: 6,
-                          color: _uploadError ? Colors.orange : Colors.green,
-                          backgroundColor: Colors.grey[700],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    "${(_uploadProgress * 100).toInt()}%",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _cancelUpload = true;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Canceled upload")),
-                      );
-                    },
-                    icon: Icon(Icons.close, color: Colors.redAccent),
-                  ),
-                ],
-              ),
-            ),
+              _datasetTabCache[dataset.id] = widgetToRender;
+              return widgetToRender;
+            }).toList(),
           ),
+        ),
       ],
     );
   }
+}
+
+enum MediaSortOption {
+  newestFirst,
+  oldestFirst,
 }

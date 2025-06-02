@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 import '../../models/media_item.dart';
 
@@ -16,7 +16,6 @@ class SetImageIconDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final borderColor = Colors.redAccent;
 
     return AlertDialog(
       title: Column(
@@ -24,16 +23,35 @@ class SetImageIconDialog extends StatelessWidget {
         children: [
           Text(l10n.setAsProjectIcon),
           const SizedBox(height: 8),
-          const Divider(thickness: 1, color: Colors.white24),
+          const Divider(thickness: 1, color: Colors.white),
         ],
       ),
       content: Text(
         l10n.setAsProjectIconConfirm(media.filePath),
+        style: const TextStyle(
+          color: Colors.white70,
+          fontWeight: FontWeight.normal,
+        ),
       ),
       actions: [
-        TextButton(
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[900],
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+              side: BorderSide(color: Colors.white70, width: 2),
+            ),
+          ),
+          child: Text(
+            l10n.cancel,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              ),
+          ),
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -41,7 +59,7 @@ class SetImageIconDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
-              side: BorderSide(color: borderColor, width: 2),
+              side: BorderSide(color: Colors.redAccent, width: 2),
             ),
           ),
           onPressed: () {
@@ -51,7 +69,7 @@ class SetImageIconDialog extends StatelessWidget {
           child: Text(
             l10n.setAsProjectIcon,
             style: const TextStyle(
-              color: Colors.redAccent,
+              color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
               ),

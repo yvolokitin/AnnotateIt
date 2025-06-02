@@ -4,6 +4,7 @@
   "discard": "Discard",
   "close": "Close",
   "cancel": "Cancel",
+  "delete": "Delete",
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
@@ -78,11 +79,13 @@
 
   "allLabels": "All Labels",
   "setAsProjectIcon": "Set as Project Icon",
-  "setAsProjectIconConfirm": "Do you want to use '{filePath}' as the icon for this project? This will replace any previously set icon.",
+  "setAsProjectIconConfirm": "Do you want to use '{filePath}' as the icon for this project?\n\nThis will replace any previously set icon.",
   "@setAsProjectIconConfirm": {
-    "description": "Confirmation message in the set icon dialog",
     "placeholders": {
       "filePath": {}
     }
-   }
+  },
+
+  "removeFilesFromDataset": "Remove files from Dataset?",
+  "removeFilesFromDatasetConfirm": "Are you sure you want to delete the following files?\n\nAll corresponding annotations will be removed as well."
 }
