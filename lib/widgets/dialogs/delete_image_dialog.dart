@@ -25,7 +25,7 @@ class DeleteImageDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.removeFilesFromDatasetConfirm,
+          l10n.removeFilesFromDatasetConfirm(mediaItems.length),
           style: const TextStyle(
             color: Colors.white70,
             fontWeight: FontWeight.normal,
@@ -100,10 +100,7 @@ class DeleteImageDialog extends StatelessWidget {
               side: const BorderSide(color: Colors.redAccent, width: 2),
             ),
           ),
-          onPressed: () {
-            onConfirmed();
-            Navigator.pop(context);
-          },
+          onPressed: onConfirmed,
           child: Text(
             l10n.delete,
             style: const TextStyle(

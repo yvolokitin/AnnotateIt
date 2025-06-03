@@ -469,8 +469,8 @@ abstract class AppLocalizations {
   /// No description provided for @removeFilesFromDatasetConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete the following files?\n\nAll corresponding annotations will be removed as well.'**
-  String get removeFilesFromDatasetConfirm;
+  /// **'Are you sure you want to delete the following file(s) (\'{amount}\')?\n\nAll corresponding annotations will be removed as well.'**
+  String removeFilesFromDatasetConfirm(Object amount);
 }
 
 class _AppLocalizationsDelegate

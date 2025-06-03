@@ -87,5 +87,10 @@
   },
 
   "removeFilesFromDataset": "Remove files from Dataset?",
-  "removeFilesFromDatasetConfirm": "Are you sure you want to delete the following files?\n\nAll corresponding annotations will be removed as well."
+  "removeFilesFromDatasetConfirm": "Are you sure you want to delete the following file(s) ('{amount}')?\n\nAll corresponding annotations will be removed as well.",
+  "@removeFilesFromDatasetConfirm": {
+    "placeholders": {
+      "amount": {}
+    }
+  }
 }

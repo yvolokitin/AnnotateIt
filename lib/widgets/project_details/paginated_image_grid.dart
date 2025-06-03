@@ -9,22 +9,20 @@ import 'media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
   final void Function(List<AnnotatedLabeledMedia>)? onSelectionChanged;
-
   final void Function(int newPage) onPageChanged;
 
   final List<AnnotatedLabeledMedia> annotatedMediaItems;
-  final totalCount, totalPages, currentPage;
+  final int totalCount, totalPages, currentPage, itemsPerPage;
   final Project project;
-  final int itemsPerPage;
 
   const PaginatedImageGrid({
     required this.annotatedMediaItems,
     required this.totalCount,
     required this.totalPages,
     required this.currentPage,
+    required this.itemsPerPage,
     required this.project,
     required this.onPageChanged,
-    this.itemsPerPage = 24,
     this.onSelectionChanged,
     super.key,
   });
@@ -36,6 +34,25 @@ class PaginatedImageGrid extends StatefulWidget {
 class _PaginatedImageGridState extends State<PaginatedImageGrid> {
   int _currentPage = 0;
 
+  int _getCrossAxisCount() {
+    print('PaginatedImageGrid:: itemsPerPage: ${widget.itemsPerPage}');
+
+    switch (widget.itemsPerPage) {
+      case 8:
+        return 2;
+      case 16:
+        return 4;
+      case 24:
+        return 6;
+      case 32:
+        return 8;
+      case 48:
+        return 8;
+      default:
+        return 6;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaItems = widget.annotatedMediaItems;
@@ -44,29 +61,28 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
       children: [
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: widget.annotatedMediaItems.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 6,
+            // padding: const EdgeInsets.all(16),
+            itemCount: mediaItems.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: _getCrossAxisCount(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 1,
             ),
             itemBuilder: (context, index) {
-              final media = widget.annotatedMediaItems[index].mediaItem;
+              final media = mediaItems[index].mediaItem;
               if (media.type == MediaType.image) {
                 return ImageTile(
-                  media: widget.annotatedMediaItems[index],
+                  media: mediaItems[index],
                   mediaItems: mediaItems,
                   index: index,
                   project: widget.project,
                   onSelectedChanged: (isSelected) {
-                    print("PaginatedImageGrid:: $index: $isSelected");
                     setState(() {
-                      widget.annotatedMediaItems[index].isSelected = isSelected;
+                      mediaItems[index].isSelected = isSelected;
                     });
                     widget.onSelectionChanged?.call(
-                      widget.annotatedMediaItems.where((item) => item.isSelected).toList(),
+                      mediaItems.where((item) => item.isSelected).toList(),
                     );
                   },
                 );

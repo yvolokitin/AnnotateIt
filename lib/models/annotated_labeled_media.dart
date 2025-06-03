@@ -66,16 +66,17 @@ class AnnotatedLabeledMedia {
     return mediaItem.lastAnnotator == userId;
   }
 
-  /// Deep copy
   AnnotatedLabeledMedia copyWith({
     MediaItem? mediaItem,
     List<Annotation>? annotations,
     List<Label>? labels,
+    bool? isSelected,
   }) {
     return AnnotatedLabeledMedia(
       mediaItem: mediaItem ?? this.mediaItem,
       annotations: annotations ?? this.annotations,
       labels: labels ?? this.labels,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 

@@ -223,6 +223,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeFilesFromDataset => 'Remove files from Dataset?';
 
   @override
-  String get removeFilesFromDatasetConfirm =>
-      'Are you sure you want to delete the following files?\n\nAll corresponding annotations will be removed as well.';
+  String removeFilesFromDatasetConfirm(Object amount) {
+    return 'Are you sure you want to delete the following file(s) (\'$amount\')?\n\nAll corresponding annotations will be removed as well.';
+  }
 }

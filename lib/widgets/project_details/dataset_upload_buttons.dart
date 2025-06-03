@@ -1,49 +1,67 @@
 import 'dart:io';
 import 'package:vap/gen_l10n/app_localizations.dart';
-import "package:file_picker/file_picker.dart";
-import "package:flutter/material.dart";
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 
-import "../../utils/image_utils.dart";
-import "../../data/dataset_database.dart";
-import "../../data/project_database.dart";
+import '../../utils/image_utils.dart';
+import '../../data/dataset_database.dart';
+import '../../data/project_database.dart';
+import '../../session/user_session.dart';
 
-import "../../session/user_session.dart";
-
-class DatasetUploadButtons extends StatelessWidget {
-  final int project_id, file_count;
+class DatasetUploadButtons extends StatefulWidget {
+  final int project_id, file_count, itemsPerPage;
+  final int selectedCount;
   final String project_icon;
   final String dataset_id;
 
   final bool isUploading;
   final bool cancelUpload;
+  final bool allSelected;
 
   final Function(bool) onUploadingChanged;
   final VoidCallback onUploadSuccess;
   final void Function(String filename, int index, int total)? onFileProgress;
+  final void Function(int newItemsPerPage)? onItemsPerPageChanged;
   final VoidCallback? onUploadError;
 
-  final int selectedCount;
   final VoidCallback? onDeleteSelected;
+  final VoidCallback? onToggleSelectAll;
 
   const DatasetUploadButtons({
     required this.project_id,
     required this.project_icon,
     required this.dataset_id,
     required this.file_count,
+    required this.itemsPerPage,
     required this.isUploading,
     required this.onUploadingChanged,
     required this.onUploadSuccess,
     required this.cancelUpload,
     required this.selectedCount,
+    required this.allSelected,
     this.onFileProgress,
     this.onUploadError,
     this.onDeleteSelected,
+    this.onToggleSelectAll,
+    this.onItemsPerPageChanged,
     super.key,
   });
 
-  Future<void> _uploadMedia(BuildContext context) async {
-    print("UI _uploadMedia: Uploading media... for dataset_id: $dataset_id");
+  @override
+  State<DatasetUploadButtons> createState() => _DatasetUploadButtonsState();
+}
 
+class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
+  bool _hoveringDelete = false;
+  late int _currentItemsPerPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentItemsPerPage = widget.itemsPerPage;
+  }
+
+  Future<void> _uploadMedia(BuildContext context) async {
     try {
       final result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
@@ -52,23 +70,26 @@ class DatasetUploadButtons extends StatelessWidget {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        onUploadingChanged(true);
+        widget.onUploadingChanged(true);
         final total = result.files.length;
 
-        if (project_icon.contains('default_project_image') || project_icon.contains('folder')) {
+        if (widget.project_icon.contains('default_project_image') ||
+            widget.project_icon.contains('folder')) {
           final platformFile = result.files[0];
-          final thumbnailFile = await generateThumbnailFromImage(File(platformFile.path!), project_id.toString());
+          final thumbnailFile = await generateThumbnailFromImage(
+              File(platformFile.path!), widget.project_id.toString());
           if (thumbnailFile != null) {
-            await ProjectDatabase.instance.updateProjectIcon(project_id, thumbnailFile.path);
+            await ProjectDatabase.instance
+                .updateProjectIcon(widget.project_id, thumbnailFile.path);
           }
         }
 
         for (int i = 0; i < total; i++) {
-          if (cancelUpload) {
-            onUploadingChanged(false);
-            onUploadError?.call();
+          if (widget.cancelUpload) {
+            widget.onUploadingChanged(false);
+            widget.onUploadError?.call();
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Upload stopped")),
+              const SnackBar(content: Text("Upload stopped")),
             );
             return;
           }
@@ -77,7 +98,7 @@ class DatasetUploadButtons extends StatelessWidget {
           final ext = file.extension?.toLowerCase() ?? 'unknown';
           final currentUser = UserSession.instance.getUser();
           if (currentUser.id == null) {
-            onUploadError?.call();
+            widget.onUploadError?.call();
             return;
           }
 
@@ -86,15 +107,13 @@ class DatasetUploadButtons extends StatelessWidget {
           double? duration;
           double? fps;
           final isVideo = ['mp4', 'mov'].contains(ext);
-  
+
           if (isVideo) {
-            // TODO: Replace with actual video metadata extractor
             final videoMeta = await getVideoMetadata(file.path!);
             width = videoMeta['width'];
             height = videoMeta['height'];
             duration = videoMeta['duration'];
             fps = videoMeta['fps'];
-  
           } else {
             final imageMeta = await getImageMetadata(file.path!);
             width = imageMeta['width'];
@@ -102,7 +121,7 @@ class DatasetUploadButtons extends StatelessWidget {
           }
 
           await DatasetDatabase.instance.insertMediaItem(
-            dataset_id,
+            widget.dataset_id,
             file.path!,
             ext,
             ownerId: currentUser.id!,
@@ -112,19 +131,19 @@ class DatasetUploadButtons extends StatelessWidget {
             fps: fps,
             source: 'local',
           );
-  
-          onFileProgress?.call(file.name, i + 1, total);
+
+          widget.onFileProgress?.call(file.name, i + 1, total);
         }
 
-        await ProjectDatabase.instance.updateProjectLastUpdated(project_id);
-        onUploadingChanged(false); onUploadSuccess();
-
+        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project_id);
+        widget.onUploadingChanged(false);
+        widget.onUploadSuccess();
       } else {
-        onUploadingChanged(false);
+        widget.onUploadingChanged(false);
       }
     } catch (e) {
       print("_uploadMedia: Upload error: $e");
-      onUploadError?.call();
+      widget.onUploadError?.call();
     }
   }
 
@@ -151,38 +170,102 @@ class DatasetUploadButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    print('1111111 selectedCount: $selectedCount');
+    final bool showDeleteButton = widget.allSelected || ((widget.selectedCount < widget.itemsPerPage) && (widget.allSelected == false));
+
     return Container(
-      padding: EdgeInsets.all(40),
       height: 120,
       width: double.infinity,
       child: Row(
-        // mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            selectedCount > 0
-              ? "$file_count files / $selectedCount selected"
-              : "$file_count files",
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+          if (widget.file_count > 0) ...[
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: IconButton(
+                icon: Icon(
+                  widget.allSelected
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                onPressed: widget.onToggleSelectAll,
+              ),
+            ),
+            const SizedBox(width: 20),
+            Text(
+              "${widget.file_count} files",
+              style: const TextStyle(color: Colors.white, fontSize: 22),
+            ),
+          ],
+
+          // if (widget.selectedCount > 0) ...[
+          if (showDeleteButton && widget.selectedCount > 0) ...[
+            Text(
+              " / ${widget.selectedCount} selected",
+              style: const TextStyle(color: Colors.white, fontSize: 22),
+            ),
+            const SizedBox(width: 20),
+            MouseRegion(
+              onEnter: (_) => setState(() => _hoveringDelete = true),
+              onExit: (_) => setState(() => _hoveringDelete = false),
+              cursor: SystemMouseCursors.click,
+              child: AnimatedScale(
+                scale: _hoveringDelete ? 1.1 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(
+                    color: _hoveringDelete
+                        ? const Color(0x26FF0000)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      color: _hoveringDelete ? Colors.redAccent : Colors.white,
+                    ),
+                    tooltip: l10n.delete,
+                    onPressed: widget.onDeleteSelected,
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          const Spacer(),
+
+          const SizedBox(width: 20),
+          DropdownButton<int>(
+            value: _currentItemsPerPage,
+            dropdownColor: Colors.grey[900],
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            iconEnabledColor: Colors.white,
+            underline: Container(height: 0),
+            items: [8, 16, 24, 36, 48].map((value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value per page', style: const TextStyle(color: Colors.white, fontSize: 22)),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null && value != _currentItemsPerPage) {
+                setState(() {
+                  _currentItemsPerPage = value;
+                });
+                widget.onItemsPerPageChanged?.call(value);
+              }
+            },
           ),
 
-          if (selectedCount > 0)
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.redAccent),
-              tooltip: "Delete selected",
-              onPressed: onDeleteSelected,
-            ),
-
-          Spacer(), // takes all available space between the text and buttons
-
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           _buildButton(
             context,
             label: l10n.importDataset,
             borderColor: Colors.grey,
           ),
 
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           _buildButton(
             context,
             label: l10n.uploadMedia,
@@ -193,61 +276,58 @@ class DatasetUploadButtons extends StatelessWidget {
     );
   }
 
-Widget _buildButton(
-  BuildContext context, {
-  required String label,
-  required Color borderColor,
-}) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final bool isCompact = screenWidth < 750;
+  Widget _buildButton(
+    BuildContext context, {
+    required String label,
+    required Color borderColor,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isCompact = screenWidth < 1024;
 
-  final IconData icon = label.toLowerCase().contains("upload")
-      ? Icons.upload
-      : Icons.dataset;
+    final IconData icon = label.toLowerCase().contains("upload")
+        ? Icons.upload
+        : Icons.dataset;
 
-  if (isCompact) {
-    // Icon-only button for small screens
-    return IconButton(
-      onPressed: isUploading
-          ? null
-          : () async {
-              await _uploadMedia(context);
-            },
-      icon: Icon(icon, color: Colors.white, size: 36),
-      tooltip: label,
-      style: IconButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        shape: CircleBorder(
-          side: BorderSide(color: borderColor, width: 2),
+    if (isCompact) {
+      return IconButton(
+        onPressed: widget.isUploading
+            ? null
+            : () async {
+                await _uploadMedia(context);
+              },
+        icon: Icon(icon, color: Colors.white, size: 36),
+        tooltip: label,
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.grey[900],
+          shape: CircleBorder(
+            side: BorderSide(color: borderColor, width: 2),
+          ),
         ),
-      ),
-    );
-  } else {
-    // Text-only button for large screens
-    return ElevatedButton(
-      onPressed: isUploading
-          ? null
-          : () async {
-              await _uploadMedia(context);
-            },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: BorderSide(color: borderColor, width: 2),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: widget.isUploading
+            ? null
+            : () async {
+                await _uploadMedia(context);
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[900],
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: BorderSide(color: borderColor, width: 2),
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
-
 }

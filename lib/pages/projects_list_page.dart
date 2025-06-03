@@ -41,10 +41,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _isLoading = true;
     });
   
-    print("[_loadProjects] Fetching project list...");
+    // print("[_loadProjects] Fetching project list...");
     List<Project> projects = await ProjectDatabase.instance.fetchProjects();
 
-    print("[_loadProjects] Found ${projects.length} projects. Loading labels...");
+    if (!mounted) return;
+    // print("[_loadProjects] Found ${projects.length} projects. Loading labels...");
     // Load labels for each project
     for (final project in projects) {
       final labels = await LabelsDatabase.instance.fetchLabelsByProject(project.id!);
@@ -56,8 +57,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _filteredProjects = _applySearchAndSort(projects);
       _isLoading = false;
     });
-
-    print("[_loadProjects] Done");
   }
 
   // Function to Edit a Project (Add Edit Logic)

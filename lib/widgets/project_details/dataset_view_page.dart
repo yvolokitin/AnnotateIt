@@ -34,7 +34,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   String? _uploadingFile;
   int _currentFileIndex = 0;
   int _fileCount = 0;
-  int _itemsPerPage = 24;
+  int itemsPerPage = 24;
   int _totalPages = 0;
   int _currentPage = 0;
   double _uploadProgress = 0.0;
@@ -77,7 +77,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
     _rebuildTabController();
     if (widget.project.defaultDatasetId != null) {
-      loadMediaForDataset(widget.project.defaultDatasetId!, _itemsPerPage, 0);
+      loadMediaForDataset(widget.project.defaultDatasetId!, itemsPerPage, 0);
     }
 
     if (!mounted) return;
@@ -90,7 +90,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (datasetId == 'add_new_tab') return;
 
     final totalCount = await DatasetDatabase.instance.countMediaItemsInDataset(datasetId);
-    final totalPages = (totalCount / _itemsPerPage).ceil();
+    final totalPages = (totalCount / itemsPerPage).ceil();
     final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, pageIndex);
 
     if (!mounted) return;
@@ -126,7 +126,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   void _handlePageChanged(int newPage) async {
     final datasetId = datasets[_tabController!.index].id;
 
-    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, _itemsPerPage, newPage);
+    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, newPage);
 
     setState(() {
       annotatedMediaByDataset[datasetId] = annotatedList;
@@ -150,7 +150,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       }
 
       final datasetId = datasets[_tabController!.index].id;
-      await loadMediaForDataset(datasetId, _itemsPerPage, _currentPage);
+      await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
 
       setState(() {
         _selectedMediaItems.clear();
@@ -176,7 +176,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (_lastLoadedDatasetId == currentDataset.id) return;
 
     _lastLoadedDatasetId = currentDataset.id;
-    loadMediaForDataset(currentDataset.id, _itemsPerPage, 0);
+    loadMediaForDataset(currentDataset.id, itemsPerPage, 0);
   }
 
   void _handleUploadingChanged(bool uploading) {
@@ -215,7 +215,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _resetCancelUpload();
-    loadMediaForDataset(currentDataset.id, _itemsPerPage, _currentPage);
+    loadMediaForDataset(currentDataset.id, itemsPerPage, _currentPage);
     _datasetTabCache.remove(currentDataset.id);
   }
 
@@ -327,7 +327,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
         _tabController!.index = datasets.length - 1;
       }
 
-      loadMediaForDataset(datasets[_tabController!.index].id, _itemsPerPage, 0);
+      loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
     }
   }
 
@@ -384,22 +384,20 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                       fileCount: _fileCount,
                       totalPages: _totalPages,
                       currentPage: _currentPage,
+                      itemsPerPage: itemsPerPage,
                       isUploading: _isUploading,
                       cancelUpload: _cancelUpload,
-                      selectedCount: _selectedMediaItems.length,
                       onUploadingChanged: _handleUploadingChanged,
                       onUploadSuccess: _handleUploadSuccess,
                       onFileProgress: _handleFileUploadProgress,
                       onUploadError: _handleUploadError,
                       onPageChanged: _handlePageChanged,
-                      onSelectionChanged: (selectedItems) {
-                        setState(() {
-                          _selectedMediaItems
-                            ..clear()
-                            ..addAll(selectedItems.map((e) => e.mediaItem));
-                        });
+                      onMediaDeleted: () {
+                        loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
                       },
-                      onDeleteSelected: _handleDeleteSelectedMedia,
+                      onItemsPerPageChanged: (int newItemsPerPage) {
+                        loadMediaForDataset(dataset.id, newItemsPerPage, _currentPage);
+                      },
                     );
 
               _datasetTabCache[dataset.id] = widgetToRender;
