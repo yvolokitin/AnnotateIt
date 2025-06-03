@@ -183,20 +183,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                               cursor: _mouseInsideImage
                                 ? SystemMouseCursors.precise
                                 : SystemMouseCursors.basic,
-                                // child: AnnotationCanvasDemo(imageFile: file, annotations: _annotations,),
                                 child: AnnotationCanvasFromFile(file: file, annotations: _annotations, labelDefinitions: []),
-                                /*child: AnnotationCanvas(
-                                  imageFile: file,
-                                  annotations: _annotations,
-                                  label: _currentLabel,
-                                  fillOpacity: fillOpacity,
-                                  labels: widget.project.labels ?? [],
-                                  scale: _scale,
-                                  onScaleChanged: (newScale) => setState(() => _scale = newScale),
-                                  onLabelSelected: (ann, newLabel) => setState(() => ann.label = newLabel),
-                                  onNewAnnotation: (ann) => setState(() => _annotations.add(ann)),
-                                ),*/
-                              //),
                             );
                           },
                         ),
