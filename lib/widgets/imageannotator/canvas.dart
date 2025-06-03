@@ -10,14 +10,24 @@ import 'canvas_painter.dart';
 
 import '../../models/annotation.dart';
 import '../../models/label.dart';
+import '../../models/shape/rect_shape.dart'; // Added import
 
 class Canvas extends StatefulWidget {
-
   final ui.Image image;
-  final List<Annotation>? annotations;
+  final List<Annotation> annotations; // Made non-nullable, assuming it's initialized
   final List<Label> labelDefinitions;
+  final Function(Annotation) onAnnotationCreated; // Callback for new annotations
+  // activeTool will be passed from parent (ImageAnnotator)
+  final String? activeTool;
 
-  const Canvas({required this.image, this.annotations, required this.labelDefinitions, super.key});
+  const Canvas({
+    required this.image,
+    required this.annotations,
+    required this.labelDefinitions,
+    required this.onAnnotationCreated,
+    this.activeTool,
+    super.key,
+  });
 
   @override
   State<Canvas> createState() => _CanvasState();
@@ -31,15 +41,68 @@ class _CanvasState extends State<Canvas> {
   Matrix4 inverse = Matrix4.identity();
   bool done = false;
 
+  // To store points of the bounding box being drawn
+  List<Offset> _currentPoints = [];
+
   @override
   void initState() {
     super.initState();
 
     Future.delayed(Duration.zero).then((_) {
       setState(() {
-          matrix = setTransformToFit(widget.image);
+        matrix = setTransformToFit(widget.image);
       });
     });
+  }
+
+  // Helper to transform screen coordinates to image coordinates
+  Offset _screenToImageSpace(Offset screenOffset) {
+    inverse.copyInverse(matrix);
+    final Vector3 transformed = inverse * Vector3(screenOffset.dx, screenOffset.dy, 0);
+    return Offset(transformed.x, transformed.y);
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    if (widget.activeTool == "bounding_box") {
+      final imagePoint = _screenToImageSpace(details.localPosition);
+      setState(() {
+        _currentPoints = [imagePoint, imagePoint];
+      });
+    }
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (widget.activeTool == "bounding_box" && _currentPoints.isNotEmpty) {
+      final imagePoint = _screenToImageSpace(details.localPosition);
+      setState(() {
+        _currentPoints[1] = imagePoint;
+      });
+    }
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (widget.activeTool == "bounding_box" && _currentPoints.length == 2) {
+      final Rect rect = Rect.fromPoints(_currentPoints[0], _currentPoints[1]);
+      // Ensure width and height are positive
+      final normalizedRect = Rect.fromLTRB(
+        min(rect.left, rect.right),
+        min(rect.top, rect.bottom),
+        max(rect.left, rect.right),
+        max(rect.top, rect.bottom),
+      );
+
+      if (normalizedRect.width > 0 && normalizedRect.height > 0) {
+        final newAnnotation = Annotation(
+          id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary ID
+          labels: [], // Empty labels for now
+          shape: RectShape.fromRect(normalizedRect),
+        );
+        widget.onAnnotationCreated(newAnnotation);
+      }
+      setState(() {
+        _currentPoints = [];
+      });
+    }
   }
 
   Matrix4 setTransformToFit(ui.Image image) {
@@ -107,6 +170,9 @@ class _CanvasState extends State<Canvas> {
                     matrix.translate(d.focalPointDelta.dx / zoom, d.focalPointDelta.dy / zoom, 0.0);
                 });
               },
+              onPanStart: _onPanStart,
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: _onPanEnd,
               child: Listener(
                 behavior: HitTestBehavior.translucent,
                 onPointerSignal: (p) {
@@ -121,7 +187,14 @@ class _CanvasState extends State<Canvas> {
                   child: Builder(
                     builder: (context) {
                       return CustomPaint(
-                        painter: CanvasPainter(widget.image, widget.annotations, widget.labelDefinitions, matrix.getMaxScaleOnAxis()),
+                        painter: CanvasPainter(
+                          widget.image,
+                          widget.annotations,
+                          widget.labelDefinitions,
+                          matrix.getMaxScaleOnAxis(),
+                          activeTool: widget.activeTool, // Pass active tool
+                          currentPoints: _currentPoints, // Pass current points
+                        ),
                         child: Container(),
                       );
                     }

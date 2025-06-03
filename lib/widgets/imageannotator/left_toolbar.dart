@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class LeftToolbar extends StatelessWidget {
   final double opacity;
   final ValueChanged<double> onOpacityChanged;
+  final void Function(String) onToolSelected;
 
   const LeftToolbar({
     super.key,
     required this.opacity,
     required this.onOpacityChanged,
+    required this.onToolSelected,
   });
 
   @override
@@ -20,7 +22,7 @@ class LeftToolbar extends StatelessWidget {
           const Divider(color: Colors.white30, height: 20),
           IconButton(
             icon: const Icon(Icons.crop_square, color: Colors.white),
-            onPressed: () {}, // TODO: Tool selection
+            onPressed: () => onToolSelected("bounding_box"),
           ),
 
           const Divider(color: Colors.white30, height: 20),

@@ -38,8 +38,17 @@ class CanvasPainter extends CustomPainter {
   final List<Label> labels;
   final Map<String, Label> labelById;
   final double scale;
+  final String? activeTool;
+  final List<Offset> currentPoints;
 
-  CanvasPainter(this.image, this.annotations, this.labels, this.scale): labelById = { for (var v in labels) v.id.toString() : v };
+  CanvasPainter(
+    this.image,
+    this.annotations,
+    this.labels,
+    this.scale, {
+    this.activeTool,
+    this.currentPoints = const [],
+  }) : labelById = {for (var v in labels) v.id.toString(): v};
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,21 +75,27 @@ class CanvasPainter extends CustomPainter {
 
       final shape = annotation.shape;
       if (shape != null) {
-        switch (shape) {
-          case 'RectShape':
-            drawRectangle(canvas, size, paint, transparent, annotation);
-            break;
-          case 'polygon':
-            drawPolygon(canvas, size, paint, transparent, annotation);
-            break;
-          case 'rotated_rect':
-            drawRotatedRectangle(canvas, size, paint, transparent, annotation);
-            break;
-          /*case 'circle':
-            drawCircle(canvas, size, paint, transparent, annotation);
-            break;*/
-        }
+        if (shape is RectShape) {
+          drawRectangle(canvas, size, paint, transparent, annotation);
+        } else if (shape is PolygonShape) {
+          drawPolygon(canvas, size, paint, transparent, annotation);
+        } else if (shape is RotatedRectShape) {
+          drawRotatedRectangle(canvas, size, paint, transparent, annotation);
+        } /*else if (shape is CircleShape) {
+          // drawCircle(canvas, size, paint, transparent, annotation);
+        }*/
       }
+    }
+
+    // Draw the temporary bounding box if it's being created
+    if (activeTool == "bounding_box" && currentPoints.length == 2) {
+      final tempRectPaint = Paint()
+        ..color = Colors.blueAccent.withOpacity(0.5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0 / scale; // Adjust stroke width based on zoom
+
+      final rectToDraw = Rect.fromPoints(currentPoints[0], currentPoints[1]);
+      canvas.drawRect(rectToDraw, tempRectPaint);
     }
   }
 
@@ -186,7 +201,13 @@ class CanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
-    return false;
+    // Repaint if annotations, active tool, or current points change, or scale.
+    return oldDelegate.annotations != annotations ||
+        oldDelegate.activeTool != activeTool ||
+        oldDelegate.currentPoints != currentPoints ||
+        oldDelegate.scale != scale ||
+        oldDelegate.image != image ||
+        oldDelegate.labels != labels;
   }
   @override
   bool shouldRebuildSemantics(CanvasPainter oldDelegate) => false;

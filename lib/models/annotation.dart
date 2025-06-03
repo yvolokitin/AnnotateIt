@@ -10,8 +10,7 @@ class Annotation {
   final int? id;
   final int mediaItemId;
   final int? labelId;
-  final String annotationType;         // e.g., 'bbox', 'polygon', 'classification'
-  final Map<String, dynamic> data;     // flexible payload
+  final Shape shape; // Changed: Now holds a Shape object directly
   final double? confidence;
   final int? annotatorId;
   final String? comment;
@@ -24,8 +23,7 @@ class Annotation {
     this.id,
     required this.mediaItemId,
     this.labelId,
-    required this.annotationType,
-    required this.data,
+    required this.shape, // Changed: Expects a Shape object
     this.confidence,
     this.annotatorId,
     this.comment,
@@ -35,13 +33,26 @@ class Annotation {
     required this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
+    String shapeType;
+    if (shape is RectShape) {
+      shapeType = 'bbox';
+    } else if (shape is PolygonShape) {
+      shapeType = 'polygon';
+    } else if (shape is CircleShape) {
+      shapeType = 'circle';
+    } else if (shape is RotatedRectShape) {
+      shapeType = 'rotated_rect';
+    } else {
+      throw Exception('Unknown shape type: ${shape.runtimeType}');
+    }
+
     return {
       'id': id,
       'media_item_id': mediaItemId,
       'label_id': labelId,
-      'annotation_type': annotationType,
-      'data': jsonEncode(data),
+      'shape_type': shapeType, // Added shape_type field
+      'shape_data': shape.toJson(), // Serialize shape object
       'confidence': confidence,
       'annotator_id': annotatorId,
       'comment': comment,
@@ -52,13 +63,37 @@ class Annotation {
     };
   }
 
-  factory Annotation.fromMap(Map<String, dynamic> map) {
+  factory Annotation.fromJson(Map<String, dynamic> map) {
+    final shapeType = map['shape_type'] as String?;
+    final shapeData = map['shape_data'] as Map<String, dynamic>?;
+
+    if (shapeType == null || shapeData == null) {
+      throw FormatException("Missing shape_type or shape_data in Annotation JSON");
+    }
+
+    Shape decodedShape;
+    switch (shapeType.toLowerCase()) {
+      case 'bbox':
+        decodedShape = RectShape.fromJson(shapeData);
+        break;
+      case 'polygon':
+        decodedShape = PolygonShape.fromJson(shapeData);
+        break;
+      case 'circle':
+        decodedShape = CircleShape.fromJson(shapeData);
+        break;
+      case 'rotated_rect':
+        decodedShape = RotatedRectShape.fromJson(shapeData);
+        break;
+      default:
+        throw Exception('Unknown shape_type: $shapeType');
+    }
+
     return Annotation(
       id: map['id'] as int?,
       mediaItemId: map['media_item_id'] as int,
       labelId: map['label_id'] as int?,
-      annotationType: map['annotation_type'] as String,
-      data: jsonDecode(map['data'] as String),
+      shape: decodedShape, // Assign decoded shape
       confidence: map['confidence'] != null ? (map['confidence'] as num).toDouble() : null,
       annotatorId: map['annotator_id'] as int?,
       comment: map['comment'] as String?,
@@ -68,25 +103,6 @@ class Annotation {
       updatedAt: DateTime.parse(map['updated_at']),
     );
   }
-}
-
-extension AnnotationShapeExt on Annotation {
-  /// Returns the shape object from annotation data.
-  Shape? get shape {
-    switch (annotationType.toLowerCase()) {
-      case 'bbox':
-        return RectShape.fromJson(data);
-      case 'polygon':
-        return PolygonShape.fromJson(data);
-      case 'circle':
-        return CircleShape.fromJson(data);
-      case 'rotated_rect':
-        return RotatedRectShape.fromJson(data);
-      // You can extend easily here for future types
-      default:
-        return null;
-    }
-  }
 
   /// Returns true if annotation has a reviewer comment
   bool get hasComment => comment != null && comment!.trim().isNotEmpty;
@@ -95,7 +111,15 @@ extension AnnotationShapeExt on Annotation {
   bool get hasStatus => status != null && status!.trim().isNotEmpty;
 
   /// Convenience: Returns human readable summary
-  String get summary => '[$annotationType] '
+  String get summary {
+    String shapeTypeStr = 'unknown_shape';
+    if (shape is RectShape) shapeTypeStr = 'bbox';
+    if (shape is PolygonShape) shapeTypeStr = 'polygon';
+    if (shape is CircleShape) shapeTypeStr = 'circle';
+    if (shape is RotatedRectShape) shapeTypeStr = 'rotated_rect';
+
+    return '[$shapeTypeStr] '
       '${hasStatus ? "Status: $status, " : ""}'
       '${hasComment ? "Comment: ${comment!}" : ""}';
+  }
 }
