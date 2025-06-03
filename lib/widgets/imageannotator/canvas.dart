@@ -92,10 +92,16 @@ class _CanvasState extends State<Canvas> {
       );
 
       if (normalizedRect.width > 0 && normalizedRect.height > 0) {
+        // TODO: mediaItemId needs to be passed to this Canvas widget to be correctly set.
+        // Using a placeholder value for now.
         final newAnnotation = Annotation(
           id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary ID
-          labels: [], // Empty labels for now
-          shape: RectShape.fromRect(normalizedRect),
+          mediaItemId: 0, // Placeholder - Actual mediaItemId is needed here
+          labelId: null, // No label selected at point of creation by default
+          shape: RectShape(normalizedRect.left, normalizedRect.top, normalizedRect.width, normalizedRect.height),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          // confidence, annotatorId can be set later or if available
         );
         widget.onAnnotationCreated(newAnnotation);
       }

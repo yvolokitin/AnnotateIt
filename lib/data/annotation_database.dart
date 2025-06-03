@@ -19,7 +19,7 @@ class AnnotationDatabase {
   // Insert new annotation into the database
   Future<void> insertAnnotation(Annotation annotation) async {
     final db = await database;
-    await db.insert('annotations', annotation.toMap());
+    await db.insert('annotations', annotation.toJson());
   }
 
   // Insert multiple annotations in a single transaction
@@ -29,7 +29,7 @@ class AnnotationDatabase {
     final db = await database;
     await db.transaction((txn) async {
       for (final annotation in annotations) {
-        await txn.insert('annotations', annotation.toMap());
+        await txn.insert('annotations', annotation.toJson());
       }
     });
   }
@@ -65,7 +65,7 @@ class AnnotationDatabase {
       whereArgs: whereArgs,
     );
 
-    return result.map((map) => Annotation.fromMap(map)).toList();
+    return result.map((map) => Annotation.fromJson(map)).toList();
   }
 
   // Optional: Delete all annotations for a specific media item

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../../models/shape/rect_shape.dart'; // Import RectShape
 import '../../data/annotation_database.dart';
 
 class COCOParser {
@@ -36,16 +37,16 @@ class COCOParser {
       if (mediaItem == null) continue;
 
       final bbox = ann['bbox'] as List<dynamic>;
+      final rectShape = RectShape(
+        (bbox[0] as num).toDouble(),
+        (bbox[1] as num).toDouble(),
+        (bbox[2] as num).toDouble(),
+        (bbox[3] as num).toDouble(),
+      );
       await annotationDb.insertAnnotation(Annotation(
         mediaItemId: mediaItem.id!,
         labelId: ann['category_id'] as int?,
-        annotationType: 'bbox',
-        data: {
-          'x': bbox[0],
-          'y': bbox[1],
-          'width': bbox[2],
-          'height': bbox[3],
-        },
+        shape: rectShape, // Use RectShape object
         confidence: (ann['score'] as num?)?.toDouble(),
         annotatorId: annotatorId,
         createdAt: DateTime.now(),

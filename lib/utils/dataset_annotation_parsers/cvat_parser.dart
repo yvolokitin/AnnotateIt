@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../../models/shape/rect_shape.dart'; // Import RectShape
 import '../../data/annotation_database.dart';
 
 class CVATParser {
@@ -54,16 +55,17 @@ class CVATParser {
 
           if (xtl == null || ytl == null || xbr == null || ybr == null) continue;
 
+          final rectShape = RectShape(
+            xtl,
+            ytl,
+            xbr - xtl,
+            ybr - ytl,
+          );
+
           final annotation = Annotation(
             mediaItemId: mediaItem.id!,
             labelId: null, // optional: map label to your label table
-            annotationType: 'bbox',
-            data: {
-              'x': xtl,
-              'y': ytl,
-              'width': xbr - xtl,
-              'height': ybr - ytl,
-            },
+            shape: rectShape, // Use RectShape object
             confidence: null,
             annotatorId: annotatorId,
             createdAt: DateTime.now(),

@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/annotated_labeled_media.dart';
-import '../models/media_item.dart';
+// import '../models/media_item.dart'; // Not directly used, Annotation holds mediaItemId
 import '../models/annotation.dart';
+import '../models/shape/rect_shape.dart'; // Import RectShape
 import '../models/project.dart';
 import '../data/annotation_database.dart';
 import '../session/user_session.dart';
@@ -43,6 +44,7 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
   final String _currentLabel = "Label";
   int? _selectedLabelId;
   bool _mouseInsideImage = false;
+  String? _activeTool; // Added state for active tool
 
   @override
   void initState() {
@@ -58,16 +60,11 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
 
     setState(() {
       _annotations = loaded
-          .where((a) => a.annotationType == 'bbox')
+          .where((a) => a.shape is RectShape) // Check shape type
           .map((a) {
-        final data = a.data;
-        final x = (data['x'] as num?)?.toDouble() ?? 0.0;
-        final y = (data['y'] as num?)?.toDouble() ?? 0.0;
-        final width = (data['width'] as num?)?.toDouble() ?? 0.0;
-        final height = (data['height'] as num?)?.toDouble() ?? 0.0;
-
+        final shape = a.shape as RectShape; // Cast to RectShape
         return AnnotationRect(
-          rect: Rect.fromLTWH(x, y, width, height),
+          rect: Rect.fromLTWH(shape.x, shape.y, shape.width, shape.height),
           label: "Label",
         );
       }).toList();
@@ -86,16 +83,16 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
     }
 
     for (final ann in _annotations) {
+      final rectShape = RectShape( // Create RectShape object
+        ann.rect.left,
+        ann.rect.top,
+        ann.rect.width,
+        ann.rect.height,
+      );
       final annotation = Annotation(
         mediaItemId: mediaId,
         labelId: _selectedLabelId,
-        annotationType: 'bbox',
-        data: {
-          'x': ann.rect.left,
-          'y': ann.rect.top,
-          'width': ann.rect.width,
-          'height': ann.rect.height,
-        },
+        shape: rectShape, // Assign RectShape object
         confidence: 1.0,
         annotatorId: currentUser.id,
         createdAt: DateTime.now(),
@@ -153,6 +150,15 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                 LeftToolbar(
                   opacity: fillOpacity,
                   onOpacityChanged: (value) => setState(() => fillOpacity = value),
+                  onToolSelected: (toolName) { // Added onToolSelected callback
+                    setState(() {
+                      _activeTool = toolName;
+                      // Potentially reset other drawing states if necessary
+                      _isDrawing = false;
+                      _startPoint = null;
+                      _currentPoint = null;
+                    });
+                  },
                 ),
                 Expanded(
                   child: Column(
@@ -183,7 +189,29 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                               cursor: _mouseInsideImage
                                 ? SystemMouseCursors.precise
                                 : SystemMouseCursors.basic,
-                                child: AnnotationCanvasFromFile(file: file, annotations: _annotations, labelDefinitions: []),
+                                child: AnnotationCanvasFromFile(
+                                  file: file,
+                                  annotations: _annotations, // These are existing, displayed annotations
+                                  labelDefinitions: [], // Pass actual label definitions if available
+                                  activeTool: _activeTool, // Pass active tool
+                                  onAnnotationCreated: (newAnnotation) {
+                                    if (newAnnotation.shape is RectShape) {
+                                      final rectShape = newAnnotation.shape as RectShape;
+                                      setState(() {
+                                        _annotations.add(
+                                          AnnotationRect(
+                                            rect: rectShape.toRect(),
+                                            // TODO: Get label from current selection or default
+                                            label: _currentLabel,
+                                          ),
+                                        );
+                                      });
+                                    } else {
+                                      // Handle other shapes or log if not expected
+                                      print("New annotation created with shape: ${newAnnotation.shape.runtimeType}");
+                                    }
+                                  },
+                                ),
                             );
                           },
                         ),

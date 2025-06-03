@@ -5,6 +5,20 @@ import 'package:image/image.dart' as img;
 
 import '../../data/user_database.dart';
 import '../../models/annotated_labeled_media.dart';
+import '../../models/shape/shape.dart';
+import '../../models/shape/rect_shape.dart';
+import '../../models/shape/polygon_shape.dart';
+import '../../models/shape/circle_shape.dart';
+import '../../models/shape/rotated_rect_shape.dart';
+
+// Helper function to get a user-friendly string for shape types
+String _getShapeTypeString(Shape shape) {
+  if (shape is RectShape) return 'bbox';
+  if (shape is PolygonShape) return 'polygon';
+  if (shape is CircleShape) return 'circle';
+  if (shape is RotatedRectShape) return 'rotated_rect';
+  return shape.runtimeType.toString(); // Fallback
+}
 
 class ImageDetailsDialog extends StatefulWidget {
   final AnnotatedLabeledMedia media;
@@ -198,7 +212,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         const Text("Annotations:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         ...widget.media.annotations.map((a) {
-          final type = a.annotationType;
+          final type = _getShapeTypeString(a.shape); // Use helper for shape type
           final createdAt = DateFormat('dd.MM.yyyy HH:mm').format(a.createdAt);
           return Container(
             margin: const EdgeInsets.only(bottom: 8),

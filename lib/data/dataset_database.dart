@@ -224,7 +224,7 @@ class DatasetDatabase {
       where: 'media_item_id IN (${List.filled(mediaIds.length, '?').join(',')})',
       whereArgs: mediaIds,
     );
-    final annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+    final annotations = annotationMaps.map((map) => Annotation.fromJson(map)).toList();
 
     // Step 3: Fetch unique label IDs used in annotations (excluding nulls)
     final Set<int> labelIds = annotations

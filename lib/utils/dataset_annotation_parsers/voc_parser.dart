@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../../models/shape/rect_shape.dart'; // Import RectShape
 import '../../data/annotation_database.dart';
 
 class VOCParser {
@@ -55,16 +56,17 @@ class VOCParser {
         final xmax = double.tryParse(bndbox.findElements('xmax').first.text) ?? 0;
         final ymax = double.tryParse(bndbox.findElements('ymax').first.text) ?? 0;
 
+        final rectShape = RectShape(
+          xmin,
+          ymin,
+          xmax - xmin,
+          ymax - ymin,
+        );
+
         final annotation = Annotation(
           mediaItemId: mediaItem.id!,
           labelId: null, // optional: map label name to label ID
-          annotationType: 'bbox',
-          data: {
-            'x': xmin,
-            'y': ymin,
-            'width': xmax - xmin,
-            'height': ymax - ymin,
-          },
+          shape: rectShape, // Use RectShape object
           confidence: null,
           annotatorId: annotatorId,
           createdAt: DateTime.now(),

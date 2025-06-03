@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:flutter/painting.dart'; // For Offset
 
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../../models/shape/polygon_shape.dart'; // Import PolygonShape
 import '../../data/annotation_database.dart';
 
 class LabelMeParser {
@@ -50,21 +52,26 @@ class LabelMeParser {
 
         if (points == null || points.isEmpty) continue;
 
-        // Convert points to list of {x, y}
-        final pointList = points.map((point) {
-          if (point is List && point.length >= 2) {
-            return {'x': point[0], 'y': point[1]};
+        List<Offset> offsetPoints = [];
+        for (var point_dynamic in points) {
+          if (point_dynamic is List && point_dynamic.length >= 2) {
+            offsetPoints.add(Offset(
+              (point_dynamic[0] as num).toDouble(),
+              (point_dynamic[1] as num).toDouble(),
+            ));
           }
-          return null;
-        }).where((p) => p != null).toList();
+        }
+
+        if (offsetPoints.isEmpty) continue;
+
+        // TODO: Could also check shape['shape_type'] if available for other shapes like 'rectangle'
+        // For now, assuming polygon based on original hardcoding.
+        final polygonShape = PolygonShape(offsetPoints);
 
         final annotation = Annotation(
           mediaItemId: mediaItem.id!,
           labelId: null, // optional: map label to label table
-          annotationType: 'polygon',
-          data: {
-            'points': pointList,
-          },
+          shape: polygonShape, // Use PolygonShape object
           confidence: null,
           annotatorId: annotatorId,
           createdAt: DateTime.now(),
