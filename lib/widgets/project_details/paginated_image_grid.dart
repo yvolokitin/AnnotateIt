@@ -74,7 +74,6 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               if (media.type == MediaType.image) {
                 return ImageTile(
                   media: mediaItems[index],
-                  mediaItems: mediaItems,
                   index: index,
                   project: widget.project,
                   onSelectedChanged: (isSelected) {
@@ -117,7 +116,7 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               ),
             ],
           ),
-        ),
+        ),  
       ],
     );
   }

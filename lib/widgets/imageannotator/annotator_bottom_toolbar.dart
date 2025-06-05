@@ -25,7 +25,12 @@ class BottomToolbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          IconButton(
+            icon: const Icon(Icons.zoom_in_map, color: Colors.white),
+            onPressed: () {},
+          ),
           Text("Zoom: ${scale.toStringAsFixed(1)}x", style: const TextStyle(color: Colors.white)),
+
           Row(
             children: [
               IconButton(

@@ -39,7 +39,12 @@ class CanvasPainter extends CustomPainter {
   final Map<String, Label> labelById;
   final double scale;
 
-  CanvasPainter(this.image, this.annotations, this.labels, this.scale): labelById = { for (var v in labels) v.id.toString() : v };
+  CanvasPainter(
+    this.image,
+    this.labels,
+    this.annotations,
+    this.scale
+  ): labelById = { for (var v in labels) v.id.toString() : v };
 
   @override
   void paint(Canvas canvas, Size size) {

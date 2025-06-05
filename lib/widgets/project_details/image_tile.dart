@@ -11,19 +11,18 @@ import '../../models/project.dart';
 
 class ImageTile extends StatefulWidget {
   final AnnotatedLabeledMedia media;
-  final List<AnnotatedLabeledMedia> mediaItems;
+  // final List<AnnotatedLabeledMedia> mediaItems;
   final int index;
   final Project project;
 
   final void Function(bool isSelected)? onSelectedChanged;
 
   const ImageTile({
-    super.key,
     required this.media,
-    required this.mediaItems,
     required this.index,
     required this.project,
     this.onSelectedChanged,
+    super.key,
   });
 
   @override
@@ -74,7 +73,7 @@ class _ImageTileState extends State<ImageTile> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => ImageAnnotatorPage(
-                          mediaItems: widget.mediaItems,
+                          mediaItem: widget.media,
                           initialIndex: widget.index,
                           project: widget.project,
                         ),

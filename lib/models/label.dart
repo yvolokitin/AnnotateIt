@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Label {
   final int? id;
   final int projectId;
@@ -67,4 +69,14 @@ class Label {
   @override
   int get hashCode =>
       name.hashCode ^ color.hashCode ^ projectId.hashCode ^ description.hashCode;
+}
+
+extension LabelColorParser on Label {
+  Color toColor() {
+    String hexColor = color.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor"; // Add opacity if missing
+    }
+    return Color(int.parse(hexColor, radix: 16));
+  }
 }

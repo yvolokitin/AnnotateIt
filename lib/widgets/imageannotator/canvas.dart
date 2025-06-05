@@ -8,16 +8,20 @@ import 'package:flutter/gestures.dart';
 
 import 'canvas_painter.dart';
 
-import '../../models/annotation.dart';
 import '../../models/label.dart';
+import '../../models/annotation.dart';
 
 class Canvas extends StatefulWidget {
-
   final ui.Image image;
+  final List<Label> labels;
   final List<Annotation>? annotations;
-  final List<Label> labelDefinitions;
 
-  const Canvas({required this.image, this.annotations, required this.labelDefinitions, super.key});
+  const Canvas({
+    required this.image,
+    required this.labels,
+    this.annotations,
+    super.key,
+  });
 
   @override
   State<Canvas> createState() => _CanvasState();
@@ -121,7 +125,7 @@ class _CanvasState extends State<Canvas> {
                   child: Builder(
                     builder: (context) {
                       return CustomPaint(
-                        painter: CanvasPainter(widget.image, widget.annotations, widget.labelDefinitions, matrix.getMaxScaleOnAxis()),
+                        painter: CanvasPainter(widget.image, widget.labels, widget.annotations, matrix.getMaxScaleOnAxis()),
                         child: Container(),
                       );
                     }

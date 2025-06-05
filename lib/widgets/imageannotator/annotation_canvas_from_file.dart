@@ -1,19 +1,22 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'annotation_rect.dart';
+
+import '../../models/label.dart';
+import '../../models/annotation.dart';
+
 import 'canvas.dart';
 
 class AnnotationCanvasFromFile extends StatefulWidget {
   final File file;
-  final List<AnnotationRect> annotations;
-  final List<Label> labelDefinitions;
+  final List<Label> labels;
+  final List<Annotation>? annotations;
 
   const AnnotationCanvasFromFile({
     super.key,
     required this.file,
+    this.labels = const [],
     this.annotations = const [],
-    this.labelDefinitions = const [],
   });
 
   @override
@@ -46,8 +49,8 @@ class _AnnotationCanvasFromFileState extends State<AnnotationCanvasFromFile> {
 
     return Canvas(
       image: _image!,
+      labels: [], // widget.labelDefinitions,
       annotations: [], // widget.annotations,
-      labelDefinitions: [], // widget.labelDefinitions,
     );
   }
 }
