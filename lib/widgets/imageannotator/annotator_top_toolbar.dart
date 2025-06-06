@@ -35,18 +35,26 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
     final bool isCompact = MediaQuery.of(context).size.width < 1200;
 
     return Container(
-      height: 60,
-      color: Colors.grey[800],
+      height: 62,
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        border: const Border(
+          bottom: BorderSide(
+            color: Colors.black,
+            width: 2,
+          ),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            width: 61,
-            height: 61,
+            width: 62,
+            height: 62,
             decoration: const BoxDecoration(
               border: Border(
-                right: BorderSide(color: Colors.black, width: 1),
-                bottom: BorderSide(color: Colors.black, width: 1),
+                right: BorderSide(color: Colors.black, width: 2),
+                // bottom: BorderSide(color: Colors.black, width: 2),
               ),
             ),
             child: IconButton(
@@ -162,17 +170,6 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                 ],
               ),
             ),
-/*
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${widget.project.name} @ ${widget.project.type}',
-                  style: const TextStyle(color: Colors.white, fontSize: 22)
-                ),
-              ],
-            ),
-*/            
           ],
 
           const Spacer(),

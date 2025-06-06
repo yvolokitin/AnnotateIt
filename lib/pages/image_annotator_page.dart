@@ -5,10 +5,9 @@ import '../models/annotated_labeled_media.dart';
 import '../models/project.dart';
 import '../models/media_item.dart';
 
-import '../widgets/imageannotator/annotation_canvas_from_file.dart';
-import '../widgets/imageannotator/annotation_rect.dart';
+import '../widgets/imageannotator/annotator_file_canvas_loader.dart';
 import '../widgets/imageannotator/annotator_left_toolbar.dart';
-import '../widgets/imageannotator/right_sidebar.dart';
+import '../widgets/imageannotator/annotator_right_sidebar.dart';
 import '../widgets/imageannotator/annotator_bottom_toolbar.dart';
 import '../widgets/imageannotator/annotator_top_toolbar.dart';
 
@@ -29,18 +28,15 @@ class ImageAnnotatorPage extends StatefulWidget {
 }
 
 class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
+  MouseCursor _cursorIcon = SystemMouseCursors.basic;
+
   late PageController _pageController;
   late MediaItem _currentMedia;
+  late double _currentZoom = 1.0;
   late int _currentIndex;
+  late int _resetZoomCount = 0;
 
   bool _sidebarCollapsed = false;
-  double _scale = 1.0;
-  List<AnnotationRect> _annotations = [];
-  Offset? _startPoint;
-  Offset? _currentPoint;
-  bool _isDrawing = false;
-  final String _currentLabel = "Label";
-
   bool _mouseInsideImage = false;
   
   @override
@@ -99,6 +95,8 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                   type: widget.project.type,
                   opacity: fillOpacity,
                   onOpacityChanged: (value) => setState(() => fillOpacity = value),
+                  onMouseIconChanged: (value) => setState(() => _cursorIcon = value),
+                  onResetZoomPressed: () => setState(() => _resetZoomCount++),
                 ),
 
                 Expanded(
@@ -114,51 +112,44 @@ class _ImageAnnotatorPageState extends State<ImageAnnotatorPage> {
                               onEnter: (_) => setState(() => _mouseInsideImage = true),
                               onExit: (_) => setState(() {
                                 _mouseInsideImage = false;
-                                _isDrawing = false;
-                                _startPoint = null;
-                                _currentPoint = null;
                               }),
                               cursor: _mouseInsideImage
-                                ? SystemMouseCursors.precise
+                                ? _cursorIcon // SystemMouseCursors.precise
                                 : SystemMouseCursors.basic,
-                              child: AnnotationCanvasFromFile(
+                              child: AnnotatorFileCanvasLoader(
                                 file: file,
+                                cursor: _cursorIcon,
                                 labels: mediaItem.labels,
                                 annotations: mediaItem.annotations,
+                                resetZoomCount: _resetZoomCount,
+                                onZoomChanged: (zoom) => setState(() => _currentZoom = zoom),
                               ),
                             );
                           },
                           onPageChanged: (index) {
-                            setState(() {
-                              _annotations.clear();
-                          });
                             _getNextMedia();
                           },
                         ),
                       ),
 
-                      BottomToolbar(
-                        scale: _scale,
-                        onZoomIn: () {
-                          setState(() {
-                            _scale = (_scale + 0.1).clamp(0.5, 5.0);
-                          });
-                        },
-                        onZoomOut: () {
-                          setState(() {
-                            _scale = (_scale - 0.1).clamp(0.5, 5.0);
-                          });
-                        },
+                      AnnotatorBottomToolbar(
+                        currentZoom: _currentZoom,
+                        currentMedia: _currentMedia,
+                        onZoomIn: () { print('onZoomIn'); },
+                        onZoomOut: () { print('onZoomOut'); },
+                        onPrevImg: () { print('onPrevImg'); },
+                        onNextImg: () { print('onNextImg'); },
+                        onSaveAnnotations: () { print('onSaveAnnotations'); },
                       ),
                     ],
                   ),
                 ),
 
-                RightSidebar(
+                AnnotatorRightSidebar(
                   collapsed: _sidebarCollapsed,
-                  annotations: _annotations,
+                  labels: widget.mediaItem.labels,
+                  annotations: widget.mediaItem.annotations,
                   onToggleCollapse: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
-                  onSubmit: () {},
                 ),
               ],
             ),

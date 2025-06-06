@@ -85,7 +85,12 @@ class AnnotateItAppState extends State<AnnotateItApp> {
     return MaterialApp(
       title: "Annot@It",
       theme: theme,
-      home: MainPage(),
+      // home: MainPage(),
+
+      home: Container(
+        color: Colors.black,
+        child: MainPage(),
+      ),
 
       // Localization setup
       localizationsDelegates: AppLocalizations.localizationsDelegates,

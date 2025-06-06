@@ -15,11 +15,16 @@ class Canvas extends StatefulWidget {
   final ui.Image image;
   final List<Label> labels;
   final List<Annotation>? annotations;
+  final int resetZoomCount;
+
+  final ValueChanged<double>? onZoomChanged;
 
   const Canvas({
     required this.image,
     required this.labels,
-    this.annotations,
+    required this.annotations,
+    required this.resetZoomCount,
+    this.onZoomChanged,
     super.key,
   });
 
@@ -28,6 +33,7 @@ class Canvas extends StatefulWidget {
 }
 
 class _CanvasState extends State<Canvas> {
+  int _lastResetCount = 0;
 
   double prevScale = 1;
   Matrix4 matrix = Matrix4.identity()
@@ -38,11 +44,36 @@ class _CanvasState extends State<Canvas> {
   @override
   void initState() {
     super.initState();
-
-    Future.delayed(Duration.zero).then((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
-          matrix = setTransformToFit(widget.image);
+        matrix = setTransformToFit(widget.image);
       });
+      notifyZoomChanged(matrix.getMaxScaleOnAxis());
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant Canvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.resetZoomCount != _lastResetCount) {
+      _lastResetCount = widget.resetZoomCount;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          matrix = setTransformToFit(widget.image);
+        });
+        // notify parent
+        widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
+      });
+    }
+  } 
+
+  void notifyZoomChanged(double zoom) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onZoomChanged?.call(zoom);
     });
   }
 
@@ -56,7 +87,12 @@ class _CanvasState extends State<Canvas> {
     final ratio = Size(imageSize.width / canvasSize.width, imageSize.height / canvasSize.height);
 
     final scale = 1 / max(ratio.width, ratio.height) * 0.9;
-    final offset = (canvasSize - imageSize * scale as Offset) / 2;
+    // final offset = (canvasSize - imageSize * scale as Offset) / 2;
+    final scaledImageSize = Size(imageSize.width * scale, imageSize.height * scale);
+    final offset = Offset(
+      (canvasSize.width - scaledImageSize.width) / 2,
+      (canvasSize.height - scaledImageSize.height) / 2,
+    );
 
     return matrix = Matrix4.identity()
       ..translate(offset.dx, offset.dy, 0.0)
@@ -64,16 +100,18 @@ class _CanvasState extends State<Canvas> {
   }
 
   void scaleCanvas(Vector3 localPosition, double scale) {
-      inverse.copyInverse(matrix);
-      final position = inverse * localPosition;
-      final mScale = 1 - scale;
-      setState(() {
-          matrix *= Matrix4( // row major or column major
-              scale, 0, 0, 0,
-              0, scale, 0, 0,
-              0, 0, scale, 0,
-              mScale * position.x, mScale * position.y, 0, 1);
-      });
+    inverse.copyInverse(matrix);
+    final position = inverse * localPosition;
+    final mScale = 1 - scale;
+    setState(() {
+      matrix *= Matrix4( // row major or column major
+          scale, 0, 0, 0,
+          0, scale, 0, 0,
+          0, 0, scale, 0,
+          mScale * position.x, mScale * position.y, 0, 1);
+    });
+
+    notifyZoomChanged(matrix.getMaxScaleOnAxis());
   }
 
   @override
@@ -101,6 +139,8 @@ class _CanvasState extends State<Canvas> {
                 setState(() {
                   matrix = setTransformToFit(widget.image);
                 });
+                // notify parent
+                notifyZoomChanged(matrix.getMaxScaleOnAxis());
               },
               onScaleUpdate: (ScaleUpdateDetails d) {
                 final scale = 1 - (prevScale - d.scale);

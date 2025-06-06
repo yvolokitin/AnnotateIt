@@ -4,12 +4,16 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final String type;
   final double opacity;
   final ValueChanged<double> onOpacityChanged;
+  final ValueChanged<MouseCursor> onMouseIconChanged;
+  final VoidCallback onResetZoomPressed;
 
   const AnnotatorLeftToolbar({
     super.key,
     required this.type,
     required this.opacity,
     required this.onOpacityChanged,
+    required this.onMouseIconChanged,
+    required this.onResetZoomPressed,
   });
 
   @override
@@ -28,8 +32,16 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
     final bool isCompact = MediaQuery.of(context).size.height < 1024;
 
     return Container(
-      width: 60,
-      color: Colors.grey[800],
+      width: 62,
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        border: const Border(
+          right: BorderSide(
+            color: Colors.black,
+            width: 2,
+          ),
+        ),
+      ),      
       child: Column(
         children: [
           SizedBox(height: isCompact ? 40 : 80),
@@ -37,7 +49,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () => setState(() => userAction = (userAction == 'navigation') ? '' : 'navigation'),
+              onTap: () {
+                widget.onMouseIconChanged(SystemMouseCursors.basic);
+                setState(() => userAction = (userAction == 'navigation') ? '' : 'navigation');
+              },
               child: Container(
                 width: 48,
                 height: 48,
@@ -47,7 +62,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Icon(
-                  Icons.pinch_outlined,
+                  Icons.near_me_outlined, // pinch_outlined,
                   color: Colors.white70,
                   size: 28,
                 ),
@@ -60,7 +75,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () => setState(() => userAction = (userAction == 'bbox_annotation') ? '' : 'bbox_annotation'),
+                onTap: () {
+                  widget.onMouseIconChanged(SystemMouseCursors.precise);
+                  setState(() => userAction = (userAction == 'bbox_annotation') ? '' : 'bbox_annotation');
+                },
                 child: Container(
                   width: 48,
                   height: 48,
@@ -82,7 +100,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () => setState(() => userAction = (userAction == 'sam_annotation') ? '' : 'sam_annotation'),
+                onTap: () {
+                  widget.onMouseIconChanged(SystemMouseCursors.precise);
+                  setState(() => userAction = (userAction == 'sam_annotation') ? '' : 'sam_annotation');
+                },
                 child: Container(
                   width: 48,
                   height: 48,
@@ -107,7 +128,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             onEnter: (_) => setState(() => _isHovered = true),
             onExit: (_) => setState(() => _isHovered = false),
               child: GestureDetector(
-              onTap: () {},
+              onTap: widget.onResetZoomPressed,
               child: Container(
                 width: 48,
                 height: 48,

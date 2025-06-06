@@ -1,46 +1,119 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
-class BottomToolbar extends StatelessWidget {
-  final double scale;
+import '../../models/media_item.dart';
+import 'annotator_icon_button.dart';
+
+class AnnotatorBottomToolbar extends StatefulWidget {
+  final double currentZoom;
+  final MediaItem currentMedia;
+
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
 
-  const BottomToolbar({
+  final VoidCallback onPrevImg;
+  final VoidCallback onNextImg;
+  final VoidCallback onSaveAnnotations;
+
+  const AnnotatorBottomToolbar({
     super.key,
-    required this.scale,
+    required this.currentZoom,
+    required this.currentMedia,
     required this.onZoomIn,
     required this.onZoomOut,
+    required this.onPrevImg,
+    required this.onNextImg,
+    required this.onSaveAnnotations,
   });
 
   @override
+  State<AnnotatorBottomToolbar> createState() => _AnnotatorBottomToolbarState();
+}
+
+class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
+  @override
   Widget build(BuildContext context) {
+    final String fileName = '${widget.currentMedia.filePath.split(Platform.pathSeparator).last}, ';
+    final String widthHeight = '${widget.currentMedia.width} px x ${widget.currentMedia.height} px';
+    final String percent = '${(widget.currentZoom * 100).toStringAsFixed(0)}%';
+    final bool isCompact = MediaQuery.of(context).size.width < 1300;
+    final bool isMinimal = MediaQuery.of(context).size.width < 860;
+
     return Container(
-      height: 48,
+      height: 50,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[900],
-        // borderRadius: BorderRadius.circular(8),
+        color: Colors.grey[800],
+        border: const Border(
+          top: BorderSide(
+            color: Colors.black,
+            width: 2,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          IconButton(
-            icon: const Icon(Icons.zoom_in_map, color: Colors.white),
-            onPressed: () {},
-          ),
-          Text("Zoom: ${scale.toStringAsFixed(1)}x", style: const TextStyle(color: Colors.white)),
-
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.zoom_out, color: Colors.white),
-                onPressed: onZoomOut,
+              AnnotatorIconButton(
+                onPressed: widget.onZoomOut,
+                icon: const Icon(Icons.remove, color: Colors.white70, size: 32),                
               ),
-              IconButton(
-                icon: const Icon(Icons.zoom_in, color: Colors.white),
-                onPressed: onZoomIn,
+              const SizedBox(width: 8),
+              Text(percent, style: const TextStyle(color: Colors.white70, fontSize: 20)),
+              const SizedBox(width: 8),
+              AnnotatorIconButton(
+                onPressed: widget.onZoomIn,
+                icon: const Icon(Icons.add, color: Colors.white70, size: 32),
               ),
+            ],
+          ),
+
+          if (!isCompact) ...[
+            const SizedBox(width: 25),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    fileName,
+                    style: const TextStyle(color: Colors.white70, fontSize: 20),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          if (!isMinimal)
+            Text(widthHeight, style: const TextStyle(color: Colors.white70, fontSize: 20)),
+
+          const Spacer(),
+          Row(
+            children: [
+              AnnotatorIconButton(
+                onPressed: widget.onPrevImg,
+                icon: const Icon(Icons.keyboard_arrow_left, color: Colors.white70, size: 36),
+              ),
+              const SizedBox(width: 6),
+              AnnotatorIconButton(
+                onPressed: widget.onNextImg,
+                icon: const Icon(Icons.keyboard_arrow_right, color: Colors.white70, size: 36),
+              ),
+
+              const SizedBox(width: 20),
+              AnnotatorIconButton(
+                onPressed: widget.onSaveAnnotations,
+                icon: const Icon(Icons.save, color: Colors.white70, size: 32),
+              ),
+
+              const SizedBox(width: 4),
+              if (!isMinimal)
+                Text('Save', style: const TextStyle(color: Colors.white70, fontSize: 18)),
             ],
           ),
         ],

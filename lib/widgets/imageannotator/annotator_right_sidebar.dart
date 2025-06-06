@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'annotation_rect.dart';
 
-class RightSidebar extends StatelessWidget {
+import '../../models/annotation.dart';
+import '../../models/label.dart';
+
+class AnnotatorRightSidebar extends StatelessWidget {
   final bool collapsed;
-  final List<AnnotationRect> annotations;
+  final List<Label> labels;
+  final List<Annotation> annotations;
   final VoidCallback onToggleCollapse;
-  final VoidCallback onSubmit;
 
-  const RightSidebar({
+  const AnnotatorRightSidebar({
     super.key,
     required this.collapsed,
+    required this.labels,
     required this.annotations,
     required this.onToggleCollapse,
-    required this.onSubmit,
   });
 
   @override
@@ -44,17 +46,10 @@ class RightSidebar extends StatelessWidget {
               itemBuilder: (context, index) {
                 final annotation = annotations[index];
                 return ListTile(
-                  title: Text(annotation.label, style: const TextStyle(color: Colors.white)),
-                  subtitle: Text(annotation.rect.toString(), style: const TextStyle(color: Colors.white38)),
+                  title: Text(annotation.annotationType, style: const TextStyle(color: Colors.white)),
+                  subtitle: Text(annotation.annotationType, style: const TextStyle(color: Colors.white38)),
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: onSubmit,
-              child: const Text("Submit"),
             ),
           ),
         ],
