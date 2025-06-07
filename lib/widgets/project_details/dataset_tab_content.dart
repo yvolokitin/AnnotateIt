@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../data/dataset_database.dart';
 
 import '../../models/annotated_labeled_media.dart';
+import '../../models/label.dart';
 import '../../models/project.dart';
-import '../../models/dataset.dart';
 
 import '../dialogs/delete_image_dialog.dart';
 
@@ -14,7 +14,8 @@ import 'no_media_dialog.dart';
 
 class DatasetTabContent extends StatefulWidget {
   final Project project;
-  final Dataset dataset;
+  final String datasetId;
+  final List<Label> labels;
   final List<AnnotatedLabeledMedia>? mediaItems;
   final int fileCount;
   final int totalPages;
@@ -39,7 +40,8 @@ class DatasetTabContent extends StatefulWidget {
   const DatasetTabContent({
     super.key,
     required this.project,
-    required this.dataset,
+    required this.datasetId,
+    required this.labels,
     required this.mediaItems,
     required this.fileCount,
     required this.totalPages,
@@ -124,10 +126,9 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
     return Column(
       children: [
         DatasetUploadButtons(
-          project_id: widget.project.id!,
-          project_icon: widget.project.icon,
-          dataset_id: widget.dataset.id,
-          file_count: widget.fileCount,
+          project: widget.project,
+          datasetId: widget.datasetId,
+          totalCount: widget.fileCount,
           itemsPerPage: widget.itemsPerPage,
           isUploading: widget.isUploading,
           onUploadingChanged: widget.onUploadingChanged,
@@ -147,15 +148,17 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
               : widget.mediaItems!.isEmpty
                   ? NoMediaDialog(
                       project_id: widget.project.id!,
-                      dataset_id: widget.dataset.id,
+                      dataset_id: widget.datasetId,
                     )
                   : PaginatedImageGrid(
+                      project: widget.project,
+                      datasetId: widget.datasetId,
+                      labels: widget.labels,
                       annotatedMediaItems: widget.mediaItems!,
                       totalCount: widget.fileCount,
                       totalPages: widget.totalPages,
                       currentPage: widget.currentPage,
                       itemsPerPage: _currentItemsPerPage,
-                      project: widget.project,
                       onPageChanged: widget.onPageChanged,
                       onSelectionChanged: _handleSelectionChanged,
                     ),

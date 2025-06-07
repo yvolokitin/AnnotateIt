@@ -4,23 +4,29 @@ import 'package:flutter/material.dart';
 import '../dialogs/image_details_dialog.dart';
 import '../dialogs/set_image_icon_dialog.dart';
 import '../dialogs/delete_image_dialog.dart';
-import '../../pages/image_annotator_page.dart';
 
-import '../../models/annotated_labeled_media.dart';
+import '../../pages/annotator_page.dart';
+
 import '../../models/project.dart';
+import '../../models/annotated_labeled_media.dart';
 
 class ImageTile extends StatefulWidget {
-  final AnnotatedLabeledMedia media;
-  // final List<AnnotatedLabeledMedia> mediaItems;
-  final int index;
   final Project project;
+  final String datasetId;
+  final AnnotatedLabeledMedia mediaItem;
+  final int pageIndex, pageSize, localIndex;
+  final int totalMediaCount;
 
   final void Function(bool isSelected)? onSelectedChanged;
 
   const ImageTile({
-    required this.media,
-    required this.index,
     required this.project,
+    required this.datasetId,
+    required this.mediaItem,
+    required this.pageIndex,
+    required this.pageSize,
+    required this.localIndex,
+    required this.totalMediaCount,
     this.onSelectedChanged,
     super.key,
   });
@@ -35,7 +41,7 @@ class _ImageTileState extends State<ImageTile> {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(widget.media.mediaItem.filePath);
+    final file = File(widget.mediaItem.mediaItem.filePath);
 
     if (!file.existsSync()) {
       return _errorContainer("File not found");
@@ -44,7 +50,7 @@ class _ImageTileState extends State<ImageTile> {
     final Matrix4 transform = Matrix4.identity();
     if (_hovered) transform.scale(1.15);
 
-    final bool isSelected = widget.media.isSelected;
+    final bool isSelected = widget.mediaItem.isSelected;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -72,10 +78,14 @@ class _ImageTileState extends State<ImageTile> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ImageAnnotatorPage(
-                          mediaItem: widget.media,
-                          initialIndex: widget.index,
+                        builder: (_) => AnnotatorPage(
                           project: widget.project,
+                          mediaItem: widget.mediaItem,
+                          datasetId: widget.datasetId,
+                          pageIndex: widget.pageIndex,
+                          pageSize: widget.pageSize,
+                          localIndex: widget.localIndex,
+                          totalMediaCount: widget.totalMediaCount,
                         ),
                       ),
                     );
@@ -141,15 +151,15 @@ class _ImageTileState extends State<ImageTile> {
                         if (value == 'details') {
                           await showDialog(
                             context: context,
-                            builder: (context) => ImageDetailsDialog(media: widget.media),
+                            builder: (context) => ImageDetailsDialog(media: widget.mediaItem),
                           );
                         } else if (value == 'delete') {
                           showDialog(
                             context: context,
                             builder: (context) => DeleteImageDialog(
-                              mediaItems: [widget.media.mediaItem],
+                              mediaItems: [widget.mediaItem.mediaItem],
                               onConfirmed: () {
-                                print('File Delete: ${widget.media.mediaItem.filePath}');
+                                print('File Delete: ${widget.mediaItem.mediaItem.filePath}');
                               },
                             ),
                           );
@@ -157,9 +167,9 @@ class _ImageTileState extends State<ImageTile> {
                           showDialog(
                             context: context,
                             builder: (context) => SetImageIconDialog(
-                              media: widget.media.mediaItem,
+                              media: widget.mediaItem.mediaItem,
                               onConfirmed: () {
-                                print('Set project icon to: ${widget.media.mediaItem.filePath}');
+                                print('Set project icon to: ${widget.mediaItem.mediaItem.filePath}');
                               },
                             ),
                           );
@@ -203,7 +213,7 @@ class _ImageTileState extends State<ImageTile> {
               ),
 
               // annotation badge (bottom-right)
-              if (widget.media.hasAnnotations == true)
+              if (widget.mediaItem.hasAnnotations == true)
                 Positioned(
                   bottom: 6,
                   right: 6,
@@ -218,7 +228,7 @@ class _ImageTileState extends State<ImageTile> {
                         const Icon(Icons.label_important, size: 16, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
-                          '${widget.media.annotationCount ?? 0}',
+                          '${widget.mediaItem.annotationCount ?? 0}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,

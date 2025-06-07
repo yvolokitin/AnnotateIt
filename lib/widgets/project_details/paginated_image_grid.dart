@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
+import '../../models/label.dart';
 import '../../models/project.dart';
 
 import 'image_tile.dart';
@@ -11,17 +12,21 @@ class PaginatedImageGrid extends StatefulWidget {
   final void Function(List<AnnotatedLabeledMedia>)? onSelectionChanged;
   final void Function(int newPage) onPageChanged;
 
+  final Project project;
+  final String datasetId;
+  final List<Label> labels;
   final List<AnnotatedLabeledMedia> annotatedMediaItems;
   final int totalCount, totalPages, currentPage, itemsPerPage;
-  final Project project;
 
   const PaginatedImageGrid({
+    required this.project,
+    required this.datasetId,
+    required this.labels,
     required this.annotatedMediaItems,
     required this.totalCount,
     required this.totalPages,
     required this.currentPage,
     required this.itemsPerPage,
-    required this.project,
     required this.onPageChanged,
     this.onSelectionChanged,
     super.key,
@@ -32,11 +37,8 @@ class PaginatedImageGrid extends StatefulWidget {
 }
 
 class _PaginatedImageGridState extends State<PaginatedImageGrid> {
-  int _currentPage = 0;
-
   int _getCrossAxisCount() {
-    print('PaginatedImageGrid:: itemsPerPage: ${widget.itemsPerPage}');
-
+    // print('PaginatedImageGrid:: itemsPerPage: ${widget.itemsPerPage}');
     switch (widget.itemsPerPage) {
       case 8:
         return 2;
@@ -73,9 +75,13 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               final media = mediaItems[index].mediaItem;
               if (media.type == MediaType.image) {
                 return ImageTile(
-                  media: mediaItems[index],
-                  index: index,
                   project: widget.project,
+                  datasetId: widget.datasetId,
+                  mediaItem: mediaItems[index],
+                  pageIndex: widget.currentPage,
+                  pageSize: widget.itemsPerPage,
+                  localIndex: index,
+                  totalMediaCount: widget.totalCount,
                   onSelectedChanged: (isSelected) {
                     setState(() {
                       mediaItems[index].isSelected = isSelected;

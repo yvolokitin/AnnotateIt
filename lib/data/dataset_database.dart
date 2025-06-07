@@ -256,4 +256,46 @@ class DatasetDatabase {
       );
     }).toList();
   }
+
+  Future<AnnotatedLabeledMedia?> loadMediaAtIndex(String datasetId, int index, ) async {
+    final db = await database;
+
+    final mediaMaps = await db.query(
+      'media_items',
+      where: 'datasetId = ?',
+      whereArgs: [datasetId],
+      limit: 1,
+      offset: index,
+    );
+
+    if (mediaMaps.isEmpty) return null;
+
+    final mediaItem = MediaItem.fromMap(mediaMaps.first);
+
+    final annotationMaps = await db.query(
+      'annotations',
+      where: 'media_item_id = ?',
+      whereArgs: [mediaItem.id],
+    );
+    final annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+
+    final labelIds = annotations
+      .where((a) => a.labelId != null)
+      .map((a) => a.labelId!)
+      .toSet();
+
+    final List<Label> labels = labelIds.isEmpty
+      ? []
+      : (await db.query(
+        'labels',
+        where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
+        whereArgs: labelIds.toList(),
+      )).map((e) => Label.fromMap(e)).toList();
+
+    return AnnotatedLabeledMedia(
+      mediaItem: mediaItem,
+      annotations: annotations,
+      labels: labels,
+    );
+  }
 }

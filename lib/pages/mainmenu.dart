@@ -1,15 +1,13 @@
+import "package:flutter/material.dart";
 import 'package:vap/gen_l10n/app_localizations.dart';
 
 import "package:vap/pages/header.dart";
 
-import "package:vap/pages/projects_list_page.dart";
-import "package:vap/pages/learn_page.dart";
-import "package:vap/pages/about_page.dart";
-import "package:vap/pages/account_page.dart";
+import "projects_list_page.dart";
+import "learn_page.dart";
+import "about_page.dart";
+import "account_page.dart";
 
-import "package:flutter/material.dart";
-
-// Main page layout with Persistent Header and adaptive Left Drawer
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -119,7 +117,7 @@ class MainPageState extends State<MainPage> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return ProjectsPage();
+        return ProjectsListPage();
       case 1:
         return AccountPage();
       case 2:
@@ -127,7 +125,7 @@ class MainPageState extends State<MainPage> {
       case 3:
         return AboutWidget();
       default:
-        return ProjectsPage();
+        return ProjectsListPage();
     }
   }
 }

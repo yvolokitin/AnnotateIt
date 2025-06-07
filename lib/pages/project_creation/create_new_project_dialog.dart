@@ -7,7 +7,7 @@ import '../../widgets/project_creation_new/create_new_project_step_task_selectio
 import '../../widgets/project_creation_new/create_new_project_step_labels.dart';
 
 import '../../session/user_session.dart';
-import '../project_details_screen.dart';
+import '../project_details_page.dart';
 
 import '../../data/project_database.dart';
 import '../../data/labels_database.dart';
@@ -273,7 +273,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ProjectDetailsScreen(
+            builder: (_) => ProjectDetailsPage(
               newProject.copyWith(
                 id: newProjectId,
                 labels: labelsWithNewProjectId,

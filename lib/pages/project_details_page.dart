@@ -4,6 +4,8 @@ import "package:flutter/material.dart";
 import "../models/label.dart";
 import "../models/project.dart";
 
+import '../data/labels_database.dart';
+
 import '../widgets/dialogs/label_list_dialog.dart';
 import '../widgets/dialogs/color_picker_dialog.dart';
 import "../widgets/buttons/hover_icon_button.dart";
@@ -11,18 +13,19 @@ import "../widgets/project_details/dataset_view_page.dart";
 import '../widgets/project_details/project_details_sidebar.dart';
 import '../widgets/project_details/project_details_add_label.dart';
 
-class ProjectDetailsScreen extends StatefulWidget {
+class ProjectDetailsPage extends StatefulWidget {
   final Project project;
 
-  const ProjectDetailsScreen(this.project, {super.key});
+  const ProjectDetailsPage(this.project, {super.key});
 
   @override
-  ProjectDetailsScreenState createState() => ProjectDetailsScreenState();
+  ProjectDetailsPageState createState() => ProjectDetailsPageState();
 }
 
-class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
+class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   final ScrollController _scrollController = ScrollController();
   List<Label> labels = [];
+  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -30,21 +33,22 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
     _loadProjectDetails();
   }
 
-  int selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-  }
-
   Future<void> _loadProjectDetails() async {
     // print("ProjectDetailsScreen: Loading project details:\n${widget.project}");
     labels = List<Label>.from(widget.project.labels ?? []);
 
     if (widget.project.labels == null || widget.project.labels!.isEmpty) {
-      // TODO: Fetch labels from database and update state
-      print("ProjectDetailsScreen: Loading project labels .... ");
+      print("ProjectDetailsScreen: No labels, loading ${widget.project.name} project labels .... ");
+      if (widget.project.id != null ) {
+        labels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
+      }
     }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
   }
 
   void _showColorPicker(int index) {
@@ -164,13 +168,11 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return DatasetViewPage(widget.project);
-        /*return Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.yellow, width: 3),
-          ),
-          child: DatasetViewPage(widget.project),
-        );*/
+        return DatasetViewPage(
+          project: widget.project,
+          datasetId: widget.project.defaultDatasetId!,
+          labels: labels,
+        );
 
       case 1:
         return Column(
@@ -180,7 +182,13 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Text('Labels', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Labels',
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold)
+                    ),
                 ],
               ),
             ),
@@ -225,7 +233,11 @@ class ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           ],  
         );
         default:
-          return DatasetViewPage(widget.project);
+          return DatasetViewPage(
+            project: widget.project,
+            datasetId: widget.project.defaultDatasetId!,
+            labels: labels,
+          );
       }
     }
   }

@@ -8,19 +8,19 @@ import "../widgets/projects_topbar.dart";
 import "../widgets/edit_project_name.dart";
 import "../widgets/empty_project_placeholder.dart";
 
-import "project_details_screen.dart";
+import "project_details_page.dart";
 import "project_creation/create_from_dataset_dialog.dart";
 import "project_creation/create_new_project_dialog.dart";
 
-class ProjectsPage extends StatefulWidget {
-  const ProjectsPage({super.key});
+class ProjectsListPage extends StatefulWidget {
+  const ProjectsListPage({super.key});
 
   @override
-  _ProjectsPageState createState() => _ProjectsPageState();
+  ProjectsListPageState createState() => ProjectsListPageState();
 }
 
-class _ProjectsPageState extends State<ProjectsPage> {
-  late Future<List<Project>> _projectsFuture;
+class ProjectsListPageState extends State<ProjectsListPage> {
+  // late Future<List<Project>> _projectsFuture;
   List<Project> _allProjects = [];
   List<Project> _filteredProjects = [];
   String _searchQuery = "";
@@ -41,12 +41,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
       _isLoading = true;
     });
   
-    // print("[_loadProjects] Fetching project list...");
     List<Project> projects = await ProjectDatabase.instance.fetchProjects();
 
     if (!mounted) return;
-    // print("[_loadProjects] Found ${projects.length} projects. Loading labels...");
-    // Load labels for each project
+
     for (final project in projects) {
       final labels = await LabelsDatabase.instance.fetchLabelsByProject(project.id!);
       project.labels = labels; // attach in-memory only
@@ -144,7 +142,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProjectDetailsScreen(newProject),
+            builder: (context) => ProjectDetailsPage(newProject),
           ),
         );  
         _loadProjects(); // Refresh after returning from details
@@ -204,7 +202,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProjectDetailsScreen(project),
+                          builder: (context) => ProjectDetailsPage(project),
                         ),
                       );
                       _loadProjects();

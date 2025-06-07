@@ -3,16 +3,17 @@ import 'package:vap/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/project.dart';
 import '../../utils/image_utils.dart';
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 import '../../session/user_session.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
-  final int project_id, file_count, itemsPerPage;
+  final Project project;
+  final int totalCount, itemsPerPage;
   final int selectedCount;
-  final String project_icon;
-  final String dataset_id;
+  final String datasetId;
 
   final bool isUploading;
   final bool cancelUpload;
@@ -28,10 +29,9 @@ class DatasetUploadButtons extends StatefulWidget {
   final VoidCallback? onToggleSelectAll;
 
   const DatasetUploadButtons({
-    required this.project_id,
-    required this.project_icon,
-    required this.dataset_id,
-    required this.file_count,
+    required this.project,
+    required this.datasetId,
+    required this.totalCount,
     required this.itemsPerPage,
     required this.isUploading,
     required this.onUploadingChanged,
@@ -73,14 +73,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         widget.onUploadingChanged(true);
         final total = result.files.length;
 
-        if (widget.project_icon.contains('default_project_image') ||
-            widget.project_icon.contains('folder')) {
+        if (widget.project.icon.contains('default_project_image') ||
+            widget.project.icon.contains('folder')) {
           final platformFile = result.files[0];
           final thumbnailFile = await generateThumbnailFromImage(
-              File(platformFile.path!), widget.project_id.toString());
+              File(platformFile.path!), widget.project.id.toString());
           if (thumbnailFile != null) {
             await ProjectDatabase.instance
-                .updateProjectIcon(widget.project_id, thumbnailFile.path);
+                .updateProjectIcon(widget.project.id!, thumbnailFile.path);
           }
         }
 
@@ -121,7 +121,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           }
 
           await DatasetDatabase.instance.insertMediaItem(
-            widget.dataset_id,
+            widget.datasetId,
             file.path!,
             ext,
             ownerId: currentUser.id!,
@@ -135,7 +135,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           widget.onFileProgress?.call(file.name, i + 1, total);
         }
 
-        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project_id);
+        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
         widget.onUploadingChanged(false);
         widget.onUploadSuccess();
       } else {
@@ -177,7 +177,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       width: double.infinity,
       child: Row(
         children: [
-          if (widget.file_count > 0) ...[
+          if (widget.totalCount > 0) ...[
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: IconButton(
@@ -193,7 +193,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             ),
             const SizedBox(width: 20),
             Text(
-              "${widget.file_count} files",
+              "${widget.totalCount} files",
               style: const TextStyle(color: Colors.white, fontSize: 22),
             ),
           ],

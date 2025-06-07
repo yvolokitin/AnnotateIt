@@ -4,8 +4,9 @@ import '../dialogs/delete_image_dialog.dart';
 
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
-import '../../models/project.dart';
 import '../../models/dataset.dart';
+import '../../models/label.dart';
+import '../../models/project.dart';
 
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
@@ -14,30 +15,39 @@ import 'dataset_tab_content.dart';
 import 'dataset_tab_bar.dart';
 
 class DatasetViewPage extends StatefulWidget {
-  Project project;
-  DatasetViewPage(this.project, {super.key});
+  final Project project;
+  final String datasetId;
+  final List<Label> labels;
+
+  const DatasetViewPage({
+    required this.project,
+    required this.datasetId,
+    required this.labels,
+    super.key,
+  });
 
   @override
   DatasetViewPageState createState() => DatasetViewPageState();
 }
 
 class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
-  List<Dataset> datasets = [];
   Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
-
+  List<Dataset> datasets = [];
+  String currentDatasetId = '';
   TabController? _tabController;
 
   bool _isUploading = false;
-  bool _uploadError = false;
   bool _cancelUpload = false;
+  bool _uploadError = false;
 
   String? _uploadingFile;
   int _currentFileIndex = 0;
+  double _uploadProgress = 0.0;
+
   int _fileCount = 0;
   int itemsPerPage = 24;
   int _totalPages = 0;
   int _currentPage = 0;
-  double _uploadProgress = 0.0;
 
   bool _initialLoading = true;
   String? _lastLoadedDatasetId;
@@ -50,6 +60,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
   @override
   void initState() {
     super.initState();
+    currentDatasetId = widget.datasetId;
     _loadDatasets();
   }
 
@@ -57,8 +68,8 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     final fetchedDatasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
 
     fetchedDatasets.sort((a, b) {
-      if (a.id == widget.project.defaultDatasetId) return -1;
-      if (b.id == widget.project.defaultDatasetId) return 1;
+      if (a.id == widget.datasetId) return -1;
+      if (b.id == widget.datasetId) return 1;
       return 0;
     });
 
@@ -76,8 +87,8 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _rebuildTabController();
-    if (widget.project.defaultDatasetId != null) {
-      loadMediaForDataset(widget.project.defaultDatasetId!, itemsPerPage, 0);
+    if (widget.datasetId != null) {
+      loadMediaForDataset(widget.datasetId, itemsPerPage, 0);
     }
 
     if (!mounted) return;
@@ -165,18 +176,36 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     _tabController!.addListener(_handleTabChange);
   }
 
-  void _handleTabChange() {
+  Future<void> _handleTabChange() async {
     final currentDataset = datasets[_tabController!.index];
 
+    // 'add_new_tab' = create a new Dataset
     if (currentDataset.id == 'add_new_tab') {
-      _createNewDataset();
-      return;
+      final newDataset = await DatasetDatabase.instance.createDatasetForProject(
+        projectId: widget.project.id!,
+        name: 'Dataset ${datasets.length + 1}',
+      );
+
+      if (!mounted) return;
+      setState(() {
+        datasets.insert(datasets.length - 1, newDataset);
+        annotatedMediaByDataset[newDataset.id] = [];
+        currentDatasetId = newDataset.id;
+      });
+
+      _rebuildTabController();
+      _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
+
+    } else { // else load data
+      if (_lastLoadedDatasetId == currentDataset.id) return;
+
+      _lastLoadedDatasetId = currentDataset.id;
+      loadMediaForDataset(currentDataset.id, itemsPerPage, 0);
+
+      setState(() {
+        currentDatasetId = currentDataset.id;
+      });
     }
-
-    if (_lastLoadedDatasetId == currentDataset.id) return;
-
-    _lastLoadedDatasetId = currentDataset.id;
-    loadMediaForDataset(currentDataset.id, itemsPerPage, 0);
   }
 
   void _handleUploadingChanged(bool uploading) {
@@ -236,22 +265,6 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
   }
 
-  Future<void> _createNewDataset() async {
-    final newDataset = await DatasetDatabase.instance.createDatasetForProject(
-      projectId: widget.project.id!,
-      name: 'Dataset ${datasets.length}',
-    );
-
-    if (!mounted) return;
-    setState(() {
-      datasets.insert(datasets.length - 1, newDataset);
-      annotatedMediaByDataset[newDataset.id] = [];
-    });
-
-    _rebuildTabController();
-    _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
-  }
-
   void _renameDataset(Dataset dataset) async {
     final controller = TextEditingController(text: dataset.name);
     final result = await showDialog<String>(
@@ -284,11 +297,9 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
 
   void _setDefaultDataset(Dataset dataset) async {
     await ProjectDatabase.instance.updateDefaultDataset(projectId: widget.project.id!, datasetId: dataset.id);
-    await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
+    await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
 
     setState(() {
-      widget.project = widget.project.copyWith(defaultDatasetId: dataset.id);
-
       datasets.removeWhere((d) => d.id == dataset.id);
       datasets.insert(0, dataset);
 
@@ -350,7 +361,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
         DatasetTabBar(
           controller: _tabController!,
           datasets: datasets,
-          defaultDatasetId: widget.project.defaultDatasetId,
+          defaultDatasetId: widget.datasetId,
           onMenuAction: (dataset, action) {
             switch (action) {
               case 'rename':
@@ -379,7 +390,8 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                   ? const Center(child: Text("Creating new dataset..."))
                   : DatasetTabContent(
                       project: widget.project,
-                      dataset: dataset,
+                      datasetId: currentDatasetId,
+                      labels: widget.labels,
                       mediaItems: mediaItems,
                       fileCount: _fileCount,
                       totalPages: _totalPages,
