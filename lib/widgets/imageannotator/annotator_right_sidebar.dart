@@ -47,7 +47,7 @@ class AnnotatorRightSidebar extends StatelessWidget {
                 final annotation = annotations[index];
                 return ListTile(
                   title: Text(annotation.annotationType, style: const TextStyle(color: Colors.white)),
-                  subtitle: Text(annotation.annotationType, style: const TextStyle(color: Colors.white38)),
+                  subtitle: Text('data: ${annotation.data}', style: const TextStyle(color: Colors.white38)),
                 );
               },
             ),

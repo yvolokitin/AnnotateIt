@@ -6,17 +6,37 @@ class PolygonShape extends Shape {
 
   PolygonShape(this.points);
 
-  factory PolygonShape.fromJson(Map<String, dynamic> json) {
+  static PolygonShape? fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('points') || json['points'] is! List) {
+      print('[PolygonShape] Warning: Missing or invalid "points" key. Data: $json');
+      return null;
+    }
+
     final rawPoints = json['points'] as List;
-    return PolygonShape(
-      rawPoints.map((p) => Offset((p[0] as num).toDouble(), (p[1] as num).toDouble())).toList(),
-    );
+
+    try {
+      final parsedPoints = rawPoints
+          .whereType<List>() // Ensure each element is a List
+          .where((p) => p.length >= 2 && p[0] is num && p[1] is num)
+          .map((p) => Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()))
+          .toList();
+
+      if (parsedPoints.isEmpty) {
+        print('[PolygonShape] Warning: No valid points found. Raw points: $rawPoints');
+        return null;
+      }
+
+      return PolygonShape(parsedPoints);
+    } catch (e) {
+      print('[PolygonShape] Failed to parse points. Error: $e. Raw: $rawPoints');
+      return null;
+    }
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'points': points.map((p) => [p.dx, p.dy]).toList(),
-  };
+        'points': points.map((p) => [p.dx, p.dy]).toList(),
+      };
 
   Path toPath() {
     final path = Path();
@@ -46,5 +66,11 @@ class PolygonShape extends Shape {
     }
 
     return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  @override
+  void paint(Canvas canvas, Paint paint) {
+    final path = toPath();
+    canvas.drawPath(path, paint);
   }
 }

@@ -1,9 +1,7 @@
-import 'dart:math';
+// import 'dart:math';
 import 'dart:ui' as ui;
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../../models/annotation.dart';
@@ -24,12 +22,22 @@ extension HexColor on Color {
   }
 }
 
-Color getColorByLabelID(String labelId, List<Label> labelDefinitions) {
-  final label = labelDefinitions.firstWhereOrNull((Label b) => b.id == labelId);
+Color getAnnotationColorByLabelId(int labelId, List<Label> labels) {
+  final label = labels.firstWhereOrNull((b) => b.id == labelId);
   if (label == null) {
-    throw "Label not found";
+    print("Label not found: $labelId");
+    return Colors.red;
   }
   return HexColor.fromHex(label.color.substring(0, 7));
+}
+
+String getAnnotationNameByLabelId(int labelId, List<Label> labels) {
+  final label = labels.firstWhereOrNull((b) => b.id == labelId);
+  if (label == null) {
+    print("Unknown label id: $labelId");
+    return "Unknown Name";
+  }
+  return label.name;
 }
 
 class CanvasPainter extends CustomPainter {
@@ -56,124 +64,51 @@ class CanvasPainter extends CustomPainter {
       image: image,
     );
     for (final annotation in annotations ?? []) {
-      // final firstLabelColor = getColorByLabelID(annotation.labels[0].id, labels);
-
-      // THIS IS WORKAROUND
-      final firstLabelColor = Colors.red;
-
-      Paint paint = Paint()
-        ..color = firstLabelColor
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
-
-      Paint transparent = Paint()
-        ..color = Color.fromARGB(102, firstLabelColor.red, firstLabelColor.green, firstLabelColor.blue);
-
-      final shape = annotation.shape;
+      final shape = Shape.fromAnnotation(annotation);
       if (shape != null) {
-        switch (shape) {
-          case 'RectShape':
-            drawRectangle(canvas, size, paint, transparent, annotation);
-            break;
-          case 'polygon':
-            drawPolygon(canvas, size, paint, transparent, annotation);
-            break;
-          case 'rotated_rect':
-            drawRotatedRectangle(canvas, size, paint, transparent, annotation);
-            break;
-          /*case 'circle':
-            drawCircle(canvas, size, paint, transparent, annotation);
-            break;*/
-        }
+        final color = getAnnotationColorByLabelId(annotation.labelId, labels);
+        final paint = Paint()
+          ..color = color
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke;
+        final fillPaint = Paint()
+          ..color = color.withOpacity(0.4)
+          ..style = PaintingStyle.fill;
+
+        // label line
+        shape.paint(canvas, paint);
+        // label transparent background
+        shape.paint(canvas, fillPaint);
+
+        final name = getAnnotationNameByLabelId(annotation.labelId, labels);
+        final offset = _labelOffsetFromShape(shape); // adaptive position
+        drawLabel(canvas, size, name, color, offset);
       }
     }
   }
 
-  void drawRectangle(Canvas canvas, Size size, Paint paint, Paint transparent, Annotation annotation){
-    final imageSize = Size(image.width.toDouble(), image.height.toDouble());
-    // final rect = (annotation.shape as Rectangle).toRect();
-    final rect = (annotation.shape as RectShape).toRect();
-    canvas.drawRect(rect, paint);
-    if (rect.size != imageSize) {
-      canvas.drawRect(rect, transparent);
-    }
-    var position = rect.topLeft;
-    for (final label in labels) {
-      final labelSize = drawLabel(canvas, size, label, position);
-      position += Offset(labelSize.width, 0);
-    }
-  }
-
-  void drawPolygon(Canvas canvas, Size size, Paint paint, Paint transparent, Annotation annotation) {
-    // final path = ui.Path();
-    // final shape = (annotation.shape as PolygonShape);
-    // path.addPolygon(shape.points, true);
-    final shape = annotation.shape as PolygonShape;
-    final path = Path()..addPolygon(shape.points, true);
-
-    canvas.drawPath(path, paint);
-    canvas.drawPath(path, transparent);
-
-    // final rect = shape.rectangle.toRect();
-    final rect = shape.boundingRect;
-    final topCenter = rect.topCenter - const Offset(0, 30.0);
-    canvas.drawLine(rect.center, topCenter, paint);
-
-    var position = topCenter;
-    for (final label in labels) {
-      final labelSize = drawLabel(canvas, size, label, position);
-      position += Offset(labelSize.width, 0);
-    }
-  }
-
-  void drawRotatedRectangle(Canvas canvas, Size size, Paint paint, Paint transparent, Annotation annotation) {
-    // final shape = (annotation.shape as RotatedRectangle);
-    final shape = (annotation.shape as RotatedRectShape);
-
-    final path = ui.Path();
-    final rect = ui.Rect.fromCenter(center: ui.Offset.zero, width: shape.width, height: shape.height);
-    path.addRect(rect);
-    final matrix = Matrix4.identity()
-      ..rotateZ(shape.angle) // .angleInRadians)
-      ..setTranslationRaw(shape.centerX, shape.centerY, 0.0);
-
-    final corners = [rect.topLeft, rect.topRight, rect.bottomRight, rect. bottomLeft];
-
-    final rotatedPath = path.transform(matrix.storage);
-    canvas.drawPath(rotatedPath, paint);
-    canvas.drawPath(rotatedPath, transparent);
-
-    double labelPosition = double.infinity;
-    for (final corner in corners) {
-      final transformedCorner = (matrix * Vector3(corner.dx, corner.dy, 0)) as Vector3;
-      labelPosition = min(transformedCorner.y, labelPosition);
-    }
-
-    var position = Offset(shape.centerX, labelPosition - 30);
-    canvas.drawLine(Offset(shape.centerX, shape.centerY), position, paint);
-    for (final label in labels) {
-      final labelSize = drawLabel(canvas, size, label, position);
-      position += Offset(labelSize.width, 0);
-    }
+  Offset _labelOffsetFromShape(Shape shape) {
+    if (shape is RectShape) return Offset(shape.x, shape.y - 20);
+    if (shape is PolygonShape) return shape.boundingRect.topCenter - const Offset(0, 20);
+    if (shape is RotatedRectShape) return Offset(shape.centerX, shape.centerY - shape.height / 2 - 20);
+    if (shape is CircleShape) return Offset(shape.centerX, shape.centerY - shape.radius - 20);
+    return Offset.zero;
   }
 
   Color foregroundColorByLuminance(Color color) {
     return color.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 
-  Size drawLabel(Canvas canvas, Size size, Label label, Offset position) {
-    // final labelName = labelById[label.id]?.name ?? "Unknown object";
-    final labelName = "Yura Label";
-    final color = Colors.blue; // getColorByLabelID(label.id.toString(), labels);
+  Size drawLabel(Canvas canvas, Size size, String name, Color color, Offset position) {
     Paint paint = Paint()
       ..color = color;
     final textStyle = TextStyle(
       color: foregroundColorByLuminance(color),
-      fontFamily: 'IntelOne',
+      fontFamily: 'JetBrainsMono',
       fontSize: 14 / scale,
     );
     final textSpan = TextSpan(
-      text: "$labelName",
+      text: name,
       style: textStyle,
     );
     final textPainter = TextPainter(
