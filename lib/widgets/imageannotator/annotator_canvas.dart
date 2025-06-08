@@ -11,28 +11,30 @@ import 'canvas_painter.dart';
 import '../../models/label.dart';
 import '../../models/annotation.dart';
 
-class Canvas extends StatefulWidget {
+class AnnotatorCanvas extends StatefulWidget {
   final ui.Image image;
   final List<Label> labels;
   final List<Annotation>? annotations;
   final int resetZoomCount;
+  final double opacity;
 
   final ValueChanged<double>? onZoomChanged;
 
-  const Canvas({
+  const AnnotatorCanvas({
     required this.image,
     required this.labels,
     required this.annotations,
     required this.resetZoomCount,
+    required this.opacity,
     this.onZoomChanged,
     super.key,
   });
 
   @override
-  State<Canvas> createState() => _CanvasState();
+  State<AnnotatorCanvas> createState() => _AnnotatorCanvasState();
 }
 
-class _CanvasState extends State<Canvas> {
+class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   int _lastResetCount = 0;
 
   double prevScale = 1;
@@ -54,7 +56,7 @@ class _CanvasState extends State<Canvas> {
   }
 
   @override
-  void didUpdateWidget(covariant Canvas oldWidget) {
+  void didUpdateWidget(covariant AnnotatorCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.resetZoomCount != _lastResetCount) {
@@ -165,7 +167,13 @@ class _CanvasState extends State<Canvas> {
                   child: Builder(
                     builder: (context) {
                       return CustomPaint(
-                        painter: CanvasPainter(widget.image, widget.labels, widget.annotations, matrix.getMaxScaleOnAxis()),
+                        painter: CanvasPainter(
+                          widget.image,
+                          widget.labels,
+                          widget.annotations,
+                          matrix.getMaxScaleOnAxis(),
+                          widget.opacity,
+                        ),
                         child: Container(),
                       );
                     }

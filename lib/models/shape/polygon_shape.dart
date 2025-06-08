@@ -13,13 +13,27 @@ class PolygonShape extends Shape {
     }
 
     final rawPoints = json['points'] as List;
+    final parsedPoints = <Offset>[];
 
     try {
-      final parsedPoints = rawPoints
-          .whereType<List>() // Ensure each element is a List
-          .where((p) => p.length >= 2 && p[0] is num && p[1] is num)
-          .map((p) => Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()))
-          .toList();
+      // Try nested format: [[x, y], [x, y], ...]
+      if (rawPoints.isNotEmpty && rawPoints.first is List) {
+        for (final p in rawPoints) {
+          if (p is List && p.length >= 2 && p[0] is num && p[1] is num) {
+            parsedPoints.add(Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()));
+          } 
+        }
+      }
+      // Try flat format: [x1, y1, x2, y2, ...]
+      else {
+        for (int i = 0; i < rawPoints.length - 1; i += 2) {
+          final x = rawPoints[i];
+          final y = rawPoints[i + 1];
+          if (x is num && y is num) {
+            parsedPoints.add(Offset(x.toDouble(), y.toDouble()));
+          }
+        }
+      }
 
       if (parsedPoints.isEmpty) {
         print('[PolygonShape] Warning: No valid points found. Raw points: $rawPoints');
@@ -32,7 +46,7 @@ class PolygonShape extends Shape {
       return null;
     }
   }
-
+  
   @override
   Map<String, dynamic> toJson() => {
         'points': points.map((p) => [p.dx, p.dy]).toList(),

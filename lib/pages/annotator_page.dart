@@ -11,7 +11,7 @@ import '../widgets/imageannotator/annotator_left_toolbar.dart';
 import '../widgets/imageannotator/annotator_right_sidebar.dart';
 import '../widgets/imageannotator/annotator_bottom_toolbar.dart';
 import '../widgets/imageannotator/annotator_top_toolbar.dart';
-import '../widgets/imageannotator/canvas.dart';
+import '../widgets/imageannotator/annotator_canvas.dart';
 
 class AnnotatorPage extends StatefulWidget {
   final Project project;
@@ -38,8 +38,7 @@ class AnnotatorPage extends StatefulWidget {
 class _AnnotatorPageState extends State<AnnotatorPage> {
   MouseCursor _cursorIcon = SystemMouseCursors.basic;
 
-  late final String datasetId;
-
+  // late final String datasetId;
   late AnnotatedLabeledMedia currentMediaItem;
   late PageController _pageController;
   late double _currentZoom = 1.0;
@@ -47,12 +46,15 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   late int _currentIndex = 0;
   bool _sidebarCollapsed = false;
   bool _mouseInsideImage = false;
+  int currentImageIndex = 0;
 
   AnnotatedLabeledMedia? _firstMedia;
+  ui.Image? _cachedImage;
 
   @override
   void initState() {
     super.initState();
+    currentImageIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
     currentMediaItem = widget.mediaItem;
     _currentIndex = widget.localIndex;
     _firstMedia = widget.mediaItem;
@@ -60,18 +62,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   Future<AnnotatedLabeledMedia?> loadMediaAtIndex(int index) async {
-    // int globalIndex = (pageIndex * pageSize) + localIndex;
-
-    if (index == widget.localIndex) {
-      return _firstMedia;
-    }
-
-    final annotated = await DatasetDatabase.instance.loadMediaAtIndex(datasetId, index);
-    if (annotated != null) {
-      setState(() {
-        currentMediaItem = annotated;
-      });
-    }
+    print('loadMediaAtIndex index $index');
+    return await DatasetDatabase.instance.loadMediaAtIndex(widget.datasetId, index);
   }
 
   Future<ui.Image> _loadImageFromFile(File file) async {
@@ -83,7 +75,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    double fillOpacity = 0.1;
+    double labelOpacity = 0.35;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -99,8 +91,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
               children: [
                 AnnotatorLeftToolbar(
                   type: widget.project.type,
-                  opacity: fillOpacity,
-                  onOpacityChanged: (value) => setState(() => fillOpacity = value),
+                  opacity: labelOpacity,
+                  onOpacityChanged: (value) => setState(() => labelOpacity = value),
                   onMouseIconChanged: (value) => setState(() => _cursorIcon = value),
                   onResetZoomPressed: () => setState(() => _resetZoomCount++),
                 ),
@@ -112,9 +104,17 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                         child: PageView.builder(
                           controller: _pageController,
                           itemCount: widget.totalMediaCount,
-                          onPageChanged: (index) => setState(() {
-                            _currentIndex = index;
-                          }),                          
+                          onPageChanged: (index) async {
+                            final annotated = await loadMediaAtIndex(index);
+                            if (annotated != null) {
+                              setState(() {
+                                _currentIndex = index;
+                                currentImageIndex = index;
+                                currentMediaItem = annotated;
+                                _cachedImage = null;
+                              });
+                            }
+                          },
                           itemBuilder: (context, index) {
                             return FutureBuilder<AnnotatedLabeledMedia?>(
                               future: loadMediaAtIndex(index),
@@ -123,10 +123,14 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                   return const Center(child: CircularProgressIndicator());
                                 }
 
-                                final media = snapshot.data!;
-
                                 return FutureBuilder<ui.Image>(
-                                  future: _loadImageFromFile(File(currentMediaItem.mediaItem.filePath)),
+                                  future: _cachedImage != null
+                                    ? Future.value(_cachedImage)
+                                    : _loadImageFromFile(File(currentMediaItem.mediaItem.filePath)).then((image) {
+                                      _cachedImage = image;
+                                      return image;
+                                    }),
+
                                   builder: (context, imageSnap) {
                                     if (!imageSnap.hasData) {
                                       return const Center(child: CircularProgressIndicator());
@@ -135,11 +139,12 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                       onEnter: (_) => setState(() => _mouseInsideImage = true),
                                       onExit: (_) => setState(() => _mouseInsideImage = false),
                                       cursor: _mouseInsideImage ? _cursorIcon : SystemMouseCursors.basic,
-                                      child: Canvas(
+                                      child: AnnotatorCanvas(
                                         image: imageSnap.data!,
                                         labels: currentMediaItem.labels,
                                         annotations: currentMediaItem.annotations,
                                         resetZoomCount: _resetZoomCount,
+                                        opacity: labelOpacity,
                                         onZoomChanged: (zoom) => setState(() => _currentZoom = zoom),
                                       ),
                                     );
@@ -152,7 +157,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                       ),
                       AnnotatorBottomToolbar(
                         currentZoom: _currentZoom,
-                        currentMedia: _firstMedia!.mediaItem, // May need to update per page
+                        currentMedia: currentMediaItem.mediaItem,
                         onZoomIn: () {},
                         onZoomOut: () {},
                         onPrevImg: () {
@@ -161,7 +166,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                         },
                         onNextImg: () {
                           final newPage = _pageController.page!.toInt() + 1;
-                          _pageController.jumpToPage(newPage);
+                          if (newPage < widget.totalMediaCount) {
+                            _pageController.jumpToPage(newPage);
+                          } else {
+                            _pageController.jumpToPage(0);
+                          }
                         },
                         onSaveAnnotations: () {},
                       ),

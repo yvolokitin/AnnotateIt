@@ -23,6 +23,8 @@ extension HexColor on Color {
 }
 
 Color getAnnotationColorByLabelId(int labelId, List<Label> labels) {
+  print("Searching labelId: $labelId in labels: ${labels.map((e) => e.id).toList()}");
+
   final label = labels.firstWhereOrNull((b) => b.id == labelId);
   if (label == null) {
     print("Label not found: $labelId");
@@ -45,13 +47,14 @@ class CanvasPainter extends CustomPainter {
   final List<Annotation>? annotations;
   final List<Label> labels;
   final Map<String, Label> labelById;
-  final double scale;
+  final double scale, opacity;
 
   CanvasPainter(
     this.image,
     this.labels,
     this.annotations,
-    this.scale
+    this.scale,
+    this.opacity,
   ): labelById = { for (var v in labels) v.id.toString() : v };
 
   @override
@@ -72,7 +75,7 @@ class CanvasPainter extends CustomPainter {
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
         final fillPaint = Paint()
-          ..color = color.withOpacity(0.4)
+          ..color = color.withOpacity(opacity)
           ..style = PaintingStyle.fill;
 
         // label line
@@ -88,7 +91,7 @@ class CanvasPainter extends CustomPainter {
   }
 
   Offset _labelOffsetFromShape(Shape shape) {
-    if (shape is RectShape) return Offset(shape.x, shape.y - 20);
+    if (shape is RectShape) return Offset(shape.x, shape.y);
     if (shape is PolygonShape) return shape.boundingRect.topCenter - const Offset(0, 20);
     if (shape is RotatedRectShape) return Offset(shape.centerX, shape.centerY - shape.height / 2 - 20);
     if (shape is CircleShape) return Offset(shape.centerX, shape.centerY - shape.radius - 20);
@@ -99,29 +102,41 @@ class CanvasPainter extends CustomPainter {
     return color.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 
-  Size drawLabel(Canvas canvas, Size size, String name, Color color, Offset position) {
-    Paint paint = Paint()
-      ..color = color;
+  Size drawLabel(Canvas canvas, Size size, String name, Color color, Offset topLeftOfBox) {
+    final paint = Paint()..color = color;
+
     final textStyle = TextStyle(
       color: foregroundColorByLuminance(color),
       fontFamily: 'JetBrainsMono',
-      fontSize: 14 / scale,
+      fontSize: 16 / scale,
+      height: 1.0, // Avoid vertical padding
     );
-    final textSpan = TextSpan(
-      text: name,
-      style: textStyle,
-    );
+
+    final textSpan = TextSpan(text: name, style: textStyle);
     final textPainter = TextPainter(
       text: textSpan,
       textDirection: TextDirection.ltr,
     );
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: size.width,
+    textPainter.layout();
+
+    // This is the critical line: align label's bottom to box's top
+    final labelBottomY = topLeftOfBox.dy;
+    final labelTopY = labelBottomY - textPainter.height;
+
+    // Optional: Align horizontally to the box's left
+    final labelX = topLeftOfBox.dx;
+
+    final labelRect = Rect.fromLTWH(
+      labelX,
+      labelTopY,
+      textPainter.width,
+      textPainter.height,
     );
-    canvas.drawRect(ui.Rect.fromLTWH(position.dx - 1, position.dy - textPainter.height - 1, textPainter.width + 2, textPainter.height), paint);
-    textPainter.paint(canvas, position - Offset(0, textPainter.height));
-    return textPainter.size + const Offset(3, 0);
+
+    canvas.drawRect(labelRect, paint);
+    textPainter.paint(canvas, Offset(labelX, labelTopY));
+
+    return textPainter.size;
   }
 
   @override
