@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../dialogs/delete_image_dialog.dart';
 
+import '../../utils/image_utils.dart' as image_utils;
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
 import '../../models/dataset.dart';
@@ -19,10 +20,13 @@ class DatasetViewPage extends StatefulWidget {
   final String datasetId;
   final List<Label> labels;
 
+  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
+
   const DatasetViewPage({
     required this.project,
     required this.datasetId,
     required this.labels,
+    this.onImageDuplicated,
     super.key,
   });
 
@@ -144,6 +148,19 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       _currentPage = newPage;
       _datasetTabCache.remove(datasetId);
     });
+  }
+
+  Future<void> _handleDuplicateImage(
+    AnnotatedLabeledMedia media,
+    bool withAnnotations,
+  ) async {
+    await image_utils.duplicateMediaItem(
+      original: media,
+      datasetId: currentDatasetId,
+      withAnnotations: withAnnotations,
+    );
+
+    await loadMediaForDataset(currentDatasetId, itemsPerPage, _currentPage);
   }
 
   void _handleDeleteSelectedMedia() async {
@@ -409,6 +426,9 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
                       },
                       onItemsPerPageChanged: (int newItemsPerPage) {
                         loadMediaForDataset(dataset.id, newItemsPerPage, _currentPage);
+                      },
+                      onImageDuplicated: (media, withAnnotations) {
+                        _handleDuplicateImage(media, withAnnotations);
                       },
                     );
 

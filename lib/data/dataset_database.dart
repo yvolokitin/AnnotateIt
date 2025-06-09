@@ -149,25 +149,7 @@ class DatasetDatabase {
     final db = await database;
     await db.insert('media_items', mediaItem.toMap());
   }
-/*
-  Future<void> deleteMediaItemWithAnnotations(int mediaItemId) async {
-    final db = await instance.database;
 
-    // 1. Delete annotations linked to this media item
-    await db.delete(
-      'annotations',
-      where: 'media_item_id = ?',
-      whereArgs: [mediaItemId],
-    );
-
-    // 2. Then delete the media item itself
-    await db.delete(
-      'media_items',
-      where: 'id = ?',
-      whereArgs: [mediaItemId],
-    );
-  }
-*/
   Future<void> deleteMediaItemWithAnnotations(int mediaItemId) async {
     final db = await instance.database;
 

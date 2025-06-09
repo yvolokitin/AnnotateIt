@@ -9,6 +9,7 @@ import 'image_tile.dart';
 import 'media_tile.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
+  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
   final void Function(List<AnnotatedLabeledMedia>)? onSelectionChanged;
   final void Function(int newPage) onPageChanged;
 
@@ -29,6 +30,7 @@ class PaginatedImageGrid extends StatefulWidget {
     required this.itemsPerPage,
     required this.onPageChanged,
     this.onSelectionChanged,
+    this.onImageDuplicated,
     super.key,
   });
 
@@ -89,6 +91,10 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                     widget.onSelectionChanged?.call(
                       mediaItems.where((item) => item.isSelected).toList(),
                     );
+                  },
+                  onImageDuplicated: (media, withAnnotations) {
+                    print('PaginatedImageGrid:: duplicating image withAnnotations: $withAnnotations');
+                    widget.onImageDuplicated?.call(media, withAnnotations);
                   },
                 );
               } else {

@@ -70,6 +70,37 @@ class Annotation {
   }
 }
 
+extension AnnotationCopy on Annotation {
+  Annotation copyWith({
+    int? mediaItemId,
+    int? labelId,
+    String? annotationType,
+    Map<String, dynamic>? data,
+    double? confidence,
+    int? annotatorId,
+    String? comment,
+    String? status,
+    int? version,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Annotation(
+      id: id,
+      mediaItemId: mediaItemId ?? this.mediaItemId,
+      labelId: labelId ?? this.labelId,
+      annotationType: annotationType ?? this.annotationType,
+      data: data ?? this.data,
+      confidence: confidence ?? this.confidence,
+      annotatorId: annotatorId ?? this.annotatorId,
+      comment: comment ?? this.comment,
+      status: status ?? this.status,
+      version: version ?? this.version,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+}
+
 extension AnnotationShapeExt on Annotation {
   /// Returns the shape object from annotation data.
   Shape? get shape {

@@ -3,6 +3,13 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
+import '../models/media_item.dart';
+import '../models/annotation.dart';
+import '../models/annotated_labeled_media.dart';
+
+import '../data/dataset_database.dart';
+import '../../data/annotation_database.dart';
+
 Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async {
   try {
     // read original image and decode
@@ -31,5 +38,87 @@ Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async
   } catch (e) {
     print('Error when tried to create thumbnail: $e');
     return null;
+  }
+}
+
+Future<void> duplicateMediaItem({
+  required AnnotatedLabeledMedia original,
+  required String datasetId,
+  required bool withAnnotations,
+}) async {
+  // Copy the image file
+  final originalFile = File(original.mediaItem.filePath);
+  final originalExt = path.extension(originalFile.path);
+  final newFileName = '${DateTime.now().millisecondsSinceEpoch}$originalExt';
+  final newPath = path.join(originalFile.parent.path, newFileName);
+
+  final newFile = await originalFile.copy(newPath);
+
+  // Insert using the existing DatasetDatabase function
+  final cleanedExt = path.extension(newPath).replaceFirst('.', '');
+  await DatasetDatabase.instance.insertMediaItem(
+    datasetId,
+    newPath,
+    cleanedExt,
+    ownerId: original.mediaItem.ownerId ?? 0,
+    numberOfFrames: original.mediaItem.numberOfFrames,
+    width: original.mediaItem.width,
+    height: original.mediaItem.height,
+    duration: original.mediaItem.duration,
+    fps: original.mediaItem.fps,
+    source: 'duplicated',
+  );
+
+  // Re-fetch new MediaItem to get new ID
+  final allItems = await DatasetDatabase.instance.fetchMediaForDataset(datasetId);
+  final newMediaItemRef = allItems.firstWhere((m) => m.filePath == newPath);
+  final newMediaId = newMediaItemRef.id!;
+
+  // Copy annotations if needed
+  if (withAnnotations) {
+    final now = DateTime.now();
+    final newAnnotations = original.annotations.map((ann) => Annotation(
+      id: null,
+      mediaItemId: newMediaId,
+      labelId: ann.labelId,
+      annotationType: ann.annotationType,
+      data: Map<String, dynamic>.from(ann.data),
+      confidence: ann.confidence,
+      annotatorId: ann.annotatorId,
+      comment: ann.comment,
+      status: ann.status,
+      version: ann.version,
+      createdAt: now,
+      updatedAt: now,
+    )).toList();
+
+    await AnnotationDatabase.instance.insertAnnotationsBatch(newAnnotations);
+  }
+}
+
+// await deleteMediaItem(mediaItem: item, deleteAnnotations: true, deleteFile: false);
+/// Deletes the media item from database and (optionally) its annotations and file from disk.
+///
+/// - [mediaItem] — объект MediaItem, который нужно удалить.
+/// - [deleteFile] — если true, удаляет сам файл с диска.
+Future<void> deleteMediaItem({
+  required MediaItem mediaItem,
+  bool deleteFile = true,
+}) async {
+  try {
+    await AnnotationDatabase.instance.deleteAnnotationsByMedia(mediaItem.id!);
+    await DatasetDatabase.instance.deleteMediaItemWithAnnotations(mediaItem.id!);
+
+    if (deleteFile) {
+      final file = File(mediaItem.filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+
+    print('Media item ${mediaItem.id} deleted (file: $deleteFile)');
+  } catch (e) {
+    print('Error deleting media item: $e');
+    rethrow;
   }
 }

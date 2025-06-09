@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
+  String get duplicate => 'Duplicate';
+
+  @override
   String get importDataset => 'Import dataset';
 
   @override
@@ -226,4 +229,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String removeFilesFromDatasetConfirm(Object amount) {
     return 'Are you sure you want to delete the following file(s) (\'$amount\')?\n\nAll corresponding annotations will be removed as well.';
   }
+
+  @override
+  String get duplicateImage => 'Duplicate Image';
+
+  @override
+  String get duplicateWithAnnotations => 'Duplicate image with annotations';
+
+  @override
+  String get duplicateWithAnnotationsHint =>
+      'A copy of the image will be created along with all annotation data.';
+
+  @override
+  String get duplicateImageOnly => 'Duplicate image only';
+
+  @override
+  String get duplicateImageOnlyHint =>
+      'Only the image will be copied, without annotations.';
+
+  @override
+  String get saveDuplicateChoiceAsDefault =>
+      'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)';
 }

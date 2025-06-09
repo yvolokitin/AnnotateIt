@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../dialogs/image_details_dialog.dart';
 import '../dialogs/set_image_icon_dialog.dart';
 import '../dialogs/delete_image_dialog.dart';
+import '../dialogs/duplicate_image_dialog.dart';
 
 import '../../pages/annotator_page.dart';
 
@@ -18,6 +19,7 @@ class ImageTile extends StatefulWidget {
   final int totalMediaCount;
 
   final void Function(bool isSelected)? onSelectedChanged;
+  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
 
   const ImageTile({
     required this.project,
@@ -28,6 +30,7 @@ class ImageTile extends StatefulWidget {
     required this.localIndex,
     required this.totalMediaCount,
     this.onSelectedChanged,
+    this.onImageDuplicated,
     super.key,
   });
 
@@ -153,6 +156,17 @@ class _ImageTileState extends State<ImageTile> {
                             context: context,
                             builder: (context) => ImageDetailsDialog(media: widget.mediaItem),
                           );
+                        } else if (value == 'duplicate') {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => DuplicateImageDialog(
+                              media: widget.mediaItem,
+                              onConfirmed: (withAnnotations, saveAsDefault) {
+                                print('ImageTile duplicating image withAnnotations: $withAnnotations, saveAsDefault: $saveAsDefault');
+                                widget.onImageDuplicated?.call(widget.mediaItem, withAnnotations);
+                              },
+                            ),
+                          );
                         } else if (value == 'delete') {
                           showDialog(
                             context: context,
@@ -186,6 +200,17 @@ class _ImageTileState extends State<ImageTile> {
                             ],
                           ),
                         ),
+                        const PopupMenuItem<String>(
+                          value: 'duplicate',
+                          child: Row(
+                            children: [
+                              Icon(Icons.copy, size: 22),
+                              SizedBox(width: 8),
+                              Text('Duplicate', style: TextStyle(fontWeight: FontWeight.normal)),
+                            ],
+                          ),
+                        ),
+
                         const PopupMenuItem<String>(
                           value: 'seticon',
                           child: Row(

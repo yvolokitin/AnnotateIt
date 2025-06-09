@@ -38,7 +38,9 @@ class AnnotatorPage extends StatefulWidget {
 class _AnnotatorPageState extends State<AnnotatorPage> {
   MouseCursor _cursorIcon = SystemMouseCursors.basic;
 
-  // late final String datasetId;
+  final Map<int, AnnotatedLabeledMedia> _mediaCache = {};
+  final Map<int, Future<AnnotatedLabeledMedia?>> _mediaFutures = {};
+
   late AnnotatedLabeledMedia currentMediaItem;
   late PageController _pageController;
   late double _currentZoom = 1.0;
@@ -47,6 +49,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   bool _sidebarCollapsed = false;
   bool _mouseInsideImage = false;
   int currentImageIndex = 0;
+  double labelOpacity = 0.35;
 
   AnnotatedLabeledMedia? _firstMedia;
   ui.Image? _cachedImage;
@@ -59,6 +62,23 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     _currentIndex = widget.localIndex;
     _firstMedia = widget.mediaItem;
     _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  Future<AnnotatedLabeledMedia?> getMediaFuture(int index) {
+    if (_mediaCache.containsKey(index)) {
+      return Future.value(_mediaCache[index]);
+    }
+    if (_mediaFutures.containsKey(index)) {
+      return _mediaFutures[index]!;
+    }
+
+    final future = DatasetDatabase.instance.loadMediaAtIndex(widget.datasetId, index).then((media) {
+      if (media != null) _mediaCache[index] = media;
+      return media;
+    });
+
+    _mediaFutures[index] = future;
+    return future;
   }
 
   Future<AnnotatedLabeledMedia?> loadMediaAtIndex(int index) async {
@@ -75,8 +95,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    double labelOpacity = 0.35;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
@@ -97,6 +115,98 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                   onResetZoomPressed: () => setState(() => _resetZoomCount++),
                 ),
 
+Expanded(
+  child: Column(
+    children: [
+      Expanded(
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.totalMediaCount,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+              currentImageIndex = index;
+              _cachedImage = null;
+            });
+          },
+          itemBuilder: (context, index) {
+            return FutureBuilder<AnnotatedLabeledMedia?>(
+              future: getMediaFuture(index),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final media = snapshot.data!;
+
+                return FutureBuilder<ui.Image>(
+                  future: _cachedImage != null
+                      ? Future.value(_cachedImage)
+                      : _loadImageFromFile(File(media.mediaItem.filePath)).then((image) {
+                          _cachedImage = image;
+                          return image;
+                        }),
+                  builder: (context, imageSnap) {
+                    if (!imageSnap.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: MouseRegion(
+                            onEnter: (_) => setState(() => _mouseInsideImage = true),
+                            onExit: (_) => setState(() => _mouseInsideImage = false),
+                            cursor: _mouseInsideImage ? _cursorIcon : SystemMouseCursors.basic,
+                            child: AnnotatorCanvas(
+                              image: imageSnap.data!,
+                              labels: media.labels,
+                              annotations: media.annotations,
+                              resetZoomCount: _resetZoomCount,
+                              opacity: labelOpacity,
+                              onZoomChanged: (zoom) => setState(() => _currentZoom = zoom),
+                            ),
+                          ),
+                        ),
+                        AnnotatorBottomToolbar(
+                          currentZoom: _currentZoom,
+                          currentMedia: media.mediaItem,
+                          onZoomIn: () {}, // позже добавим функционал
+                          onZoomOut: () {},
+                          onPrevImg: () {
+                            final newPage = _pageController.page!.toInt() - 1;
+                            if (newPage >= 0) {
+                              _pageController.jumpToPage(newPage);
+                            }
+                          },
+                          onNextImg: () {
+                            final newPage = _pageController.page!.toInt() + 1;
+                            if (newPage < widget.totalMediaCount) {
+                              _pageController.jumpToPage(newPage);
+                            } else {
+                              _pageController.jumpToPage(0); // циклично
+                            }
+                          },
+                          onSaveAnnotations: () {
+                            // можно подключить сохранение в БД
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+),
+
+
+
+/*
                 Expanded(
                   child: Column(
                     children: [
@@ -177,6 +287,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     ],
                   ),
                 ),
+*/
                 AnnotatorRightSidebar(
                   collapsed: _sidebarCollapsed,
                   labels: _firstMedia!.labels,

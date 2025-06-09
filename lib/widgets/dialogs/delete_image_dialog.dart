@@ -100,7 +100,11 @@ class DeleteImageDialog extends StatelessWidget {
               side: const BorderSide(color: Colors.redAccent, width: 2),
             ),
           ),
-          onPressed: onConfirmed,
+          // onPressed: onConfirmed,
+          onPressed: () {
+            onConfirmed();
+            Navigator.pop(context);
+          },
           child: Text(
             l10n.delete,
             style: const TextStyle(

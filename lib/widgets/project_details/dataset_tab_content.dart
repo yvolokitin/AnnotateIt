@@ -28,6 +28,7 @@ class DatasetTabContent extends StatefulWidget {
   final VoidCallback onUploadError;
   final Function(bool) onUploadingChanged;
 
+  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
   final void Function(String filename, int index, int total) onFileProgress;
   final void Function(int newItemsPerPage) onItemsPerPageChanged;
 
@@ -56,6 +57,7 @@ class DatasetTabContent extends StatefulWidget {
     required this.onPageChanged,
     required this.onMediaDeleted,
     required this.onItemsPerPageChanged,
+    this.onImageDuplicated,
   });
 
   @override
@@ -161,6 +163,10 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
                       itemsPerPage: _currentItemsPerPage,
                       onPageChanged: widget.onPageChanged,
                       onSelectionChanged: _handleSelectionChanged,
+                      onImageDuplicated: (media, withAnnotations) {
+                        print('DatasetTabContent:: duplicating image withAnnotations: $withAnnotations');
+                        widget.onImageDuplicated?.call(media, withAnnotations);
+                      },
                     ),
         ),
       ],

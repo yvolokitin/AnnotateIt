@@ -124,6 +124,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
+  /// No description provided for @duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
+
   /// No description provided for @importDataset.
   ///
   /// In en, this message translates to:
@@ -471,6 +477,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete the following file(s) (\'{amount}\')?\n\nAll corresponding annotations will be removed as well.'**
   String removeFilesFromDatasetConfirm(Object amount);
+
+  /// No description provided for @duplicateImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Image'**
+  String get duplicateImage;
+
+  /// No description provided for @duplicateWithAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate image with annotations'**
+  String get duplicateWithAnnotations;
+
+  /// No description provided for @duplicateWithAnnotationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A copy of the image will be created along with all annotation data.'**
+  String get duplicateWithAnnotationsHint;
+
+  /// No description provided for @duplicateImageOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate image only'**
+  String get duplicateImageOnly;
+
+  /// No description provided for @duplicateImageOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the image will be copied, without annotations.'**
+  String get duplicateImageOnlyHint;
+
+  /// No description provided for @saveDuplicateChoiceAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)'**
+  String get saveDuplicateChoiceAsDefault;
 }
 
 class _AppLocalizationsDelegate

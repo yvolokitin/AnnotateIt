@@ -5,6 +5,8 @@
   "close": "Close",
   "cancel": "Cancel",
   "delete": "Delete",
+  "duplicate": "Duplicate",
+
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
@@ -92,5 +94,13 @@
     "placeholders": {
       "amount": {}
     }
-  }
+  },
+
+  "duplicateImage": "Duplicate Image",
+  "duplicateWithAnnotations": "Duplicate image with annotations",
+  "duplicateWithAnnotationsHint": "A copy of the image will be created along with all annotation data.",
+  "duplicateImageOnly": "Duplicate image only",
+  "duplicateImageOnlyHint": "Only the image will be copied, without annotations.",
+  "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)"
+
 }
