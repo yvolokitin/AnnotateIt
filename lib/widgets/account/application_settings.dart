@@ -196,59 +196,66 @@ class ApplicationSettings extends StatelessWidget {
     );
   }
 
-  Widget _buildCountrySelection(BuildContext context, bool isWide, bool isTablet) {
-    final countryNames = {
-      'en': 'English 🇬🇧',
-      'es': 'Spanish 🇪🇸',
-      'fr': 'French 🇫🇷',
-      'de': 'German 🇩🇪',
-      'it': 'Italian 🇮🇹',
-      'pt': 'Portuguese 🇵🇹',
-      'nl': 'Dutch 🇳🇱',
-    };
+Widget _buildCountrySelection(BuildContext context, bool isWide, bool isTablet) {
+  final countryNames = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'it': 'Italian',
+    'pt': 'Portuguese',
+    'nl': 'Dutch',
+  };
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Country / Language',
-          style: TextStyle(fontSize: 20, color: Colors.white70),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: countryNames.entries.map((entry) {
-            final code = entry.key;
-            final label = entry.value;
-            final isSelected = user.language == code;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Country / Language',
+        style: TextStyle(fontSize: 20, color: Colors.white70),
+      ),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: countryNames.entries.map((entry) {
+          final code = entry.key;
+          final fullName = entry.value;
+          final label = isWide
+              ? fullName
+              : (isTablet ? code.toUpperCase() : fullName); // fallback to fullName for other cases
+          final isSelected = user.language == code;
 
-            return SizedBox(
-              width: isWide ? 160 : (isTablet ? 130 : double.infinity),
-              child: GestureDetector(
-                onTap: () => onUserChange(user.copyWith(language: code)),
-                child: Card(
-                  color: isSelected ? Colors.amber : Colors.grey[900],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-                    child: Center(
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: isSelected ? Colors.black : Colors.white70,
-                        ),
+          return SizedBox(
+            width: isWide ? 160 : (isTablet ? 130 : double.infinity),
+            child: GestureDetector(
+              onTap: () => onUserChange(user.copyWith(language: code)),
+              child: Card(
+                color: isSelected ? Colors.amber : Colors.grey[900],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                  child: Center(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: isSelected ? Colors.black : Colors.white70,
                       ),
                     ),
                   ),
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
+            ),
+          );
+        }).toList(),
+      ),
+    ],
+  );
+}
+
+
 }
