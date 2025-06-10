@@ -48,7 +48,13 @@ class ProjectDatabase {
         autoSave INTEGER NOT NULL,
         showTips INTEGER NOT NULL,
         createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
+        updatedAt TEXT NOT NULL,
+        projectShowNoLabels INTEGER NOT NULL DEFAULT 1,
+        projectShowImportWarning INTEGER NOT NULL DEFAULT 1,
+        datasetEnableDuplicate INTEGER NOT NULL DEFAULT 1,
+        datasetEnableDelete INTEGER NOT NULL DEFAULT 1,
+        annotationAllowImageCopy INTEGER NOT NULL DEFAULT 1,
+        annotationOpacity REAL NOT NULL DEFAULT 0.35        
       )
     ''');
 

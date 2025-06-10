@@ -7,7 +7,7 @@ import '../session/user_session.dart';
 
 import '../widgets/account/user_profile.dart';
 import '../widgets/account/account_storage.dart';
-import '../widgets/account/account_settings.dart';
+import '../widgets/account/application_settings.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -75,6 +75,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
     }
 
     final bigScreen = screenWidth >= 1600;
+    final smallScreen = screenWidth < 700;
 
     return Scaffold(
       body: SafeArea(
@@ -107,9 +108,13 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (bigScreen) Icon(Icons.person_outline),
-                              if (bigScreen) SizedBox(width: 8),
-                              const Text('User Profile'),
+                              Icon(Icons.person_outline),
+                              if (screenWidth > 700)...[
+                                  SizedBox(width: 8),
+                                  const Text('User'),
+                              ],
+                              if (screenWidth > 1500)
+                                const Text(' Profile'),
                             ],
                           ),
                         ),
@@ -117,9 +122,13 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (bigScreen) Icon(Icons.folder_open),
-                              if (bigScreen) SizedBox(width: 8),
-                              const Text('Device Storage'),
+                              Icon(Icons.folder_open),
+                              if (screenWidth > 700 && screenWidth <= 1500)...[
+                                  SizedBox(width: 8),
+                                  const Text('Storage'),
+                              ],
+                              if (screenWidth > 1500)
+                                const Text('Device Storage'),
                             ],
                           ),
                         ),
@@ -127,9 +136,13 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (bigScreen) Icon(Icons.settings_outlined),
-                              if (bigScreen) SizedBox(width: 8),
-                              const Text('Application Settings'),
+                              Icon(Icons.folder_open),
+                              if (screenWidth > 700 && screenWidth <= 1500)...[
+                                  SizedBox(width: 8),
+                                  const Text('Settings'),
+                              ],
+                              if (screenWidth > 1500)
+                                const Text('Application Settings'),
                             ],
                           ),
                         ),
@@ -150,7 +163,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               _updateUser();
                             }),
                           ),
-                          AccountSettings(
+                          ApplicationSettings(
                             user: _user!,
                             onUserChange: (updated) => setState(() {
                               _user = updated;

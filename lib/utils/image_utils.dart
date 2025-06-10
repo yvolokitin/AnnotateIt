@@ -46,16 +46,24 @@ Future<void> duplicateMediaItem({
   required String datasetId,
   required bool withAnnotations,
 }) async {
-  // Copy the image file
   final originalFile = File(original.mediaItem.filePath);
   final originalExt = path.extension(originalFile.path);
-  final newFileName = '${DateTime.now().millisecondsSinceEpoch}$originalExt';
-  final newPath = path.join(originalFile.parent.path, newFileName);
 
-  final newFile = await originalFile.copy(newPath);
+  // Generate a unique filename
+  String newFileName;
+  String newPath;
+  File newFile;
+  do {
+    newFileName = '${DateTime.now().millisecondsSinceEpoch}${originalExt}';
+    newPath = path.join(originalFile.parent.path, newFileName);
+    newFile = File(newPath);
+  } while (await newFile.exists());
 
-  // Insert using the existing DatasetDatabase function
-  final cleanedExt = path.extension(newPath).replaceFirst('.', '');
+  // Copy the file
+  await originalFile.copy(newPath);
+
+  // Insert new media item into the database
+  final cleanedExt = originalExt.replaceFirst('.', '');
   await DatasetDatabase.instance.insertMediaItem(
     datasetId,
     newPath,
@@ -69,16 +77,16 @@ Future<void> duplicateMediaItem({
     source: 'duplicated',
   );
 
-  // Re-fetch new MediaItem to get new ID
+  // Fetch the newly inserted MediaItem to get its ID
   final allItems = await DatasetDatabase.instance.fetchMediaForDataset(datasetId);
   final newMediaItemRef = allItems.firstWhere((m) => m.filePath == newPath);
   final newMediaId = newMediaItemRef.id!;
 
-  // Copy annotations if needed
+  // Duplicate annotations if needed
   if (withAnnotations) {
     final now = DateTime.now();
     final newAnnotations = original.annotations.map((ann) => Annotation(
-      id: null,
+      id: null, // ensure SQLite generates a new ID
       mediaItemId: newMediaId,
       labelId: ann.labelId,
       annotationType: ann.annotationType,
