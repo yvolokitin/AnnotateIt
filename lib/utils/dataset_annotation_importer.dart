@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../models/media_item.dart';
+import '../models/label.dart';
 import '../data/annotation_database.dart';
 
 import 'dataset_annotation_parsers/coco_parser.dart';
@@ -12,11 +13,13 @@ import 'dataset_annotation_parsers/cvat_parser.dart';
 
 class DatasetAnnotationImporter {
   final AnnotationDatabase annotationDb;
+  
   final Logger _logger = Logger('DatasetAnnotationImporter');
 
   DatasetAnnotationImporter({required this.annotationDb});
 
   Future<int> addAnnotationsToProjectFromDataset({
+    required List<Label> projectLabels,
     required String datasetPath,
     required String format,
     required Map<String, MediaItem> mediaItemsMap,
@@ -26,6 +29,7 @@ class DatasetAnnotationImporter {
     switch (format.toLowerCase()) {
       case 'coco':
         return await COCOParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
@@ -35,6 +39,7 @@ class DatasetAnnotationImporter {
 
       case 'yolo':
         return await YOLOParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
@@ -44,6 +49,7 @@ class DatasetAnnotationImporter {
 
       case 'voc':
         return await VOCParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
@@ -53,6 +59,7 @@ class DatasetAnnotationImporter {
 
       case 'datumaro':
         return await DatumaroParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
@@ -62,6 +69,7 @@ class DatasetAnnotationImporter {
 
       case 'labelme':
         return await LabelMeParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,
@@ -71,6 +79,7 @@ class DatasetAnnotationImporter {
 
       case 'cvat':
         return await CVATParser.parse(
+          projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
           annotationDb: annotationDb,

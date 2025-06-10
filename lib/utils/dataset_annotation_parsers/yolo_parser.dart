@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 
+import '../../models/label.dart';
 import '../../data/annotation_database.dart';
 import '../../models/media_item.dart';
 import '../../models/annotation.dart';
@@ -11,6 +12,7 @@ class YOLOParser {
   static final Logger _logger = Logger('YOLOParser');
 
   static Future<int> parse({
+    required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,

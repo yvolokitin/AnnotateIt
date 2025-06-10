@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
 
+import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
 import '../../data/annotation_database.dart';
@@ -10,6 +11,7 @@ class VOCParser {
   static final Logger _logger = Logger('VOCParser');
 
   static Future<int> parse({
+    required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,

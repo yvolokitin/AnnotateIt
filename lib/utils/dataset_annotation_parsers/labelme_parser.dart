@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
 
+import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
 import '../../data/annotation_database.dart';
@@ -10,6 +11,7 @@ class LabelMeParser {
   static final Logger _logger = Logger('LabelMeParser');
 
   static Future<int> parse({
+    required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
     required AnnotationDatabase annotationDb,

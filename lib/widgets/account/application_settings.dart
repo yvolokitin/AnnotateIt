@@ -54,6 +54,7 @@ class ApplicationSettings extends StatelessWidget {
 
             _buildSection('Annotation Settings', [
               _buildSliderWithButtons(
+                context,
                 'Annotation opacity',
                 user.annotationOpacity ?? 0.35,
                 (val) => onUserChange(user.copyWith(annotationOpacity: val)),
@@ -96,14 +97,38 @@ class ApplicationSettings extends StatelessWidget {
     );
   }
 
-  Widget _buildSwitch(String title, bool value, ValueChanged<bool> onChanged) {
-    return SwitchListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(title, style: const TextStyle(fontSize: 20, color: Colors.white70)),
-      value: value,
-      onChanged: onChanged,
-    );
-  }
+Widget _buildSwitch(String title, bool value, ValueChanged<bool> onChanged) {
+  const redThumb = Color(0xFFFF0000);
+  const redTrack = Color(0x3FFF0000);
+
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Expanded(
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            color: Colors.white70,
+          ),
+        ),
+      ),
+      Switch(
+        value: value,
+        onChanged: onChanged,
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) return redThumb;
+          return Colors.grey;
+        }),
+        trackColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) return redTrack;
+          return Colors.grey.shade700;
+        }),
+      ),
+    ],
+  );
+}
 
   Widget _buildSwitchWithNote({
     required String title,
@@ -116,27 +141,39 @@ class ApplicationSettings extends StatelessWidget {
       children: [
         _buildSwitch(title, value, onChanged),
         Padding(
-          padding: const EdgeInsets.only(left: 16, bottom: 12),
-          child: Text(note, style: const TextStyle(fontSize: 16, color: Colors.white60)),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(note, style: const TextStyle(fontSize: 18, color: Colors.white60)),
         ),
       ],
     );
   }
 
-  Widget _buildSliderWithButtons(String label, double value, ValueChanged<double> onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.white)),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                if (value > 0.01) onChanged((value - 0.01).clamp(0.0, 1.0));
-              },
-              icon: const Icon(Icons.remove, color: Colors.white70),
-            ),
-            Expanded(
+Widget _buildSliderWithButtons(BuildContext context, String label, double value, ValueChanged<double> onChanged) {
+  const redColor = Color(0xFFFF0000); // solid red
+  const redColor30 = Color(0x4DFF0000); // 30% opacity
+  const redColor20 = Color(0x33FF0000); // 20% opacity
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: const TextStyle(color: Colors.white)),
+      Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              if (value > 0.01) onChanged((value - 0.01).clamp(0.0, 1.0));
+            },
+            icon: const Icon(Icons.remove, color: Colors.white70),
+          ),
+          Expanded(
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: redColor,
+                inactiveTrackColor: redColor30,
+                thumbColor: redColor,
+                overlayColor: redColor20,
+                valueIndicatorColor: redColor,
+              ),
               child: Slider(
                 value: value,
                 onChanged: onChanged,
@@ -146,17 +183,18 @@ class ApplicationSettings extends StatelessWidget {
                 label: '${(value * 100).toStringAsFixed(0)}%',
               ),
             ),
-            IconButton(
-              onPressed: () {
-                if (value < 0.99) onChanged((value + 0.01).clamp(0.0, 1.0));
-              },
-              icon: const Icon(Icons.add, color: Colors.white70),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+          ),
+          IconButton(
+            onPressed: () {
+              if (value < 0.99) onChanged((value + 0.01).clamp(0.0, 1.0));
+            },
+            icon: const Icon(Icons.add, color: Colors.white70),
+          ),
+        ],
+      ),
+    ],
+  );
+}
 
   Widget _buildThemeSelection() {
     return Column(
@@ -196,66 +234,64 @@ class ApplicationSettings extends StatelessWidget {
     );
   }
 
-Widget _buildCountrySelection(BuildContext context, bool isWide, bool isTablet) {
-  final countryNames = {
-    'en': 'English',
-    'es': 'Spanish',
-    'fr': 'French',
-    'de': 'German',
-    'it': 'Italian',
-    'pt': 'Portuguese',
-    'nl': 'Dutch',
-  };
+  Widget _buildCountrySelection(BuildContext context, bool isWide, bool isTablet) {
+    final countryNames = {
+      'en': 'English',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'nl': 'Dutch',
+    };
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Country / Language',
-        style: TextStyle(fontSize: 20, color: Colors.white70),
-      ),
-      const SizedBox(height: 8),
-      Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: countryNames.entries.map((entry) {
-          final code = entry.key;
-          final fullName = entry.value;
-          final label = isWide
-              ? fullName
-              : (isTablet ? code.toUpperCase() : fullName); // fallback to fullName for other cases
-          final isSelected = user.language == code;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Country / Language',
+          style: TextStyle(fontSize: 20, color: Colors.white70),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: countryNames.entries.map((entry) {
+            final code = entry.key;
+            final fullName = entry.value;
+            final label = isWide
+                ? fullName
+                : (isTablet ? code.toUpperCase() : fullName);
+            final isSelected = user.language == code;
 
-          return SizedBox(
-            width: isWide ? 160 : (isTablet ? 130 : double.infinity),
-            child: GestureDetector(
-              onTap: () => onUserChange(user.copyWith(language: code)),
-              child: Card(
-                color: isSelected ? Colors.amber : Colors.grey[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-                  child: Center(
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: isSelected ? Colors.black : Colors.white70,
+            return SizedBox(
+              width: isWide ? 160 : (isTablet ? 130 : double.infinity),
+              child: GestureDetector(
+                onTap: () => onUserChange(user.copyWith(language: code)),
+                child: Card(
+                  color: isSelected ? Colors.amber : Colors.grey[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                    child: Center(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: isSelected ? Colors.black : Colors.white70,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        }).toList(),
-      ),
-    ],
-  );
-}
-
-
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 }

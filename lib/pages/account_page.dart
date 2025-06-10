@@ -74,9 +74,6 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
       );
     }
 
-    final bigScreen = screenWidth >= 1600;
-    final smallScreen = screenWidth < 700;
-
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -91,7 +88,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: bigScreen ? 60.0 : 10.0,
+                  horizontal: (screenWidth >= 1600) ? 60.0 : 10.0,
                 ),
                 child: Column(
                   children: [
@@ -127,8 +124,10 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                                   SizedBox(width: 8),
                                   const Text('Storage'),
                               ],
-                              if (screenWidth > 1500)
+                              if (screenWidth > 1500)...[
+                                SizedBox(width: 8),
                                 const Text('Device Storage'),
+                              ],
                             ],
                           ),
                         ),
@@ -136,13 +135,15 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.folder_open),
+                              Icon(Icons.settings, ),
                               if (screenWidth > 700 && screenWidth <= 1500)...[
                                   SizedBox(width: 8),
                                   const Text('Settings'),
                               ],
-                              if (screenWidth > 1500)
+                              if (screenWidth > 1500)...[
+                                SizedBox(width: 8),
                                 const Text('Application Settings'),
+                              ],
                             ],
                           ),
                         ),

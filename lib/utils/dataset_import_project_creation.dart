@@ -63,26 +63,28 @@ class DatasetImportProjectCreation {
     }
 
     if (datasetInfo.labels.isNotEmpty) {
-      await addLabelsToProject(
+      final projectLabels = await addLabelsToProject(
         projectId: newProjectId,
         labelNames: datasetInfo.labels,
       );
+
+      final mediaItemsMap = await fetchMediaItemsMap(defaultDatasetId);
+
+      final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
+      final addedCount = await importer.addAnnotationsToProjectFromDataset(
+        projectLabels: projectLabels,
+        datasetPath: datasetInfo.datasetPath,
+        format: datasetInfo.datasetFormat,
+        mediaItemsMap: mediaItemsMap,
+        projectId: newProjectId,
+        annotatorId: currentUser.id ?? -1,
+      );
+    
+      print('Added $addedCount annotations.');
+
     } else {
       print("No labels detected in dataset. Skipping label import.");
     }
-
-    final mediaItemsMap = await fetchMediaItemsMap(defaultDatasetId);
-
-    final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
-    final addedCount = await importer.addAnnotationsToProjectFromDataset(
-      datasetPath: datasetInfo.datasetPath,
-      format: datasetInfo.datasetFormat,
-      mediaItemsMap: mediaItemsMap,
-      projectId: newProjectId,
-      annotatorId: currentUser.id ?? -1,
-    );
-    
-    print('Added $addedCount annotations.');
 
     return newProjectId;
   }
@@ -212,13 +214,13 @@ class DatasetImportProjectCreation {
     return firstImagePath;
   }
 
-  static Future<void> addLabelsToProject({
+  static Future<List<Label>> addLabelsToProject({
     required int projectId,
     required List<String> labelNames,
   }) async {
     if (labelNames.isEmpty) {
       print("No labels to add.");
-      return;
+      return [];
     }
 
     final random = Random();
@@ -227,20 +229,28 @@ class DatasetImportProjectCreation {
       final g = random.nextInt(256);
       final b = random.nextInt(256);
       return '#${r.toRadixString(16).padLeft(2, '0')}'
-            '${g.toRadixString(16).padLeft(2, '0')}'
-            '${b.toRadixString(16).padLeft(2, '0')}';
+          '${g.toRadixString(16).padLeft(2, '0')}'
+          '${b.toRadixString(16).padLeft(2, '0')}';
     }
 
-    final labels = labelNames.map((name) => Label(
-      id: null,
-      projectId: projectId,
-      name: name.trim(),
-      color: generateRandomColor(),
-      description: null,
-    )).toList();
+    final db = await LabelsDatabase.instance.database;
+    final List<Label> insertedLabels = [];
 
-    await LabelsDatabase.instance.updateProjectLabels(projectId, labels);
-    print("Added ${labels.length} labels to project $projectId");
+    for (final name in labelNames) {
+      final label = Label(
+        id: null,
+        projectId: projectId,
+        name: name.trim(),
+        color: generateRandomColor(),
+        description: null,
+      );
+
+      final labelId = await db.insert('labels', label.toMap());
+      insertedLabels.add(label.copyWith(id: labelId));
+    }
+
+    print("Added ${insertedLabels.length} labels to project $projectId");
+    return insertedLabels;
   }
 
   static Future<Map<String, MediaItem>> fetchMediaItemsMap(String datasetId) async {

@@ -34,6 +34,16 @@ class AnnotationDatabase {
     });
   }
 
+  Future<bool> labelExists(int labelId, int projectId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT id FROM labels
+      WHERE id = ? AND project_id = ?
+      LIMIT 1;
+    ''', [labelId, projectId]);
+    return result.isNotEmpty;
+  }
+
   /// Fetches annotations for a specific media item.
   ///
   /// [mediaItemId] – ID of the media item to fetch annotations for.
