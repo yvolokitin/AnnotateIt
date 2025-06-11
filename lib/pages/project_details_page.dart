@@ -1,17 +1,15 @@
-// import "package:flutter_svg/flutter_svg.dart";
 import "package:flutter/material.dart";
 
 import "../models/label.dart";
 import "../models/project.dart";
 
 import '../data/labels_database.dart';
-
-import '../widgets/dialogs/label_list_dialog.dart';
-import '../widgets/dialogs/color_picker_dialog.dart';
 import "../widgets/buttons/hover_icon_button.dart";
-import "../widgets/project_details/dataset_view_page.dart";
+
+import "../widgets/project_details/project_view_media_galery.dart";
+import '../widgets/project_details/project_view_datasets_overview.dart';
+import '../widgets/project_details/project_view_labels.dart';
 import '../widgets/project_details/project_details_sidebar.dart';
-import '../widgets/project_details/project_details_add_label.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   final Project project;
@@ -23,24 +21,27 @@ class ProjectDetailsPage extends StatefulWidget {
 }
 
 class ProjectDetailsPageState extends State<ProjectDetailsPage> {
-  final ScrollController _scrollController = ScrollController();
   List<Label> labels = [];
   int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadProjectDetails();
-  }
 
-  Future<void> _loadProjectDetails() async {
-    // print("ProjectDetailsScreen: Loading project details:\n${widget.project}");
     labels = List<Label>.from(widget.project.labels ?? []);
 
+    _loadProjectLabels();
+  }
+
+  Future<void> _loadProjectLabels() async {
     if (widget.project.labels == null || widget.project.labels!.isEmpty) {
       print("ProjectDetailsScreen: No labels, loading ${widget.project.name} project labels .... ");
-      if (widget.project.id != null ) {
-        labels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
+
+      if (widget.project.id != null) {
+        final loadedLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
+        setState(() {
+          labels = loadedLabels;
+        });
       }
     }
   }
@@ -49,38 +50,6 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
     setState(() {
       selectedIndex = index;
     });
-  }
-
-  void _showColorPicker(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => ColorPickerDialog(
-        initialColor: labels[index].color,
-        onColorSelected: (newColor) {
-          setState(() {
-            labels[index] = labels[index].copyWith(color: newColor);
-          });
-          // TODO: Persist label color change to DB
-        },
-      ),
-    );
-  }
-
-  void _handleAddNewLabel(String name, String color) {
-    final newLabel = Label(
-      projectId: widget.project.id ?? 0,
-      name: name,
-      color: color,
-    );
-
-    setState(() {
-      labels.add(newLabel);
-      widget.project.labels ??= [];
-      widget.project.labels!.add(newLabel); 
-    });
-
-    // Optional: print or do something else
-    print('New label added: $name - $color');
   }
 
   @override
@@ -168,76 +137,35 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   Widget getSelectedWidget(int index) {
     switch (index) {
       case 0:
-        return DatasetViewPage(
+        return ProjectViewMediaGalery(
           project: widget.project,
           datasetId: widget.project.defaultDatasetId!,
           labels: labels,
         );
 
       case 1:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Text(
-                    'Labels',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)
-                    ),
-                ],
-              ),
-            ),
-
-            Divider(color: Colors.grey),
-            SizedBox(height: 25),
-
-            ProjectDetailsAddLabel(
-              labels: labels,
-              projectType: widget.project.type,
-              onAddNewLabel: _handleAddNewLabel,
-            ),
-        
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: LabelListDialog(
-                  labels: labels,
-                  scrollController: _scrollController,
-                  onColorTap: _showColorPicker,
-                  onNameChanged: (index, newName) {
-                    setState(() {
-                      labels[index] = labels[index].copyWith(name: newName);
-                    });
-                    // TODO: Save updated label name to database
-                  },
-                  onDelete: (label) {
-                    setState(() {
-                      labels.remove(label);
-                    });
-                    // TODO: Delete label from database
-                  },  
-                  onColorChanged: (index, newColor) {
-                    setState(() {
-                      labels[index] = labels[index].copyWith(color: newColor);
-                    });
-                    // TODO: Update label color in database
-                  },
-                ),
-              ),
-            ),
-          ],  
+        return ProjectViewLabels(
+          project: widget.project,
+          labels: labels,
+          onLabelsUpdated: (updatedLabels) {
+            setState(() {
+              labels = updatedLabels;
+            });
+            // You may also persist to DB here
+          },
         );
-        default:
-          return DatasetViewPage(
-            project: widget.project,
-            datasetId: widget.project.defaultDatasetId!,
-            labels: labels,
-          );
+
+      case 2:
+        return ProjectViewDatasetsOverview(
+          project: widget.project,
+        );
+
+      default:
+        return ProjectViewMediaGalery(
+          project: widget.project,
+          datasetId: widget.project.defaultDatasetId!,
+          labels: labels,
+        );
       }
     }
   }
@@ -262,7 +190,7 @@ class AppDrawer extends StatelessWidget {
           // Drawer items
           DrawerItem(
             icon: Icons.image,
-            title: "Datasets",
+            title: "Media",
             fullMode: fullMode,
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
@@ -273,6 +201,13 @@ class AppDrawer extends StatelessWidget {
             fullMode: fullMode,
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
+          ),
+          DrawerItem(
+            icon: Icons.assignment,
+            title: "Overview",
+            fullMode: fullMode,
+            isSelected: selectedIndex == 2,
+            onTap: () => onItemSelected(2),
           ),
         ],
       ),
@@ -295,13 +230,24 @@ class NavigationRailMenu extends StatelessWidget {
     return NavigationRail(
       selectedIndex: selectedIndex,
       onDestinationSelected: onItemSelected,
+      
+      selectedIconTheme: const IconThemeData(color: Colors.red),
+      selectedLabelTextStyle: const TextStyle(color: Colors.red),
+      unselectedIconTheme: const IconThemeData(color: Colors.white70),
+      unselectedLabelTextStyle: const TextStyle(color: Colors.white54),
+      backgroundColor: Colors.grey[900],
+      
       destinations: [
         NavigationRailDestination(icon: Icon(Icons.image), label: Text(
-          'Datasets',
+          'Media',
           style: Theme.of(context).textTheme.titleMedium,
         )),
         NavigationRailDestination(icon: Icon(Icons.label), label: Text(
           'Labels',
+          style: Theme.of(context).textTheme.headlineMedium,
+        )),
+        NavigationRailDestination(icon: Icon(Icons.assignment), label: Text(
+          'Overview',
           style: Theme.of(context).textTheme.headlineMedium,
         )),
       ],

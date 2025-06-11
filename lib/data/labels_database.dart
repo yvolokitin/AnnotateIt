@@ -56,15 +56,58 @@ class LabelsDatabase {
     return result.map((map) => Label.fromMap(map)).toList();
   }
 
-  /// Insert a single label
+  /// Insert a label for a specific project.
+  /// Throws if projectId is null or project does not exist.
   Future<int> insertLabel(Label label) async {
     final db = await database;
+    if (label.projectId == null) {
+      throw ArgumentError('Label must be associated with a project (projectId cannot be null).');
+    }
+
+    // Verify project exists
+    final projectExists = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM projects WHERE id = ?',
+      [label.projectId],
+    )) == 1;
+
+    if (!projectExists) {
+      throw Exception('Cannot insert label: project with ID ${label.projectId} does not exist.');
+    }
+
     return await db.insert('labels', label.toMap());
   }
 
-  /// Delete a specific label
+  Future<int> updateLabel(Label label) async {
+    final db = await database;
+    if (label.id == null) {
+      throw ArgumentError("Cannot update label without ID.");
+    }
+
+    if (label.projectId == null) {
+      throw ArgumentError('Label must be associated with a project (projectId cannot be null).');
+    }
+
+    return db.update(
+      'labels',
+      label.toMap(),
+      where: 'id = ?',
+      whereArgs: [label.id],
+    );
+  }
+
+  /// Delete a label by ID, but ensure it belongs to an existing project.
   Future<int> deleteLabel(int labelId) async {
     final db = await database;
+    // check if label exists first
+    final labelExists = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM labels WHERE id = ?',
+      [labelId],
+    )) == 1;
+
+    if (!labelExists) {
+      throw Exception('Label with ID $labelId does not exist.');
+    }
+
     return await db.delete('labels', where: 'id = ?', whereArgs: [labelId]);
   }
 

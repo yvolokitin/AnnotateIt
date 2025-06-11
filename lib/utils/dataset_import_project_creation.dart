@@ -19,7 +19,7 @@ import '../models/label.dart';
 import '../models/project.dart';
 import '../models/archive.dart';
 import '../models/media_item.dart';
-import '../models/media_folder.dart';
+// import '../models/media_folder.dart';
 
 typedef ProgressCallback = void Function(int current, int total);
 
@@ -33,7 +33,7 @@ class DatasetImportProjectCreation {
     final currentUser = UserSession.instance.getUser();
 
     // Step 1: Create the project
-    final newProjectId = await ProjectDatabase.instance.createProject(
+    final newProject = await ProjectDatabase.instance.createProject(
       Project(
         name: archive.zipFileName,
         type: archive.selectedTaskType ?? 'Unknown',
@@ -46,10 +46,10 @@ class DatasetImportProjectCreation {
     );
 
     // Step 2: Validate dataset creation
-    final String? defaultDatasetId = await ProjectDatabase.instance.getDefaultDatasetId(newProjectId);
-    if (defaultDatasetId == null) {
-      throw Exception("Created Project $newProjectId has no default dataset assigned.");
-    }
+    // final String? defaultDatasetId = await ProjectDatabase.instance.getDefaultDatasetId(newProjectId);
+    // if (defaultDatasetId == null) {
+    //   throw Exception("Created Project $newProjectId has no default dataset assigned.");
+    // }
 
     // Step 3: Create MediaFolder
     final folderId = await DatasetDatabase.instance.createMediaFolder(
@@ -59,28 +59,28 @@ class DatasetImportProjectCreation {
     );
     // Step 4: Link MediaFolder to Dataset
     await DatasetDatabase.instance.linkMediaFolderToDataset(
-      datasetId: defaultDatasetId,
+      datasetId: newProject.defaultDatasetId!,
       folderId: folderId,
     );
 
     // Step 5: Add media items to dataset
     final String? firstImagePath = await addMediaItemsToDataset(
       datasetPath: archive.datasetPath,
-      datasetId: defaultDatasetId,
+      datasetId: newProject.defaultDatasetId!,
       ownerId: currentUser.id ?? -1,
       onProgress: onProgress,
     );
 
     // Step 6: Update project icon
     if (firstImagePath != null) {
-      final thumbnailFile = await generateThumbnailFromImage(File(firstImagePath), newProjectId.toString());
+      final thumbnailFile = await generateThumbnailFromImage(File(firstImagePath), newProject.id.toString());
       if (thumbnailFile != null) {
-        await ProjectDatabase.instance.updateProjectIcon(newProjectId, thumbnailFile.path);
+        await ProjectDatabase.instance.updateProjectIcon(newProject.id!, thumbnailFile.path);
       }
     }
 
     // Step 7: Update the default dataset with archive info
-    final existingDataset = await DatasetDatabase.instance.loadDatasetWithFolderIds(defaultDatasetId);
+    final existingDataset = await DatasetDatabase.instance.loadDatasetWithFolderIds(newProject.defaultDatasetId!);
     if (existingDataset != null) {
       final updatedDataset = existingDataset.copyWith(
         name: archive.zipFileName.split('.').first,
@@ -100,11 +100,11 @@ class DatasetImportProjectCreation {
     // Step 8: Add labels (if present)
     if (archive.labels.isNotEmpty) {
       final projectLabels = await addLabelsToProject(
-        projectId: newProjectId,
+        projectId: newProject.id!,
         labelNames: archive.labels,
       );
 
-      final mediaItemsMap = await fetchMediaItemsMap(defaultDatasetId);
+      final mediaItemsMap = await fetchMediaItemsMap(newProject.defaultDatasetId!);
 
       final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
       final addedCount = await importer.addAnnotationsToProjectFromDataset(
@@ -112,7 +112,7 @@ class DatasetImportProjectCreation {
         datasetPath: archive.datasetPath,
         format: archive.datasetFormat,
         mediaItemsMap: mediaItemsMap,
-        projectId: newProjectId,
+        projectId: newProject.id!,
         annotatorId: currentUser.id ?? -1,
       );
     
@@ -122,7 +122,7 @@ class DatasetImportProjectCreation {
       print("No labels detected in dataset. Skipping label import.");
     }
 
-    return newProjectId;
+    return newProject.id!;
   }
 
   static Future<String?> addMediaItemsToDataset({

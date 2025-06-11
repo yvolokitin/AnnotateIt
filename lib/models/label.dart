@@ -6,6 +6,7 @@ class Label {
   final String name;
   final String color;
   final String? description;
+  final DateTime createdAt;
 
   Label({
     this.id,
@@ -13,7 +14,8 @@ class Label {
     required this.name,
     required this.color,
     this.description,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   Label copyWith({
     int? id,
@@ -21,6 +23,7 @@ class Label {
     String? name,
     String? color,
     String? description,
+    DateTime? createdAt,
   }) {
     return Label(
       id: id ?? this.id,
@@ -28,6 +31,7 @@ class Label {
       name: name ?? this.name,
       color: color ?? this.color,
       description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -38,6 +42,7 @@ class Label {
       name: map['name'] as String,
       color: map['color'] as String,
       description: map['description'] as String?,
+      createdAt: DateTime.parse(map['createdAt']),
     );
   }
 
@@ -48,6 +53,7 @@ class Label {
       'name': name,
       'color': color,
       if (description != null) 'description': description,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 

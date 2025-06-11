@@ -15,14 +15,14 @@ import '../../data/project_database.dart';
 import 'dataset_tab_content.dart';
 import 'dataset_tab_bar.dart';
 
-class DatasetViewPage extends StatefulWidget {
+class ProjectViewMediaGalery extends StatefulWidget {
   final Project project;
   final String datasetId;
   final List<Label> labels;
 
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
 
-  const DatasetViewPage({
+  const ProjectViewMediaGalery({
     required this.project,
     required this.datasetId,
     required this.labels,
@@ -31,10 +31,10 @@ class DatasetViewPage extends StatefulWidget {
   });
 
   @override
-  DatasetViewPageState createState() => DatasetViewPageState();
+  ProjectViewMediaGaleryState createState() => ProjectViewMediaGaleryState();
 }
 
-class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderStateMixin {
+class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with TickerProviderStateMixin {
   Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
   List<Dataset> datasets = [];
   String currentDatasetId = '';

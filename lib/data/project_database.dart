@@ -175,6 +175,7 @@ class ProjectDatabase {
         name TEXT NOT NULL,
         color TEXT NOT NULL,
         description TEXT,
+        createdAt TEXT NOT NULL,
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
       );
     ''');
@@ -203,63 +204,67 @@ class ProjectDatabase {
     ''');
   }
 
-  Future<int> createProject(Project project) async {
-    final db = await database;
+Future<Project> createProject(Project project) async {
+  final db = await database;
 
-    // Fallback name if empty
-    final String projectName = (project.name.trim().isEmpty)
-      ? 'Project'
-      : project.name.trim();
+  final String projectName = (project.name.trim().isEmpty)
+    ? 'Project'
+    : project.name.trim();
 
-    final now = DateTime.now();
+  final now = DateTime.now();
 
-    // Start a DB transaction
-    return await db.transaction<int>((txn) async {
-      // Step 1: Insert project without defaultDatasetId
-      final projectId = await txn.insert('projects', {
-        'name': projectName,
-        'type': project.type,
-        'icon': project.icon,
-        'creationDate': now.toIso8601String(),
-        'lastUpdated': now.toIso8601String(),
-        'ownerId': project.ownerId,
-      });
-
-      // Step 2: Create the default dataset
-      final dataset = Dataset(
-        id: uuid.v4(),
-        projectId: projectId,
-        name: 'Dataset',
-        description: 'Default dataset for $projectName',
-        type: project.type, // assume it's the same as project
-        source: 'manual',
-        format: 'custom',
-        version: '1.0.0',
-        mediaCount: 0,
-        annotationCount: 0,
-        defaultDataset: true,
-        license: null,
-        metadata: null,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      await txn.insert('datasets', dataset.toMap());
-
-      // Step 3: Update the project with the defaultDatasetId
-      await txn.update(
-        'projects',
-        {
-          'defaultDatasetId': dataset.id,
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
-        where: 'id = ?',
-        whereArgs: [projectId],
-      );
-
-      return projectId;
+  return await db.transaction<Project>((txn) async {
+    // Insert project without defaultDatasetId
+    final projectId = await txn.insert('projects', {
+      'name': projectName,
+      'type': project.type,
+      'icon': project.icon,
+      'creationDate': now.toIso8601String(),
+      'lastUpdated': now.toIso8601String(),
+      'ownerId': project.ownerId,
     });
-  }
+
+    // Create default dataset
+    final dataset = Dataset(
+      id: uuid.v4(),
+      projectId: projectId,
+      name: 'Dataset',
+      description: 'Default dataset for $projectName',
+      type: project.type,
+      source: 'manual',
+      format: 'custom',
+      version: '1.0.0',
+      mediaCount: 0,
+      annotationCount: 0,
+      defaultDataset: true,
+      license: null,
+      metadata: null,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await txn.insert('datasets', dataset.toMap());
+
+    // Update project with defaultDatasetId
+    await txn.update(
+      'projects',
+      {
+        'defaultDatasetId': dataset.id,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    print('dataset.id ${dataset.id} for $projectName created');
+
+    // Return a new complete Project object
+    return project.copyWith(
+      id: projectId,
+      defaultDatasetId: dataset.id,
+    );
+  });
+}
 
   Future<String?> getDefaultDatasetId(int projectId) async {
     final db = await database;

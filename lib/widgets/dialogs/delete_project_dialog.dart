@@ -37,10 +37,11 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
 
     await deleteProjectSafe(widget.project, deleteFromDisk: _deleteFromDisk);
 
-    widget.onOptionsSelected?.call(_deleteFromDisk, _dontAskAgain);
-    widget.onConfirmed();
-
-    if (mounted) Navigator.pop(context);
+    if (mounted) {
+      widget.onOptionsSelected?.call(_deleteFromDisk, _dontAskAgain);
+      widget.onConfirmed();
+      Navigator.of(context).pop();
+    }
   }
 
   @override

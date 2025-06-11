@@ -1,8 +1,6 @@
 import "package:flutter/material.dart";
 
 import '../session/user_session.dart';
-import '../utils/project_utils.dart';
-
 import "../models/project.dart";
 import "../data/project_database.dart";
 import "../data/labels_database.dart";
@@ -25,7 +23,6 @@ class ProjectsListPage extends StatefulWidget {
 }
 
 class ProjectsListPageState extends State<ProjectsListPage> {
-  // late Future<List<Project>> _projectsFuture;
   List<Project> _allProjects = [];
   List<Project> _filteredProjects = [];
   String _searchQuery = "";
@@ -243,21 +240,25 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 leading: Icon(Icons.delete, color: Colors.red),
                 title: Text("Delete Project"),
                 onTap: () {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder: (_) => DeleteProjectDialog(
-                      project: project,
-                      onConfirmed: () {
-                        Navigator.pop(context);
-                      },
-                      onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
-                        if (dontAskAgain) {
-                          await UserSession.instance.setProjectSkipDeleteConfirm(true);
-                        }
-                        await deleteProjectSafe(project, deleteFromDisk: deleteFromDisk);
-                      },
-                    ),
+                    final currentContext = context;
+                    Navigator.pop(context);
+
+                    Future.delayed(Duration.zero, () {
+                      showDialog(
+                        context: currentContext,
+                        builder: (_) => DeleteProjectDialog(
+                          project: project,
+                          onConfirmed: () {
+                            _loadProjects(); // ← Refresh the list after deletion                        
+                          },
+                          onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
+                            if (dontAskAgain) {
+                              await UserSession.instance.setProjectSkipDeleteConfirm(true);
+                            }
+                          },
+                        ),
+                      );
+                    },
                   );
                 },
               ),

@@ -262,22 +262,21 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           ownerId: currentUser.id ?? -1,
         );
 
-        final newProjectId = await ProjectDatabase.instance.createProject(newProject);
+        // final newProjectId = await ProjectDatabase.instance.createProject(newProject);
+        final fullProject = await ProjectDatabase.instance.createProject(newProject);
         final labelsWithNewProjectId = _createdLabels
-          .map((label) => label.copyWith(projectId: newProjectId))
+          .map((label) => label.copyWith(projectId: fullProject.id!))
           .toList();
 
-        await LabelsDatabase.instance.updateProjectLabels(newProjectId, labelsWithNewProjectId);
+        await LabelsDatabase.instance.updateProjectLabels(fullProject.id!, labelsWithNewProjectId);
 
         if (!mounted) return;
+
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ProjectDetailsPage(
-              newProject.copyWith(
-                id: newProjectId,
-                labels: labelsWithNewProjectId,
-              ),
+              fullProject.copyWith(labels: labelsWithNewProjectId),
             ),
           ),
         );
