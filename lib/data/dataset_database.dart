@@ -26,6 +26,7 @@ class DatasetDatabase {
 
   Future<Dataset> createDatasetForProject({
     required int projectId,
+    required String projectType,
     String name = 'New Dataset',
     String description = '',
     bool isDefault = false,
@@ -33,6 +34,7 @@ class DatasetDatabase {
   }) async {
     final db = await database;
 
+    // Prevent multiple default datasets
     if (isDefault) {
       final result = await db.query(
         'projects',
@@ -46,12 +48,23 @@ class DatasetDatabase {
       }
     }
 
+    final now = DateTime.now();
     final dataset = Dataset(
       id: _uuid.v4(),
       projectId: projectId,
-      name: name,
+      name: name.trim().isEmpty ? 'Dataset' : name.trim(),
       description: description,
-      createdAt: DateTime.now(),
+      type: projectType,
+      source: 'manual',
+      format: 'custom',
+      version: '1.0.0',
+      mediaCount: 0,
+      annotationCount: 0,
+      defaultDataset: isDefault,
+      license: null,
+      metadata: null,
+      createdAt: now,
+      updatedAt: now,
     );
 
     await db.insert('datasets', dataset.toMap());
@@ -110,6 +123,32 @@ class DatasetDatabase {
     );
 
     return mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
+  }
+
+  Future<Dataset?> loadDatasetWithFolderIds(String datasetId) async {
+    final db = await database;
+
+    // Step 1: Load dataset
+    final datasetResult = await db.query(
+      'datasets',
+      where: 'id = ?',
+      whereArgs: [datasetId],
+    );
+
+    if (datasetResult.isEmpty) return null;
+
+    final datasetMap = datasetResult.first;
+
+    // Step 2: Load folder IDs via the junction table
+    final folderResults = await db.rawQuery('''
+      SELECT folderId FROM dataset_media_folders
+      WHERE datasetId = ?
+    ''', [datasetId]);
+
+    final folderIds = folderResults.map((row) => row['folderId'] as int).toList();
+
+    // Step 3: Return Dataset with folders field populated
+    return Dataset.fromMap(datasetMap).copyWith(folders: folderIds);
   }
 
   Future<void> insertMediaItem(
@@ -280,4 +319,117 @@ class DatasetDatabase {
       labels: labels,
     );
   }
+
+  Future<int> createMediaFolder({
+    required String path,
+    required String name,
+    required DateTime createdAt,
+  }) async {
+    final db = await database;
+    final folderMap = {
+      'path': path,
+      'name': name,
+      'createdAt': createdAt.toIso8601String(),
+    };
+
+    return await db.insert('media_folders', folderMap);
+  }
+
+  Future<void> linkMediaFolderToDataset({
+    required String datasetId,
+    required int folderId,
+  }) async {
+    final db = await database;
+    await db.insert('dataset_media_folders', {
+      'datasetId': datasetId,
+      'folderId': folderId,
+    });
+  }
+
+  Future<String?> getMediaFolderPath(int folderId) async {
+    final db = await database;
+    final result = await db.query(
+      'media_folders',
+      columns: ['path'],
+      where: 'id = ?',
+      whereArgs: [folderId],
+      limit: 1,
+    );
+    if (result.isNotEmpty) {
+      return result.first['path'] as String;
+    }
+    return null;
+  }
+
+  Future<void> deleteMediaFolderLink({
+    required String datasetId,
+    required int folderId,
+  }) async {
+    final db = await database;
+    await db.delete(
+      'dataset_media_folders',
+      where: 'datasetId = ? AND folderId = ?',
+      whereArgs: [datasetId, folderId],
+    );
+  }
+
+  Future<void> deleteDatasetsForProject({required int projectId}) async {
+    final db = await database;
+
+    // Get all datasets linked to the project
+    final datasets = await fetchDatasetsForProject(projectId);
+
+    for (final dataset in datasets) {
+      // Remove all folder links for the dataset
+      await db.delete(
+        'dataset_media_folders',
+        where: 'datasetId = ?',
+        whereArgs: [dataset.id],
+      );
+
+      // Delete annotations and media
+      final mediaItems = await fetchMediaForDataset(dataset.id);
+      for (final media in mediaItems) {
+        if (media.id != null) {
+          await deleteMediaItemWithAnnotations(media.id!);
+        }
+      }
+
+      // Delete the dataset
+      await db.delete(
+        'datasets',
+        where: 'id = ?',
+        whereArgs: [dataset.id],
+      );
+    }
+  }
+
+  Future<List<int>> getFolderIdsForDataset(String datasetId) async {
+    final db = await database;
+    final results = await db.query(
+      'dataset_media_folders',
+      columns: ['folderId'],
+      where: 'datasetId = ?',
+      whereArgs: [datasetId],
+    );
+
+    return results.map((row) => row['folderId'] as int).toList();
+  }
+
+  Future<List<String>> getOtherProjectNamesUsingFolder({
+    required int folderId,
+    required String currentDatasetId,
+  }) async {
+    final db = await database;
+    final results = await db.rawQuery('''
+      SELECT DISTINCT p.name
+      FROM projects p
+      JOIN datasets d ON p.id = d.projectId
+      JOIN dataset_media_folders f ON d.id = f.datasetId
+      WHERE f.folderId = ? AND d.id != ?
+    ''', [folderId, currentDatasetId]);
+
+    return results.map((row) => row['name'] as String).toList();
+  }
+
 }

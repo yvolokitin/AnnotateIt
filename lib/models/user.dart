@@ -13,12 +13,13 @@ class User {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  final bool? projectShowNoLabels;
-  final bool? projectShowImportWarning;
-  final bool? datasetEnableDuplicate;
-  final bool? datasetEnableDelete;
-  final bool? annotationAllowImageCopy;
-  final double? annotationOpacity;
+  final bool projectSkipDeleteConfirm;
+  final bool projectShowNoLabels;
+  final bool projectShowImportWarning;
+  final bool datasetEnableDuplicate;
+  final bool datasetEnableDelete;
+  final bool annotationAllowImageCopy;
+  final double annotationOpacity;
 
   static final List<String> fields = [
     'id',
@@ -34,6 +35,7 @@ class User {
     'showTips',
     'createdAt',
     'updatedAt',
+    'projectSkipDeleteConfirm',
     'projectShowNoLabels',
     'projectShowImportWarning',
     'datasetEnableDuplicate',
@@ -56,6 +58,7 @@ class User {
     required this.showTips,
     required this.createdAt,
     required this.updatedAt,
+    required this.projectSkipDeleteConfirm,
     required this.projectShowNoLabels,
     required this.projectShowImportWarning,
     required this.datasetEnableDuplicate,
@@ -78,6 +81,7 @@ User copyWith({
   bool? showTips,
   DateTime? createdAt,
   DateTime? updatedAt,
+  bool? projectSkipDeleteConfirm,
   bool? projectShowNoLabels,
   bool? projectShowImportWarning,
   bool? datasetEnableDuplicate,
@@ -99,6 +103,7 @@ User copyWith({
     showTips: showTips ?? this.showTips,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    projectSkipDeleteConfirm: projectSkipDeleteConfirm ?? this.projectSkipDeleteConfirm,
     projectShowNoLabels: projectShowNoLabels ?? this.projectShowNoLabels,
     projectShowImportWarning: projectShowImportWarning ?? this.projectShowImportWarning,
     datasetEnableDuplicate: datasetEnableDuplicate ?? this.datasetEnableDuplicate,
@@ -122,7 +127,7 @@ User copyWith({
         'showTips': showTips ? 1 : 0,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
-
+        'projectSkipDeleteConfirm': projectSkipDeleteConfirm ? 1 : 0,
         'projectShowNoLabels': projectShowNoLabels == true ? 1 : 0,
         'projectShowImportWarning': projectShowImportWarning == true ? 1 : 0,
         'datasetEnableDuplicate': datasetEnableDuplicate == true ? 1 : 0,
@@ -146,6 +151,7 @@ User copyWith({
       showTips: map['showTips'] == 1,
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
+      projectSkipDeleteConfirm: map['projectSkipDeleteConfirm'] == 1,
       projectShowNoLabels: map['projectShowNoLabels'] == 1,
       projectShowImportWarning: map['projectShowImportWarning'] == 1,
       datasetEnableDuplicate: map['datasetEnableDuplicate'] == 1,

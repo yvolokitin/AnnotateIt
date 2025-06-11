@@ -513,6 +513,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)'**
   String get saveDuplicateChoiceAsDefault;
+
+  /// No description provided for @deleteProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Project'**
+  String get deleteProjectTitle;
+
+  /// No description provided for @deleteProjectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the project \"{projectName}\"?'**
+  String deleteProjectConfirm(Object projectName);
 }
 
 class _AppLocalizationsDelegate

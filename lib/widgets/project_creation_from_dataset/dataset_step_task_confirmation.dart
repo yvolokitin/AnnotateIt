@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'dataset_dialog_project_type_helper.dart';
-import '../../../models/dataset_info.dart';
+import '../../../models/archive.dart';
 
 class StepDatasetTaskConfirmation extends StatefulWidget {
-  final DatasetInfo info;
+  final Archive archive;
   final void Function(String selectedTask)? onSelectionChanged;
 
   const StepDatasetTaskConfirmation({
     super.key,
-    required this.info,
+    required this.archive,
     this.onSelectionChanged,
   });
 
@@ -38,8 +38,8 @@ class StepDatasetTaskConfirmationState
   @override
   void initState() {
     super.initState();
-    selectedTask = widget.info.taskTypes.isNotEmpty
-        ? widget.info.taskTypes.first
+    selectedTask = widget.archive.taskTypes.isNotEmpty
+        ? widget.archive.taskTypes.first
         : tasks.first['title'];
   }
 
@@ -47,7 +47,7 @@ class StepDatasetTaskConfirmationState
 
   @override
   Widget build(BuildContext context) {
-    final detectedTasks = widget.info.taskTypes.toSet();
+    final detectedTasks = widget.archive.taskTypes.toSet();
     final allEnabled = detectedTasks.contains("Unknown") || detectedTasks.isEmpty;
 
     return SingleChildScrollView(

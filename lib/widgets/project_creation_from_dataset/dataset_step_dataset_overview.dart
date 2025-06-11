@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../models/dataset_info.dart';
+import '../../../models/archive.dart';
 
 import 'dataset_dialog_show_all_labels.dart';
 
 class StepDatasetOverview extends StatelessWidget {
-  final DatasetInfo info;
+  final Archive archive;
 
-  const StepDatasetOverview({super.key, required this.info});
+  const StepDatasetOverview({super.key, required this.archive});
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +23,28 @@ class StepDatasetOverview extends StatelessWidget {
                 context,
                 "Dataset Name and Path",
                 [
-                  _buildRow(context, "Dataset ZIP File name", info.zipFileName),
-                  _buildRow(context, "Dataset Path", info.datasetPath),
-                  _buildRow(context, "Number of files in Dataset", info.mediaCount.toString()),
+                  _buildRow(context, "ZIP Archive file name", archive.zipFileName),
+                  _buildRow(context, "ZIP Archive Path", archive.datasetPath),
+                  _buildRow(context, "Number of files in ZIP Archive", archive.mediaCount.toString()),
                 ],
               ),
               _buildCard(
                 context,
                 "Dataset Type and Format",
                 [
-                  _buildRow(context, "Dataset Format", info.datasetFormat),
-                  _buildTaskTypesRow(context, info.taskTypes),
+                  _buildRow(context, "Dataset Format", archive.datasetFormat),
+                  _buildTaskTypesRow(context, archive.taskTypes),
                 ],
               ),
               _buildCard(
                 context,
                 "Dataset Annotations",
                 [
-                  _buildRow(context, "Number of Annotated Files", info.annotatedFilesCount.toString()),
-                  _buildRow(context, "Number of Annotations", info.annotationCount.toString()),
+                  _buildRow(context, "Number of Annotated Files", archive.annotatedFilesCount.toString()),
+                  _buildRow(context, "Number of Annotations", archive.annotationCount.toString()),
                 ],
               ),
-              _buildLabelsCard(context, "Dataset Labels", info.labels),
+              _buildLabelsCard(context, "Dataset Labels", archive.labels),
             ],
           ),
         ),

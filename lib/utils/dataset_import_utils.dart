@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:isolate';
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive_io.dart' as zip;
 import 'package:xml/xml.dart';
 
-import '../models/dataset_info.dart';
+import '../models/archive.dart';
+
 import 'dataset_task_type_detector.dart';
 
 class DatasetAnnotationStats {
@@ -351,7 +352,7 @@ Future<Directory> extractZipToAppFolder(
   await outputDir.create(recursive: true);
 
   final bytes = zipFile.readAsBytesSync();
-  final archive = ZipDecoder().decodeBytes(bytes);
+  final archive = zip.ZipDecoder().decodeBytes(bytes);
 
   final totalFiles = archive.length;
   int extractedCount = 0;
@@ -523,8 +524,8 @@ Future<void> cleanupExtractedPath(
 /// Reports progress via [onExtractProgress], [onDetectProgress].
 /// Calls [onExtractDone] after extraction.
 /// 
-/// Returns [DatasetInfo].
-Future<DatasetInfo> processZipLocally({
+/// Returns [Archive].
+Future<Archive> processZipLocally({
   required File zipFile,
   required String storagePath,
   required void Function(double progress) onExtractProgress,
@@ -555,7 +556,7 @@ Future<DatasetInfo> processZipLocally({
   final mediaFiles = allFiles.where((f) =>
       mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
-  // 🟢 Use new high-quality annotation stats function
+  // Use new high-quality annotation stats function
   final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
 
   // Just collect annotation file names for label list (same as before)
@@ -563,7 +564,7 @@ Future<DatasetInfo> processZipLocally({
   final annotationFiles = allFiles.where((f) =>
       annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
-  return DatasetInfo(
+  return Archive(
     zipFileName: zipFile.path.split(Platform.pathSeparator).last,
     datasetPath: extractedDir.path,
     mediaCount: mediaFiles.length,
@@ -581,8 +582,8 @@ Future<DatasetInfo> processZipLocally({
 /// Reports progress via [onExtractProgress], [onDetectProgress].
 /// Calls [onExtractDone] after extraction.
 /// 
-/// Returns [DatasetInfo].
-Future<DatasetInfo> processZipLocallyWithIsolates({
+/// Returns [Archive].
+Future<Archive> processZipLocallyWithIsolates({
   required File zipFile,
   required String storagePath,
   required void Function(double progress) onExtractProgress,
@@ -646,11 +647,11 @@ Future<DatasetInfo> processZipLocallyWithIsolates({
   List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
 
   // Collect annotation file names for label list (same as before)
-  final annotationExtensions = ['.json', '.xml', '.txt'];
-  final annotationFiles = allFiles.where((f) =>
-      annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
+  // final annotationExtensions = ['.json', '.xml', '.txt'];
+  // final annotationFiles = allFiles.where((f) =>
+  //    annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
-  return DatasetInfo(
+  return Archive(
     zipFileName: zipFile.path.split(Platform.pathSeparator).last,
     datasetPath: extractedPath,
     mediaCount: mediaFiles.length,

@@ -1,12 +1,17 @@
 import "package:flutter/material.dart";
+
+import '../session/user_session.dart';
+import '../utils/project_utils.dart';
+
+import "../models/project.dart";
 import "../data/project_database.dart";
 import "../data/labels_database.dart";
-import "../models/project.dart";
 
 import "../widgets/project_list/project_tile.dart";
 import "../widgets/projects_topbar.dart";
 import "../widgets/edit_project_name.dart";
 import "../widgets/empty_project_placeholder.dart";
+import '../widgets/dialogs/delete_project_dialog.dart';
 
 import "project_details_page.dart";
 import "project_creation/create_from_dataset_dialog.dart";
@@ -239,7 +244,21 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 title: Text("Delete Project"),
                 onTap: () {
                   Navigator.pop(context);
-                  _deleteProject(project);
+                  showDialog(
+                    context: context,
+                    builder: (_) => DeleteProjectDialog(
+                      project: project,
+                      onConfirmed: () {
+                        Navigator.pop(context);
+                      },
+                      onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
+                        if (dontAskAgain) {
+                          await UserSession.instance.setProjectSkipDeleteConfirm(true);
+                        }
+                        await deleteProjectSafe(project, deleteFromDisk: deleteFromDisk);
+                      },
+                    ),
+                  );
                 },
               ),
             ],

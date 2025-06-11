@@ -49,6 +49,7 @@ class ProjectDatabase {
         showTips INTEGER NOT NULL,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
+        projectSkipDeleteConfirm INTEGER NOT NULL DEFAULT 0,
         projectShowNoLabels INTEGER NOT NULL DEFAULT 1,
         projectShowImportWarning INTEGER NOT NULL DEFAULT 1,
         datasetEnableDuplicate INTEGER NOT NULL DEFAULT 1,
@@ -105,37 +106,66 @@ class ProjectDatabase {
         projectId INTEGER NOT NULL,
         name TEXT NOT NULL,
         description TEXT,
+        type TEXT NOT NULL,
+        source TEXT DEFAULT 'manual',
+        format TEXT DEFAULT 'custom',
+        version TEXT DEFAULT '1.0.0',
+        mediaCount INTEGER DEFAULT 0,
+        annotationCount INTEGER DEFAULT 0,
+        defaultDataset INTEGER DEFAULT 0 CHECK (defaultDataset IN (0, 1)),
+        license TEXT,
+        metadata TEXT,
         createdAt TEXT NOT NULL,
+        updatedAt TEXT,
         FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE CASCADE
-      )
+      );
     ''');
 
-  await db.execute('''
-    CREATE TABLE media_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Internal DB ID
-      uuid TEXT UNIQUE,                              -- Unique UUID for external reference
-      datasetId TEXT,                                -- Foreign key to datasets table
-      filePath TEXT,                                 -- Absolute or relative path to file
-      extension TEXT,                                -- File extension (e.g., .jpg, .mp4)
-      type TEXT,                                     -- "image" or "video"
+    await db.execute('''
+      CREATE TABLE media_folders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        path TEXT NOT NULL,
+        name TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      );
+    ''');
 
-      width INTEGER,                                 -- Media width (in pixels)
-      height INTEGER,                                -- Media height (in pixels)
-      duration REAL,                                 -- Duration in seconds (only for videos)
-      fps REAL,                                      -- Frames per second (only for videos)
-      source TEXT,                                   -- Source of media: "uploaded", "imported", or "url"
+    await db.execute('''
+      CREATE TABLE dataset_media_folders (
+        datasetId TEXT NOT NULL,
+        folderId INTEGER NOT NULL,
+        PRIMARY KEY (datasetId, folderId),
+        FOREIGN KEY (datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
+        FOREIGN KEY (folderId) REFERENCES media_folders(id) ON DELETE CASCADE
+      );
+    ''');
 
-      uploadDate TEXT,                               -- ISO 8601 date-time string
-      owner_id INTEGER NOT NULL,                     -- Foreign key to users (owner of the media)
+    await db.execute('''
+      CREATE TABLE media_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Internal DB ID
+        uuid TEXT UNIQUE,                              -- Unique UUID for external reference
+        datasetId TEXT,                                -- Foreign key to datasets table
+        filePath TEXT,                                 -- Absolute or relative path to file
+        extension TEXT,                                -- File extension (e.g., .jpg, .mp4)
+        type TEXT,                                     -- "image" or "video"
 
-      lastAnnotator TEXT,                            -- Name or ID of last annotator (nullable)
-      lastAnnotatedDate TEXT,                        -- ISO date-time string of last annotation
-      numberOfFrames INTEGER,                        -- Total frames (useful for videos)
+        width INTEGER,                                 -- Media width (in pixels)
+        height INTEGER,                                -- Media height (in pixels)
+        duration REAL,                                 -- Duration in seconds (only for videos)
+        fps REAL,                                      -- Frames per second (only for videos)
+        source TEXT,                                   -- Source of media: "uploaded", "imported", or "url"
 
-      FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
-      FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
-    );
-  ''');
+        uploadDate TEXT,                               -- ISO 8601 date-time string
+        owner_id INTEGER NOT NULL,                     -- Foreign key to users (owner of the media)
+
+        lastAnnotator TEXT,                            -- Name or ID of last annotator (nullable)
+        lastAnnotatedDate TEXT,                        -- ISO date-time string of last annotation
+        numberOfFrames INTEGER,                        -- Total frames (useful for videos)
+
+        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
+        FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    ''');
 
     // Labels table (per project)
     await db.execute('''
@@ -181,7 +211,7 @@ class ProjectDatabase {
       ? 'Project'
       : project.name.trim();
 
-    final now = DateTime.now().toIso8601String();
+    final now = DateTime.now();
 
     // Start a DB transaction
     return await db.transaction<int>((txn) async {
@@ -190,8 +220,8 @@ class ProjectDatabase {
         'name': projectName,
         'type': project.type,
         'icon': project.icon,
-        'creationDate': now,
-        'lastUpdated': now,
+        'creationDate': now.toIso8601String(),
+        'lastUpdated': now.toIso8601String(),
         'ownerId': project.ownerId,
       });
 
@@ -201,7 +231,17 @@ class ProjectDatabase {
         projectId: projectId,
         name: 'Dataset',
         description: 'Default dataset for $projectName',
-        createdAt: DateTime.now(),
+        type: project.type, // assume it's the same as project
+        source: 'manual',
+        format: 'custom',
+        version: '1.0.0',
+        mediaCount: 0,
+        annotationCount: 0,
+        defaultDataset: true,
+        license: null,
+        metadata: null,
+        createdAt: now,
+        updatedAt: now,
       );
 
       await txn.insert('datasets', dataset.toMap());
@@ -288,57 +328,71 @@ class ProjectDatabase {
     _log.info('Set dataset $datasetId as default for project $projectId');
   }
 
-  Future<Dataset> createDatasetForProject({required int projectId, String name = 'New Dataset', String description = '', bool isDefault = false,}) async {
-    final db = await database;
+  Future<Dataset> createDatasetForProject({
+      required int projectId,
+      required String projectType,
+      String name = 'New Dataset',
+      String description = '',
+      bool isDefault = false
+    }) async {
+      final db = await database;
 
-    // Check if a default dataset already exists
-    if (isDefault) {
-      final List<Map<String, dynamic>> existing = await db.query(
-        'projects',
-        where: 'id = ? AND defaultDatasetId IS NOT NULL',
-        whereArgs: [projectId],
-      );
-
-      if (existing.isNotEmpty) {
-        throw Exception('Default dataset already exists for this project.');
+      // Check if a default dataset already exists
+      if (isDefault) {
+        final List<Map<String, dynamic>> existing = await db.query(
+          'projects',
+          where: 'id = ? AND defaultDatasetId IS NOT NULL',
+          whereArgs: [projectId],
+        );
+        if (existing.isNotEmpty) {
+          throw Exception('Default dataset already exists for this project.');
+        }
       }
-    }
 
-    // Create dataset
-    final dataset = Dataset(
-      id: uuid.v4(),
-      projectId: projectId,
-      name: name,
-      description: description,
-      createdAt: DateTime.now(),
-    );
+      final now = DateTime.now();
+      // Create dataset
+      final dataset = Dataset(
+        id: uuid.v4(),
+        projectId: projectId,
+        name: name.trim().isEmpty ? 'Dataset' : name.trim(),
+        description: description,
+        type: projectType,
+        source: 'manual',
+        format: 'custom',
+        version: '1.0.0',
+        mediaCount: 0,
+        annotationCount: 0,
+        defaultDataset: isDefault,
+        license: null,
+        metadata: null,
+        createdAt: now,
+        updatedAt: now,
+        );
+        await db.insert('datasets', dataset.toMap());
 
-    await db.insert('datasets', dataset.toMap());
+        // If it's a default dataset, update the project record
+        if (isDefault) {
+          await db.update(
+            'projects',
+            {
+              'defaultDatasetId': dataset.id,
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
+            where: 'id = ?',
+            whereArgs: [projectId],
+          );
+        } else { // else update only lastUpdated timestamp
+          await db.update(
+            'projects',
+            {
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
+            where: 'id = ?',
+            whereArgs: [projectId],
+          );
+        }
 
-    // If it's a default dataset, update the project record
-    if (isDefault) {
-      await db.update(
-        'projects',
-        {
-          'defaultDatasetId': dataset.id,
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
-        where: 'id = ?',
-        whereArgs: [projectId],
-      );
-
-    } else { // else update only lastUpdated timestamp
-      await db.update(
-        'projects',
-        {
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
-        where: 'id = ?',
-        whereArgs: [projectId],
-      );
-    }
-
-    return dataset;
+        return dataset;
   }
 
   Future<void> updateProjectLastUpdated(int projectId) async {

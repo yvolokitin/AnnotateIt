@@ -77,12 +77,24 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
       return 0;
     });
 
+    // Add the "+ tab" placeholder with required fields
     fetchedDatasets.add(Dataset(
       id: 'add_new_tab',
       projectId: widget.project.id!,
       name: '+',
       description: '',
+      type: widget.project.type,
+      source: 'manual',
+      format: 'custom',
+      version: '1.0.0',
+      mediaCount: 0,
+      annotationCount: 0,
+      defaultDataset: false,
+      license: null,
+      metadata: null,
+      folders: const [],
       createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ));
 
     if (!mounted) return;
@@ -91,8 +103,8 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     });
 
     _rebuildTabController();
-    if (widget.datasetId != null) {
-      loadMediaForDataset(widget.datasetId, itemsPerPage, 0);
+    if (currentDatasetId != null) {
+      loadMediaForDataset(currentDatasetId, itemsPerPage, 0);
     }
 
     if (!mounted) return;
@@ -200,6 +212,7 @@ class DatasetViewPageState extends State<DatasetViewPage> with TickerProviderSta
     if (currentDataset.id == 'add_new_tab') {
       final newDataset = await DatasetDatabase.instance.createDatasetForProject(
         projectId: widget.project.id!,
+        projectType: widget.project.type,
         name: 'Dataset ${datasets.length + 1}',
       );
 

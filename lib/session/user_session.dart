@@ -1,6 +1,8 @@
 import 'dart:io';
-import '../models/user.dart';
 import 'package:logging/logging.dart';
+
+import '../models/user.dart';
+import '../data/user_database.dart';
 
 /// A singleton service that manages the current logged-in or active user in memory.
 ///
@@ -47,6 +49,16 @@ class UserSession {
       throw Exception("UserSession not initialized. Call setUser() first.");
     }
     return _currentUser!;
+  }
+
+  Future<void> setProjectSkipDeleteConfirm(bool skip) async {
+    final user = getUser();
+    await UserDatabase.instance.setProjectSkipDeleteConfirm(
+      userId: user.id!,
+      skip: skip,
+    );
+
+    _currentUser = user.copyWith(projectSkipDeleteConfirm: skip);
   }
 
   Future<String> getCurrentUserDatasetFolder() async {

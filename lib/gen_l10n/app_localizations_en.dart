@@ -250,4 +250,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get saveDuplicateChoiceAsDefault =>
       'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)';
+
+  @override
+  String get deleteProjectTitle => 'Delete Project';
+
+  @override
+  String deleteProjectConfirm(Object projectName) {
+    return 'Are you sure you want to delete the project \"$projectName\"?';
+  }
 }

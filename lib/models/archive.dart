@@ -1,34 +1,15 @@
-// lib/models/dataset_info.dart
-
-class DatasetInfo {
-  /// Name of the original dataset ZIP file
+class Archive {
   final String zipFileName;
-
-  /// Local path where the dataset was extracted
   final String datasetPath;
-
-  /// Total number of media files (images/videos)
   final int mediaCount;
-
-  /// Total number of annotation items
   final int annotationCount;
-
-  /// Number of media files that have at least one annotation
   final int annotatedFilesCount;
-
-  /// Detected dataset format (COCO, YOLO, VOC, etc.)
   final String datasetFormat;
-
-  /// Detected possible dataset task types (Detection, Classification etc.)
   final List<String> taskTypes;
-
-  /// User-selected task type for project creation
   final String? selectedTaskType;
-
-  /// List of detected label names
   final List<String> labels;
 
-  DatasetInfo({
+  Archive({
     required this.zipFileName,
     required this.datasetPath,
     required this.mediaCount,
@@ -40,8 +21,7 @@ class DatasetInfo {
     required this.labels,
   });
 
-  /// Creates a copy of this object with optional new values
-  DatasetInfo copyWith({
+  Archive copyWith({
     String? zipFileName,
     String? datasetPath,
     int? mediaCount,
@@ -52,7 +32,7 @@ class DatasetInfo {
     String? selectedTaskType,
     List<String>? labels,
   }) {
-    return DatasetInfo(
+    return Archive(
       zipFileName: zipFileName ?? this.zipFileName,
       datasetPath: datasetPath ?? this.datasetPath,
       mediaCount: mediaCount ?? this.mediaCount,
@@ -68,21 +48,21 @@ class DatasetInfo {
   @override
   String toString() {
     return '''
-      DatasetInfo(
-      zipFileName: $zipFileName,
-      datasetPath: $datasetPath,
-      mediaCount: $mediaCount,
-      annotationCount: $annotationCount,
-      annotatedFilesCount: $annotatedFilesCount,
-      datasetFormat: $datasetFormat,
-      taskTypes: ${taskTypes.join(', ')},
-      selectedTaskType: $selectedTaskType,
-      labels: ${labels.length} labels
-    )
+      Archive(
+        zipFileName: $zipFileName,
+        datasetPath: $datasetPath,
+        mediaCount: $mediaCount,
+        annotationCount: $annotationCount,
+        annotatedFilesCount: $annotatedFilesCount,
+        datasetFormat: $datasetFormat,
+        taskTypes: ${taskTypes.join(', ')},
+        selectedTaskType: $selectedTaskType,
+        labels: ${labels.length} labels
+      )
     ''';
   }
 
-  DatasetInfo withDefaultSelectedTaskType() {
+  Archive withDefaultSelectedTaskType() {
     if ((selectedTaskType != null && selectedTaskType!.isNotEmpty) || taskTypes.isEmpty) {
       // already assigned or no detected types
       return this;

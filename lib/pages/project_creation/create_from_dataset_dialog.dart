@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:logging/logging.dart';
 
-import '../../../models/dataset_info.dart';
+import '../../../models/archive.dart';
 import '../../../session/user_session.dart';
+
 import '../../../utils/dataset_import_utils.dart';
 import '../../../utils/dataset_import_project_creation.dart';
 
@@ -38,7 +39,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   bool _useIsolateMode = false;
   int _currentStep = 1;
-  DatasetInfo? _datasetInfo;
+  Archive? _archive;
   double _progress = 0.0;
 
   // progress callback for project creation step
@@ -50,18 +51,18 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     });
   }
 
-  void _pickFile() async {
+  void _pickZipArchive() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
     );
     if (result != null && result.files.single.path != null) {
       final file = File(result.files.single.path!);
-      await _processZip(file);
+      await _processZipArchive(file);
     }
   }
 
-  Future<void> _processZip(File file) async {
+  Future<void> _processZipArchive(File file) async {
     setState(() {
       _isUploading = true;
       _progress = 0.0;
@@ -101,15 +102,15 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             );
 
       setState(() {
-        _datasetInfo = info;
+        _archive = info;
         _isUploading = false;
         _progress = 1.0;
       });
     } catch (e, stack) {
       _logger.warning('Failed to process ZIP file: $e', e, stack);
-      if (_datasetInfo != null) {
+      if (_archive != null) {
         await cleanupExtractedPath(
-          _datasetInfo!.datasetPath,
+          _archive!.datasetPath,
           onLog: (msg) => _logger.info(msg),
         );
       }
@@ -120,18 +121,18 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       setState(() {
         _isUploading = false;
         _currentStep = 1;
-        _datasetInfo = null;
+        _archive = null;
       });
     }
   }
 
   Future<void> _goToNextStep() async {
-    if (_currentStep == 3 && _datasetInfo != null) {
-      _datasetInfo = _datasetInfo!.withDefaultSelectedTaskType();
+    if (_currentStep == 3 && _archive != null) {
+      _archive = _archive!.withDefaultSelectedTaskType();
       setState(() => _currentStep = 4);
 
-    } else if (_currentStep == 4 && _datasetInfo != null) {
-      final selectedTask = _datasetInfo!.selectedTaskType?.trim();
+    } else if (_currentStep == 4 && _archive != null) {
+      final selectedTask = _archive!.selectedTaskType?.trim();
       if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
         await showDialog(
           context: context,
@@ -168,7 +169,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         setState(() => _isCreatingProject = true);
 
         final int newProjectId = await DatasetImportProjectCreation.createProjectWithDataset(
-          _datasetInfo!,
+          _archive!,
           onProgress: _onMediaImportProgress,
         );
         if (!mounted) return;
@@ -211,12 +212,12 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       return;
     }
 
-    if (_datasetInfo != null) {
+    if (_archive != null) {
       final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
       if (shouldCancel != true) return;
 
       await cleanupExtractedPath(
-        _datasetInfo!.datasetPath,
+        _archive!.datasetPath,
         onLog: (msg) => _logger.info(msg),
       );
     }
@@ -250,11 +251,11 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               return false;
             }
 
-            if (_datasetInfo != null) {
+            if (_archive != null) {
               final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
               if (shouldCancel != true) return false;
               await cleanupExtractedPath(
-                _datasetInfo!.datasetPath,
+                _archive!.datasetPath,
                 onLog: (msg) => _logger.info(msg),
               );
             }
@@ -292,8 +293,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             const SizedBox(height: 8),
             StepDescriptionWidget(
               currentStep: _currentStep,
-              extractedPath: _datasetInfo?.datasetPath,
-              datasetFormat: _datasetInfo?.datasetFormat,
+              extractedPath: _archive?.datasetPath,
+              datasetFormat: _archive?.datasetFormat,
             ),
             const SizedBox(height: 24),
             DatasetStepProgressBar(currentStep: _currentStep),
@@ -366,17 +367,17 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   Widget _buildStepContent() {
     if (_currentStep == 1) {
-      return UploadPrompt(onPickFile: _pickFile);
+      return UploadPrompt(onPickFile: _pickZipArchive);
 
-    } else if (_currentStep == 3 && _datasetInfo != null) {
-      return StepDatasetOverview(info: _datasetInfo!);
+    } else if (_currentStep == 3 && _archive != null) {
+      return StepDatasetOverview(archive: _archive!);
 
-    } else if (_currentStep == 4 && _datasetInfo != null) {
+    } else if (_currentStep == 4 && _archive != null) {
       return StepDatasetTaskConfirmation(
-        info: _datasetInfo!,
+        archive: _archive!,
         onSelectionChanged: (selectedTask) {
           setState(() {
-            _datasetInfo = _datasetInfo!.copyWith(selectedTaskType: selectedTask);
+            _archive = _archive!.copyWith(selectedTaskType: selectedTask);
           });
         },
       );

@@ -52,8 +52,13 @@ class DatumaroParser {
     final Map<int, Label> labelIndexMap = {
       for (int i = 0; i < projectLabels.length; i++) i: projectLabels[i]
     };
+    final Map<String, Label> labelNameMap = {
+      for (final label in projectLabels) label.name.toLowerCase(): label
+    };
 
     int addedCount = 0;
+    final Map<int, int> labelCount = {};
+    final DateTime timestamp = DateTime.now();
 
     void logAndSkip(String message) {
       _logger.warning('[Datumaro] $message');
@@ -64,38 +69,47 @@ class DatumaroParser {
       required Map<String, dynamic> ann,
     }) async {
       final int? labelIndex = ann['label_id'] as int?;
-      final Label? label = (labelIndex != null) ? labelIndexMap[labelIndex] : null;
+      Label? label = (labelIndex != null) ? labelIndexMap[labelIndex] : null;
+
+      if (label == null && ann.containsKey('label')) {
+        final name = (ann['label'] as String?)?.toLowerCase();
+        label = name != null ? labelNameMap[name] : null;
+      }
 
       if (label == null || label.id == null) {
-        logAndSkip('Invalid or unknown label index: $labelIndex for "${mediaItem.filePath}". Skipping.');
+        logAndSkip('Unknown label for annotation in ${mediaItem.filePath}');
         return;
       }
+
+      final type = ann['type'] ?? 'unknown';
+      final data = ann['data'] ?? ann;
 
       await annotationDb.insertAnnotation(
         Annotation(
           id: null,
           mediaItemId: mediaItem.id!,
           labelId: label.id,
-          annotationType: ann['type'] ?? 'unknown',
-          data: ann['data'] ?? ann,
+          annotationType: type,
+          data: data,
           confidence: (ann['confidence'] != null)
               ? (ann['confidence'] as num).toDouble()
               : null,
           annotatorId: annotatorId,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+          createdAt: timestamp,
+          updatedAt: timestamp,
         ),
       );
+
+      labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
       addedCount++;
     }
 
-    // CASE 1: Old format with "annotations"
     if (data.containsKey('annotations')) {
       final annotations = data['annotations'];
       if (annotations is Map<String, dynamic>) {
         for (final entry in annotations.entries) {
           final imageName = entry.key;
-          final mediaItem = mediaItemsMap[imageName.toLowerCase()];
+          final mediaItem = mediaItemsMap[p.basename(imageName).toLowerCase()];
           if (mediaItem == null) {
             logAndSkip('image "$imageName" not found in mediaItems. Skipping.');
             continue;
@@ -138,6 +152,10 @@ class DatumaroParser {
       }
     } else {
       _logger.warning('[Datumaro] unknown format: missing "annotations" or "items" key');
+    }
+
+    for (final entry in labelCount.entries) {
+      _logger.info('[Datumaro] labelId ${entry.key} -> ${entry.value} annotations');
     }
 
     _logger.info('[Datumaro] added $addedCount annotations from ${annotationFile.path}');

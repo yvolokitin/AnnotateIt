@@ -101,6 +101,9 @@
   "duplicateWithAnnotationsHint": "A copy of the image will be created along with all annotation data.",
   "duplicateImageOnly": "Duplicate image only",
   "duplicateImageOnlyHint": "Only the image will be copied, without annotations.",
-  "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)"
+  "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)",
+
+  "deleteProjectTitle": "Delete Project",
+  "deleteProjectConfirm": "Are you sure you want to delete the project \"{projectName}\"?"
 
 }

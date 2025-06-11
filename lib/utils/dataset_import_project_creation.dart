@@ -17,8 +17,9 @@ import '../data/annotation_database.dart';
 
 import '../models/label.dart';
 import '../models/project.dart';
-import '../models/dataset_info.dart';
+import '../models/archive.dart';
 import '../models/media_item.dart';
+import '../models/media_folder.dart';
 
 typedef ProgressCallback = void Function(int current, int total);
 
@@ -26,15 +27,16 @@ class DatasetImportProjectCreation {
   static final Logger _logger = Logger('DatasetImportProjectCreation');
 
   static Future<int> createProjectWithDataset(
-    DatasetInfo datasetInfo,
+    Archive archive,
     {required ProgressCallback onProgress}
   ) async {
     final currentUser = UserSession.instance.getUser();
 
+    // Step 1: Create the project
     final newProjectId = await ProjectDatabase.instance.createProject(
       Project(
-        name: datasetInfo.zipFileName,
-        type: datasetInfo.selectedTaskType ?? 'Unknown',
+        name: archive.zipFileName,
+        type: archive.selectedTaskType ?? 'Unknown',
         icon: "assets/images/default_project_image.svg",
         creationDate: DateTime.now(),
         lastUpdated: DateTime.now(),
@@ -43,18 +45,33 @@ class DatasetImportProjectCreation {
       ),
     );
 
+    // Step 2: Validate dataset creation
     final String? defaultDatasetId = await ProjectDatabase.instance.getDefaultDatasetId(newProjectId);
     if (defaultDatasetId == null) {
       throw Exception("Created Project $newProjectId has no default dataset assigned.");
     }
 
+    // Step 3: Create MediaFolder
+    final folderId = await DatasetDatabase.instance.createMediaFolder(
+      path: archive.datasetPath,
+      name: archive.zipFileName.split('.').first,
+      createdAt: DateTime.now(),
+    );
+    // Step 4: Link MediaFolder to Dataset
+    await DatasetDatabase.instance.linkMediaFolderToDataset(
+      datasetId: defaultDatasetId,
+      folderId: folderId,
+    );
+
+    // Step 5: Add media items to dataset
     final String? firstImagePath = await addMediaItemsToDataset(
-      datasetPath: datasetInfo.datasetPath,
+      datasetPath: archive.datasetPath,
       datasetId: defaultDatasetId,
       ownerId: currentUser.id ?? -1,
       onProgress: onProgress,
     );
 
+    // Step 6: Update project icon
     if (firstImagePath != null) {
       final thumbnailFile = await generateThumbnailFromImage(File(firstImagePath), newProjectId.toString());
       if (thumbnailFile != null) {
@@ -62,10 +79,29 @@ class DatasetImportProjectCreation {
       }
     }
 
-    if (datasetInfo.labels.isNotEmpty) {
+    // Step 7: Update the default dataset with archive info
+    final existingDataset = await DatasetDatabase.instance.loadDatasetWithFolderIds(defaultDatasetId);
+    if (existingDataset != null) {
+      final updatedDataset = existingDataset.copyWith(
+        name: archive.zipFileName.split('.').first,
+        description: 'Imported from archive',
+        type: archive.selectedTaskType ?? 'detection',
+        format: archive.datasetFormat,
+        source: 'imported',
+        version: '1.0.0',
+        mediaCount: archive.mediaCount,
+        annotationCount: archive.annotationCount,
+        updatedAt: DateTime.now(),
+      );
+
+      await DatasetDatabase.instance.updateDataset(updatedDataset);
+    }
+  
+    // Step 8: Add labels (if present)
+    if (archive.labels.isNotEmpty) {
       final projectLabels = await addLabelsToProject(
         projectId: newProjectId,
-        labelNames: datasetInfo.labels,
+        labelNames: archive.labels,
       );
 
       final mediaItemsMap = await fetchMediaItemsMap(defaultDatasetId);
@@ -73,8 +109,8 @@ class DatasetImportProjectCreation {
       final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
       final addedCount = await importer.addAnnotationsToProjectFromDataset(
         projectLabels: projectLabels,
-        datasetPath: datasetInfo.datasetPath,
-        format: datasetInfo.datasetFormat,
+        datasetPath: archive.datasetPath,
+        format: archive.datasetFormat,
         mediaItemsMap: mediaItemsMap,
         projectId: newProjectId,
         annotatorId: currentUser.id ?? -1,

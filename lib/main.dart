@@ -17,8 +17,6 @@ import "data/annotation_database.dart";
 import "data/project_database.dart";
 import "data/labels_database.dart";
 
-// 👇 Localization import
-// import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vap/gen_l10n/app_localizations.dart';
 
 ThemeData themeData = getSystemTheme();

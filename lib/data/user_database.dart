@@ -52,6 +52,22 @@ class UserDatabase {
     return null;
   }
 
+  Future<void> setProjectSkipDeleteConfirm({
+    required int userId,
+    required bool skip,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {
+        'projectSkipDeleteConfirm': skip ? 1 : 0,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
   Future<int> update(User user) async {
     final db = await database;
     return db.update(
