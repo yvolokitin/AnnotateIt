@@ -71,11 +71,23 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+/*                GestureDetector(
+                  onTap: () => Navigator.pop(context, 'refresh'),
+                  child: Image.asset(
+                    'assets/icons/icons8-return-100.png',
+                    height: 32,
+                    width: 32,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+*/
+
                 HoverIconButton(
                   icon: Icons.arrow_back,
                   margin: EdgeInsets.only(left: 20.0),
                   onPressed: () => Navigator.pop(context, 'refresh'),
                 ),
+                
                 HoverIconButton(
                   icon: Icons.help_outline,
                   margin: EdgeInsets.only(right: 20.0),

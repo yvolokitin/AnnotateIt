@@ -249,7 +249,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                         builder: (_) => DeleteProjectDialog(
                           project: project,
                           onConfirmed: () {
-                            _loadProjects(); // ← Refresh the list after deletion                        
+                            // Refresh the list after deletion
+                            _loadProjects();
                           },
                           onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
                             if (dontAskAgain) {
