@@ -41,25 +41,19 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   final Map<int, AnnotatedLabeledMedia> _mediaCache = {};
   final Map<int, Future<AnnotatedLabeledMedia?>> _mediaFutures = {};
 
-  late AnnotatedLabeledMedia currentMediaItem;
   late PageController _pageController;
   late double _currentZoom = 1.0;
   late int _resetZoomCount = 0;
-  late int _currentIndex = 0;
   bool showRightSidebar = false;
   bool _mouseInsideImage = false;
-  int currentImageIndex = 0;
   double labelOpacity = 0.35;
-
   ui.Image? _cachedImage;
 
   @override
   void initState() {
     super.initState();
-    currentImageIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
-    currentMediaItem = widget.mediaItem;
-    _currentIndex = widget.localIndex;
-    _pageController = PageController(initialPage: _currentIndex);
+    final initialIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
+    _pageController = PageController(initialPage: initialIndex);
   }
 
   Future<AnnotatedLabeledMedia?> getMediaFuture(int index) {
@@ -77,11 +71,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
     _mediaFutures[index] = future;
     return future;
-  }
-
-  Future<AnnotatedLabeledMedia?> loadMediaAtIndex(int index) async {
-    print('loadMediaAtIndex index $index');
-    return await DatasetDatabase.instance.loadMediaAtIndex(widget.datasetId, index);
   }
 
   Future<ui.Image> _loadImageFromFile(File file) async {
@@ -103,112 +92,90 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             onHelp: () {},
           ),
           Expanded(
-            child: Row(
-              children: [
-                AnnotatorLeftToolbar(
-                  type: widget.project.type,
-                  opacity: labelOpacity,
-                  onOpacityChanged: (value) => setState(() => labelOpacity = value),
-                  onMouseIconChanged: (value) => setState(() => _cursorIcon = value),
-                  onResetZoomPressed: () => setState(() => _resetZoomCount++),
-                  onShowDatasetGridChanged: (value) => setState(() => showRightSidebar = value),
-                ),
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.totalMediaCount,
+              onPageChanged: (_) => setState(() => _cachedImage = null),
+              itemBuilder: (context, index) {
+                return FutureBuilder<AnnotatedLabeledMedia?>(
+                  future: getMediaFuture(index),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: PageView.builder(
-                          controller: _pageController,
-                          itemCount: widget.totalMediaCount,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentIndex = index;
-                              currentImageIndex = index;
-                              _cachedImage = null;
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            return FutureBuilder<AnnotatedLabeledMedia?>(
-                              future: getMediaFuture(index),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) {
-                                  return const Center(child: CircularProgressIndicator());
-                                }
+                    final media = snapshot.data!;
+                    return FutureBuilder<ui.Image>(
+                      future: _cachedImage != null
+                          ? Future.value(_cachedImage)
+                          : _loadImageFromFile(File(media.mediaItem.filePath)).then((image) {
+                              _cachedImage = image;
+                              return image;
+                            }),
+                      builder: (context, imageSnap) {
+                        if (!imageSnap.hasData) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
 
-                                final media = snapshot.data!;
-                                return FutureBuilder<ui.Image>(
-                                  future: _cachedImage != null
-                                    ? Future.value(_cachedImage)
-                                    : _loadImageFromFile(File(media.mediaItem.filePath)).then((image) {
-                                      _cachedImage = image;
-                                      return image;
-                                    }),
-                                  builder: (context, imageSnap) {
-                                    if (!imageSnap.hasData || imageSnap.data == null) {
-                                      return const Center(child: CircularProgressIndicator());
-                                    }
-
-                                    return Column(
-                                      children: [
-                                        Expanded(
-                                          child: MouseRegion(
-                                            onEnter: (_) => setState(() => _mouseInsideImage = true),
-                                            onExit: (_) => setState(() => _mouseInsideImage = false),
-                                            cursor: _mouseInsideImage ? _cursorIcon : SystemMouseCursors.basic,
-                                            child: AnnotatorCanvas(
-                                              image: imageSnap.data!,
-                                              labels: widget.project.labels!,
-                                              annotations: media.annotations,
-                                              resetZoomCount: _resetZoomCount,
-                                              opacity: labelOpacity,
-                                              onZoomChanged: (zoom) => setState(() => _currentZoom = zoom),
-                                            ),
-                                          ),
-                                        ),
-                                        AnnotatorBottomToolbar(
-                                          currentZoom: _currentZoom,
-                                          currentMedia: media.mediaItem,
-                                          onZoomIn: () {}, // Implement zoom in logic
-                                          onZoomOut: () {}, // Implement zoom out logic
-                                          onPrevImg: () {
-                                            final newPage = _pageController.page!.toInt() - 1;
-                                            if (newPage >= 0) {
-                                              _pageController.jumpToPage(newPage);
-                                            } else {
-                                              _pageController.jumpToPage(widget.totalMediaCount - 1);
-                                            }
-                                          },
-                                          onNextImg: () {
-                                            final newPage = _pageController.page!.toInt() + 1;
-                                            if (newPage < widget.totalMediaCount) {
-                                              _pageController.jumpToPage(newPage);
-                                            } else {
-                                              _pageController.jumpToPage(0);
-                                            }
-                                          },
-                                          onSaveAnnotations: () {
-                                            // save annotations in DB logic here, tbd
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                AnnotatorRightSidebar(
-                  collapsed: showRightSidebar,
-                  annotations: currentMediaItem.annotations,
-                ),
-              ],
+                        return Row(
+                          children: [
+                            AnnotatorLeftToolbar(
+                              type: widget.project.type,
+                              opacity: labelOpacity,
+                              onOpacityChanged: (value) => setState(() => labelOpacity = value),
+                              onMouseIconChanged: (value) => setState(() => _cursorIcon = value),
+                              onResetZoomPressed: () => setState(() => _resetZoomCount++),
+                              onShowDatasetGridChanged: (value) => setState(() => showRightSidebar = value),
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: MouseRegion(
+                                      onEnter: (_) => setState(() => _mouseInsideImage = true),
+                                      onExit: (_) => setState(() => _mouseInsideImage = false),
+                                      cursor: _mouseInsideImage ? _cursorIcon : SystemMouseCursors.basic,
+                                      child: AnnotatorCanvas(
+                                        image: imageSnap.data!,
+                                        labels: widget.project.labels!,
+                                        annotations: media.annotations,
+                                        resetZoomCount: _resetZoomCount,
+                                        opacity: labelOpacity,
+                                        onZoomChanged: (zoom) => setState(() => _currentZoom = zoom),
+                                      ),
+                                    ),
+                                  ),
+                                  AnnotatorBottomToolbar(
+                                    currentZoom: _currentZoom,
+                                    currentMedia: media.mediaItem,
+                                    onZoomIn: () {}, // implement
+                                    onZoomOut: () {}, // implement
+                                    onPrevImg: () {
+                                      final newPage = _pageController.page!.toInt() - 1;
+                                      _pageController.jumpToPage(newPage >= 0 ? newPage : widget.totalMediaCount - 1);
+                                    },
+                                    onNextImg: () {
+                                      final newPage = _pageController.page!.toInt() + 1;
+                                      _pageController.jumpToPage(newPage < widget.totalMediaCount ? newPage : 0);
+                                    },
+                                    onSaveAnnotations: () {
+                                      // TODO: save annotations
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            AnnotatorRightSidebar(
+                              collapsed: showRightSidebar,
+                              annotations: media.annotations,
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
