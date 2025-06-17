@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -245,7 +246,7 @@ class DatasetDatabase {
       where: 'media_item_id IN (${List.filled(mediaIds.length, '?').join(',')})',
       whereArgs: mediaIds,
     );
-    final annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+    List<Annotation> annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
 
     // Step 3: Fetch unique label IDs used in annotations (excluding nulls)
     final Set<int> labelIds = annotations
@@ -260,6 +261,23 @@ class DatasetDatabase {
           where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
           whereArgs: labelIds.toList(),
         ).then((rows) => rows.map((e) => Label.fromMap(e)).toList());
+
+    // Create label map and assign name + color to annotations
+    final labelMap = {
+      for (var label in labels)
+        label.id: {
+          'name': label.name,
+          'color': label.toColor(),
+        }
+    };
+
+    annotations = annotations.map((a) {
+      final info = a.labelId != null ? labelMap[a.labelId] : null;
+      return a.copyWith(
+        name: info?['name'] as String?,
+        color: info?['color'] as Color?, // already parsed
+      );
+    }).toList();
 
     // Step 4: Group annotations by mediaId
     final Map<int, List<Annotation>> annotationsByMediaId = {};
@@ -313,6 +331,19 @@ class DatasetDatabase {
         whereArgs: labelIds.toList(),
       )).map((e) => Label.fromMap(e)).toList();
 
+    // Enrich annotations
+    final Map<int, Label> labelMap = {
+      for (var label in labels) label.id!: label,
+    };
+
+    for (var annotation in annotations) {
+      final label = labelMap[annotation.labelId];
+      if (label != null) {
+        annotation.name = label.name;
+        annotation.color = label.toColor();
+      }
+    }
+  
     return AnnotatedLabeledMedia(
       mediaItem: mediaItem,
       annotations: annotations,

@@ -137,7 +137,10 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       offset: offset,
       limit: pageSize,
     );
-
+// Sorting is disabled to preserve the original database order (based on offset).
+// This ensures consistency between PaginatedImageGrid and AnnotatorPage,
+// so that the clicked index points to the correct image without mismatch.
+/*
     switch (_sortOption) {
       case MediaSortOption.newestFirst:
         annotatedList.sort((a, b) => b.mediaItem.uploadDate.compareTo(a.mediaItem.uploadDate));
@@ -146,7 +149,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
         annotatedList.sort((a, b) => a.mediaItem.uploadDate.compareTo(b.mediaItem.uploadDate));
         break;
     }
-
+*/
     return annotatedList;
   }
 

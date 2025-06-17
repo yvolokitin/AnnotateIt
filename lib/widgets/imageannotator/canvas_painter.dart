@@ -1,61 +1,27 @@
 // import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:collection/collection.dart';
+// import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
+// import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../../models/annotation.dart';
-import '../../models/label.dart';
-
 import '../../models/shape/rect_shape.dart';
 import '../../models/shape/polygon_shape.dart';
 import '../../models/shape/rotated_rect_shape.dart';
 import '../../models/shape/shape.dart';
 import '../../models/shape/circle_shape.dart';
 
-extension HexColor on Color {
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-}
-
-Color getAnnotationColorByLabelId(int labelId, List<Label> labels) {
-  print("Searching labelId: $labelId in labels: ${labels.map((e) => e.id).toList()}");
-
-  final label = labels.firstWhereOrNull((b) => b.id == labelId);
-  if (label == null) {
-    print("Label not found: $labelId");
-    return Colors.red;
-  }
-  return HexColor.fromHex(label.color.substring(0, 7));
-}
-
-String getAnnotationNameByLabelId(int labelId, List<Label> labels) {
-  final label = labels.firstWhereOrNull((b) => b.id == labelId);
-  if (label == null) {
-    print("Unknown label id: $labelId");
-    return "Unknown Name";
-  }
-  return label.name;
-}
-
 class CanvasPainter extends CustomPainter {
   final ui.Image image;
   final List<Annotation>? annotations;
-  final List<Label> labels;
-  final Map<String, Label> labelById;
   final double scale, opacity;
 
-  CanvasPainter(
-    this.image,
-    this.labels,
-    this.annotations,
-    this.scale,
-    this.opacity,
-  ): labelById = { for (var v in labels) v.id.toString() : v };
+  CanvasPainter({
+    required this.image,
+    required this.annotations,
+    required this.scale,
+    required this.opacity,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,10 +32,11 @@ class CanvasPainter extends CustomPainter {
       fit: BoxFit.scaleDown,
       image: image,
     );
+
     for (final annotation in annotations ?? []) {
       final shape = Shape.fromAnnotation(annotation);
       if (shape != null) {
-        final color = getAnnotationColorByLabelId(annotation.labelId, labels);
+        final color = annotation.color ?? Colors.grey;
         final paint = Paint()
           ..color = color
           ..strokeWidth = 2
@@ -83,7 +50,7 @@ class CanvasPainter extends CustomPainter {
         // label transparent background
         shape.paint(canvas, fillPaint);
 
-        final name = getAnnotationNameByLabelId(annotation.labelId, labels);
+        final name = annotation.name ?? 'Unknown';
         final offset = _labelOffsetFromShape(shape); // adaptive position
         drawLabel(canvas, size, name, color, offset);
       }

@@ -72,12 +72,6 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
   }
 
-  // Function to Delete a Project
-  Future<void> _deleteProject(Project project) async {
-    await ProjectDatabase.instance.deleteProject(project.id!);
-    _loadProjects(); // Refresh list after deletion
-  }  
-
   void _onSearchChanged(String query) {
     setState(() {
       _searchQuery = query;

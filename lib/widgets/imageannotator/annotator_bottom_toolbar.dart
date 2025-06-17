@@ -50,7 +50,7 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
             width: 2,
           ),
         ),
-      ),
+      ),      
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,

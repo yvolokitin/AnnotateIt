@@ -6,6 +6,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<MouseCursor> onMouseIconChanged;
   final VoidCallback onResetZoomPressed;
+  final ValueChanged<bool> onShowDatasetGridChanged;
 
   const AnnotatorLeftToolbar({
     super.key,
@@ -14,6 +15,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onOpacityChanged,
     required this.onMouseIconChanged,
     required this.onResetZoomPressed,
+    required this.onShowDatasetGridChanged,
   });
 
   @override
@@ -150,7 +152,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () => setState(() => showDatasetGrid = !showDatasetGrid),
+              onTap: () {
+                setState(() => showDatasetGrid = !showDatasetGrid);
+                widget.onShowDatasetGridChanged(showDatasetGrid);
+              },
               child: Container(
                 width: 48,
                 height: 48,

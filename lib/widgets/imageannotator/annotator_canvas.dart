@@ -1,4 +1,4 @@
-import 'dart:async';
+// import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -6,10 +6,9 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
-import 'canvas_painter.dart';
-
 import '../../models/label.dart';
 import '../../models/annotation.dart';
+import 'canvas_painter.dart';
 
 class AnnotatorCanvas extends StatefulWidget {
   final ui.Image image;
@@ -53,6 +52,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       });
       notifyZoomChanged(matrix.getMaxScaleOnAxis());
     });
+    // print('0000 annotations.length: ${widget.annotations?.length ?? 0}');
   }
 
   @override
@@ -89,7 +89,6 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final ratio = Size(imageSize.width / canvasSize.width, imageSize.height / canvasSize.height);
 
     final scale = 1 / max(ratio.width, ratio.height) * 0.9;
-    // final offset = (canvasSize - imageSize * scale as Offset) / 2;
     final scaledImageSize = Size(imageSize.width * scale, imageSize.height * scale);
     final offset = Offset(
       (canvasSize.width - scaledImageSize.width) / 2,
@@ -168,11 +167,10 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                     builder: (context) {
                       return CustomPaint(
                         painter: CanvasPainter(
-                          widget.image,
-                          widget.labels,
-                          widget.annotations,
-                          matrix.getMaxScaleOnAxis(),
-                          widget.opacity,
+                          image: widget.image,
+                          annotations: widget.annotations,
+                          scale: matrix.getMaxScaleOnAxis(),
+                          opacity: widget.opacity,
                         ),
                         child: Container(),
                       );

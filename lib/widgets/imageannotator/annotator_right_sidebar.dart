@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
-
 import '../../models/annotation.dart';
-import '../../models/label.dart';
 
 class AnnotatorRightSidebar extends StatelessWidget {
   final bool collapsed;
-  final List<Label> labels;
   final List<Annotation> annotations;
-  final VoidCallback onToggleCollapse;
 
   const AnnotatorRightSidebar({
     super.key,
     required this.collapsed,
-    required this.labels,
     required this.annotations,
-    required this.onToggleCollapse,
   });
 
   @override
@@ -22,20 +16,32 @@ class AnnotatorRightSidebar extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: collapsed ? 0 : 200,
-      color: Colors.grey[900],
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        border: const Border(
+          left: BorderSide(
+            color: Colors.black,
+            width: 2,
+          ),
+        ),
+      ),      
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text("Annotations", style: TextStyle(color: Colors.white)),
-              ),
-              IconButton(
-                icon: Icon(collapsed ? Icons.chevron_left : Icons.chevron_right, color: Colors.white),
-                onPressed: onToggleCollapse,
+                child: Text(
+                  "Annotations (${annotations.length})",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    ),
+                  ),
               ),
             ],
           ),
@@ -45,9 +51,13 @@ class AnnotatorRightSidebar extends StatelessWidget {
               itemCount: annotations.length,
               itemBuilder: (context, index) {
                 final annotation = annotations[index];
-                return ListTile(
-                  title: Text(annotation.annotationType, style: const TextStyle(color: Colors.white)),
-                  subtitle: Text('data: ${annotation.data}', style: const TextStyle(color: Colors.white38)),
+                return Text(
+                  annotation.name ?? 'Unnamed',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: annotation.color ?? Colors.grey,
+                    fontWeight: FontWeight.normal,
+                  ),
                 );
               },
             ),

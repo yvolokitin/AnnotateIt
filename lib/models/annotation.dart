@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'shape/shape.dart';
@@ -20,6 +21,9 @@ class Annotation {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  String? name;
+  Color? color;
+
   Annotation({
     this.id,
     required this.mediaItemId,
@@ -34,6 +38,25 @@ class Annotation {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  @override
+  String toString() {
+    return 'Annotation('
+      'id: $id, '
+      'mediaItemId: $mediaItemId, '
+      'labelId: $labelId, '
+      'annotationType: $annotationType, '
+      'data: $data, '
+      'confidence: $confidence, '
+      'annotatorId: $annotatorId, '
+      'comment: $comment, '
+      'status: $status, '
+      'version: $version, '
+      'createdAt: $createdAt, '
+      'updatedAt: $updatedAt, '
+      'name: $name, '
+      'color: ${color?.value.toRadixString(16)})';
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -83,6 +106,8 @@ extension AnnotationCopy on Annotation {
     int? version,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? name,
+    Color? color,
   }) {
     return Annotation(
       id: id,
@@ -97,7 +122,9 @@ extension AnnotationCopy on Annotation {
       version: version ?? this.version,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-    );
+    )
+    ..name = name ?? this.name
+    ..color = color ?? this.color;
   }
 }
 

@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:vap/gen_l10n/app_localizations.dart';
 
-import "package:vap/pages/header.dart";
+import "../widgets/mainmenu/header.dart";
 
 import "projects_list_page.dart";
 import "learn_page.dart";
@@ -198,6 +198,13 @@ class NavigationRailMenu extends StatelessWidget {
     return NavigationRail(
       selectedIndex: selectedIndex,
       onDestinationSelected: onItemSelected,
+
+      selectedIconTheme: const IconThemeData(color: Colors.red),
+      selectedLabelTextStyle: const TextStyle(color: Colors.red),
+      unselectedIconTheme: const IconThemeData(color: Colors.white70),
+      unselectedLabelTextStyle: const TextStyle(color: Colors.white54),
+      backgroundColor: Colors.grey[900],
+
       destinations: [
         NavigationRailDestination(icon: Icon(Icons.work), label: Text(
           AppLocalizations.of(context)!.menuProjects,

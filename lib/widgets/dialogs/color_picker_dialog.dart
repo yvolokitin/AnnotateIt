@@ -19,8 +19,6 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   late Color selectedColor;
 
   static const List<Color> basicColors = [
-    Colors.black,
-    Colors.white,
     Colors.red,
     Colors.green,
     Colors.blue,
@@ -31,10 +29,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     Colors.brown,
     Colors.pink,
     Colors.teal,
-    Color(0xFF444444),
+    Color(0xFF336666),
     Color(0xFF888888),
     Color(0xFFCCCCCC),
     Color(0xFFFFC107),
+    Colors.black,
+    Colors.white,
   ];
 
   @override
@@ -62,6 +62,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Divider(thickness: 1, color: Colors.white),
+            const SizedBox(height: 20),
+
             ColorPicker(
               pickerColor: selectedColor,
               onColorChanged: (color) {
@@ -72,30 +75,49 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               showLabel: true,
               pickerAreaHeightPercent: 0.8,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 25),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text("Basic Colors", style: TextStyle(color: Colors.white70)),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 15),
+
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: basicColors.map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => selectedColor = color);
-                  },
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: color,
-                      border: Border.all(
-                        color: selectedColor == color ? Colors.white : Colors.transparent,
-                        width: 2,
+                final isSelected = selectedColor == color;
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: () {
+                        setState(() => selectedColor = color);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: color,
+                          border: Border.all(
+                            color: isSelected ? Colors.white : Colors.transparent,
+                            width: 2,
+                          ),
+                          boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.4),
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : [],
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 );

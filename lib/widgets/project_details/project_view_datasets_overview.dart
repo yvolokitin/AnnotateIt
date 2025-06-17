@@ -8,6 +8,8 @@ import '../../models/dataset.dart';
 
 import "../../utils/date_utils.dart";
 
+import '../project_list/labels_list.dart';
+
 class ProjectViewDatasetsOverview extends StatefulWidget {
   final Project project;
 
@@ -90,6 +92,9 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
   }
 
   Widget _buildDatasetCard(Dataset dataset) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelFontSize = screenWidth < 600 ? 14.0 : 16.0;
+
     return Container(
       //width: 220,
       //height: 280,
@@ -164,21 +169,29 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
           ),
 
           const SizedBox(height: 25),
+
+          Row(
+            children: [
+              Icon(Icons.source),
+              const SizedBox(width: 5),
+              Text('Source ${dataset.source}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal)),
+            ],
+          ),
+
+          const SizedBox(height: 25),
           const Text('Labels:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: widget.project.labels?.map((label) {
-                  return Chip(
-                    label: Text(label.name),
-                    backgroundColor: label.toColor().withOpacity(0.15),
-                    labelStyle: TextStyle(color: label.toColor()),
-                  );
-                }).toList() ??
-                [const Text('No labels')],
+
+          LabelList(
+            labels: widget.project.labels ?? [],
+            projectName: widget.project.name,
+            iconPath: widget.project.icon,
+            fontLabelSize: labelFontSize,
           ),
+
           const Spacer(),
+          const Divider(color: Colors.grey),
+          const SizedBox(height: 25),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
