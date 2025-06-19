@@ -129,6 +129,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -148,17 +149,24 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           ),
         ),
         const Divider(color: Colors.grey),
-        const SizedBox(height: 25),
 
-        ProjectDetailsAddLabel(
-          labels: labels,
-          projectType: widget.project.type,
-          onAddNewLabel: _handleAddNewLabel,
+        Container(
+          margin: EdgeInsets.all(screenWidth > 1600 ? 20 : 6),
+          padding: EdgeInsets.all(screenWidth > 1600 ? 20 : 6),
+          decoration: BoxDecoration(
+            color: Colors.grey[800],
+          ),
+          child: ProjectDetailsAddLabel(
+            labels: labels,
+            projectType: widget.project.type,
+            onAddNewLabel: _handleAddNewLabel,
+          ),
         ),
 
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+          child: Container(
+            margin: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
+            padding: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             child: LabelListDialog(
               labels: labels,
               scrollController: _scrollController,

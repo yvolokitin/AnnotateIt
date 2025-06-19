@@ -3,6 +3,7 @@ import 'package:vap/gen_l10n/app_localizations.dart';
 
 import '../../models/label.dart';
 import '../dialogs/alert_error_dialog.dart';
+import '../dialogs/color_picker_dialog.dart';
 
 class ProjectDetailsAddLabel extends StatefulWidget {
   final List<Label> labels;
@@ -84,27 +85,42 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
     widget.onAddNewLabel(newLabelName, _labelColor);
   }
 
+  void _showColorPicker() {
+    showDialog(
+      context: context,
+      builder: (context) => ColorPickerDialog(
+        initialColor: _labelColor,
+        onColorSelected: (newColor) {
+          setState(() {
+            _labelColor = newColor;
+          });
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: () {}, // Add color picker logic here if needed
+            onTap: _showColorPicker,
             child: Container(
-              width: 54,
-              height: 54,
+              width: screenWidth > 1200 ? 50 : 38,
+              height: screenWidth > 1200 ? 50 : 38,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.red, width: 1),
+                border: Border.all(color: Colors.white70, width: 1),
               ),
               alignment: Alignment.center,
               child: Container(
-                width: 36,
-                height: 36,
+                width: screenWidth > 1200 ? 30 : 22,
+                height: screenWidth > 1200 ? 30 : 22,
                 decoration: BoxDecoration(
                   color: Color(int.parse(_labelColor.replaceFirst('#', '0xFF'))),
                   shape: BoxShape.circle,
@@ -113,44 +129,51 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
             ),
           ),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: 20),
         Expanded(
           child: TextField(
             controller: _labelController,
             decoration: InputDecoration(
               hintText: l10n.labelNameHint,
-              hintStyle: const TextStyle(color: Colors.white54, fontWeight: FontWeight.normal),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              hintStyle: TextStyle(
+                color: Colors.white54,
+                fontSize: screenWidth > 1200 ? 22 : 18,
+                fontWeight: FontWeight.normal
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: screenWidth > 1200 ? 10 : 8,
+              ),
               filled: false,
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(50),
-                borderSide: const BorderSide(color: Colors.red, width: 1),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.white70, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(50),
-                borderSide: const BorderSide(color: Colors.red, width: 1),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.white70, width: 1),
               ),
             ),
             style: const TextStyle(color: Colors.white),
           ),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: 20),
 
         ElevatedButton(
           onPressed: _addLabel,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[900],
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            backgroundColor: Colors.grey[800],
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 11),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
-              side: BorderSide(color: Colors.red, width: 2),
+              side: BorderSide(color: Colors.white70, width: 2),
             ),
           ),
           child: Text(
             l10n.createLabelButton,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: screenWidth > 1200 ? 22 : 18,
               fontWeight: FontWeight.bold,
             ),
           ),

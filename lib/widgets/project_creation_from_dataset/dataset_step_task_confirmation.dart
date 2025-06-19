@@ -50,6 +50,8 @@ class StepDatasetTaskConfirmationState
     final detectedTasks = widget.archive.taskTypes.toSet();
     final allEnabled = detectedTasks.contains("Unknown") || detectedTasks.isEmpty;
 
+    print ('1111111 detectedTasks: $detectedTasks');
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -67,6 +69,7 @@ class StepDatasetTaskConfirmationState
                         color: Colors.white),
                   ),
                 ),
+                if (!allEnabled)
                 Row(
                   children: [
                     const Text("Allow Project Type Change",
@@ -105,6 +108,7 @@ class StepDatasetTaskConfirmationState
                     ),
                   ],
                 ),
+                
               ],
             ),
             const SizedBox(height: 16),
