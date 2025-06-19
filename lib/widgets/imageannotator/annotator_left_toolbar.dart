@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'user_action.dart';
 
 class AnnotatorLeftToolbar extends StatefulWidget {
   final String type;
   final double opacity;
+  final UserAction selectedAction;
+
   final ValueChanged<double> onOpacityChanged;
-  final ValueChanged<MouseCursor> onMouseIconChanged;
   final VoidCallback onResetZoomPressed;
   final ValueChanged<bool> onShowDatasetGridChanged;
+  final ValueChanged<UserAction> onActionSelected;
 
   const AnnotatorLeftToolbar({
     super.key,
     required this.type,
     required this.opacity,
+    required this.selectedAction,
     required this.onOpacityChanged,
-    required this.onMouseIconChanged,
     required this.onResetZoomPressed,
     required this.onShowDatasetGridChanged,
+    required this.onActionSelected,
   });
 
   @override
@@ -27,6 +31,11 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
   bool showOpacityDialog = false;
   bool showDatasetGrid = false;
   bool _isHovered = false;
+
+  void _selectUserAction(UserAction action) {
+    setState(() => userAction = action.name);
+    widget.onActionSelected(action);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +60,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () {
-                widget.onMouseIconChanged(SystemMouseCursors.basic);
-                setState(() => userAction = (userAction == 'navigation') ? '' : 'navigation');
-              },
+              onTap: () => _selectUserAction(UserAction.navigation),
               child: Container(
                 width: 48,
                 height: 48,
@@ -77,10 +83,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () {
-                  widget.onMouseIconChanged(SystemMouseCursors.precise);
-                  setState(() => userAction = (userAction == 'bbox_annotation') ? '' : 'bbox_annotation');
-                },
+                onTap: () => _selectUserAction(UserAction.bbox_annotation),
                 child: Container(
                   width: 48,
                   height: 48,
@@ -102,10 +105,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () {
-                  widget.onMouseIconChanged(SystemMouseCursors.precise);
-                  setState(() => userAction = (userAction == 'sam_annotation') ? '' : 'sam_annotation');
-                },
+                onTap: () => _selectUserAction(UserAction.sam_annotation),
                 child: Container(
                   width: 48,
                   height: 48,

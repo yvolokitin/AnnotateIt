@@ -1,4 +1,4 @@
-import 'dart:ui' as ui;
+import 'dart:ui';
 
 import '../annotation.dart';
 
@@ -8,8 +8,16 @@ import 'rotated_rect_shape.dart';
 import 'circle_shape.dart';
 
 abstract class Shape {
-  void paint(ui.Canvas canvas, ui.Paint paint);
+  /// Draws the shape
+  void paint(Canvas canvas, Paint paint);
+
   Map<String, dynamic> toJson();
+
+  /// Returns the bounding box of the shape
+  Rect get boundingBox;
+
+  /// Checks if a point is inside the shape
+  bool containsPoint(Offset point);
 
   static Shape? fromAnnotation(Annotation annotation) {
     final json = annotation.data;

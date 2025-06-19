@@ -60,6 +60,14 @@ class RectShape extends Shape {
       };
 
   @override
+  Rect get boundingBox => Rect.fromLTWH(x, y, width, height);
+
+  @override
+  bool containsPoint(Offset point) {
+    return boundingBox.contains(point);
+  }
+
+  @override
   void paint(Canvas canvas, Paint paint) {
     final rect = Rect.fromLTWH(x, y, width, height);
     canvas.drawRect(rect, paint);

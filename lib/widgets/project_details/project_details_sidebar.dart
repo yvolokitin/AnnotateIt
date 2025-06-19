@@ -48,7 +48,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
   @override
   Widget build(BuildContext context) {
     bool isSvg = widget.project.icon.toLowerCase().endsWith('.svg');
-
     return Container(
       padding: const EdgeInsets.all(25.0),
       color: Colors.grey[850],
@@ -100,15 +99,15 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
           ),
 
           const SizedBox(height: 15),
-
           // Project Icon
           isSvg
               ? SvgPicture.asset(
-                  widget.project.icon,
-                  height: 140,
-                  fit: BoxFit.cover,
-                  color: Colors.white,
-                )
+                widget.project.icon,
+                height: 140,
+                fit: BoxFit.cover,
+                // color: Colors.white,
+                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              )
               : Image.file(
                   File(widget.project.icon),
                   height: 140,
@@ -120,10 +119,8 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
                 ),
 
           const SizedBox(height: 15),
-
-          // Project Type
           Text(
-            "Type: ${widget.project.type}",
+            "Type: ${widget.project.type}", // Project Type
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.normal,
@@ -134,8 +131,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
           ),
 
           const SizedBox(height: 15),
-
-          // Creation Date
           Text(
             "Created at ${formatDate(widget.project.creationDate)}",
             style: const TextStyle(

@@ -32,7 +32,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCompact = MediaQuery.of(context).size.width < 1200;
+    final bool isCompact = MediaQuery.of(context).size.width < 1280;
 
     return Container(
       height: 62,
@@ -54,7 +54,6 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
             decoration: const BoxDecoration(
               border: Border(
                 right: BorderSide(color: Colors.black, width: 2),
-                // bottom: BorderSide(color: Colors.black, width: 2),
               ),
             ),
             child: IconButton(
@@ -94,7 +93,13 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                           items: [
                             DropdownMenuItem<Label>(
                               value: null,
-                              child: const Text("Select default label", style: TextStyle(fontSize: 20)),
+                              child: Text(
+                                "Select default label",
+                                style: TextStyle(
+                                  fontSize: isCompact ? 16 : 20,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
                             ),
                             ...labels.map((Label label) {
                               return DropdownMenuItem<Label>(
@@ -113,7 +118,10 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                                     Flexible(
                                       child: Text(
                                         label.name,
-                                        style: const TextStyle(fontSize: 22),
+                                        style: TextStyle(
+                                          fontSize: isCompact ? 16 : 20,
+                                          fontWeight: FontWeight.normal,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                       ),

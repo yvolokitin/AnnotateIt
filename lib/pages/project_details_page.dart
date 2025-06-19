@@ -21,6 +21,7 @@ class ProjectDetailsPage extends StatefulWidget {
 }
 
 class ProjectDetailsPageState extends State<ProjectDetailsPage> {
+  late Project project;
   List<Label> labels = [];
   int selectedIndex = 0;
 
@@ -28,6 +29,7 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   void initState() {
     super.initState();
 
+    project = widget.project;
     labels = List<Label>.from(widget.project.labels ?? []);
 
     _loadProjectLabels();
@@ -41,6 +43,7 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
         final loadedLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
         setState(() {
           labels = loadedLabels;
+          project = project.copyWith(labels: loadedLabels);
         });
       }
     }
@@ -55,6 +58,7 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     double contentPadding = (screenWidth > 1600) ? 30.0 : (screenWidth > 900) ? 15.0 : 2.0;
 
     print("screenWidth: $screenWidth");
@@ -71,17 +75,6 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-/*                GestureDetector(
-                  onTap: () => Navigator.pop(context, 'refresh'),
-                  child: Image.asset(
-                    'assets/icons/icons8-return-100.png',
-                    height: 32,
-                    width: 32,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-*/
-
                 HoverIconButton(
                   icon: Icons.arrow_back,
                   margin: EdgeInsets.only(left: 20.0),
@@ -103,28 +96,31 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
           Expanded(
             child : Row(
               children: [
-                if (screenWidth >= 1600)
+                if (screenWidth >= 1600 && screenHeight >= 785)
                   Expanded(
                     flex: 2,
                     child: Column(
                       children: [
                         ProjectDetailsSidebar(
-                          project: widget.project,
+                          project: project,
                           selectedIndex: selectedIndex,
                           onItemSelected: _onItemTapped,
                         ),
+
                         Expanded(
-                          child: AppDrawer(
-                            fullMode: true,
-                            selectedIndex: selectedIndex,
-                            onItemSelected: _onItemTapped,
+                          child: SizedBox.expand(
+                            child: AppDrawer(
+                              fullMode: true,
+                              selectedIndex: selectedIndex,
+                              onItemSelected: _onItemTapped,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                if (screenWidth < 1600)
+                if (screenWidth < 1600 || screenHeight < 785)
                   NavigationRailMenu(
                     selectedIndex: selectedIndex,
                     onItemSelected: _onItemTapped,
@@ -150,14 +146,14 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
     switch (index) {
       case 0:
         return ProjectViewMediaGalery(
-          project: widget.project,
-          datasetId: widget.project.defaultDatasetId!,
+          project: project,
+          datasetId: project.defaultDatasetId!,
           labels: labels,
         );
 
       case 1:
         return ProjectViewLabels(
-          project: widget.project,
+          project: project,
           labels: labels,
           onLabelsUpdated: (updatedLabels) {
             setState(() {
@@ -169,13 +165,13 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
 
       case 2:
         return ProjectViewDatasetsOverview(
-          project: widget.project,
+          project: project,
         );
 
       default:
         return ProjectViewMediaGalery(
-          project: widget.project,
-          datasetId: widget.project.defaultDatasetId!,
+          project: project,
+          datasetId: project.defaultDatasetId!,
           labels: labels,
         );
       }

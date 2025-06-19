@@ -1,4 +1,3 @@
-// import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -8,14 +7,18 @@ import 'package:flutter/gestures.dart';
 
 import '../../models/label.dart';
 import '../../models/annotation.dart';
+import '../../models/shape/shape.dart';
 import 'canvas_painter.dart';
+import 'user_action.dart';
 
 class AnnotatorCanvas extends StatefulWidget {
+  final UserAction userAction;
   final ui.Image image;
   final List<Label> labels;
   final List<Annotation>? annotations;
   final int resetZoomCount;
   final double opacity;
+
 
   final ValueChanged<double>? onZoomChanged;
 
@@ -25,6 +28,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.annotations,
     required this.resetZoomCount,
     required this.opacity,
+    required this.userAction,
     this.onZoomChanged,
     super.key,
   });
@@ -34,6 +38,7 @@ class AnnotatorCanvas extends StatefulWidget {
 }
 
 class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
+  Annotation? _selectedAnnotation;
   int _lastResetCount = 0;
 
   double prevScale = 1;
@@ -52,7 +57,6 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       });
       notifyZoomChanged(matrix.getMaxScaleOnAxis());
     });
-    // print('0000 annotations.length: ${widget.annotations?.length ?? 0}');
   }
 
   @override
@@ -115,6 +119,32 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
   }
 
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.userAction == UserAction.navigation) {
+      final inverse = Matrix4.identity()..copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
+      final tapped = _findAnnotationAtPosition(transformed);
+
+      if (_selectedAnnotation?.id != tapped?.id) {
+        setState(() {
+          _selectedAnnotation = tapped;
+        });
+      } 
+    }
+  }
+
+  Annotation? _findAnnotationAtPosition(Offset position) {
+    final annotations = widget.annotations?.reversed ?? [];
+    for (final annotation in annotations) {
+      final shape = Shape.fromAnnotation(annotation);
+      if (shape == null) continue;
+      if (shape.boundingBox.contains(position) && shape.containsPoint(position)) {
+        return annotation;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<SizeChangedLayoutNotification>(
@@ -133,6 +163,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
             decoration: const BoxDecoration(shape: BoxShape.rectangle),
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
+              onTapDown: _handleTapDown,
               onScaleStart: (_) {
                 prevScale = 1;
               },
@@ -169,6 +200,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                         painter: CanvasPainter(
                           image: widget.image,
                           annotations: widget.annotations,
+                          selectedAnnotation: _selectedAnnotation,
                           scale: matrix.getMaxScaleOnAxis(),
                           opacity: widget.opacity,
                         ),

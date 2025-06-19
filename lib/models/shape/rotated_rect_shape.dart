@@ -77,4 +77,41 @@ class RotatedRectShape extends Shape {
 
     canvas.drawPath(path, paint);
   }
+
+  @override
+  Rect get boundingBox {
+    final corners = toCorners();
+    double minX = corners.first.dx;
+    double maxX = corners.first.dx;
+    double minY = corners.first.dy;
+    double maxY = corners.first.dy;
+
+    for (final corner in corners) {
+      if (corner.dx < minX) minX = corner.dx;
+      if (corner.dx > maxX) maxX = corner.dx;
+      if (corner.dy < minY) minY = corner.dy;
+      if (corner.dy > maxY) maxY = corner.dy;
+    }
+
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  @override
+  bool containsPoint(Offset point) {
+    final translated = point - Offset(centerX, centerY);
+
+    // Reverse rotate the point
+    final cosA = math.cos(-angle);
+    final sinA = math.sin(-angle);
+    final rotated = Offset(
+      cosA * translated.dx - sinA * translated.dy,
+      sinA * translated.dx + cosA * translated.dy,
+    );
+
+    // Simple AABB check in unrotated space
+    return rotated.dx >= -width / 2 &&
+         rotated.dx <= width / 2 &&
+         rotated.dy >= -height / 2 &&
+         rotated.dy <= height / 2;
+  }
 }

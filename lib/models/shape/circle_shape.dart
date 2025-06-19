@@ -46,4 +46,14 @@ class CircleShape extends Shape {
   void paint(Canvas canvas, Paint paint) {
     canvas.drawCircle(center, radius, paint);
   }
+
+  @override
+  Rect get boundingBox => toRect();
+
+  @override
+  bool containsPoint(Offset point) {
+    final dx = point.dx - centerX;
+    final dy = point.dy - centerY;
+    return dx * dx + dy * dy <= radius * radius;
+  }
 }

@@ -87,4 +87,14 @@ class PolygonShape extends Shape {
     final path = toPath();
     canvas.drawPath(path, paint);
   }
+
+  @override
+  Rect get boundingBox => boundingRect;
+
+  @override
+  bool containsPoint(Offset point) {
+    final path = toPath();
+    return path.contains(point);
+  }
+
 }

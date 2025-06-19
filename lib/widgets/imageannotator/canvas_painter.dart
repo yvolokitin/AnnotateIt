@@ -1,8 +1,5 @@
-// import 'dart:math';
 import 'dart:ui' as ui;
-// import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-// import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../../models/annotation.dart';
 import '../../models/shape/rect_shape.dart';
@@ -15,12 +12,14 @@ class CanvasPainter extends CustomPainter {
   final ui.Image image;
   final List<Annotation>? annotations;
   final double scale, opacity;
-
+  final Annotation? selectedAnnotation;
+  
   CanvasPainter({
     required this.image,
     required this.annotations,
     required this.scale,
     required this.opacity,
+    this.selectedAnnotation,
   });
 
   @override
@@ -55,6 +54,68 @@ class CanvasPainter extends CustomPainter {
         drawLabel(canvas, size, name, color, offset);
       }
     }
+   
+    // the selected annotation’s red outline is always drawn on top
+    if (selectedAnnotation != null) {
+      final shape = Shape.fromAnnotation(selectedAnnotation!);
+      if (shape != null) {
+        final highlightPaint = Paint()
+          ..color = Colors.red
+          ..strokeWidth = 4
+          ..style = PaintingStyle.stroke;
+        shape.paint(canvas, highlightPaint);
+
+        // Get shape corners and draw handles
+        final corners = shapeCorners(shape);
+        drawCornerHandles(canvas, corners);
+      }
+    }
+
+  }
+
+void drawCornerHandles(Canvas canvas, List<Offset> corners) {
+  const handleSize = 12.0;
+  const halfSize = handleSize / 2;
+  const borderWidth = 4.0;
+
+  final fillPaint = Paint()
+    ..color = Colors.white
+    ..style = PaintingStyle.fill;
+
+  final borderPaint = Paint()
+    ..color = Colors.red
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = borderWidth;
+
+  for (final corner in corners) {
+    final rect = Rect.fromCenter(center: corner, width: handleSize, height: handleSize);
+    canvas.drawRect(rect, fillPaint);    // white background
+    canvas.drawRect(rect, borderPaint);  // red border
+  }
+}
+
+  List<Offset> shapeCorners(Shape shape) {
+    if (shape is RectShape) {
+      return [
+        Offset(shape.x, shape.y),
+        Offset(shape.x + shape.width, shape.y),
+        Offset(shape.x + shape.width, shape.y + shape.height),
+        Offset(shape.x, shape.y + shape.height),
+      ];
+    } else if (shape is RotatedRectShape) {
+      return shape.toCorners(); // already defined
+    } else if (shape is PolygonShape) {
+      return shape.points;
+    } else if (shape is CircleShape) {
+      // corners of the bounding square
+      return [
+        Offset(shape.centerX - shape.radius, shape.centerY - shape.radius),
+        Offset(shape.centerX + shape.radius, shape.centerY - shape.radius),
+        Offset(shape.centerX + shape.radius, shape.centerY + shape.radius),
+        Offset(shape.centerX - shape.radius, shape.centerY + shape.radius),
+      ];
+    }
+    return [];
   }
 
   Offset _labelOffsetFromShape(Shape shape) {
@@ -108,8 +169,12 @@ class CanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
-    return false;
+    return oldDelegate.annotations != annotations ||
+         oldDelegate.selectedAnnotation?.id != selectedAnnotation?.id ||
+         oldDelegate.opacity != opacity ||
+         oldDelegate.scale != scale;
   }
+
   @override
   bool shouldRebuildSemantics(CanvasPainter oldDelegate) => false;
 }
