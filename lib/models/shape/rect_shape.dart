@@ -9,6 +9,9 @@ class RectShape extends Shape {
 
   RectShape(this.x, this.y, this.width, this.height);
 
+  @override
+  Offset? get labelConnectionPoint => null;
+
   static RectShape? fromJson(Map<String, dynamic> json) {
     try {
       // support format: { bbox: [x, y, w, h] }
@@ -82,6 +85,9 @@ class RectShape extends Shape {
       Offset(x, y + height),
     ];
   }
+
+  @override
+  Offset get labelOffset => Offset(x + 15, y);
 
   @override
   RectShape move(Offset delta) {

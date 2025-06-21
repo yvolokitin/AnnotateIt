@@ -11,6 +11,8 @@ abstract class Shape {
   /// Draws the shape
   void paint(Canvas canvas, Paint paint);
 
+  Offset? get labelConnectionPoint => null;
+  
   Map<String, dynamic> toJson();
   Map<String, dynamic> toMap() => toJson();
   
@@ -31,6 +33,7 @@ abstract class Shape {
   });
 
   List<Offset> getCorners();
+  Offset get labelOffset;
 
   static Shape? fromAnnotation(Annotation annotation) {
     final json = annotation.data;

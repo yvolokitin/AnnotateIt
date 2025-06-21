@@ -126,4 +126,22 @@ class PolygonShape extends Shape {
   List<Offset> getCorners() {
     return List<Offset>.from(points);
   }
+
+  @override
+  Offset get labelOffset {
+    final heightOffset = boundingBox.height * 0.3; // 30% of height
+    // return boundingBox.topCenter - Offset(0, 20 + heightOffset);
+    return boundingBox.topCenter;// - Offset(0, heightOffset);
+  }
+
+  @override
+  Offset? get labelConnectionPoint {
+    if (points.isEmpty) return null;
+    double sumX = 0, sumY = 0;
+    for (final point in points) {
+      sumX += point.dx;
+      sumY += point.dy;
+    }
+    return Offset(sumX / points.length, sumY / points.length);
+  }
 }

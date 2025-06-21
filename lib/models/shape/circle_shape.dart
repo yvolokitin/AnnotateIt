@@ -95,4 +95,13 @@ class CircleShape extends Shape {
       Offset(centerX - radius, centerY), // left
     ];
   }
+
+  @override
+  Offset get labelOffset => Offset(
+    centerX, 
+    centerY - radius - (radius * 0.3) // 30% of radius as offset
+  );
+
+  @override
+  Offset? get labelConnectionPoint => Offset(centerX, centerY);
 }

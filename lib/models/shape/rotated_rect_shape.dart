@@ -69,6 +69,27 @@ class RotatedRectShape extends Shape {
   List<Offset> getCorners() => toCorners();
 
   @override
+  Offset get labelOffset {
+    // Calculate the top center point of the unrotated rectangle
+    final unrotatedTopCenter = Offset(centerX, centerY - height / 2);
+
+    // Apply rotation to this point
+    final rotatedX = centerX + math.cos(angle) * (unrotatedTopCenter.dx - centerX) - 
+                           math.sin(angle) * (unrotatedTopCenter.dy - centerY);
+    final rotatedY = centerY + math.sin(angle) * (unrotatedTopCenter.dx - centerX) + 
+                           math.cos(angle) * (unrotatedTopCenter.dy - centerY);
+  
+    // Move 20 pixels further out along the rotated "up" direction
+    return Offset(
+      rotatedX - math.sin(angle) * 20,
+      rotatedY - math.cos(angle) * 20,
+    );
+  }
+
+  @override
+  Offset? get labelConnectionPoint => Offset(centerX, centerY);
+
+  @override
   void paint(Canvas canvas, Paint paint) {
     final corners = toCorners();
     final path = Path()
