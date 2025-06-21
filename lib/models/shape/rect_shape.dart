@@ -11,7 +11,7 @@ class RectShape extends Shape {
 
   static RectShape? fromJson(Map<String, dynamic> json) {
     try {
-      // поддержка формата: { bbox: [x, y, w, h] }
+      // support format: { bbox: [x, y, w, h] }
       if (json.containsKey('bbox') && json['bbox'] is List) {
         final list = json['bbox'] as List;
         if (list.length >= 4) {
@@ -27,7 +27,7 @@ class RectShape extends Shape {
         }
       }
 
-      // поддержка формата: { x: ..., y: ..., width: ..., height: ... }
+      // support format: { x: ..., y: ..., width: ..., height: ... }
       final missingFields = <String>[];
       if (!json.containsKey('x')) missingFields.add('x');
       if (!json.containsKey('y')) missingFields.add('y');
@@ -71,5 +71,66 @@ class RectShape extends Shape {
   void paint(Canvas canvas, Paint paint) {
     final rect = Rect.fromLTWH(x, y, width, height);
     canvas.drawRect(rect, paint);
+  }
+
+  @override
+  List<Offset> getCorners() {
+    return [
+      Offset(x, y),
+      Offset(x + width, y),
+      Offset(x + width, y + height),
+      Offset(x, y + height),
+    ];
+  }
+
+  @override
+  RectShape move(Offset delta) {
+    return RectShape(
+      x + delta.dx,
+      y + delta.dy,
+      width,
+      height,
+    );
+  }
+
+  @override
+  RectShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    // Ensure width and height are always positive
+    switch (handleIndex) {
+      case 0: // top-left
+        return RectShape(
+          newPosition.dx,
+          newPosition.dy,
+          (x + width - newPosition.dx).abs(),
+          (y + height - newPosition.dy).abs(),
+        );
+      case 1: // top-right
+        return RectShape(
+          x,
+          newPosition.dy,
+          (newPosition.dx - x).abs(),
+          (y + height - newPosition.dy).abs(),
+        );
+      case 2: // bottom-right
+        return RectShape(
+          x,
+          y,
+          (newPosition.dx - x).abs(),
+          (newPosition.dy - y).abs(),
+        );
+      case 3: // bottom-left
+        return RectShape(
+          newPosition.dx,
+          y,
+          (x + width - newPosition.dx).abs(),
+          (newPosition.dy - y).abs(),
+        );
+      default:
+        return this;
+    }
   }
 }

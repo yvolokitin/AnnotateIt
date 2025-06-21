@@ -56,4 +56,43 @@ class CircleShape extends Shape {
     final dy = point.dy - centerY;
     return dx * dx + dy * dy <= radius * radius;
   }
+
+  @override
+  CircleShape move(Offset delta) {
+    return CircleShape(
+      centerX + delta.dx,
+      centerY + delta.dy,
+      radius,
+    );
+  }
+
+  @override
+  CircleShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    // For circles, we'll use the distance from center to new position as the radius
+    final newRadius = (newPosition - center).distance;
+    
+    // Ensure minimum radius
+    final minRadius = 4.0;
+    final clampedRadius = newRadius > minRadius ? newRadius : minRadius;
+
+    return CircleShape(
+      centerX,
+      centerY,
+      clampedRadius,
+    );
+  }
+
+  // For circles, we'll provide 4 handles at cardinal directions
+  List<Offset> getCorners() {
+    return [
+      Offset(centerX, centerY - radius), // top
+      Offset(centerX + radius, centerY), // right
+      Offset(centerX, centerY + radius), // bottom
+      Offset(centerX - radius, centerY), // left
+    ];
+  }
 }

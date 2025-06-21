@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:async/async.dart';
 
 import '../data/dataset_database.dart';
-import '../../models/project.dart';
+
+import '../models/project.dart';
+import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
 
 import '../widgets/imageannotator/annotator_left_toolbar.dart';
@@ -119,6 +121,23 @@ Future<void> _loadImage(int index, String filePath) async {
     }
   }
 
+  void _handleAnnotationUpdated(Annotation updatedAnnotation) {
+    setState(() {
+      final currentMedia = _mediaCache[_currentIndex];
+      if (currentMedia != null) {
+        final index = currentMedia.annotations?.indexWhere(
+          (a) => a.id == updatedAnnotation.id
+        ) ?? -1;
+
+        if (index != -1) {
+          currentMedia.annotations?[index] = updatedAnnotation;
+        }
+      }
+    });
+  
+    // Optionally save immediately - not needed due to save button
+  }
+
   void _handleActionSelected(UserAction action) {
     setState(() {
       userAction = action;
@@ -193,6 +212,7 @@ Future<void> _loadImage(int index, String filePath) async {
                                     setState(() => _currentZoom = zoom);
                                   }
                                 },
+                                onAnnotationUpdated: _handleAnnotationUpdated,
                               ),
                             ),
                           ),

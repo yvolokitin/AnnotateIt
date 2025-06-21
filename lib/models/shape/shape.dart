@@ -12,12 +12,25 @@ abstract class Shape {
   void paint(Canvas canvas, Paint paint);
 
   Map<String, dynamic> toJson();
-
+  Map<String, dynamic> toMap() => toJson();
+  
   /// Returns the bounding box of the shape
   Rect get boundingBox;
 
   /// Checks if a point is inside the shape
   bool containsPoint(Offset point);
+
+  /// annotation move
+  Shape move(Offset delta);
+
+  /// annotation resize
+  Shape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  });
+
+  List<Offset> getCorners();
 
   static Shape? fromAnnotation(Annotation annotation) {
     final json = annotation.data;

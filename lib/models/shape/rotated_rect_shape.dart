@@ -66,6 +66,9 @@ class RotatedRectShape extends Shape {
   }
 
   @override
+  List<Offset> getCorners() => toCorners();
+
+  @override
   void paint(Canvas canvas, Paint paint) {
     final corners = toCorners();
     final path = Path()
@@ -113,5 +116,68 @@ class RotatedRectShape extends Shape {
          rotated.dx <= width / 2 &&
          rotated.dy >= -height / 2 &&
          rotated.dy <= height / 2;
+  }
+
+  @override
+  RotatedRectShape move(Offset delta) {
+    return RotatedRectShape(
+      centerX + delta.dx,
+      centerY + delta.dy,
+      width,
+      height,
+      angle,
+    );
+  }
+
+  @override
+  RotatedRectShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    // First, convert new position to local unrotated coordinates
+    final localPoint = newPosition - Offset(centerX, centerY);
+    final cosA = math.cos(-angle);
+    final sinA = math.sin(-angle);
+    final unrotatedPoint = Offset(
+      cosA * localPoint.dx - sinA * localPoint.dy,
+      sinA * localPoint.dx + cosA * localPoint.dy,
+    );
+
+    // Calculate new width and height based on which corner is being dragged
+    double newWidth = width;
+    double newHeight = height;
+
+    switch (handleIndex) {
+      case 0: // top-left
+        newWidth = (width / 2 - unrotatedPoint.dx).abs() * 2;
+        newHeight = (height / 2 - unrotatedPoint.dy).abs() * 2;
+        break;
+      case 1: // top-right
+        newWidth = (width / 2 + unrotatedPoint.dx).abs() * 2;
+        newHeight = (height / 2 - unrotatedPoint.dy).abs() * 2;
+        break;
+      case 2: // bottom-right
+        newWidth = (width / 2 + unrotatedPoint.dx).abs() * 2;
+        newHeight = (height / 2 + unrotatedPoint.dy).abs() * 2;
+        break;
+      case 3: // bottom-left
+        newWidth = (width / 2 - unrotatedPoint.dx).abs() * 2;
+        newHeight = (height / 2 + unrotatedPoint.dy).abs() * 2;
+        break;
+    }
+
+    // Ensure minimum size
+    final minSize = 8.0;
+    newWidth = math.max(newWidth, minSize);
+    newHeight = math.max(newHeight, minSize);
+
+    return RotatedRectShape(
+      centerX,
+      centerY,
+      newWidth,
+      newHeight,
+      angle,
+    );
   }
 }

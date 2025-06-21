@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../data/dataset_database.dart';
-import '../../models/label.dart';
 import '../../models/project.dart';
 import '../../models/dataset.dart';
 
@@ -172,7 +170,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
 
           Row(
             children: [
-              Icon(Icons.source),
+              Icon(Icons.source_outlined),
               const SizedBox(width: 5),
               Text('Source ${dataset.source}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal)),
             ],

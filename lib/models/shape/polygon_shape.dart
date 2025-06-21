@@ -97,4 +97,33 @@ class PolygonShape extends Shape {
     return path.contains(point);
   }
 
+  @override
+  PolygonShape move(Offset delta) {
+    return PolygonShape(
+      points.map((point) => Offset(point.dx + delta.dx, point.dy + delta.dy)).toList(),
+    );
+  }
+
+  @override
+  PolygonShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    if (handleIndex < 0 || handleIndex >= points.length) return this;
+
+    // Calculate scale factors based on bounding box changes
+    final oldBounds = boundingRect;
+    final newPoints = List<Offset>.from(points);
+
+    // Move the selected point directly to the new position
+    newPoints[handleIndex] = newPosition;
+
+    return PolygonShape(newPoints);
+  }
+
+  // Helper method to get corner points (same as all polygon points)
+  List<Offset> getCorners() {
+    return List<Offset>.from(points);
+  }
 }
