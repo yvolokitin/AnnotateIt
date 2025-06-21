@@ -47,6 +47,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   MouseCursor cursorIcon = SystemMouseCursors.basic;
   UserAction userAction = UserAction.navigation;
 
+  bool showAnnotationNames = true;
   bool showRightSidebar = false;
   bool _mouseInsideImage = false;
   double labelOpacity = 0.35;
@@ -187,10 +188,12 @@ Future<void> _loadImage(int index, String filePath) async {
                       type: widget.project.type,
                       opacity: labelOpacity,
                       selectedAction: userAction,
+                      showAnnotationNames: showAnnotationNames,
                       onOpacityChanged: (v) => setState(() => labelOpacity = v),
                       onResetZoomPressed: () => setState(() => _resetZoomCount++),
                       onShowDatasetGridChanged: (v) => setState(() => showRightSidebar = v),
                       onActionSelected: _handleActionSelected,
+                      onShowAnnotationNames: (v) => setState(() => showAnnotationNames = v),
                     ),
                     Expanded(
                       child: Column(
@@ -205,6 +208,7 @@ Future<void> _loadImage(int index, String filePath) async {
                                 labels: widget.project.labels ?? [],
                                 annotations: media.annotations,
                                 resetZoomCount: _resetZoomCount,
+                                showAnnotationNames: showAnnotationNames,
                                 opacity: labelOpacity,
                                 userAction: userAction,
                                 onZoomChanged: (zoom) {

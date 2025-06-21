@@ -29,39 +29,41 @@ class AnnotatorRightSidebar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Annotations (${annotations.length})",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          if (!collapsed)...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Annotations (${annotations.length})",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: annotations.length,
-              itemBuilder: (context, index) {
-                final annotation = annotations[index];
-                return Text(
-                  annotation.name ?? 'Unnamed',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: annotation.color ?? Colors.grey,
-                    fontWeight: FontWeight.normal,
-                  ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: annotations.length,
+                itemBuilder: (context, index) {
+                  final annotation = annotations[index];
+                  return Text(
+                    annotation.name ?? 'Unnamed',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: annotation.color ?? Colors.grey,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -14,12 +14,14 @@ class CanvasPainter extends CustomPainter {
   final List<Annotation>? annotations;
   final double scale, opacity;
   final Annotation? selectedAnnotation;
-  
+  final bool showAnnotationNames;  
+
   CanvasPainter({
     required this.image,
     required this.annotations,
     required this.scale,
     required this.opacity,
+    required this.showAnnotationNames,
     this.selectedAnnotation,
   });
 
@@ -50,14 +52,16 @@ class CanvasPainter extends CustomPainter {
         // label transparent background
         shape.paint(canvas, fillPaint);
 
-        drawLabel(
-          canvas,
-          size,
-          annotation.name ?? 'Unknown',
-          paint.color,
-          shape.labelOffset,
-          shapeConnectionPoint: shape.labelConnectionPoint,
-        );
+        if (showAnnotationNames) {
+          drawLabel(
+            canvas,
+            size,
+            annotation.name ?? 'Unknown',
+            paint.color,
+            shape.labelOffset,
+            shapeConnectionPoint: shape.labelConnectionPoint,
+          );
+        }
 
       } else {
         debugPrint('Shape is null for annotation: ${annotation.id}');

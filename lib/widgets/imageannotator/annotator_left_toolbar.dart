@@ -5,21 +5,25 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final String type;
   final double opacity;
   final UserAction selectedAction;
+  final bool showAnnotationNames;
 
   final ValueChanged<double> onOpacityChanged;
   final VoidCallback onResetZoomPressed;
   final ValueChanged<bool> onShowDatasetGridChanged;
   final ValueChanged<UserAction> onActionSelected;
+  final ValueChanged<bool> onShowAnnotationNames;
 
   const AnnotatorLeftToolbar({
     super.key,
     required this.type,
     required this.opacity,
     required this.selectedAction,
+    required this.showAnnotationNames,
     required this.onOpacityChanged,
     required this.onResetZoomPressed,
     required this.onShowDatasetGridChanged,
     required this.onActionSelected,
+    required this.onShowAnnotationNames,
   });
 
   @override
@@ -39,7 +43,9 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    bool annotationShapes = widget.type.toLowerCase().contains('detect') || widget.type.toLowerCase().contains('segment');
+    bool annotationDetection = widget.type.toLowerCase().contains('detect');
+    bool annotationSegment = widget.type.toLowerCase().contains('segment');
+
     final bool isCompact = MediaQuery.of(context).size.height < 1024;
 
     return Container(
@@ -78,7 +84,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ),
 
-          if (annotationShapes) ...[
+          if (annotationDetection) ...[
             Divider(color: Colors.white30, height: isCompact ? 15 : 30),
             MouseRegion(
               cursor: SystemMouseCursors.click,
@@ -100,7 +106,9 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                 ),
               ),
             ),
+          ],
 
+          if (annotationSegment) ...[
             Divider(color: Colors.white30, height: isCompact ? 15 : 30),
             MouseRegion(
               cursor: SystemMouseCursors.click,
@@ -199,20 +207,41 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                widget.onShowAnnotationNames(!widget.showAnnotationNames);
+              },
               child: Container(
                 width: 48,
                 height: 48,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
-                  color: Colors.transparent, // showDatasetGrid ? Colors.grey[850] : Colors.transparent,
+                  color: (!widget.showAnnotationNames) ? Colors.grey[850] : Colors.transparent,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Icon(
-                  Icons.delete_rounded,
-                  color: Colors.white70,
-                  size: 28,
-                ),
+                child: widget.showAnnotationNames
+                  ? const Icon(
+                    Icons.text_fields,
+                    color: Colors.white70,
+                    size: 28,
+                  )
+                  : Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(
+                        Icons.text_fields,
+                        color: Colors.white38,
+                        size: 28,
+                      ),
+                      Transform.rotate(
+                        angle: -0.7,
+                        child: Container(
+                          width: 24,
+                          height: 2,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ],
+                  ),
               ),
             ),
           ),

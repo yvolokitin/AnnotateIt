@@ -18,6 +18,7 @@ class AnnotatorCanvas extends StatefulWidget {
   final List<Annotation>? annotations;
   final int resetZoomCount;
   final double opacity;
+  final bool showAnnotationNames;
 
   final ValueChanged<double>? onZoomChanged;
   final ValueChanged<Annotation>? onAnnotationUpdated;
@@ -29,6 +30,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.resetZoomCount,
     required this.opacity,
     required this.userAction,
+    required this.showAnnotationNames,
     this.onZoomChanged,
     this.onAnnotationUpdated,
     super.key,
@@ -39,7 +41,7 @@ class AnnotatorCanvas extends StatefulWidget {
 }
 
 class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
-  Offset? _middleButtonDragStart;
+  // Offset? _middleButtonDragStart;
   Offset? _lastMiddleButtonPosition;
   
   Annotation? _selectedAnnotation;
@@ -224,6 +226,7 @@ Widget build(BuildContext context) {
                       selectedAnnotation: _selectedAnnotation,
                       scale: matrix.getMaxScaleOnAxis(),
                       opacity: widget.opacity,
+                      showAnnotationNames: widget.showAnnotationNames,
                     ),
                   ),
                 ),
