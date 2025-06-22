@@ -11,11 +11,11 @@ class CreateNewProjectStepTaskSelection extends StatefulWidget {
   final Function(String tab, String task) onTaskSelectionChanged;
 
   const CreateNewProjectStepTaskSelection({
-    Key? key,
+    super.key,
     required this.nameController,
     required this.selectedTaskType,
     required this.onTaskSelectionChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<CreateNewProjectStepTaskSelection> createState() => _CreateNewProjectStepTaskSelectionState();
@@ -56,54 +56,67 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
-        TextField(
-          controller: widget.nameController,
-          decoration: InputDecoration(
-            labelText: AppLocalizations.of(context)!.projectNameLabel,
-            filled: true,
-            fillColor: Colors.grey[850],
-            enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red, width: 1),
+        Padding(
+          padding: EdgeInsets.all(screenWidth > 1600 ? 20.0 : 10.0),
+          child: TextField(
+            controller: widget.nameController,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.projectNameLabel,
+              filled: true,
+              fillColor: Colors.grey[850],
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.orange, width: 1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.orange, width: 1),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red, width: 1),
-            ),
+            style: TextStyle(color: Color(0xFFCC9966), fontWeight: FontWeight.normal, fontSize: 22),
           ),
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 20),
         ),
-        const SizedBox(height: 26),
-        TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.red,
-          indicatorWeight: 3.0,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          labelStyle: const TextStyle(fontSize: 24),
-          unselectedLabelStyle: const TextStyle(fontSize: 24),
-          tabs: _tabs.map((label) => Tab(text: label)).toList(),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: TabBarView(
+
+        Padding(
+          padding: EdgeInsets.only(left: 20, right: 20,),
+          child: TabBar(
             controller: _tabController,
-            children: [
-              DetectionTab(
-                selectedTaskType: widget.selectedTaskType,
-                onSelected: (task) => widget.onTaskSelectionChanged("Detection", task),
-              ),
-              ClassificationTab(
-                selectedTaskType: widget.selectedTaskType,
-                onSelected: (task) => widget.onTaskSelectionChanged("Classification", task),
-              ),
-              SegmentationTab(
-                selectedTaskType: widget.selectedTaskType,
-                onSelected: (task) => widget.onTaskSelectionChanged("Segmentation", task),
-              ),
-            ],
+            indicatorColor: Colors.deepOrangeAccent,
+            indicatorWeight: 3.0,
+            labelColor: Colors.orangeAccent,
+            unselectedLabelColor: Color(0xFFB28F7D),
+            labelStyle: const TextStyle(fontSize: 24),
+            unselectedLabelStyle: const TextStyle(fontSize: 24),
+            tabs: _tabs.map((label) => Tab(text: label)).toList(),
           ),
         ),
+
+        Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                DetectionTab(
+                  selectedTaskType: widget.selectedTaskType,
+                  onSelected: (task) => widget.onTaskSelectionChanged("Detection", task),
+                ),  
+                ClassificationTab(
+                  selectedTaskType: widget.selectedTaskType,
+                  onSelected: (task) => widget.onTaskSelectionChanged("Classification", task),
+                ),
+                SegmentationTab(
+                  selectedTaskType: widget.selectedTaskType,
+                  onSelected: (task) => widget.onTaskSelectionChanged("Segmentation", task),
+                ),
+              ],
+            ),
+        ), 
       ],
     );
   }

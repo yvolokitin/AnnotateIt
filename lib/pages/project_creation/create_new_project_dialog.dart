@@ -61,6 +61,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isLargeScreen = constraints.maxWidth >= 1600;
@@ -95,39 +96,61 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                AppLocalizations.of(context)!.createProjectTitle,
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                              Row(
+                                children: [                              
+                                  const Icon(
+                                    Icons.create_new_folder_rounded,
+                                    size: 34,
+                                    color: Colors.deepOrangeAccent,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    l10n.createProjectTitle,
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepOrangeAccent,
+                                    ),
+                                  ),
+                                ]
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                _step == 0
-                                    ? AppLocalizations.of(context)!.createProjectStepOneSubtitle
-                                    : AppLocalizations.of(context)!.createProjectStepTwoSubtitle,
-                                style: const TextStyle(fontSize: 22, color: Colors.white70),
+                              Row(
+                                children: [                              
+                                  Text(
+                                    _step == 0
+                                      ? l10n.createProjectStepOneSubtitle
+                                      : l10n.createProjectStepTwoSubtitle,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color(0xFFCC9966),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
+
                         const SizedBox(height: 12),
-                        const Divider(color: Colors.grey),
-                        const SizedBox(height: 12),
+                        const Divider(color: Colors.orangeAccent),
+
                         Expanded(
                           child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
                         ),
+
+                        const SizedBox(height: 12),
                         _buildBottomButtons(),
                       ],
                     ),
                   ),
+
                   Positioned(
                     top: 5,
                     right: 5,
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white70),
+                      icon: const Icon(Icons.close, color: Color(0xFFCC9966)),
                       tooltip: 'Close',
                       onPressed: () => Navigator.of(context).pop(),
                     ),
@@ -170,14 +193,15 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   }
 
   Widget _buildBottomButtons() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            AppLocalizations.of(context)!.dialogCancel,
-            style: TextStyle(color: Colors.white70)
+            l10n.dialogCancel,
+            style: TextStyle(color: Color(0xFFB28F7D))
           ),
         ),
         Row(
@@ -194,13 +218,20 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
             ElevatedButton(
               onPressed: _handleStepButtonPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.grey[850],
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.deepOrangeAccent, width: 3),
+                ),
               ),
               child: Text(
-                _step == 0 ? AppLocalizations.of(context)!.dialogNext : AppLocalizations.of(context)!.dialogFinish,
-                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                _step == 0 ? l10n.dialogNext : l10n.dialogFinish,
+                style: const TextStyle(
+                  color: Colors.deepOrangeAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
               ),
             ),
           ],
@@ -224,18 +255,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
     }
 
     if (_step == 1) {
-      if (_createdLabels.isEmpty) {
-        AlertErrorDialog.show(
-          context,
-          l10n.labelRequiredTitle,
-          l10n.labelRequiredMessage,
-          tips: l10n.labelRequiredTips,
-        );
-        return;
-      }
-
       final isBinary = _selectedTaskType.toLowerCase() == 'binary classification';
-      if (isBinary && _createdLabels.length != 2) {
+      if (isBinary && _createdLabels.length > 2) {
         AlertErrorDialog.show(
           context,
           l10n.binaryLimitTitle,

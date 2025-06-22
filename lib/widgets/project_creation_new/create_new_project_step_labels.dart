@@ -14,11 +14,11 @@ class CreateNewProjectStepLabels extends StatefulWidget {
   final String projectType;
 
   const CreateNewProjectStepLabels({
-    Key? key,
+    super.key,
     required this.createdLabels,
     required this.projectType,
     this.onLabelsChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<CreateNewProjectStepLabels> createState() => _CreateNewProjectStepLabelsState();
@@ -130,13 +130,6 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     );
   }
 
-  void _removeLabel(Label label) {
-    setState(() => _labels.remove(label));
-    widget.onLabelsChanged?.call(
-      _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-    );
-  }
-
   String _getLabelCreationNote(String type) {
     final l10n = AppLocalizations.of(context)!;
     final lower = type.toLowerCase();
@@ -153,6 +146,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
 
     return Column(
@@ -170,17 +164,17 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
               child: GestureDetector(
                 onTap: _showNewLabelColorPicker,
                 child: Container(
-                  width: 54,
-                  height: 54,
+                  width: screenWidth > 1200 ? 48 : 38,
+                  height: screenWidth > 1200 ? 48 : 38,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.red, width: 1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.orangeAccent, width: 1),
                   ),
                   alignment: Alignment.center,
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: screenWidth > 1200 ? 28 : 22,
+                    height: screenWidth > 1200 ? 28 : 22,
                     decoration: BoxDecoration(
                       color: Color(int.parse(_labelColor.replaceFirst('#', '0xFF'))),
                       shape: BoxShape.circle,
@@ -189,48 +183,67 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                 ),
               ),
             ),
+
             const SizedBox(width: 20),
             Expanded(
               child: TextField(
                 controller: _labelController,
                 decoration: InputDecoration(
                   hintText: l10n.labelNameHint,
-                  hintStyle: const TextStyle(color: Colors.white54, fontWeight: FontWeight.normal),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                  hintStyle: TextStyle(
+                    color: Colors.white54,
+                    fontWeight: FontWeight.normal,
+                    fontSize: screenWidth > 1200 ? 22 : 18,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  // contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   filled: false,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Colors.red, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Colors.red, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  // fontSize: 22,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ),
+
             const SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: _addLabel,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              ),
-              child: Text(
-                l10n.createLabelButton,
-                style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            SizedBox(
+              height: 44,
+              child: ElevatedButton(
+                onPressed: _addLabel,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,// Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: BorderSide(color: Colors.orangeAccent, width: 2),
+                  ),
+                ),
+                child: Text(
+                  l10n.createLabelButton,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
+
           ],
         ),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(l10n.createdLabelsTitle, style: const TextStyle(fontSize: 20, color: Colors.white)),
-        ),
-        const SizedBox(height: 12),
 
         Flexible(
           child: LabelListDialog(

@@ -197,21 +197,21 @@ class AppDrawer extends StatelessWidget {
         children: [
           // Drawer items
           DrawerItem(
-            icon: Icons.image,
+            icon: Icons.wallpaper_rounded,
             title: "Media",
             fullMode: fullMode,
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
           DrawerItem(
-            icon: Icons.label,
+            icon: Icons.label_outline_rounded,
             title: "Labels",
             fullMode: fullMode,
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
           ),
           DrawerItem(
-            icon: Icons.assignment,
+            icon: Icons.library_books_outlined,
             title: "Overview",
             fullMode: fullMode,
             isSelected: selectedIndex == 2,
@@ -243,21 +243,39 @@ class NavigationRailMenu extends StatelessWidget {
       selectedLabelTextStyle: const TextStyle(color: Colors.red),
       unselectedIconTheme: const IconThemeData(color: Colors.white70),
       unselectedLabelTextStyle: const TextStyle(color: Colors.white54),
-      backgroundColor: Colors.grey[900],
+      backgroundColor: Colors.grey[850],
       
       destinations: [
-        NavigationRailDestination(icon: Icon(Icons.image), label: Text(
-          'Media',
-          style: Theme.of(context).textTheme.titleMedium,
-        )),
-        NavigationRailDestination(icon: Icon(Icons.label), label: Text(
-          'Labels',
-          style: Theme.of(context).textTheme.headlineMedium,
-        )),
-        NavigationRailDestination(icon: Icon(Icons.assignment), label: Text(
-          'Overview',
-          style: Theme.of(context).textTheme.headlineMedium,
-        )),
+        NavigationRailDestination(
+          icon: Icon(
+            size: 28,
+            Icons.wallpaper_rounded,
+          ),
+          label: Text(
+            'Media',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        NavigationRailDestination(
+          icon: Icon(
+            size: 28,
+            Icons.label_outline_rounded,
+          ),
+          label: Text(
+            'Labels',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        NavigationRailDestination(
+          icon: Icon(
+            size: 28,
+            Icons.library_books_outlined,
+          ),
+          label: Text(
+            'Overview',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
       ],
     );
   }
@@ -269,15 +287,17 @@ class DrawerItem extends StatelessWidget {
   final String title;
   final bool fullMode;
   final bool isSelected;
-  final VoidCallback onTap;
   final double textSize;
 
-  const DrawerItem({super.key, 
+  final VoidCallback onTap;
+
+  const DrawerItem({
+    super.key, 
     required this.icon,
     required this.title,
-    this.fullMode = false,
     required this.isSelected,
     required this.onTap,
+    this.fullMode = false,
     this.textSize = 28.0,
   });
 
@@ -304,7 +324,12 @@ class DrawerItem extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(icon, color: isSelected ? Colors.red : null), // Red icon if selected
+                  Icon(
+                    icon,
+                    size: 28,
+                    color: isSelected ? Colors.red : null,
+                  ), // Red icon if selected
+
                   if (fullMode) SizedBox(width: 16),
                   if (fullMode)
                     Text(

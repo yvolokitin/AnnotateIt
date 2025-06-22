@@ -9,12 +9,15 @@ class LabelList extends StatelessWidget {
   final String iconPath;
   final double fontLabelSize;
 
+  final Color chipBackgroundColor;
+
   const LabelList({
     super.key,
     required this.labels,
     required this.projectName,
     required this.iconPath,
     required this.fontLabelSize,
+    this.chipBackgroundColor = Colors.transparent,
   });
 
   @override
@@ -80,26 +83,33 @@ class LabelList extends StatelessWidget {
   }
 
   Widget _buildChip(Label label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 16,
-          height: 16,
-          margin: const EdgeInsets.only(right: 6),
-          decoration: BoxDecoration(
-            color: _fromHex(label.color),
-            shape: BoxShape.circle,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      margin: const EdgeInsets.only(right: 4),
+      decoration: BoxDecoration(
+        color: chipBackgroundColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            margin: const EdgeInsets.only(right: 6),
+            decoration: BoxDecoration(
+              color: label.toColor(),
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
-        Text(
-          label.name,
-          style: TextStyle(color: Colors.white, fontSize: fontLabelSize),
-        ),
-        const SizedBox(width: 8),
-      ],
+          Text(
+            label.name,
+            style: TextStyle(color: Colors.white, fontSize: fontLabelSize),
+          ),
+        ],
+      ),
     );
-  }
+  } 
 
   static double _estimateChipWidth(Label label, {required double size}) {
     final labelWidth = _measureTextWidth(label.name, size: size);
@@ -113,12 +123,5 @@ class LabelList extends StatelessWidget {
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width;
-  }
-
-  static Color _fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('FF');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
   }
 }

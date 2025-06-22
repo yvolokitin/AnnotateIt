@@ -88,8 +88,7 @@ class CanvasPainter extends CustomPainter {
 
   void drawCornerHandles(Canvas canvas, List<Offset> corners) {
     const handleSize = 12.0;
-    const halfSize = handleSize / 2;
-    const borderWidth = 4.0;
+    const borderWidth = 5.0;
 
     final fillPaint = Paint()
       ..color = Colors.white

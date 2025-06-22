@@ -110,8 +110,8 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
           child: GestureDetector(
             onTap: _showColorPicker,
             child: Container(
-              width: screenWidth > 1200 ? 50 : 38,
-              height: screenWidth > 1200 ? 50 : 38,
+              width: screenWidth > 1200 ? 48 : 38,
+              height: screenWidth > 1200 ? 48 : 38,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
@@ -119,8 +119,8 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
               ),
               alignment: Alignment.center,
               child: Container(
-                width: screenWidth > 1200 ? 30 : 22,
-                height: screenWidth > 1200 ? 30 : 22,
+                width: screenWidth > 1200 ? 28 : 22,
+                height: screenWidth > 1200 ? 28 : 22,
                 decoration: BoxDecoration(
                   color: Color(int.parse(_labelColor.replaceFirst('#', '0xFF'))),
                   shape: BoxShape.circle,
@@ -142,7 +142,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: screenWidth > 1200 ? 10 : 8,
+                vertical: 10,
               ),
               filled: false,
               enabledBorder: OutlineInputBorder(

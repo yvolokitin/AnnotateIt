@@ -14,7 +14,7 @@ class SegmentationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TaskTypeGrid(
+    return DatasetTaskTypeGrid(
       selectedTaskType: selectedTaskType,
       onTaskSelected: onSelected,
       tasks: const [
