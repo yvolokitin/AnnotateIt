@@ -44,7 +44,7 @@ class SetImageIconDialog extends StatelessWidget {
             ),
           ),
           child: Text(
-            l10n.cancel,
+            l10n.cancelButton,
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 22,

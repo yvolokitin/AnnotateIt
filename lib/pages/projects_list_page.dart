@@ -7,9 +7,10 @@ import "../data/labels_database.dart";
 
 import "../widgets/project_list/project_tile.dart";
 import "../widgets/projects_topbar.dart";
-import "../widgets/edit_project_name.dart";
 import "../widgets/empty_project_placeholder.dart";
+
 import '../widgets/dialogs/delete_project_dialog.dart';
+import "../widgets/dialogs/edit_project_name_dialog.dart";
 
 import "project_details_page.dart";
 import "project_creation/create_from_dataset_dialog.dart";
@@ -60,25 +61,27 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   }
 
   // Function to Edit a Project (Add Edit Logic)
-  void _editProjectName(Project project) {
-    showDialog(
+  void _editProjectName(Project project) async {
+    final updatedName = await showDialog<String>(
       context: context,
-      builder: (context) => EditProjectName(
-        project: project,
-        onProjectUpdated: () {
-          _loadProjects(); // Refresh project list after saving
-        },
-      ),
+      builder: (_) => EditProjectNameDialog(project: project),
     );
+  
+    if (updatedName != null) {
+      // Refresh project list after saving
+      _loadProjects();
+    }
   }
 
+  /// to be implemented later, now its disabled
+/*
   void _onSearchChanged(String query) {
     setState(() {
       _searchQuery = query;
       _filteredProjects = _applySearchAndSort(_allProjects);
     });
   }
-
+*/
   void _onSortSelected(String option) {
     setState(() {
       _sortOption = option;
@@ -135,6 +138,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     if (result != null) {
       final newProject = await ProjectDatabase.instance.fetchProjectById(result);
       if (newProject != null) {
+        if (!mounted) return;
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -212,7 +216,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
   }
 
-  // Function to Show Edit/Delete Options
+  // Function to show Edit / Change type and Delete options
   void _showProjectOptions(BuildContext context, Project project) {
     showModalBottomSheet(
       context: context,
@@ -223,16 +227,59 @@ class ProjectsListPageState extends State<ProjectsListPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.edit, color: Colors.green),
-                title: Text("Edit Project Name"),
+                leading: Icon(
+                  Icons.edit_note_outlined,
+                  color: Colors.white70,
+                  size: 30,
+                ),
+                title: Text(
+                  "Edit project name",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white70
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _editProjectName(project);
                 },
               ),
+
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
-                title: Text("Delete Project"),
+                leading: Icon(
+                  Icons.build_circle_outlined,
+                  color: Colors.white70,
+                  size: 30,
+                ),
+                title: Text(
+                  "Change project type",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white70,
+                    ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editProjectName(project);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  Icons.delete_sweep_outlined,
+                  color: Colors.white70,
+                  size: 30,
+                ),
+                title: Text(
+                  "Delete project",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white70,
+                  ),
+                ),
                 onTap: () {
                     final currentContext = context;
                     Navigator.pop(context);

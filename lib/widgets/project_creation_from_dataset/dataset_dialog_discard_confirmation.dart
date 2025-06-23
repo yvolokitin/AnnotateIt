@@ -14,21 +14,22 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: Colors.grey[800],
       title: Text(
-        AppLocalizations.of(context)!.discardDatasetImportTitle,
+        l10n.discardDatasetImportTitle,
         style: TextStyle(color: Colors.white),
       ),
       content: Text(
-        AppLocalizations.of(context)!.discardDatasetImportMessage,
+        l10n.discardDatasetImportMessage,
         style: TextStyle(color: Colors.white70),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(
-            AppLocalizations.of(context)!.keep,
+            l10n.keepButton,
             style: TextStyle(color: Colors.white54)
           ),
         ),
@@ -40,7 +41,7 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Text(
-            AppLocalizations.of(context)!.discard,
+            l10n.discardButton,
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],

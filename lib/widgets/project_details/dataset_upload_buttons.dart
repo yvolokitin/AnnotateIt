@@ -225,7 +225,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       Icons.delete,
                       color: _hoveringDelete ? Colors.redAccent : Colors.white,
                     ),
-                    tooltip: l10n.delete,
+                    tooltip: l10n.deleteButton,
                     onPressed: widget.onDeleteSelected,
                   ),
                 ),

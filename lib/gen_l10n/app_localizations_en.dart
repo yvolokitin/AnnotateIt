@@ -9,22 +9,25 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get keep => 'Keep';
+  String get keepButton => 'Keep';
 
   @override
-  String get discard => 'Discard';
+  String get discardButton => 'Discard';
 
   @override
-  String get close => 'Close';
+  String get saveButton => 'Save';
 
   @override
-  String get cancel => 'Cancel';
+  String get closeButton => 'Close';
 
   @override
-  String get delete => 'Delete';
+  String get cancelButton => 'Cancel';
 
   @override
-  String get duplicate => 'Duplicate';
+  String get deleteButton => 'Delete';
+
+  @override
+  String get duplicateButton => 'Duplicate';
 
   @override
   String get importDataset => 'Import dataset';
@@ -250,6 +253,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get saveDuplicateChoiceAsDefault =>
       'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)';
+
+  @override
+  String get editProjectTitle => 'Edit project name';
+
+  @override
+  String get editProjectDescription =>
+      'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.';
+
+  @override
+  String get changeProjectTypeTitle => 'Change project type';
 
   @override
   String get deleteProjectTitle => 'Delete Project';

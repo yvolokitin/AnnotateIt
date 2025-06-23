@@ -6,12 +6,12 @@ class DatasetImportProjectTypeHelper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       backgroundColor: Colors.grey[900],
       title: Text(
-        t.projectTypeHelpTitle,
+        l10n.projectTypeHelpTitle,
         style: const TextStyle(color: Colors.white),
       ),
       content: SingleChildScrollView(
@@ -19,7 +19,7 @@ class DatasetImportProjectTypeHelper extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              t.projectTypeWhyDisabledTitle,
+              l10n.projectTypeWhyDisabledTitle,
               style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -27,12 +27,12 @@ class DatasetImportProjectTypeHelper extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              t.projectTypeWhyDisabledBody,
+              l10n.projectTypeWhyDisabledBody,
               style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 16),
             Text(
-              t.projectTypeAllowChangeTitle,
+              l10n.projectTypeAllowChangeTitle,
               style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -40,20 +40,21 @@ class DatasetImportProjectTypeHelper extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              t.projectTypeAllowChangeBody,
+              l10n.projectTypeAllowChangeBody,
               style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 16),
             Text(
-              t.projectTypeWhenUseTitle,
+              l10n.projectTypeWhenUseTitle,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              t.projectTypeWhenUseBody,
+              l10n.projectTypeWhenUseBody,
               style: const TextStyle(color: Colors.white70),
             ),
           ],
@@ -61,7 +62,7 @@ class DatasetImportProjectTypeHelper extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: Text(t.close, style: const TextStyle(color: Colors.redAccent)),
+          child: Text(l10n.closeButton, style: const TextStyle(color: Colors.redAccent)),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

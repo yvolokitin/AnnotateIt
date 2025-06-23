@@ -4,21 +4,21 @@ import 'package:vap/gen_l10n/app_localizations.dart';
 import '../../models/project.dart';
 import '../../data/project_database.dart';
 
-class EditProjectNameDialog extends StatefulWidget {
+class ChangeProjectTypeDialog extends StatefulWidget {
   final Project project;
-  final String Function(String)? onProjectNameUpdated;
+  final String Function(String)? onProjecttypeChanged;
 
-  const EditProjectNameDialog({
+  const ChangeProjectTypeDialog({
     super.key,
     required this.project,
-    this.onProjectNameUpdated,
+    this.onProjecttypeChanged,
   });
 
   @override
-  EditProjectNameDialogState createState() => EditProjectNameDialogState();
+  ChangeProjectTypeDialogState createState() => ChangeProjectTypeDialogState();
 }
 
-class EditProjectNameDialogState extends State<EditProjectNameDialog> {
+class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
   late TextEditingController _controller;
   String projectName = "";
   
@@ -38,7 +38,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
   Future<void> _saveChanges() async {
     if (projectName.isNotEmpty) {
       await ProjectDatabase.instance.updateProjectName(widget.project.id!, projectName);
-      widget.onProjectNameUpdated?.call(projectName);
+      widget.onProjecttypeChanged?.call(projectName);
       if (!mounted) return;
       Navigator.pop(context, projectName);
     }
@@ -46,9 +46,8 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
-
+    final screenWidth = MediaQuery.of(context).size.width;
     return AlertDialog(
       backgroundColor: Colors.grey[800],
       shape: RoundedRectangleBorder(
@@ -57,18 +56,18 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
       ),
       title: Row(
         children: [
-          Icon(
-            Icons.edit_note_outlined,
-            size: (screenWidth > 1600) ? 32 : 24,
+          const Icon(
+            Icons.build_circle_outlined,
+            size: 32,
             color: Colors.orangeAccent,
           ),
           const SizedBox(width: 12),
           Text(
-            l10n.editProjectTitle,
-            style: TextStyle(
+            l10n.changeProjectTypeTitle,
+            style: const TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,
-              fontSize: (screenWidth > 1600) ? 24 : 20,
+              fontSize: 24
             ),
           ),
         ],
@@ -80,9 +79,9 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
         children: [
           const Divider(color: Colors.orangeAccent),
           Padding(
-            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 12.0),
+            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
             child: Text(
-              l10n.editProjectDescription,
+              "Please, choose a clear, descriptive project name (3 - 86 characters). It's recommended to avoid special characters",
               style: const TextStyle(
                 color: Colors.white70,
                 fontWeight: FontWeight.normal,
@@ -92,7 +91,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
           ),
 
           Padding(
-            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 12.0),
+            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
             child: TextField(
                 controller: _controller,
                 onChanged: (value) => setState(() {
@@ -168,8 +167,8 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                   Text(
                     l10n.saveButton,
                     style: TextStyle(
-                      color: Colors.white,
                       fontSize: 22,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -33,14 +33,14 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
   }
 
   void _editProjectName() async {
-    final newName = await showDialog<String>(
+    final updatedName = await showDialog<String>(
       context: context,
-      builder: (_) => EditProjectNameDialog(name: _projectName),
+      builder: (_) => EditProjectNameDialog(project: widget.project),
     );
 
-    if (newName != null && newName != _projectName) {
+    if (updatedName != null) {
       setState(() {
-        _projectName = newName;
+        _projectName = updatedName;
       });
     }
   }

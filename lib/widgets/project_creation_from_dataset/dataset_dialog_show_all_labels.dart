@@ -9,12 +9,12 @@ class ShowAllLabelsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sortedLabels = List<String>.from(labels)..sort();
-    final t = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       backgroundColor: Colors.grey[900],
       title: Text(
-        t.allLabels,
+        l10n.allLabels,
         style: const TextStyle(color: Colors.white),
       ),
       content: SizedBox(
@@ -36,7 +36,7 @@ class ShowAllLabelsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(t.close, style: const TextStyle(color: Colors.redAccent)),
+          child: Text(l10n.closeButton, style: const TextStyle(color: Colors.redAccent)),
         ),
       ],
     );

@@ -56,46 +56,39 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.all(screenWidth > 1600 ? 20.0 : 10.0),
-          child: TextField(
-            controller: widget.nameController,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.projectNameLabel,
-              filled: true,
-              fillColor: Colors.grey[850],
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.orange, width: 1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.orange, width: 1),
-                borderRadius: BorderRadius.circular(12),
-              ),
+        TextField(
+          controller: widget.nameController,
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.projectNameLabel,
+            filled: true,
+            fillColor: Colors.grey[850],
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 10,
             ),
-            style: TextStyle(color: Color(0xFFCC9966), fontWeight: FontWeight.normal, fontSize: 22),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.orange, width: 1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.orange, width: 1),
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
+          style: TextStyle(color: Color(0xFFCC9966), fontWeight: FontWeight.normal, fontSize: 22),
         ),
 
-        Padding(
-          padding: EdgeInsets.only(left: 20, right: 20,),
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: Colors.deepOrangeAccent,
-            indicatorWeight: 3.0,
-            labelColor: Colors.orangeAccent,
-            unselectedLabelColor: Color(0xFFB28F7D),
-            labelStyle: const TextStyle(fontSize: 24),
-            unselectedLabelStyle: const TextStyle(fontSize: 24),
-            tabs: _tabs.map((label) => Tab(text: label)).toList(),
-          ),
+        TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.deepOrangeAccent,
+          indicatorWeight: 3.0,
+          labelColor: Colors.orangeAccent,
+          unselectedLabelColor: Color(0xFFB28F7D),
+          labelStyle: const TextStyle(fontSize: 24),
+          unselectedLabelStyle: const TextStyle(fontSize: 24),
+          tabs: _tabs.map((label) => Tab(text: label)).toList(),
         ),
 
         Expanded(

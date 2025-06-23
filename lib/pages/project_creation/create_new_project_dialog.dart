@@ -137,7 +137,10 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                         const Divider(color: Colors.orangeAccent),
 
                         Expanded(
-                          child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
+                          ),
                         ),
 
                         const SizedBox(height: 12),
@@ -221,8 +224,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 backgroundColor: Colors.grey[850],
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.deepOrangeAccent, width: 3),
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.deepOrangeAccent, width: 2),
                 ),
               ),
               child: Text(
@@ -230,7 +233,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 style: const TextStyle(
                   color: Colors.deepOrangeAccent,
                   fontWeight: FontWeight.bold,
-                  fontSize: 22,
+                  fontSize: 20,
                 ),
               ),
             ),
@@ -283,7 +286,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           ownerId: currentUser.id ?? -1,
         );
 
-        // final newProjectId = await ProjectDatabase.instance.createProject(newProject);
         final fullProject = await ProjectDatabase.instance.createProject(newProject);
         final labelsWithNewProjectId = _createdLabels
           .map((label) => label.copyWith(projectId: fullProject.id!))

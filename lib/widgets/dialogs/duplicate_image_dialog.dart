@@ -43,7 +43,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
           ),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white70),
-            tooltip: l10n.cancel,
+            tooltip: l10n.cancelButton,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -131,7 +131,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
           ),
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.cancel,
+            l10n.cancelButton,
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 22,

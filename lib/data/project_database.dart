@@ -284,7 +284,7 @@ Future<Project> createProject(Project project) async {
     return null;
   }
 
-  Future<int> updateProjectName(Project project) async {
+  Future<int> updateProjectName(int projectId, String projectName) async {
     final db = await database;
 
     // Fetch current project name from database
@@ -292,14 +292,14 @@ Future<Project> createProject(Project project) async {
       'projects',
       columns: ['name'],
       where: 'id = ?',
-      whereArgs: [project.id],
+      whereArgs: [projectId],
     );
 
     if (result.isNotEmpty) {
       String currentName = result.first['name'];
       // If the name has not changed, do nothing and return 0 (no update)
-      if (currentName == project.name) {
-        _log.info('No changes detected for project "${project.name}", skipping update.');
+      if (currentName == projectName) {
+        _log.info('No changes detected for project "$projectName", skipping update.');
         return 0; // No update performed
       }
     }
@@ -308,12 +308,12 @@ Future<Project> createProject(Project project) async {
     return await db.update(
       'projects',
       {
-        'name': project.name,
+        'name': projectName,
         // Update project lastUpdated column with current time
         'lastUpdated': DateTime.now().toIso8601String(),
       },
       where: 'id = ?',
-      whereArgs: [project.id],
+      whereArgs: [projectId],
     );
   }
 

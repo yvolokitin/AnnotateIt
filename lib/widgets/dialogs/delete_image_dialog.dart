@@ -83,7 +83,7 @@ class DeleteImageDialog extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.cancel,
+            l10n.cancelButton,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -106,7 +106,7 @@ class DeleteImageDialog extends StatelessWidget {
             Navigator.pop(context);
           },
           child: Text(
-            l10n.delete,
+            l10n.deleteButton,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,

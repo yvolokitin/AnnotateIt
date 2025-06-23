@@ -1,11 +1,12 @@
 {
   "@@locale": "en",
-  "keep": "Keep",
-  "discard": "Discard",
-  "close": "Close",
-  "cancel": "Cancel",
-  "delete": "Delete",
-  "duplicate": "Duplicate",
+  "keepButton": "Keep",
+  "discardButton": "Discard",
+  "saveButton": "Save",
+  "closeButton": "Close",
+  "cancelButton": "Cancel",
+  "deleteButton": "Delete",
+  "duplicateButton": "Duplicate",
 
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
@@ -102,6 +103,11 @@
   "duplicateImageOnly": "Duplicate image only",
   "duplicateImageOnlyHint": "Only the image will be copied, without annotations.",
   "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)",
+
+  "editProjectTitle": "Edit project name",
+  "editProjectDescription": "Please, choose a clear, descriptive project name (3 - 86 characters). It's recommended to avoid special characters.",
+  
+  "changeProjectTypeTitle": "Change project type",
 
   "deleteProjectTitle": "Delete Project",
   "deleteProjectConfirm": "Are you sure you want to delete the project \"{projectName}\"?"

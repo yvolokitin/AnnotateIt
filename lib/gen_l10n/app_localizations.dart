@@ -94,41 +94,47 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
-  /// No description provided for @keep.
+  /// No description provided for @keepButton.
   ///
   /// In en, this message translates to:
   /// **'Keep'**
-  String get keep;
+  String get keepButton;
 
-  /// No description provided for @discard.
+  /// No description provided for @discardButton.
   ///
   /// In en, this message translates to:
   /// **'Discard'**
-  String get discard;
+  String get discardButton;
 
-  /// No description provided for @close.
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveButton;
+
+  /// No description provided for @closeButton.
   ///
   /// In en, this message translates to:
   /// **'Close'**
-  String get close;
+  String get closeButton;
 
-  /// No description provided for @cancel.
+  /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
-  String get cancel;
+  String get cancelButton;
 
-  /// No description provided for @delete.
+  /// No description provided for @deleteButton.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
-  String get delete;
+  String get deleteButton;
 
-  /// No description provided for @duplicate.
+  /// No description provided for @duplicateButton.
   ///
   /// In en, this message translates to:
   /// **'Duplicate'**
-  String get duplicate;
+  String get duplicateButton;
 
   /// No description provided for @importDataset.
   ///
@@ -513,6 +519,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)'**
   String get saveDuplicateChoiceAsDefault;
+
+  /// No description provided for @editProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit project name'**
+  String get editProjectTitle;
+
+  /// No description provided for @editProjectDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.'**
+  String get editProjectDescription;
+
+  /// No description provided for @changeProjectTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change project type'**
+  String get changeProjectTypeTitle;
 
   /// No description provided for @deleteProjectTitle.
   ///
