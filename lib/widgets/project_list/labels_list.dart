@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../models/label.dart';
-import 'labels_details.dart';
 
 class LabelList extends StatelessWidget {
   final List<Label> labels;
@@ -51,23 +50,16 @@ class LabelList extends StatelessWidget {
 
         if (visibleChips.length < labels.length) {
           visibleChips.add(
-            GestureDetector(
-              onTap: () => showDialog(
-                context: context,
-                builder: (_) => AllLabelsDialog(
-                  labels: labels ?? [],
-                  projectTitle: projectName,
-                  iconPath: iconPath,
-                ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                color: chipBackgroundColor,
+                borderRadius: BorderRadius.circular(6),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '+ more...',
-                    style: TextStyle(color: Colors.white70, fontSize: fontLabelSize),
-                  ),
-                ],
+              child: Text(
+                '+ more...',
+                style: TextStyle(color: Colors.white70, fontSize: fontLabelSize),
               ),
             ),
           );
@@ -83,6 +75,9 @@ class LabelList extends StatelessWidget {
   }
 
   Widget _buildChip(Label label) {
+    final isLong = label.name.length > 15;
+    final displayName = isLong ? '${label.name.substring(0, 15)}…' : label.name;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       margin: const EdgeInsets.only(right: 4),
@@ -100,22 +95,28 @@ class LabelList extends StatelessWidget {
             decoration: BoxDecoration(
               color: label.toColor(),
               borderRadius: BorderRadius.circular(4),
-              // shape: BoxShape.circle,
             ),
           ),
-          Text(
-            label.name,
-            style: TextStyle(color: Colors.white, fontSize: fontLabelSize),
+          Tooltip(
+            message: label.name,
+            child: Text(
+              displayName,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(color: Colors.white, fontSize: fontLabelSize),
+            ),
           ),
         ],
       ),
     );
-  } 
+  }
 
   static double _estimateChipWidth(Label label, {required double size}) {
-    final labelWidth = _measureTextWidth(label.name, size: size);
-    // return labelWidth + 42; // 16px color circle + 6 margin + ~20 padding
-    return labelWidth + 16 + 6 + 8; // circle + margin + spacing
+    final isLong = label.name.length > 15;
+    final truncated = isLong ? '${label.name.substring(0, 15)}…' : label.name;
+    final textWidth = _measureTextWidth(truncated, size: size);
+
+    return 40 + 16 + 6 + textWidth + 2;
   }
 
   static double _measureTextWidth(String text, {required double size}) {
