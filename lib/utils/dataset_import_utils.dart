@@ -352,7 +352,13 @@ Future<Directory> extractZipToAppFolder(
   await outputDir.create(recursive: true);
 
   final bytes = zipFile.readAsBytesSync();
-  final archive = zip.ZipDecoder().decodeBytes(bytes);
+  if (bytes.isEmpty) throw Exception("ZIP file is empty.");
+  zip.Archive archive;
+  try {
+    archive = zip.ZipDecoder().decodeBytes(bytes);
+  } catch (e) {
+    throw Exception("Failed to decode ZIP file: $e");
+  }
 
   final totalFiles = archive.length;
   int extractedCount = 0;
@@ -499,22 +505,29 @@ Future<void> cleanupExtractedPath(
   void Function(String message)? onLog,
 }) async {
   final dir = Directory(extractedPath);
-  if (await dir.exists()) {
-    await dir.delete(recursive: true);
-    onLog?.call('Cleaned up extracted directory: $extractedPath');
+
+  try {
+    if (await dir.exists()) {
+      await dir.delete(recursive: true);
+      onLog?.call('Cleaned up extracted directory: $extractedPath');
+    } else {
+      onLog?.call('Directory not found, skipping deletion: $extractedPath');
+    }
+  } catch (e) {
+    onLog?.call('Failed to delete extracted directory: $e');
   }
 
   try {
     final rootFolder = dir.parent;
     if (await rootFolder.exists()) {
-      final contents = rootFolder.listSync();
+      final contents = await rootFolder.list().toList();
       if (contents.isEmpty) {
         await rootFolder.delete();
         onLog?.call('Cleaned up root folder: ${rootFolder.path}');
       }
     }
   } catch (e) {
-    onLog?.call('Failed to remove root folder: $e');
+    onLog?.call('Failed to delete root folder: $e');
   }
 }
 

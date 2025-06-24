@@ -9,13 +9,14 @@ import '../../../session/user_session.dart';
 import '../../../utils/dataset_import_utils.dart';
 import '../../../utils/dataset_import_project_creation.dart';
 
+import '../../widgets/dialogs/alert_error_dialog.dart';
+
 import '../../widgets/project_creation_from_dataset/dataset_upload_prompt.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_description_widget.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_task_confirmation.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_progress_bar.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_dataset_overview.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_project_creation.dart';
-
 import '../../widgets/project_creation_from_dataset/dataset_dialog_discard_confirmation.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
@@ -62,69 +63,81 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     }
   }
 
-  Future<void> _processZipArchive(File file) async {
-    setState(() {
-      _isUploading = true;
-      _progress = 0.0;
-      _currentStep = 2;
-      _useIsolateMode = false;
-    });
+Future<void> _processZipArchive(File file) async {
+  setState(() {
+    _isUploading = true;
+    _progress = 0.0;
+    _currentStep = 2;
+    _useIsolateMode = false;
+  });
 
-    try {
-      final storagePath = await getDefaultStoragePath(() =>
-          UserSession.instance.getCurrentUserDatasetFolder());
+  try {
+    final storagePath = await getDefaultStoragePath(() =>
+        UserSession.instance.getCurrentUserDatasetFolder());
 
-      final fileSize = await file.length();
+    final fileSize = await file.length();
+    final bool useIsolate = fileSize > DATASET_ISOLATE_THRESHOLD;
+    _useIsolateMode = useIsolate;
 
-      final info = fileSize > DATASET_ISOLATE_THRESHOLD
-          ? await (() async {
-              _useIsolateMode = true;
-              return await processZipLocallyWithIsolates(
-                zipFile: file,
-                storagePath: storagePath,
-                onExtractProgress: (progress) => setState(() => _progress = progress),
-                onExtractDone: (path) => setState(() {
-                  _progress = 0.0;
-                  _currentStep = 3;
-                }),
-                onDetectProgress: (progress) => setState(() => _progress = progress),
-              );
-            })()
-          : await processZipLocally(
-              zipFile: file,
-              storagePath: storagePath,
-              onExtractProgress: (progress) => setState(() => _progress = progress),
-              onExtractDone: (path) => setState(() {
-                _progress = 0.0;
-                _currentStep = 3;
-              }),
-              onDetectProgress: (progress) => setState(() => _progress = progress),
-            );
+    Archive archive;
 
-      setState(() {
-        _archive = info;
-        _isUploading = false;
-        _progress = 1.0;
-      });
-    } catch (e, stack) {
-      _logger.warning('Failed to process ZIP file: $e', e, stack);
-      if (_archive != null) {
-        await cleanupExtractedPath(
-          _archive!.datasetPath,
-          onLog: (msg) => _logger.info(msg),
-        );
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Import failed: $e")),
+    if (useIsolate) {
+      archive = await processZipLocallyWithIsolates(
+        zipFile: file,
+        storagePath: storagePath,
+        onExtractProgress: (progress) => setState(() => _progress = progress),
+        onExtractDone: (path) => setState(() {
+          _progress = 0.0;
+          _currentStep = 3;
+        }),
+        onDetectProgress: (progress) => setState(() => _progress = progress),
       );
-      setState(() {
-        _isUploading = false;
-        _currentStep = 1;
-        _archive = null;
-      });
+    } else {
+      archive = await processZipLocally(
+        zipFile: file,
+        storagePath: storagePath,
+        onExtractProgress: (progress) => setState(() => _progress = progress),
+        onExtractDone: (path) => setState(() {
+          _progress = 0.0;
+          _currentStep = 3;
+        }),
+        onDetectProgress: (progress) => setState(() => _progress = progress),
+      );
     }
+
+    setState(() {
+      _archive = archive;
+      _isUploading = false;
+      _progress = 1.0;
+    });
+  } catch (e, stack) {
+    _logger.warning('CreateFromDatasetDialog: Failed to process ZIP file: $e', e, stack);
+
+    final extractedPath = _archive?.datasetPath;
+    if (extractedPath != null && extractedPath.isNotEmpty) {
+      await cleanupExtractedPath(
+        extractedPath,
+        onLog: (msg) => _logger.info(msg),
+      );
+    }
+
+    if (!mounted) return;
+
+    await AlertErrorDialog.show(
+      context,
+      "Import Failed",
+      "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
+      tips: "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: $e",
+    );
+    
+    setState(() {
+      _isUploading = false;
+      _progress = 0.0;
+      _currentStep = 1;
+      _archive = null;
+    });
   }
+}
 
   Future<void> _goToNextStep() async {
     if (_currentStep == 3 && _archive != null) {
@@ -134,27 +147,11 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     } else if (_currentStep == 4 && _archive != null) {
       final selectedTask = _archive!.selectedTaskType?.trim();
       if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
-        await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              backgroundColor: Colors.grey[850],
-              title: const Text(
-                'No Project Type Selected',
-                style: TextStyle(color: Colors.white),
-              ),
-              content: const Text(
-                'Please select a Project Type based on the detected annotation types in your dataset.',
-                style: TextStyle(color: Colors.white70),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('OK', style: TextStyle(color: Colors.redAccent)),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
+        await AlertErrorDialog.show(
+          context,
+          'No Project Type Selected',
+          'Please select a Project Type based on the detected annotation types in your dataset.',
+          tips: 'Check your dataset format and ensure annotations follow a supported structure like COCO, YOLO, VOC or Datumaro.',
         );
         return;
       }
@@ -193,21 +190,21 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   Future<void> _handleCancel() async {
     if (_isUploading) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please wait until dataset is fully processed."),
-          duration: Duration(seconds: 2),
-        ),
+      await AlertErrorDialog.show(
+        context,
+        "Processing Dataset",
+        "We are currently extracting your ZIP archive, analyzing its contents, and detecting the dataset format and annotation type. This may take a few seconds to a few minutes depending on the dataset size and structure. Please do not close this window or navigate away during the process.",
+        tips: "Large archives with many images or annotation files can take longer to process.",
       );
       return;
     }
 
     if (_isCreatingProject) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please wait until project is fully created."),
-          duration: Duration(seconds: 2),
-        ),
+      await AlertErrorDialog.show(
+        context,
+        "Creating Project",
+        "We are setting up your project, initializing its metadata, and saving all configurations. This includes assigning labels, creating datasets, and linking associated media files. Please wait a moment and avoid closing this window until the process is complete.",
+        tips: "Projects with many labels or media files might take slightly longer.",
       );
       return;
     }
@@ -242,11 +239,11 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         return WillPopScope(
           onWillPop: () async {
             if (_isUploading) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Please wait until dataset is fully processed."),
-                  duration: Duration(seconds: 2),
-                ),
+              await AlertErrorDialog.show(
+                context,
+                "Processing Dataset",
+                "We are currently analyzing your dataset archive. This includes extracting files, detecting dataset structure, identifying annotation formats, and collecting media and label information. Please wait until the process is complete. Closing the window or navigating away may interrupt the operation.",
+                tips: "Large datasets with many files or complex annotations may take extra time.",
               );
               return false;
             }

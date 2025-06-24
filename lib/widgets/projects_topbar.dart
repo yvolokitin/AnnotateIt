@@ -151,19 +151,28 @@ class ProjectsTopBar extends StatelessWidget {
                   height: 30,
                   color: Colors.white,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 7),
                 PopupMenuButton<int>(
                   color: const Color(0xFF2E2E2E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Colors.white70, width: 1),
+                  ),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                  offset: const Offset(0, 40),
+                  offset: const Offset(-10, 47),
                   onSelected: (value) {
-                    onCreateFromDataset();
+                    if (value == 0) { onCreateProject(); }
+                    else { onCreateFromDataset(); }
                   },
                   itemBuilder: (context) => const [
                     PopupMenuItem<int>(
                       value: 0,
-                      child: Text("Create from dataset", style: TextStyle(color: Colors.white, fontSize: 22)),
+                      child: Text("Create new project", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.normal)),
+                    ),
+
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Text("Create from Dataset", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.normal)),
                     ),
                   ],
                 ),
