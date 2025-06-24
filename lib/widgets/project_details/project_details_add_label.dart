@@ -74,6 +74,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
 
     setState(() {
       _labels.add(Label(
+        labelOrder: 0,
         projectId: 0,
         name: newLabelName,
         color: _labelColor,
@@ -159,22 +160,25 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
         ),
         SizedBox(width: 20),
 
-        ElevatedButton(
-          onPressed: _addLabel,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[800],
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 11),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-              side: BorderSide(color: Colors.white70, width: 2),
+        SizedBox(
+          height: screenWidth > 1200 ? 46 : 36,
+          child: ElevatedButton(
+            onPressed: _addLabel,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+                side: BorderSide(color: Colors.redAccent, width: 2),
+              ),
             ),
-          ),
-          child: Text(
-            l10n.createLabelButton,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: screenWidth > 1200 ? 22 : 18,
-              fontWeight: FontWeight.bold,
+            child: Text(
+              l10n.createLabelButton,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: screenWidth > 1200 ? 22 : 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),

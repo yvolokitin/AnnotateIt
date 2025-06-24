@@ -4,11 +4,6 @@ import "../models/label.dart";
 import "../models/project.dart";
 import '../data/labels_database.dart';
 
-import "../widgets/project_details/project_view_media_galery.dart";
-import '../widgets/project_details/project_view_datasets_overview.dart';
-import '../widgets/project_details/project_view_labels.dart';
-import '../widgets/project_details/project_details_sidebar.dart';
-
 import '../widgets/project_details/project_details_app_bar.dart';
 import '../widgets/project_details/project_details_navigation.dart';
 import '../widgets/project_details/project_details_content_switcher.dart';

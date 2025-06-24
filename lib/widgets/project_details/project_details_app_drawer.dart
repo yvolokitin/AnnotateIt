@@ -27,7 +27,7 @@ class ProjectDetailsAppDrawer extends StatelessWidget {
             onTap: () => onItemSelected(0),
           ),
           ProjectDetailsDrawerItem(
-            icon: Icons.label_outline_rounded,
+            icon: Icons.discount_outlined,
             title: "Labels",
             fullMode: fullMode,
             isSelected: selectedIndex == 1,

@@ -271,4 +271,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String deleteProjectConfirm(Object projectName) {
     return 'Are you sure you want to delete the project \"$projectName\"?';
   }
+
+  @override
+  String get noLabelsTitle => 'You have no Labels in the Project';
+
+  @override
+  String get noLabelsExplain1 =>
+      'You can\'t annotate without labels because labels give meaning to what you\'re marking';
+
+  @override
+  String get noLabelsExplain2 =>
+      '— without them, the model would not know what the annotation represents.';
+
+  @override
+  String get noLabelsExplain3 =>
+      'An annotation without a label is just an empty box.';
+
+  @override
+  String get noLabelsExplain4 =>
+      'Labels define the categories or classes you\'re annotating in your dataset.';
+
+  @override
+  String get noLabelsExplain5 =>
+      'Whether you\'re tagging objects in images, classifying, or segmenting regions,';
+
+  @override
+  String get noLabelsExplain6 =>
+      'labels are essential for organizing your annotations clearly and consistently.';
 }

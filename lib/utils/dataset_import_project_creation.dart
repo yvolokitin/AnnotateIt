@@ -272,15 +272,18 @@ class DatasetImportProjectCreation {
     final db = await LabelsDatabase.instance.database;
     final List<Label> insertedLabels = [];
 
+    int counter = 0;
     for (final name in labelNames) {
       final label = Label(
         id: null,
+        labelOrder: counter,
         projectId: projectId,
         name: name.trim(),
         color: generateRandomColor(),
         description: null,
       );
 
+      counter++;
       final labelId = await db.insert('labels', label.toMap());
       insertedLabels.add(label.copyWith(id: labelId));
     }

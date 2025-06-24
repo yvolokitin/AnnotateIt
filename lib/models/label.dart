@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class Label {
   final int? id;
+  final int labelOrder; // Renamed from 'order'
   final int projectId;
   final String name;
   final String color;
@@ -10,6 +11,7 @@ class Label {
 
   Label({
     this.id,
+    required this.labelOrder,
     required this.projectId,
     required this.name,
     required this.color,
@@ -19,6 +21,7 @@ class Label {
 
   Label copyWith({
     int? id,
+    int? labelOrder,
     int? projectId,
     String? name,
     String? color,
@@ -27,6 +30,7 @@ class Label {
   }) {
     return Label(
       id: id ?? this.id,
+      labelOrder: labelOrder ?? this.labelOrder,
       projectId: projectId ?? this.projectId,
       name: name ?? this.name,
       color: color ?? this.color,
@@ -38,6 +42,7 @@ class Label {
   factory Label.fromMap(Map<String, dynamic> map) {
     return Label(
       id: map['id'] as int?,
+      labelOrder: map['label_order'] as int,
       projectId: map['project_id'] as int,
       name: map['name'] as String,
       color: map['color'] as String,
@@ -49,6 +54,7 @@ class Label {
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
+      'label_order': labelOrder,
       'project_id': projectId,
       'name': name,
       'color': color,
@@ -59,7 +65,7 @@ class Label {
 
   @override
   String toString() {
-    return 'Label(id: $id, projectId: $projectId, name: $name, color: $color, description: $description)';
+    return 'Label(id: $id, labelOrder: $labelOrder, projectId: $projectId, name: $name, color: $color, description: $description)';
   }
 
   @override

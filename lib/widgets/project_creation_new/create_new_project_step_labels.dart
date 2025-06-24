@@ -6,7 +6,7 @@ import '../../models/label.dart';
 
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
-import '../dialogs/label_list_dialog.dart';
+import '../dialogs/edit_labels_list_dialog.dart';
 
 class CreateNewProjectStepLabels extends StatefulWidget {
   final List<Map<String, dynamic>> createdLabels;
@@ -117,6 +117,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
     setState(() {
       _labels.add(Label(
+        labelOrder: 0,
         projectId: 0,
         name: newLabelName,
         color: _labelColor,
@@ -135,10 +136,13 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     final lower = type.toLowerCase();
     if (lower == 'binary classification') {
       return l10n.noteBinaryClassification;
+
     } else if (lower == 'multi-class classification') {
       return l10n.noteMultiClassClassification;
+
     } else if (lower == 'object detection' || lower == 'instance segmentation') {
       return l10n.noteDetectionOrSegmentation;
+
     } else {
       return l10n.noteDefault;
     }
@@ -152,11 +156,14 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _getLabelCreationNote(widget.projectType),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal, color: Colors.white),
-        ),
-        const SizedBox(height: 30),
+        if (screenWidth > 1200)...[
+          Text(
+            _getLabelCreationNote(widget.projectType),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal, color: Colors.white70),
+          ),
+          const SizedBox(height: 30),
+        ],
+
         Row(
           children: [
             MouseRegion(
@@ -199,20 +206,19 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                     horizontal: 20,
                     vertical: 10,
                   ),
-                  // contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   filled: false,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                    borderSide: const BorderSide(color: Colors.redAccent, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                    borderSide: const BorderSide(color: Colors.redAccent, width: 1),
                   ),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
+                  fontSize: screenWidth > 1200 ? 22 : 18,
                   color: Colors.white,
-                  // fontSize: 22,
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -220,22 +226,22 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
             const SizedBox(width: 20),
             SizedBox(
-              height: 44,
+              height: screenWidth > 1200 ? 46 : 36,
               child: ElevatedButton(
                 onPressed: _addLabel,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,// Colors.redAccent,
+                  backgroundColor: Colors.transparent,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
-                    side: BorderSide(color: Colors.orangeAccent, width: 2),
+                    side: BorderSide(color: Colors.redAccent, width: 2),
                   ),
                 ),
                 child: Text(
                   l10n.createLabelButton,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: screenWidth > 1200 ? 22 : 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -246,7 +252,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
         ),
 
         Flexible(
-          child: LabelListDialog(
+          child: EditLabelsListDialog(
             labels: _labels,
             scrollController: _scrollController,
             onColorTap: _showColorPicker,

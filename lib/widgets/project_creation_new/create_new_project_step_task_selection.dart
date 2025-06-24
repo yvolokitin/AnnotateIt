@@ -60,8 +60,15 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
       children: [
         TextField(
           controller: widget.nameController,
+          cursorColor: Colors.white, 
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+            fontSize: 22,
+          ),
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.projectNameLabel,
+            labelStyle: const TextStyle(color: Colors.white24),
             filled: true,
             fillColor: Colors.grey[850],
             contentPadding: EdgeInsets.symmetric(
@@ -69,25 +76,24 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
               vertical: 10,
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.orange, width: 1),
+              borderSide: BorderSide(color: Colors.white, width: 1),
               borderRadius: BorderRadius.circular(12),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.orange, width: 1),
+              borderSide: BorderSide(color: Colors.white, width: 1),
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          style: TextStyle(color: Color(0xFFCC9966), fontWeight: FontWeight.normal, fontSize: 22),
         ),
 
         TabBar(
           controller: _tabController,
-          indicatorColor: Colors.deepOrangeAccent,
+          indicatorColor: Colors.red,
           indicatorWeight: 3.0,
-          labelColor: Colors.orangeAccent,
-          unselectedLabelColor: Color(0xFFB28F7D),
-          labelStyle: const TextStyle(fontSize: 24),
-          unselectedLabelStyle: const TextStyle(fontSize: 24),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white24,
+          labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
+          unselectedLabelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
           tabs: _tabs.map((label) => Tab(text: label)).toList(),
         ),
 

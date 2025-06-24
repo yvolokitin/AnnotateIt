@@ -51,6 +51,7 @@ class _ImageTileState extends State<ImageTile> {
       if (labelName != null && labelName.isNotEmpty && !uniqueLabels.containsKey(labelName)) {
         final labelColor = annotation.color ?? Colors.grey; // fallback
         uniqueLabels[labelName] = Label(
+          labelOrder: 0,
           projectId: widget.project.id!,
           name: labelName,
           color: labelColor.value.toRadixString(16).padLeft(8, '0')

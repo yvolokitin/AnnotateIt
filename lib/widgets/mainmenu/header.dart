@@ -30,7 +30,7 @@ class AppHeaderState extends State<AppHeader> {
         children: [
           if (widget.onHeaderPressed != null)
             IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
+              icon: const Icon(Icons.menu_rounded, color: Colors.white),
               onPressed: widget.onHeaderPressed,
             ),
           const SizedBox(width: 10),
@@ -38,7 +38,7 @@ class AppHeaderState extends State<AppHeader> {
           const SizedBox(width: 10),
           const Text(
             "Annot@It",
-            style: TextStyle(color: Colors.white, fontSize: 30),
+            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
           ),
         ],
       ),

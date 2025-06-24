@@ -40,7 +40,7 @@ class COCOParser {
 
       final label = projectLabels.firstWhere(
         (lbl) => lbl.name.toLowerCase() == name.toLowerCase(),
-        orElse: () => Label(id: -1, projectId: projectId, name: 'INVALID', color: '#000000'),
+        orElse: () => Label(id: -1, labelOrder: 0, projectId: projectId, name: 'INVALID', color: '#000000'),
       );
 
       if (label.id != null && label.id != -1) {

@@ -61,11 +61,13 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth >= 1600;
+    final isTablet = screenWidth >= 800 && screenWidth < 1600;
     final l10n = AppLocalizations.of(context)!;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isLargeScreen = constraints.maxWidth >= 1600;
-        final isTablet = constraints.maxWidth >= 800 && constraints.maxWidth < 1600;
 
         final dialogPadding = isLargeScreen
             ? const EdgeInsets.all(60)
@@ -98,18 +100,18 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                             children: [
                               Row(
                                 children: [                              
-                                  const Icon(
+                                  Icon(
                                     Icons.create_new_folder_rounded,
-                                    size: 34,
-                                    color: Colors.deepOrangeAccent,
+                                    size: isLargeScreen ? 34 : 30,
+                                    color: Colors.white,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
                                     l10n.createProjectTitle,
                                     style: TextStyle(
-                                      fontSize: 26,
+                                      fontSize: isLargeScreen ? 26 : 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.deepOrangeAccent,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ]
@@ -124,7 +126,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.normal,
-                                      color: Color(0xFFCC9966),
+                                      color: Colors.white24,
                                     ),
                                   ),
                                 ],
@@ -134,7 +136,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                         ),
 
                         const SizedBox(height: 12),
-                        const Divider(color: Colors.orangeAccent),
+                        const Divider(color: Colors.white70),
 
                         Expanded(
                           child: Padding(
@@ -153,7 +155,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                     top: 5,
                     right: 5,
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Color(0xFFCC9966)),
+                      icon: const Icon(Icons.close, color: Colors.white70),
                       tooltip: 'Close',
                       onPressed: () => Navigator.of(context).pop(),
                     ),
@@ -186,6 +188,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           _createdLabels
             ..clear()
             ..addAll(labelMaps.map((map) => Label(
+                  labelOrder: 0,
                   projectId: 0,
                   name: map['name'],
                   color: map['color'],
@@ -204,7 +207,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             l10n.dialogCancel,
-            style: TextStyle(color: Color(0xFFB28F7D))
+            style: TextStyle(color: Colors.white54)
           ),
         ),
         Row(
@@ -213,8 +216,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
               TextButton(
                 onPressed: () => setState(() => _step--),
                 child: Text(
-                  AppLocalizations.of(context)!.dialogBack,
-                  style: TextStyle(color: Colors.white70)
+                  l10n.dialogBack,
+                  style: TextStyle(color: Colors.white54)
                 ),
               ),
             const SizedBox(width: 8),
@@ -225,13 +228,13 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
-                  side: BorderSide(color: Colors.deepOrangeAccent, width: 2),
+                  side: BorderSide(color: Colors.red, width: 2),
                 ),
               ),
               child: Text(
                 _step == 0 ? l10n.dialogNext : l10n.dialogFinish,
                 style: const TextStyle(
-                  color: Colors.deepOrangeAccent,
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),

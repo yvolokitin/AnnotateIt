@@ -44,13 +44,14 @@ class LabelsDatabase {
     });
   }
 
-  /// Fetch all labels for a given project
+  /// Fetch all labels for a given project, ordered by the `order` field
   Future<List<Label>> fetchLabelsByProject(int projectId) async {
     final db = await database;
     final result = await db.query(
       'labels',
       where: 'project_id = ?',
       whereArgs: [projectId],
+      orderBy: 'label_order ASC', // sort by order field
     );
 
     return result.map((map) => Label.fromMap(map)).toList();

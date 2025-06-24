@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
-class ProjectDetailsNavigationRailMenu extends StatelessWidget {
+class MainMenuNavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const ProjectDetailsNavigationRailMenu({
+  const MainMenuNavigationRailMenu({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
@@ -12,19 +13,20 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return NavigationRail(
       selectedIndex: selectedIndex,
+      backgroundColor: Colors.grey[850],
       onDestinationSelected: onItemSelected,
       selectedIconTheme: const IconThemeData(color: Colors.red),
       selectedLabelTextStyle: const TextStyle(color: Colors.red),
       unselectedIconTheme: const IconThemeData(color: Colors.white70),
       unselectedLabelTextStyle: const TextStyle(color: Colors.white54),
-      backgroundColor: Colors.grey[800],
-
       destinations: [
-        _buildDestination(0, Icons.wallpaper_rounded, 'Media'),
-        _buildDestination(1, Icons.discount_outlined, 'Labels'),
-        _buildDestination(2, Icons.library_books_outlined, 'Overview'),
+        _buildDestination(0, Icons.cases_outlined, l10n.menuProjects),
+        _buildDestination(1, Icons.account_circle_outlined, l10n.menuProjects),
+        _buildDestination(2, Icons.school_outlined, l10n.menuProjects),
+        _buildDestination(3, Icons.error_outline_rounded, l10n.menuProjects),
       ],
     );
   }
@@ -35,7 +37,7 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: selectedIndex == index ? Colors.grey[850] : Colors.transparent,
+          color: selectedIndex == index ? Colors.grey[900] : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(size: 28, icon),

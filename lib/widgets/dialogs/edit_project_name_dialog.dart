@@ -59,7 +59,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
         children: [
           Icon(
             Icons.edit_note_outlined,
-            size: (screenWidth > 1600) ? 32 : 24,
+            size: (screenWidth > 1200) ? 34 : 26,
             color: Colors.orangeAccent,
           ),
           const SizedBox(width: 12),
@@ -68,7 +68,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
             style: TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,
-              fontSize: (screenWidth > 1600) ? 24 : 20,
+              fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
           ),
         ],
@@ -80,19 +80,19 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
         children: [
           const Divider(color: Colors.orangeAccent),
           Padding(
-            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 12.0),
+            padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
             child: Text(
               l10n.editProjectDescription,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white70,
                 fontWeight: FontWeight.normal,
-                fontSize: 22,
+                fontSize: (screenWidth > 1200) ? 24 : 20,
               ),
             ),
           ),
 
           Padding(
-            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 12.0),
+            padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
             child: TextField(
                 controller: _controller,
                 onChanged: (value) => setState(() {
@@ -118,9 +118,9 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                     borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
                   ),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  // fontSize: 22,
+                  fontSize: (screenWidth > 1200) ? 22 : 18,
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -145,7 +145,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.normal,
-                  fontSize: 22,
+                  fontSize: (screenWidth > 1200) ? 22 : 20,
                 ),
               ),
             ),
@@ -169,8 +169,8 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                     l10n.saveButton,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      fontSize: (screenWidth > 1200) ? 22 : 20,
                     ),
                   ),
                 ],

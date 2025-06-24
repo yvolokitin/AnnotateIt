@@ -110,6 +110,14 @@
   "changeProjectTypeTitle": "Change project type",
 
   "deleteProjectTitle": "Delete Project",
-  "deleteProjectConfirm": "Are you sure you want to delete the project \"{projectName}\"?"
+  "deleteProjectConfirm": "Are you sure you want to delete the project \"{projectName}\"?",
+
+  "noLabelsTitle": "You have no Labels in the Project",
+  "noLabelsExplain1": "You can't annotate without labels because labels give meaning to what you're marking",
+  "noLabelsExplain2": "— without them, the model would not know what the annotation represents.",
+  "noLabelsExplain3": "An annotation without a label is just an empty box.",
+  "noLabelsExplain4": "Labels define the categories or classes you're annotating in your dataset.",
+  "noLabelsExplain5": "Whether you're tagging objects in images, classifying, or segmenting regions,",
+  "noLabelsExplain6": "labels are essential for organizing your annotations clearly and consistently."
 
 }

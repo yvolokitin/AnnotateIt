@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:logging/logging.dart';
-
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart';
 
@@ -171,6 +169,7 @@ class ProjectDatabase {
     await db.execute('''
       CREATE TABLE labels (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        label_order INTEGER NOT NULL,
         project_id INTEGER NOT NULL,
         name TEXT NOT NULL,
         color TEXT NOT NULL,

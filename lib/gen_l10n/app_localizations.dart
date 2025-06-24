@@ -549,6 +549,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete the project \"{projectName}\"?'**
   String deleteProjectConfirm(Object projectName);
+
+  /// No description provided for @noLabelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no Labels in the Project'**
+  String get noLabelsTitle;
+
+  /// No description provided for @noLabelsExplain1.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t annotate without labels because labels give meaning to what you\'re marking'**
+  String get noLabelsExplain1;
+
+  /// No description provided for @noLabelsExplain2.
+  ///
+  /// In en, this message translates to:
+  /// **'— without them, the model would not know what the annotation represents.'**
+  String get noLabelsExplain2;
+
+  /// No description provided for @noLabelsExplain3.
+  ///
+  /// In en, this message translates to:
+  /// **'An annotation without a label is just an empty box.'**
+  String get noLabelsExplain3;
+
+  /// No description provided for @noLabelsExplain4.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels define the categories or classes you\'re annotating in your dataset.'**
+  String get noLabelsExplain4;
+
+  /// No description provided for @noLabelsExplain5.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether you\'re tagging objects in images, classifying, or segmenting regions,'**
+  String get noLabelsExplain5;
+
+  /// No description provided for @noLabelsExplain6.
+  ///
+  /// In en, this message translates to:
+  /// **'labels are essential for organizing your annotations clearly and consistently.'**
+  String get noLabelsExplain6;
 }
 
 class _AppLocalizationsDelegate

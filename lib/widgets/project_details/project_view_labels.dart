@@ -4,7 +4,7 @@ import '../../models/label.dart';
 import '../../models/project.dart';
 import '../../data/labels_database.dart';
 
-import '../dialogs/label_list_dialog.dart';
+import '../dialogs/edit_labels_list_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
 
 import 'project_details_add_label.dart';
@@ -61,6 +61,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
   void _handleAddNewLabel(String name, String color) async {
     final newLabel = Label(
       id: null, // will be set after DB insert
+      labelOrder: labels.length,
       projectId: widget.project.id ?? 0,
       name: name,
       color: color,
@@ -167,7 +168,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           child: Container(
             margin: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             padding: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
-            child: LabelListDialog(
+            child: EditLabelsListDialog(
               labels: labels,
               scrollController: _scrollController,
               onColorTap: _showColorPicker,
