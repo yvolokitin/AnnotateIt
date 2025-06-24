@@ -50,7 +50,8 @@ class MainPageState extends State<MainPage> {
                       _scaffoldKey.currentState?.openDrawer();
                     }
                   : null,
-                ),
+              ),
+
               Expanded(
                 child: Row(
                   children: [
@@ -63,7 +64,7 @@ class MainPageState extends State<MainPage> {
                             Container(
                               height: 95,
                               width: double.infinity,
-                              color: Color(0xFF11191F), // Color(0xFF0F151C),
+                              color: Colors.grey[850],
                             ),
 
                             Expanded(
