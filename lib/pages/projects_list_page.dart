@@ -24,6 +24,8 @@ class ProjectsListPage extends StatefulWidget {
 }
 
 class ProjectsListPageState extends State<ProjectsListPage> {
+  bool sortDetection = false, sortClassification = false, sortSegmentation = false;
+
   List<Project> _allProjects = [];
   List<Project> _filteredProjects = [];
   String _searchQuery = "";
@@ -73,15 +75,13 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     }
   }
 
-  /// to be implemented later, now its disabled
-/*
   void _onSearchChanged(String query) {
     setState(() {
       _searchQuery = query;
       _filteredProjects = _applySearchAndSort(_allProjects);
     });
   }
-*/
+
   void _onSortSelected(String option) {
     setState(() {
       _sortOption = option;
@@ -90,10 +90,26 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   }
 
   List<Project> _applySearchAndSort(List<Project> projects) {
+    final query = _searchQuery.toLowerCase();
+
     List<Project> filtered = projects.where((p) {
-      return p.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final nameMatches = p.name.toLowerCase().contains(query);
+      final type = p.type.toLowerCase();
+
+      final matchesDetection = sortDetection && type.contains("detection");
+      final matchesClassification = sortClassification && type.contains("classification");
+      final matchesSegmentation = sortSegmentation && type.contains("segmentation");
+  
+      final anyFilterActive = sortDetection || sortClassification || sortSegmentation;
+
+      // If any filter is active, return only matching types
+      final matchesFilter = anyFilterActive
+        ? (matchesDetection || matchesClassification || matchesSegmentation)
+        : true;
+      return nameMatches && matchesFilter;
     }).toList();
 
+    // Sort options
     switch (_sortOption) {
       case "Last Updated":
         filtered.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
@@ -166,15 +182,34 @@ class ProjectsListPageState extends State<ProjectsListPage> {
         )
         : Column(
         children: [
-          // 📌 Row with Create Button, Search Bar, and Sort Icon
+          // Row with Create Button, Search Bar, and Sort Icon
           ProjectsTopBar(
-              onSearchPressed: () {
-                print("Project Search button pressed, not implemented yet");
-              },
+              sortDetection: sortDetection,
+              sortClassification: sortClassification,
+              sortSegmentation: sortSegmentation,
+              onSearchPressed: () { },
               onSortSelected: _onSortSelected,
               onCreateProject: _handleCreateNewProject,
               onCreateFromDataset: _handleImportFromDataset,
               onCreateFromExport: _handleImportFromDataset,
+              onSortDetection: () {
+                setState(() {
+                  sortDetection = !sortDetection;
+                  _filteredProjects = _applySearchAndSort(_allProjects);
+                });
+              },
+              onSortClassification: () {
+                setState(() {
+                  sortClassification = !sortClassification;
+                  _filteredProjects = _applySearchAndSort(_allProjects);
+                });
+              },
+              onSortSegmentation: () {
+                setState(() {
+                  sortSegmentation = !sortSegmentation;
+                  _filteredProjects = _applySearchAndSort(_allProjects);
+                });
+              },
           ),
 
           // Project List -> list of ProjectTile's (in widgets)

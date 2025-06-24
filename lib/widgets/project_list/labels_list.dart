@@ -99,7 +99,8 @@ class LabelList extends StatelessWidget {
             margin: const EdgeInsets.only(right: 6),
             decoration: BoxDecoration(
               color: label.toColor(),
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(4),
+              // shape: BoxShape.circle,
             ),
           ),
           Text(

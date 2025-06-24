@@ -246,6 +246,50 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ),
 
+          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 48,
+                height: 48,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: showOpacityDialog ? Colors.grey[850] : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Icon(
+                  Icons.rotate_left_rounded,
+                  color: Colors.white70,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+
+          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 48,
+                height: 48,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: showOpacityDialog ? Colors.grey[850] : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Icon(
+                  Icons.rotate_right_rounded,
+                  color: Colors.white70,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+
           const Spacer(),
           MouseRegion(
             cursor: SystemMouseCursors.click,
