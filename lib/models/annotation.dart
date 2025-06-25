@@ -11,8 +11,14 @@ class Annotation {
   final int? id;
   final int mediaItemId;
   final int? labelId;
-  final String annotationType;         // e.g., 'bbox', 'polygon', 'classification'
-  final Map<String, dynamic> data;     // flexible payload
+
+  // e.g., 'bbox', 'polygon', 'classification'/'label'
+  // Datumaro and CVAT use type = "label" for classification.
+  final String annotationType;         
+  
+  // flexible payload
+  final Map<String, dynamic> data;
+
   final double? confidence;
   final int? annotatorId;
   final String? comment;

@@ -36,35 +36,42 @@ class CanvasPainter extends CustomPainter {
     );
 
     for (final annotation in annotations ?? []) {
-      final shape = Shape.fromAnnotation(annotation);
-      if (shape != null) {
-        final color = annotation.color ?? Colors.grey;
-        final paint = Paint()
-          ..color = color
-          ..strokeWidth = 2
-          ..style = PaintingStyle.stroke;
-        final fillPaint = Paint()
-          ..color = color.withOpacity(opacity)
-          ..style = PaintingStyle.fill;
-
-        // label line
-        shape.paint(canvas, paint);
-        // label transparent background
-        shape.paint(canvas, fillPaint);
-
-        if (showAnnotationNames) {
-          drawLabel(
-            canvas,
-            size,
-            annotation.name ?? 'Unknown',
-            paint.color,
-            shape.labelOffset,
-            shapeConnectionPoint: shape.labelConnectionPoint,
-          );
-        }
+      print('annotation.annotationType ${annotation.annotationType}');
+      // Datumaro and CVAT use type = "label" for classification.
+      if (annotation.annotationType == 'classification' || annotation.annotationType == 'label') {
+        // Handle classification annotations differently
+        _paintClassificationAnnotation(canvas, size, annotation);
 
       } else {
-        debugPrint('Shape is null for annotation: ${annotation.id}');
+        final shape = Shape.fromAnnotation(annotation);
+        if (shape != null) {
+          final color = annotation.color ?? Colors.grey;
+          final paint = Paint()
+            ..color = color
+            ..strokeWidth = 2
+            ..style = PaintingStyle.stroke;
+          final fillPaint = Paint()
+            ..color = color.withOpacity(opacity)
+            ..style = PaintingStyle.fill;
+
+          // label line
+          shape.paint(canvas, paint);
+          // label transparent background
+          shape.paint(canvas, fillPaint);
+
+          if (showAnnotationNames) {
+            drawLabel(
+              canvas,
+              size,
+              annotation.name ?? 'Unknown',
+              paint.color,
+              shape.labelOffset,
+              shapeConnectionPoint: shape.labelConnectionPoint,
+            );
+          }
+        } else {
+          debugPrint('Shape is null for annotation: ${annotation.id}');
+        }
       }
     }
    
@@ -85,6 +92,85 @@ class CanvasPainter extends CustomPainter {
     }
 
   }
+
+void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotation, {bool isSelected = false}) {
+  const padding = 8.0;
+  const boxHeight = 32.0;
+  const boxSpacing = 4.0;
+  
+  // Calculate box width based on text length
+  final text = annotation.name ?? 'Unknown';
+  final textStyle = TextStyle(
+    color: foregroundColorByLuminance(annotation.color ?? Colors.grey),
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+  );
+  final textPainter = TextPainter(
+    text: TextSpan(text: text, style: textStyle),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  
+  final boxWidth = textPainter.width + padding * 2;
+  
+  // Get all classification annotations
+  // Datumaro and CVAT use type = "label" for classification
+  final classificationAnnotations = annotations?.where(
+    (a) => (a.annotationType == 'classification' || a.annotationType == 'label')
+  ).toList() ?? [];
+
+  // Calculate position based on index
+  final index = classificationAnnotations.indexOf(annotation);
+  if (index == -1) return;
+
+  // Calculate total width needed for all boxes up to this one
+  double totalWidth = 0;
+  for (int i = 0; i < index; i++) {
+    final otherText = classificationAnnotations[i].name ?? 'Unknown';
+    final otherTextPainter = TextPainter(
+      text: TextSpan(text: otherText, style: textStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    totalWidth += (otherTextPainter.width + padding * 2) + boxSpacing;
+  }
+
+  // Draw the classification box in sequence
+  final boxRect = Rect.fromLTWH(
+    padding + totalWidth,
+    padding,
+    boxWidth,
+    boxHeight,
+  );
+  
+  // Draw filled box
+  final fillPaint = Paint()
+    ..color = (annotation.color ?? Colors.grey).withOpacity(opacity)
+    ..style = PaintingStyle.fill;
+  canvas.drawRRect(
+    RRect.fromRectAndRadius(boxRect, const Radius.circular(4.0)),
+    fillPaint,
+  );
+  
+  // Draw border if selected
+  if (isSelected) {
+    final borderPaint = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(boxRect, const Radius.circular(4.0)),
+      borderPaint,
+    );
+  }
+  
+  // Draw text centered in box
+  textPainter.paint(
+    canvas,
+    Offset(
+      padding + totalWidth + (boxWidth - textPainter.width) / 2,
+      padding + (boxHeight - textPainter.height) / 2,
+    ),
+  );
+}
 
   void drawCornerHandles(Canvas canvas, List<Offset> corners) {
     const handleSize = 12.0;

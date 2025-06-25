@@ -5,6 +5,7 @@ import 'package:async/async.dart';
 
 import '../data/dataset_database.dart';
 
+import '../models/label.dart';
 import '../models/project.dart';
 import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
@@ -44,6 +45,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   late int _resetZoomCount = 0;
   int _currentIndex = 0;
 
+  // initialize selectedLabel with fake values
+  Label selectedLabel = Label(id: -1, projectId: -1, name: 'Default', color: '#000000', labelOrder: -1);
+
   MouseCursor cursorIcon = SystemMouseCursors.basic;
   UserAction userAction = UserAction.navigation;
 
@@ -78,29 +82,27 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     }
   }
 
-Future<void> _loadMedia(int index) async {
-  if (_mediaCache.containsKey(index)) return;
-
-  final media = await DatasetDatabase.instance.loadMediaAtIndex(widget.datasetId, index);
-  if (media != null) {
-    _mediaCache[index] = media;
-    await _loadImage(index, media.mediaItem.filePath);
-    if (mounted) setState(() {}); // ✅ trigger rebuild
+  Future<void> _loadMedia(int index) async {
+    if (_mediaCache.containsKey(index)) return;
+    final media = await DatasetDatabase.instance.loadMediaAtIndex(widget.datasetId, index);
+    if (media != null) {
+      _mediaCache[index] = media;
+      await _loadImage(index, media.mediaItem.filePath);
+      if (mounted) setState(() {}); // trigger rebuild
+    }
   }
-}
 
-Future<void> _loadImage(int index, String filePath) async {
-  if (_imageCache.containsKey(index)) return;
+  Future<void> _loadImage(int index, String filePath) async {
+    if (_imageCache.containsKey(index)) return;
+    final file = File(filePath);
+    if (!file.existsSync()) return;
 
-  final file = File(filePath);
-  if (!file.existsSync()) return;
-
-  final bytes = await file.readAsBytes();
-  final codec = await ui.instantiateImageCodec(bytes);
-  final frame = await codec.getNextFrame();
-  _imageCache[index] = frame.image;
-  if (mounted) setState(() {}); // ✅ trigger rebuild
-}
+    final bytes = await file.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    _imageCache[index] = frame.image;
+    if (mounted) setState(() {});
+  }
 
   void _handlePageChange(int index) {
     setState(() => _currentIndex = index);
@@ -135,9 +137,59 @@ Future<void> _loadImage(int index, String filePath) async {
         }
       }
     });
-  
-    // Optionally save immediately - not needed due to save button
   }
+
+void _handleLabelSelected(Label label) {
+  // Early return if not a classification project
+  if (!widget.project.type.toLowerCase().contains('classification')) {
+    setState(() => selectedLabel = label);
+    return;
+  }
+
+  final currentMedia = _mediaCache[_currentIndex];
+  if (currentMedia == null) {
+    setState(() => selectedLabel = label);
+    return;
+  }
+
+  // Check if this label already exists as a classification
+  final existingIndex = currentMedia.annotations?.indexWhere(
+    (a) => a.annotationType == 'classification' && a.labelId == label.id
+  ) ?? -1;
+
+  if (existingIndex != -1) {
+    // Label already exists, just update selection
+    setState(() => selectedLabel = label);
+    return;
+  }
+
+  // Create new annotations list (or copy existing)
+  // final newAnnotations = [...currentMedia.annotations ?? []];
+  final newAnnotations = currentMedia.annotations != null 
+    ? List<Annotation>.from(currentMedia.annotations!)
+    : <Annotation>[];
+
+  // Add new classification annotation
+  newAnnotations.add(Annotation(
+    id: null, // Will be assigned by database
+    mediaItemId: currentMedia.mediaItem.id!,
+    labelId: label.id,
+    annotationType: 'classification',
+    data: {},
+    confidence: 1.0,
+    annotatorId: null, // Will be set when saving
+    comment: null,
+    status: 'pending',
+    version: 1,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  )..name = label.name
+   ..color = label.toColor());
+
+  // Update cache and state
+  _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+  setState(() => selectedLabel = label);
+}
 
   void _handleActionSelected(UserAction action) {
     setState(() {
@@ -168,6 +220,7 @@ Future<void> _loadImage(int index, String filePath) async {
             project: widget.project,
             onBack: () => Navigator.pop(context),
             onHelp: () {},
+            onAssignedLabel: _handleLabelSelected,
           ),
           Expanded(
             child: PageView.builder(
@@ -211,6 +264,7 @@ Future<void> _loadImage(int index, String filePath) async {
                                 showAnnotationNames: showAnnotationNames,
                                 opacity: labelOpacity,
                                 userAction: userAction,
+                                selectedLabel: selectedLabel,
                                 onZoomChanged: (zoom) {
                                   if (mounted) {
                                     setState(() => _currentZoom = zoom);

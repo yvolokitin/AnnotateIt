@@ -10,7 +10,7 @@ class AnnotatorTopToolbar extends StatefulWidget {
   final VoidCallback onBack;
   final VoidCallback onHelp;
 
-  final ValueChanged<Label?>? onAssignedLabel;
+  final ValueChanged<Label>? onAssignedLabel;
   final ValueChanged<Label?>? onDefaultLabelSelected;
 
   const AnnotatorTopToolbar({
@@ -18,7 +18,7 @@ class AnnotatorTopToolbar extends StatefulWidget {
     required this.project,
     required this.onBack,
     required this.onHelp,
-    this.onAssignedLabel,
+    required this.onAssignedLabel,
     this.onDefaultLabelSelected,
   });
 
@@ -191,6 +191,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
               labels: labels,
               onLabelSelected: (label) {
                 print('Label selected: ${label.name}');
+                widget.onAssignedLabel?.call(label);
               }
             ),
           ),

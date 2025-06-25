@@ -16,6 +16,7 @@ class AnnotatorCanvas extends StatefulWidget {
   final ui.Image image;
   final List<Label> labels;
   final List<Annotation>? annotations;
+  final Label selectedLabel;
   final int resetZoomCount;
   final double opacity;
   final bool showAnnotationNames;
@@ -31,6 +32,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.opacity,
     required this.userAction,
     required this.showAnnotationNames,
+    required this.selectedLabel,
     this.onZoomChanged,
     this.onAnnotationUpdated,
     super.key,
