@@ -136,6 +136,12 @@ abstract class AppLocalizations {
   /// **'Duplicate'**
   String get duplicateButton;
 
+  /// No description provided for @applyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get applyButton;
+
   /// No description provided for @importDataset.
   ///
   /// In en, this message translates to:
@@ -189,12 +195,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Project from Dataset import'**
   String get emptyProject_importDataset;
-
-  /// No description provided for @dialogCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get dialogCancel;
 
   /// No description provided for @dialogBack.
   ///
@@ -591,6 +591,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'labels are essential for organizing your annotations clearly and consistently.'**
   String get noLabelsExplain6;
+
+  /// No description provided for @toolbar_navigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get toolbar_navigation;
+
+  /// No description provided for @toolbar_bbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Bounding Box'**
+  String get toolbar_bbox;
+
+  /// No description provided for @toolbar_segmentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Segmentation'**
+  String get toolbar_segmentation;
+
+  /// No description provided for @toolbar_reset_zoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Zoom'**
+  String get toolbar_reset_zoom;
+
+  /// No description provided for @toolbar_toggle_grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Grid'**
+  String get toolbar_toggle_grid;
+
+  /// No description provided for @toolbar_opacity_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Opacity Settings'**
+  String get toolbar_opacity_settings;
+
+  /// No description provided for @toolbar_toggle_annotation_names.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Annotation Names'**
+  String get toolbar_toggle_annotation_names;
+
+  /// No description provided for @toolbar_rotate_left.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate Left (Coming Soon)'**
+  String get toolbar_rotate_left;
+
+  /// No description provided for @toolbar_rotate_right.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate Right (Coming Soon)'**
+  String get toolbar_rotate_right;
+
+  /// No description provided for @toolbar_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get toolbar_help;
+
+  /// No description provided for @dialog_opacity_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation Fill Opacity'**
+  String get dialog_opacity_title;
+
+  /// No description provided for @dialog_help_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotator Toolbar Help'**
+  String get dialog_help_title;
+
+  /// No description provided for @dialog_help_content.
+  ///
+  /// In en, this message translates to:
+  /// **'• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.'**
+  String get dialog_help_content;
+
+  /// No description provided for @dialog_help_tips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!'**
+  String get dialog_help_tips;
 }
 
 class _AppLocalizationsDelegate

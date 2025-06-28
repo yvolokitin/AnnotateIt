@@ -7,6 +7,7 @@
   "cancelButton": "Cancel",
   "deleteButton": "Delete",
   "duplicateButton": "Duplicate",
+  "applyButton": "Apply",
 
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
@@ -17,7 +18,6 @@
   "emptyProject_description": "Create a project to begin organizing datasets, annotating media, and applying AI to your vision tasks — all in one streamlined workspace designed to accelerate your computer vision pipeline.",
   "emptyProject_createNew": "Create New Project",
   "emptyProject_importDataset": "Create Project from Dataset import",
-  "dialogCancel": "Cancel",
   "dialogBack": "<- Back",
   "dialogNext": "Next ->",
   "dialogFinish": "Finish",
@@ -118,6 +118,22 @@
   "noLabelsExplain3": "An annotation without a label is just an empty box.",
   "noLabelsExplain4": "Labels define the categories or classes you're annotating in your dataset.",
   "noLabelsExplain5": "Whether you're tagging objects in images, classifying, or segmenting regions,",
-  "noLabelsExplain6": "labels are essential for organizing your annotations clearly and consistently."
+  "noLabelsExplain6": "labels are essential for organizing your annotations clearly and consistently.",
+
+  "toolbar_navigation": "Navigation",
+  "toolbar_bbox": "Bounding Box",
+  "toolbar_segmentation": "Segmentation",
+  "toolbar_reset_zoom": "Reset Zoom",
+  "toolbar_toggle_grid": "Toggle Grid",
+  "toolbar_opacity_settings": "Opacity Settings",
+  "toolbar_toggle_annotation_names": "Toggle Annotation Names",
+  "toolbar_rotate_left": "Rotate Left (Coming Soon)",
+  "toolbar_rotate_right": "Rotate Right (Coming Soon)",
+  "toolbar_help": "Help",
+  "dialog_opacity_title": "Annotation Fill Opacity",
+  "dialog_help_title": "Annotator Toolbar Help",
+  "dialog_help_content": "• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.",
+  "dialog_help_tips": "Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!"
+
 
 }

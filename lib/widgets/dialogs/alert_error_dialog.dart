@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 class AlertErrorDialog extends StatelessWidget {
   final String title;
   final String message;
-
-  // optional extra info
   final String? tips;
 
   const AlertErrorDialog({
@@ -14,10 +13,19 @@ class AlertErrorDialog extends StatelessWidget {
     this.tips,
   });
 
-  static Future<void> show(BuildContext context, String title, String message, {String? tips}) {
+  static Future<void> show(
+    BuildContext context,
+    String title,
+    String message, {
+    String? tips,
+  }) {
     return showDialog(
       context: context,
-      builder: (_) => AlertErrorDialog(title: title, message: message, tips: tips),
+      builder: (_) => AlertErrorDialog(
+        title: title,
+        message: message,
+        tips: tips,
+      ),
     );
   }
 
@@ -30,63 +38,75 @@ class AlertErrorDialog extends StatelessWidget {
       backgroundColor: Colors.grey[800],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.orangeAccent, width: 1),
+        side: const BorderSide(color: Colors.orangeAccent, width: 1),
       ),
+      titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(
-            Icons.info_outline,
-            size: 32,
-            color: Colors.orangeAccent,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.orangeAccent,
-              fontWeight: FontWeight.bold,
-              fontSize: 24
-            ),
-          ),
-        ],
-      ),
-
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Divider(color: Colors.orangeAccent),
-          Padding(
-            padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.normal,
-                fontSize: 22,
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline,
+                size: 32,
+                color: Colors.orangeAccent,
               ),
-            ),
-          ),
-
-          if (showTips)
-            Padding(
-              padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
-              child: Text(
-                tips!,
+              const SizedBox(width: 12),
+              Text(
+                title,
                 style: const TextStyle(
-                  color: Colors.white60,
-                  fontWeight: FontWeight.normal,
-                  fontSize: 22,
+                  color: Colors.orangeAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
                 ),
               ),
-            ),
-
-
-          const SizedBox(height: 25),
-          const Divider(color: Colors.orangeAccent),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.orangeAccent),
+            tooltip: 'Close',
+            onPressed: () => Navigator.pop(context),
+          ),
         ],
       ),
-
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(color: Colors.orangeAccent),
+              Padding(
+                padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+              if (showTips)
+                Padding(
+                  padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
+                  child: Text(
+                    tips!,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 25),
+              const Divider(color: Colors.orangeAccent),
+            ],
+          ),
+        ),
+      ),
       actions: [
         ElevatedButton(
           onPressed: () => Navigator.pop(context),
@@ -95,11 +115,11 @@ class AlertErrorDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.orangeAccent, width: 2),
+              side: const BorderSide(color: Colors.orangeAccent, width: 2),
             ),
           ),
-          child: const Text(
-            'Close',
+          child: Text(
+            AppLocalizations.of(context)!.closeButton,
             style: TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,

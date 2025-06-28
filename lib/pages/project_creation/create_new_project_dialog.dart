@@ -206,7 +206,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.dialogCancel,
+            l10n.cancelButton,
             style: TextStyle(color: Colors.white54)
           ),
         ),

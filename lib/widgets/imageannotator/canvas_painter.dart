@@ -14,7 +14,9 @@ class CanvasPainter extends CustomPainter {
   final List<Annotation>? annotations;
   final double scale, opacity;
   final Annotation? selectedAnnotation;
-  final bool showAnnotationNames;  
+  final bool showAnnotationNames;
+
+  final bool show_classifications = false;
 
   CanvasPainter({
     required this.image,
@@ -36,12 +38,14 @@ class CanvasPainter extends CustomPainter {
     );
 
     for (final annotation in annotations ?? []) {
-      print('annotation.annotationType ${annotation.annotationType}');
+      // print('annotation.annotationType ${annotation.annotationType}');
       // Datumaro and CVAT use type = "label" for classification.
       if (annotation.annotationType == 'classification' || annotation.annotationType == 'label') {
         // Handle classification annotations differently
-        _paintClassificationAnnotation(canvas, size, annotation);
-
+        if (show_classifications) {
+          _paintClassificationAnnotation(canvas, size, annotation);
+        }
+        
       } else {
         final shape = Shape.fromAnnotation(annotation);
         if (shape != null) {
@@ -90,13 +94,14 @@ class CanvasPainter extends CustomPainter {
         drawCornerHandles(canvas, corners);
       }
     }
-
   }
 
-void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotation, {bool isSelected = false}) {
+
+void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotation) {
   const padding = 8.0;
   const boxHeight = 32.0;
   const boxSpacing = 4.0;
+  const verticalOffset = 0.0; // 20px above the image
   
   // Calculate box width based on text length
   final text = annotation.name ?? 'Unknown';
@@ -113,7 +118,6 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   final boxWidth = textPainter.width + padding * 2;
   
   // Get all classification annotations
-  // Datumaro and CVAT use type = "label" for classification
   final classificationAnnotations = annotations?.where(
     (a) => (a.annotationType == 'classification' || a.annotationType == 'label')
   ).toList() ?? [];
@@ -133,10 +137,10 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
     totalWidth += (otherTextPainter.width + padding * 2) + boxSpacing;
   }
 
-  // Draw the classification box in sequence
+  // Draw 20px above the image (0,0) position
   final boxRect = Rect.fromLTWH(
-    padding + totalWidth,
-    padding,
+    padding + totalWidth, // x position
+    -boxHeight - verticalOffset, // y position (negative to go above)
     boxWidth,
     boxHeight,
   );
@@ -151,7 +155,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   );
   
   // Draw border if selected
-  if (isSelected) {
+  if (annotation.id == selectedAnnotation?.id) {
     final borderPaint = Paint()
       ..color = Colors.red
       ..strokeWidth = 2
@@ -167,7 +171,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
     canvas,
     Offset(
       padding + totalWidth + (boxWidth - textPainter.width) / 2,
-      padding + (boxHeight - textPainter.height) / 2,
+      -boxHeight - verticalOffset + (boxHeight - textPainter.height) / 2,
     ),
   );
 }

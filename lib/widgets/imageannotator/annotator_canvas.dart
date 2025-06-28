@@ -12,10 +12,11 @@ import 'canvas_painter.dart';
 import 'user_action.dart';
 
 class AnnotatorCanvas extends StatefulWidget {
+  final Annotation? selectedAnnotation; 
+  final List<Annotation>? annotations;
   final UserAction userAction;
   final ui.Image image;
   final List<Label> labels;
-  final List<Annotation>? annotations;
   final Label selectedLabel;
   final int resetZoomCount;
   final double opacity;
@@ -23,6 +24,7 @@ class AnnotatorCanvas extends StatefulWidget {
 
   final ValueChanged<double>? onZoomChanged;
   final ValueChanged<Annotation>? onAnnotationUpdated;
+  final ValueChanged<Annotation?>? onAnnotationSelected;
 
   const AnnotatorCanvas({
     required this.image,
@@ -33,8 +35,10 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.userAction,
     required this.showAnnotationNames,
     required this.selectedLabel,
+    this.selectedAnnotation,
     this.onZoomChanged,
     this.onAnnotationUpdated,
+    this.onAnnotationSelected,
     super.key,
   });
 
@@ -43,17 +47,14 @@ class AnnotatorCanvas extends StatefulWidget {
 }
 
 class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
-  // Offset? _middleButtonDragStart;
   Offset? _lastMiddleButtonPosition;
-  
-  Annotation? _selectedAnnotation;
   int _lastResetCount = 0;
-
   double prevScale = 1;
+  bool done = false;
+
   Matrix4 matrix = Matrix4.identity()
     ..scale(0.9);
   Matrix4 inverse = Matrix4.identity();
-  bool done = false;
 
   @override
   void initState() {
@@ -152,17 +153,14 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     }
   }
     
-    void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(TapDownDetails details) {
     if (widget.userAction == UserAction.navigation) {
       final inverse = Matrix4.identity()..copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
       final tapped = _findAnnotationAtPosition(transformed);
 
-      if (_selectedAnnotation?.id != tapped?.id) {
-        setState(() {
-          _selectedAnnotation = tapped;
-        });
-      } 
+      // Call the correct callback
+      widget.onAnnotationSelected?.call(tapped);
     }
   }
 
@@ -225,7 +223,7 @@ Widget build(BuildContext context) {
                     painter: CanvasPainter(
                       image: widget.image,
                       annotations: widget.annotations,
-                      selectedAnnotation: _selectedAnnotation,
+                      selectedAnnotation: widget.selectedAnnotation,
                       scale: matrix.getMaxScaleOnAxis(),
                       opacity: widget.opacity,
                       showAnnotationNames: widget.showAnnotationNames,

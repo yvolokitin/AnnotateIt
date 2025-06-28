@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
+
+import '../dialogs/alert_error_dialog.dart';
+import '../dialogs/opacity_dialog.dart';
+
 import 'user_action.dart';
+import 'toolbar_button.dart';
+import 'toolbar_divider.dart';
+import 'toolbar_constants.dart';
 
 class AnnotatorLeftToolbar extends StatefulWidget {
   final String type;
@@ -31,206 +39,119 @@ class AnnotatorLeftToolbar extends StatefulWidget {
 }
 
 class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
-  String userAction = 'navigation';
   bool showOpacityDialog = false;
   bool showDatasetGrid = false;
-  bool _isHovered = false;
 
   void _selectUserAction(UserAction action) {
-    setState(() => userAction = action.name);
     widget.onActionSelected(action);
+  }
+
+  void _openOpacityDialog(BuildContext context) {
+    setState(() => showOpacityDialog = true);
+    OpacityDialog.show(
+      context,
+      initialOpacity: widget.opacity,
+      onOpacityChanged: widget.onOpacityChanged,
+    ).then((_) => setState(() => showOpacityDialog = false));
   }
 
   @override
   Widget build(BuildContext context) {
     bool annotationDetection = widget.type.toLowerCase().contains('detect');
     bool annotationSegment = widget.type.toLowerCase().contains('segment');
-
     final bool isCompact = MediaQuery.of(context).size.height < 1024;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      width: 62,
+      width: ToolbarConstants.toolbarWidth,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: ToolbarConstants.toolbarBackgroundColor,
         border: const Border(
-          right: BorderSide(
-            color: Colors.black,
-            width: 2,
-          ),
+          right: BorderSide(color: Colors.black, width: 2),
         ),
       ),      
       child: Column(
         children: [
-          SizedBox(height: isCompact ? 40 : 80),
+          SizedBox(height: 6),
 
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () => _selectUserAction(UserAction.navigation),
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: (userAction == 'navigation') ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.near_me_outlined, // pinch_outlined,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          // Navigation Button
+          ToolbarButton(
+            icon: Icon(Icons.near_me_outlined),
+            onTap: () => _selectUserAction(UserAction.navigation),
+            isActive: widget.selectedAction == UserAction.navigation,
+            tooltip: l10n.toolbar_navigation,
           ),
 
+          // Bounding Box Button (conditionally shown)
           if (annotationDetection) ...[
-            Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () => _selectUserAction(UserAction.bbox_annotation),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: (userAction == 'bbox_annotation') ? Colors.grey[850] : Colors.transparent,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Icon(
-                    Icons.format_shapes_rounded,
-                    color: Colors.white70,
-                    size: 28,
-                  ),
-                ),
-              ),
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: Icon(Icons.format_shapes_rounded),
+              onTap: () => _selectUserAction(UserAction.bbox_annotation),
+              isActive: widget.selectedAction == UserAction.bbox_annotation,
+              tooltip: l10n.toolbar_bbox,
             ),
           ],
 
+          // Segmentation Button (conditionally shown)
           if (annotationSegment) ...[
-            Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () => _selectUserAction(UserAction.sam_annotation),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: (userAction == 'sam_annotation') ? Colors.grey[850] : Colors.transparent,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome_outlined,
-                    color: Colors.white70,
-                    size: 28,
-                  ),
-                ),
-              ),
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: Icon(Icons.auto_awesome_outlined),
+              onTap: () => _selectUserAction(UserAction.sam_annotation),
+              isActive: widget.selectedAction == UserAction.sam_annotation,
+              tooltip: l10n.toolbar_segmentation,
             ),
           ],
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            onEnter: (_) => setState(() => _isHovered = true),
-            onExit: (_) => setState(() => _isHovered = false),
-              child: GestureDetector(
-              onTap: widget.onResetZoomPressed,
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: _isHovered ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.fit_screen_outlined,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          // Reset Zoom Button
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.fit_screen_outlined),
+            onTap: widget.onResetZoomPressed,
+            tooltip: l10n.toolbar_reset_zoom,
           ),
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                setState(() => showDatasetGrid = !showDatasetGrid);
-                widget.onShowDatasetGridChanged(showDatasetGrid);
-              },
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: showDatasetGrid ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.apps_outlined,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          // Dataset Grid Toggle
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.apps_outlined),
+            onTap: () {
+              setState(() => showDatasetGrid = !showDatasetGrid);
+              widget.onShowDatasetGridChanged(showDatasetGrid);
+            },
+            isActive: showDatasetGrid,
+            tooltip: l10n.toolbar_toggle_grid,
           ),
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () => _showOpacityDialog(context),
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: showOpacityDialog ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.settings,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          // Opacity Settings
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.settings),
+            onTap: () => _openOpacityDialog(context),
+            isActive: showOpacityDialog,
+            tooltip: l10n.toolbar_opacity_settings,
           ),
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                widget.onShowAnnotationNames(!widget.showAnnotationNames);
-              },
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: (!widget.showAnnotationNames) ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: widget.showAnnotationNames
-                  ? const Icon(
+          // Annotation Names Toggle
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            onTap: () => widget.onShowAnnotationNames(!widget.showAnnotationNames),
+            isActive: !widget.showAnnotationNames,
+            tooltip: l10n.toolbar_toggle_annotation_names,
+            child: widget.showAnnotationNames
+                ? Icon(
                     Icons.text_fields,
-                    color: Colors.white70,
-                    size: 28,
+                    color: ToolbarConstants.iconColor,
+                    size: ToolbarConstants.iconSize,
                   )
-                  : Stack(
+                : Stack(
                     alignment: Alignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.text_fields,
                         color: Colors.white38,
-                        size: 28,
+                        size: ToolbarConstants.iconSize,
                       ),
                       Transform.rotate(
                         angle: -0.7,
@@ -242,122 +163,41 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                       ),
                     ],
                   ),
-              ),
-            ),
           ),
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: showOpacityDialog ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.rotate_left_rounded,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          // Rotation Buttons (disabled state)
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.rotate_left_rounded),
+            onTap: null,
+            tooltip: l10n.toolbar_rotate_left,
+            isDisabled: true,
           ),
 
-          Divider(color: Colors.white30, height: isCompact ? 15 : 30),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: showOpacityDialog ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.rotate_right_rounded,
-                  color: Colors.white70,
-                  size: 28,
-                ),
-              ),
-            ),
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.rotate_right_rounded),
+            onTap: null,
+            tooltip: l10n.toolbar_rotate_right,
+            isDisabled: true,
           ),
 
           const Spacer(),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.transparent, // showDatasetGrid ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.help_outline_outlined,
-                  color: Colors.white60,
-                  size: 28,
-                ),
-              ),
-            ),
+          ToolbarButton(
+            icon: Icon(Icons.help_outline_outlined),
+            onTap: () {
+              AlertErrorDialog.show(
+                context,
+                l10n.dialog_help_title,
+                l10n.dialog_help_content,
+                tips: l10n.dialog_help_tips,
+              );
+            },
+            tooltip: l10n.toolbar_help,
           ),
           const SizedBox(height: 10),
         ],
       ),
     );
-  }
-
-  void _showOpacityDialog(BuildContext context) {
-    setState(() => showOpacityDialog = true);
-    double tempOpacity = widget.opacity;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Annotation Fill Opacity'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Slider(
-                    value: tempOpacity,
-                    min: 0.0,
-                    max: 1.0,
-                    divisions: 10,
-                    label: '${(tempOpacity * 100).round()}%',
-                    onChanged: (value) => setState(() => tempOpacity = value),
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                widget.onOpacityChanged(tempOpacity);
-                Navigator.pop(context);
-              },
-              child: const Text('Apply'),
-            ),
-          ],
-        );
-      },
-    ).then((_) => setState(() => showOpacityDialog = false));
   }
 }

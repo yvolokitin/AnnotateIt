@@ -30,6 +30,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get duplicateButton => 'Duplicate';
 
   @override
+  String get applyButton => 'Apply';
+
+  @override
   String get importDataset => 'Import dataset';
 
   @override
@@ -58,9 +61,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyProject_importDataset => 'Create Project from Dataset import';
-
-  @override
-  String get dialogCancel => 'Cancel';
 
   @override
   String get dialogBack => '<- Back';
@@ -298,4 +298,48 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noLabelsExplain6 =>
       'labels are essential for organizing your annotations clearly and consistently.';
+
+  @override
+  String get toolbar_navigation => 'Navigation';
+
+  @override
+  String get toolbar_bbox => 'Bounding Box';
+
+  @override
+  String get toolbar_segmentation => 'Segmentation';
+
+  @override
+  String get toolbar_reset_zoom => 'Reset Zoom';
+
+  @override
+  String get toolbar_toggle_grid => 'Toggle Grid';
+
+  @override
+  String get toolbar_opacity_settings => 'Opacity Settings';
+
+  @override
+  String get toolbar_toggle_annotation_names => 'Toggle Annotation Names';
+
+  @override
+  String get toolbar_rotate_left => 'Rotate Left (Coming Soon)';
+
+  @override
+  String get toolbar_rotate_right => 'Rotate Right (Coming Soon)';
+
+  @override
+  String get toolbar_help => 'Help';
+
+  @override
+  String get dialog_opacity_title => 'Annotation Fill Opacity';
+
+  @override
+  String get dialog_help_title => 'Annotator Toolbar Help';
+
+  @override
+  String get dialog_help_content =>
+      '• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.';
+
+  @override
+  String get dialog_help_tips =>
+      'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!';
 }

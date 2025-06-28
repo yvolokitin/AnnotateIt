@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:async/async.dart';
 
 import '../data/dataset_database.dart';
-
 import '../models/label.dart';
 import '../models/project.dart';
 import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
-
 import '../widgets/imageannotator/annotator_left_toolbar.dart';
 import '../widgets/imageannotator/annotator_right_sidebar.dart';
 import '../widgets/imageannotator/annotator_bottom_toolbar.dart';
@@ -44,15 +42,14 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   late double _currentZoom = 1.0;
   late int _resetZoomCount = 0;
   int _currentIndex = 0;
+  Annotation? _selectedAnnotation;
 
-  // initialize selectedLabel with fake values
   Label selectedLabel = Label(id: -1, projectId: -1, name: 'Default', color: '#000000', labelOrder: -1);
-
   MouseCursor cursorIcon = SystemMouseCursors.basic;
   UserAction userAction = UserAction.navigation;
 
   bool showAnnotationNames = true;
-  bool showRightSidebar = false;
+  bool showRightSidebar = true; // Changed to default true
   bool _mouseInsideImage = false;
   double labelOpacity = 0.35;
 
@@ -61,8 +58,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   @override
   void initState() {
-    print("AnnotatorPage labels: ${widget.project.labels?.length}");
-
     super.initState();
     _currentIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
     _pageController = PageController(initialPage: _currentIndex);
@@ -70,7 +65,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   void _preloadInitialMedia() {
-    // Preload current, previous and next media
     final indicesToPreload = {
       _currentIndex,
       _currentIndex - 1,
@@ -88,7 +82,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     if (media != null) {
       _mediaCache[index] = media;
       await _loadImage(index, media.mediaItem.filePath);
-      if (mounted) setState(() {}); // trigger rebuild
+      if (mounted) setState(() {});
     }
   }
 
@@ -105,7 +99,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   void _handlePageChange(int index) {
-    setState(() => _currentIndex = index);
+    setState(() {
+      _currentIndex = index;
+      _selectedAnnotation = null; // Clear selection when changing images
+    });
     _preloadAdjacentImages(index);
   }
 
@@ -139,57 +136,50 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     });
   }
 
-void _handleLabelSelected(Label label) {
-  // Early return if not a classification project
-  if (!widget.project.type.toLowerCase().contains('classification')) {
+  void _handleLabelSelected(Label label) {
+    if (!widget.project.type.toLowerCase().contains('classification')) {
+      setState(() => selectedLabel = label);
+      return;
+    }
+
+    final currentMedia = _mediaCache[_currentIndex];
+    if (currentMedia == null) {
+      setState(() => selectedLabel = label);
+      return;
+    }
+
+    final existingIndex = currentMedia.annotations?.indexWhere(
+      (a) => a.annotationType == 'classification' && a.labelId == label.id
+    ) ?? -1;
+
+    if (existingIndex != -1) {
+      setState(() => selectedLabel = label);
+      return;
+    }
+
+    final newAnnotations = currentMedia.annotations != null 
+      ? List<Annotation>.from(currentMedia.annotations!)
+      : <Annotation>[];
+
+    newAnnotations.add(Annotation(
+      id: null,
+      mediaItemId: currentMedia.mediaItem.id!,
+      labelId: label.id,
+      annotationType: 'classification',
+      data: {},
+      confidence: 1.0,
+      annotatorId: null,
+      comment: null,
+      status: 'pending',
+      version: 1,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    )..name = label.name
+     ..color = label.toColor());
+
+    _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
     setState(() => selectedLabel = label);
-    return;
   }
-
-  final currentMedia = _mediaCache[_currentIndex];
-  if (currentMedia == null) {
-    setState(() => selectedLabel = label);
-    return;
-  }
-
-  // Check if this label already exists as a classification
-  final existingIndex = currentMedia.annotations?.indexWhere(
-    (a) => a.annotationType == 'classification' && a.labelId == label.id
-  ) ?? -1;
-
-  if (existingIndex != -1) {
-    // Label already exists, just update selection
-    setState(() => selectedLabel = label);
-    return;
-  }
-
-  // Create new annotations list (or copy existing)
-  // final newAnnotations = [...currentMedia.annotations ?? []];
-  final newAnnotations = currentMedia.annotations != null 
-    ? List<Annotation>.from(currentMedia.annotations!)
-    : <Annotation>[];
-
-  // Add new classification annotation
-  newAnnotations.add(Annotation(
-    id: null, // Will be assigned by database
-    mediaItemId: currentMedia.mediaItem.id!,
-    labelId: label.id,
-    annotationType: 'classification',
-    data: {},
-    confidence: 1.0,
-    annotatorId: null, // Will be set when saving
-    comment: null,
-    status: 'pending',
-    version: 1,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  )..name = label.name
-   ..color = label.toColor());
-
-  // Update cache and state
-  _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
-  setState(() => selectedLabel = label);
-}
 
   void _handleActionSelected(UserAction action) {
     setState(() {
@@ -200,10 +190,91 @@ void _handleLabelSelected(Label label) {
     });
   }
 
+  void _handleAnnotationSelected(Annotation? annotation) {
+    setState(() {
+      _selectedAnnotation = annotation;
+    });
+  }
+
+  void _handleAnnotationEdit(Annotation annotation) {
+    showDialog(
+      context: context,
+      builder: (context) => _buildEditAnnotationDialog(annotation),
+    );
+  }
+
+  void _handleAnnotationDelete(Annotation annotation) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Annotation'),
+        content: const Text('Are you sure you want to delete this annotation?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteAnnotation(annotation);
+              Navigator.pop(context);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteAnnotation(Annotation annotation) {
+    setState(() {
+      final currentMedia = _mediaCache[_currentIndex];
+      if (currentMedia != null) {
+        final newAnnotations = currentMedia.annotations?.where(
+          (a) => a.id != annotation.id
+        ).toList();
+        
+        _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+        
+        if (_selectedAnnotation == annotation) {
+          _selectedAnnotation = null;
+        }
+      }
+    });
+  }
+
+  Widget _buildEditAnnotationDialog(Annotation annotation) {
+    final textController = TextEditingController(text: annotation.name);
+    
+    return AlertDialog(
+      title: const Text('Edit Annotation'),
+      content: TextField(
+        controller: textController,
+        decoration: const InputDecoration(
+          labelText: 'Annotation Name',
+          border: OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            final updatedAnnotation = annotation.copyWith(name: textController.text);
+            _handleAnnotationUpdated(updatedAnnotation);
+            Navigator.pop(context);
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
-    // Dispose all cached images
     for (final image in _imageCache.values) {
       image.dispose();
     }
@@ -265,12 +336,14 @@ void _handleLabelSelected(Label label) {
                                 opacity: labelOpacity,
                                 userAction: userAction,
                                 selectedLabel: selectedLabel,
+                                selectedAnnotation: _selectedAnnotation,
                                 onZoomChanged: (zoom) {
                                   if (mounted) {
                                     setState(() => _currentZoom = zoom);
                                   }
                                 },
                                 onAnnotationUpdated: _handleAnnotationUpdated,
+                                onAnnotationSelected: _handleAnnotationSelected,
                               ),
                             ),
                           ),
@@ -295,8 +368,13 @@ void _handleLabelSelected(Label label) {
                       ),
                     ),
                     AnnotatorRightSidebar(
-                      collapsed: showRightSidebar,
-                      annotations: media.annotations,
+                      collapsed: !showRightSidebar,
+                      labels: widget.project.labels ?? [],
+                      annotations: media.annotations ?? [],
+                      selectedAnnotation: _selectedAnnotation,
+                      onAnnotationSelected: _handleAnnotationSelected,
+                      onAnnotationEdit: _handleAnnotationEdit,
+                      onAnnotationDelete: _handleAnnotationDelete,
                     ),
                   ],
                 );
