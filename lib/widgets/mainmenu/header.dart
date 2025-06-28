@@ -34,11 +34,9 @@ class AppHeaderState extends State<AppHeader> {
               onPressed: widget.onHeaderPressed,
             ),
           const SizedBox(width: 10),
-          const Icon(Icons.widgets, color: Colors.white),
-          const SizedBox(width: 10),
-          const Text(
-            "Annot@It",
-            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+          Image.asset(
+            'assets/logo/annotateit.png',
+            height: headerHeight,
           ),
         ],
       ),

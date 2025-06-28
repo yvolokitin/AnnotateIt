@@ -675,6 +675,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!'**
   String get dialog_help_tips;
+
+  /// No description provided for @deleteAnnotationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Annotation'**
+  String get deleteAnnotationTitle;
+
+  /// No description provided for @deleteAnnotationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get deleteAnnotationMessage;
+
+  /// No description provided for @unnamedAnnotation.
+  ///
+  /// In en, this message translates to:
+  /// **'this annotation'**
+  String get unnamedAnnotation;
 }
 
 class _AppLocalizationsDelegate

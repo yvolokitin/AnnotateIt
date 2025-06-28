@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+
 import '../../models/annotation.dart';
+import '../../models/label.dart';
+
+import 'label_dropdown.dart';
 
 class AnnotatedListItem extends StatelessWidget {
   final Annotation annotation;
   final bool isSelected;
   final bool isHovered;
   final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final Function(Label) onLabelChanged;
+  final Function(Annotation) onDelete;
   final ThemeData theme;
+  final List<Label> availableLabels;
 
   const AnnotatedListItem({
     super.key,
@@ -16,9 +21,10 @@ class AnnotatedListItem extends StatelessWidget {
     required this.isSelected,
     required this.isHovered,
     required this.onTap,
-    required this.onEdit,
+    required this.onLabelChanged,
     required this.onDelete,
     required this.theme,
+    required this.availableLabels,
   });
 
   @override
@@ -81,18 +87,24 @@ class AnnotatedListItem extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 18),
-                        color: theme.hintColor,
-                        onPressed: onEdit,
-                        tooltip: 'Edit annotation',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                      LabelDropdown(
+                        currentLabel: availableLabels.firstWhere(
+                          (label) => label.id == annotation.labelId,
+                          orElse: () => Label(
+                            labelOrder: 0,
+                            projectId: 0,
+                            name: 'No label selected',
+                            color: '#000000',
+                          ),
+                        ),
+                        availableLabels: availableLabels,
+                        onLabelSelected: onLabelChanged,
+                        theme: theme,
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline, size: 18),
                         color: theme.colorScheme.error,
-                        onPressed: onDelete,
+                        onPressed: () => onDelete(annotation),
                         tooltip: 'Delete annotation',
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),

@@ -78,6 +78,36 @@ class AnnotationDatabase {
     return result.map((map) => Annotation.fromMap(map)).toList();
   }
 
+  /// Deletes a specific annotation from the database
+  /// 
+  /// [annotationId] - The ID of the annotation to delete
+  /// 
+  /// Returns the number of rows affected (1 if successful, 0 if not found)
+  Future<int> deleteAnnotation(int annotationId) async {
+    final db = await database;
+    return await db.delete(
+      'annotations',
+      where: 'id = ?',
+      whereArgs: [annotationId],
+    );
+  }
+
+  // Delete multiple annotations in a single transaction
+  Future<void> deleteAnnotationsBatch(List<int> annotationIds) async {
+    if (annotationIds.isEmpty) return;
+    
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final id in annotationIds) {
+        await txn.delete(
+          'annotations',
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    });
+  }
+
   // Optional: Delete all annotations for a specific media item
   Future<void> deleteAnnotationsByMedia(int mediaItemId) async {
     final db = await database;

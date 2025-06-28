@@ -4,10 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:async/async.dart';
 
 import '../data/dataset_database.dart';
+import '../data/annotation_database.dart';
+
 import '../models/label.dart';
 import '../models/project.dart';
 import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
+
+import '../widgets/dialogs/alert_error_dialog.dart';
+import '../widgets/dialogs/delete_annotation_dialog.dart';
+
 import '../widgets/imageannotator/annotator_left_toolbar.dart';
 import '../widgets/imageannotator/annotator_right_sidebar.dart';
 import '../widgets/imageannotator/annotator_bottom_toolbar.dart';
@@ -49,7 +55,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   UserAction userAction = UserAction.navigation;
 
   bool showAnnotationNames = true;
-  bool showRightSidebar = true; // Changed to default true
+  bool showRightSidebar = true;
   bool _mouseInsideImage = false;
   double labelOpacity = 0.35;
 
@@ -137,26 +143,24 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   void _handleLabelSelected(Label label) {
+    setState(() => selectedLabel = label);
+  
+    // Only automatically create classification annotations if this is a classification project
     if (!widget.project.type.toLowerCase().contains('classification')) {
-      setState(() => selectedLabel = label);
       return;
     }
 
     final currentMedia = _mediaCache[_currentIndex];
-    if (currentMedia == null) {
-      setState(() => selectedLabel = label);
-      return;
-    }
+    if (currentMedia == null) return;
 
+    // Check if this label already exists as a classification
     final existingIndex = currentMedia.annotations?.indexWhere(
       (a) => a.annotationType == 'classification' && a.labelId == label.id
     ) ?? -1;
 
-    if (existingIndex != -1) {
-      setState(() => selectedLabel = label);
-      return;
-    }
+    if (existingIndex != -1) return;
 
+    // Create new classification annotation
     final newAnnotations = currentMedia.annotations != null 
       ? List<Annotation>.from(currentMedia.annotations!)
       : <Annotation>[];
@@ -178,7 +182,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
      ..color = label.toColor());
 
     _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
-    setState(() => selectedLabel = label);
   }
 
   void _handleActionSelected(UserAction action) {
@@ -196,80 +199,83 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     });
   }
 
-  void _handleAnnotationEdit(Annotation annotation) {
-    showDialog(
-      context: context,
-      builder: (context) => _buildEditAnnotationDialog(annotation),
-    );
-  }
-
-  void _handleAnnotationDelete(Annotation annotation) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Annotation'),
-        content: const Text('Are you sure you want to delete this annotation?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              _deleteAnnotation(annotation);
-              Navigator.pop(context);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _deleteAnnotation(Annotation annotation) {
+  void _handleAnnotationLabelChanged(Annotation annotation, Label? newLabel) {
     setState(() {
       final currentMedia = _mediaCache[_currentIndex];
       if (currentMedia != null) {
-        final newAnnotations = currentMedia.annotations?.where(
-          (a) => a.id != annotation.id
-        ).toList();
+        final index = currentMedia.annotations?.indexWhere(
+          (a) => a.id == annotation.id
+        ) ?? -1;
+
+        if (index != -1) {
+          // Create updated annotation with new label
+          final updatedAnnotation = annotation.copyWith(
+            labelId: newLabel?.id,
+            name: newLabel?.name,
+            color: newLabel?.toColor(),
+            updatedAt: DateTime.now(),
+          );
+
+          // Update the annotation in the cache
+          currentMedia.annotations?[index] = updatedAnnotation;
         
-        _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
-        
-        if (_selectedAnnotation == annotation) {
-          _selectedAnnotation = null;
+          // Update selected annotation if it's the one being modified
+          if (_selectedAnnotation?.id == annotation.id) {
+            _selectedAnnotation = updatedAnnotation;
+          }
         }
       }
     });
   }
 
-  Widget _buildEditAnnotationDialog(Annotation annotation) {
-    final textController = TextEditingController(text: annotation.name);
-    
-    return AlertDialog(
-      title: const Text('Edit Annotation'),
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(
-          labelText: 'Annotation Name',
-          border: OutlineInputBorder(),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            final updatedAnnotation = annotation.copyWith(name: textController.text);
-            _handleAnnotationUpdated(updatedAnnotation);
-            Navigator.pop(context);
-          },
-          child: const Text('Save'),
-        ),
-      ],
+  Future<void> _handleAnnotationDelete(Annotation annotation) async {
+    final shouldDelete = await DeleteAnnotationDialog.show(
+      context: context,
+      annotation: annotation,
     );
+  
+    if (shouldDelete ?? false) {
+      try {
+        // Delete from database
+        final deletedCount = await AnnotationDatabase.instance.deleteAnnotation(annotation.id!);
+      
+        if (deletedCount > 0 && mounted) {
+          setState(() {
+            // Update local state
+            final currentMedia = _mediaCache[_currentIndex];
+            if (currentMedia != null) {
+              final newAnnotations = currentMedia.annotations?.where(
+                (a) => a.id != annotation.id
+              ).toList();
+            
+              _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+            
+              if (_selectedAnnotation?.id == annotation.id) {
+                _selectedAnnotation = null;
+              }
+            }
+          });
+        } else {
+          if (mounted) {
+            await AlertErrorDialog.show(
+              context,
+              'Deletion Failed',
+              'The annotation could not be deleted from the database.',
+              tips: 'Please try again or check your database connection.',
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          await AlertErrorDialog.show(
+            context,
+            'Deletion Error',
+            'An error occurred while deleting the annotation: ${e.toString()}',
+            tips: 'Please try again or contact support if the problem persists.',
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -373,7 +379,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                       annotations: media.annotations ?? [],
                       selectedAnnotation: _selectedAnnotation,
                       onAnnotationSelected: _handleAnnotationSelected,
-                      onAnnotationEdit: _handleAnnotationEdit,
+                      onAnnotationLabelChanged: _handleAnnotationLabelChanged,
                       onAnnotationDelete: _handleAnnotationDelete,
                     ),
                   ],

@@ -133,7 +133,10 @@
   "dialog_opacity_title": "Annotation Fill Opacity",
   "dialog_help_title": "Annotator Toolbar Help",
   "dialog_help_content": "• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.",
-  "dialog_help_tips": "Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!"
+  "dialog_help_tips": "Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!",
 
+  "deleteAnnotationTitle": "Delete Annotation",
+  "deleteAnnotationMessage": "Are you sure you want to delete",
+  "unnamedAnnotation": "this annotation"
 
 }

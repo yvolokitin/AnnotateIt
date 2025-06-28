@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../models/label.dart';
 import '../../models/annotation.dart';
-
 import 'annotated_list_item.dart';
 
 class AnnotatorRightSidebar extends StatefulWidget {
@@ -10,8 +8,8 @@ class AnnotatorRightSidebar extends StatefulWidget {
   final List<Label> labels;
   final List<Annotation> annotations;
   final Function(Annotation?)? onAnnotationSelected;
-  final Function(Annotation)? onAnnotationEdit;
-  final Function(Annotation)? onAnnotationDelete;
+  final Function(Annotation, Label) onAnnotationLabelChanged;
+  final Function(Annotation) onAnnotationDelete;
   final Annotation? selectedAnnotation;
 
   const AnnotatorRightSidebar({
@@ -19,9 +17,9 @@ class AnnotatorRightSidebar extends StatefulWidget {
     required this.collapsed,
     required this.labels,
     required this.annotations,
-    this.onAnnotationSelected,
-    this.onAnnotationEdit,
-    this.onAnnotationDelete,
+    required this.onAnnotationSelected,
+    required this.onAnnotationLabelChanged,
+    required this.onAnnotationDelete,
     this.selectedAnnotation,
   });
 
@@ -33,7 +31,6 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
   int? _hoveredIndex;
 
   void _handleAnnotationTap(Annotation annotation) {
-    // Toggle selection - if already selected, deselect by passing null
     widget.onAnnotationSelected?.call(
       widget.selectedAnnotation == annotation ? null : annotation
     );
@@ -122,9 +119,10 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
             isSelected: isSelected,
             isHovered: isHovered,
             onTap: () => _handleAnnotationTap(annotation),
-            onEdit: () => widget.onAnnotationEdit?.call(annotation),
-            onDelete: () => widget.onAnnotationDelete?.call(annotation),
+            onLabelChanged: (newLabel) => widget.onAnnotationLabelChanged(annotation, newLabel),
+            onDelete: widget.onAnnotationDelete,
             theme: Theme.of(context),
+            availableLabels: widget.labels,
           ),
         );
       },

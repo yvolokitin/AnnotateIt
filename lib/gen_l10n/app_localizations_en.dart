@@ -342,4 +342,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dialog_help_tips =>
       'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!';
+
+  @override
+  String get deleteAnnotationTitle => 'Delete Annotation';
+
+  @override
+  String get deleteAnnotationMessage => 'Are you sure you want to delete';
+
+  @override
+  String get unnamedAnnotation => 'this annotation';
 }
