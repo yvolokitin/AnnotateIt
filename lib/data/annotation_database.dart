@@ -78,6 +78,16 @@ class AnnotationDatabase {
     return result.map((map) => Annotation.fromMap(map)).toList();
   }
 
+  Future<int> updateAnnotation(Annotation annotation) async {
+    final db = await database;
+    return await db.update(
+      'annotations',
+      annotation.toMap(),
+      where: 'id = ?',
+      whereArgs: [annotation.id],
+    );
+  }
+
   /// Deletes a specific annotation from the database
   /// 
   /// [annotationId] - The ID of the annotation to delete

@@ -82,12 +82,13 @@ class AnnotatedListItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                // Action buttons
-                if (isHovered || isSelected)
+                // Action buttons - now only shown when isSelected is true
+                if (isSelected)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       LabelDropdown(
+                        key: ValueKey('label_dropdown_${annotation.id}'),
                         currentLabel: availableLabels.firstWhere(
                           (label) => label.id == annotation.labelId,
                           orElse: () => Label(
@@ -98,7 +99,9 @@ class AnnotatedListItem extends StatelessWidget {
                           ),
                         ),
                         availableLabels: availableLabels,
-                        onLabelSelected: onLabelChanged,
+                        onLabelSelected: (newLabel) {
+                          onLabelChanged(newLabel);
+                        },
                         theme: theme,
                       ),
                       IconButton(

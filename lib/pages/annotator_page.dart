@@ -199,33 +199,51 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     });
   }
 
-  void _handleAnnotationLabelChanged(Annotation annotation, Label? newLabel) {
-    setState(() {
-      final currentMedia = _mediaCache[_currentIndex];
-      if (currentMedia != null) {
-        final index = currentMedia.annotations?.indexWhere(
-          (a) => a.id == annotation.id
-        ) ?? -1;
+  Future<void> _handleAnnotationLabelChanged(Annotation annotation, Label newLabel) async {
+    try {
+      // Create updated annotation
+      final updatedAnnotation = annotation.copyWith(
+        labelId: newLabel.id,
+        name: newLabel.name,
+        color: newLabel.toColor(),
+        updatedAt: DateTime.now(),
+      );
 
-        if (index != -1) {
-          // Create updated annotation with new label
-          final updatedAnnotation = annotation.copyWith(
-            labelId: newLabel?.id,
-            name: newLabel?.name,
-            color: newLabel?.toColor(),
-            updatedAt: DateTime.now(),
-          );
+      // Update in database
+      await AnnotationDatabase.instance.updateAnnotation(updatedAnnotation);
 
-          // Update the annotation in the cache
-          currentMedia.annotations?[index] = updatedAnnotation;
-        
-          // Update selected annotation if it's the one being modified
-          if (_selectedAnnotation?.id == annotation.id) {
-            _selectedAnnotation = updatedAnnotation;
+      // Update UI state
+      if (mounted) {
+        setState(() {
+          final currentMedia = _mediaCache[_currentIndex];
+          if (currentMedia != null) {
+            final index = currentMedia.annotations?.indexWhere(
+              (a) => a.id == annotation.id
+            ) ?? -1;
+
+            if (index != -1) {
+              // Create new list to trigger widget update
+              final newAnnotations = List<Annotation>.from(currentMedia.annotations!);
+              newAnnotations[index] = updatedAnnotation;
+
+              _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+            
+              if (_selectedAnnotation?.id == annotation.id) {
+                _selectedAnnotation = updatedAnnotation;
+              }
+            }
           }
-        }
+        });
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'Update Failed',
+          'Failed to update annotation label: ${e.toString()}',
+        );  
+      }
+    }
   }
 
   Future<void> _handleAnnotationDelete(Annotation annotation) async {
