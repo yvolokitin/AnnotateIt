@@ -64,7 +64,8 @@ class AnnotatedListItem extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     color: annotation.color ?? colorScheme.primary,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(4),
+                    // shape: BoxShape.circle,
                     border: Border.all(
                       color: theme.dividerColor,
                       width: 1,
@@ -106,7 +107,7 @@ class AnnotatedListItem extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline, size: 18),
-                        color: theme.colorScheme.error,
+                        color: Colors.white70,
                         onPressed: () => onDelete(annotation),
                         tooltip: 'Delete annotation',
                         padding: EdgeInsets.zero,

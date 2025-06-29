@@ -676,6 +676,12 @@ abstract class AppLocalizations {
   /// **'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!'**
   String get dialog_help_tips;
 
+  /// No description provided for @dialog_opacity_explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the opacity level to make the content more or less transparent.'**
+  String get dialog_opacity_explanation;
+
   /// No description provided for @deleteAnnotationTitle.
   ///
   /// In en, this message translates to:

@@ -344,6 +344,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!';
 
   @override
+  String get dialog_opacity_explanation =>
+      'Adjust the opacity level to make the content more or less transparent.';
+
+  @override
   String get deleteAnnotationTitle => 'Delete Annotation';
 
   @override

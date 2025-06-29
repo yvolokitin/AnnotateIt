@@ -40,33 +40,128 @@ class _OpacityDialogState extends State<OpacityDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return AlertDialog(
-      title: Text(l10n.dialog_opacity_title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
+      backgroundColor: Colors.grey[800],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.orangeAccent, width: 1),
+      ),
+      titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Slider(
-            value: _opacity,
-            min: 0.0,
-            max: 1.0,
-            divisions: 10,
-            label: '${(_opacity * 100).round()}%',
-            onChanged: (value) => setState(() => _opacity = value),
+          Row(
+            children: [
+              const Icon(
+                Icons.opacity,
+                size: 32,
+                color: Colors.orangeAccent,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.dialog_opacity_title,
+                style: const TextStyle(
+                  color: Colors.orangeAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.orangeAccent),
+            tooltip: 'Close',
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(color: Colors.orangeAccent),
+              Padding(
+                padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.dialog_opacity_explanation,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 22,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Slider(
+                      value: _opacity,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      activeColor: Colors.orangeAccent,
+                      inactiveColor: Colors.grey[600],
+                      label: '${(_opacity * 100).round()}%',
+                      onChanged: (value) => setState(() => _opacity = value),
+                    ),
+                    Center(
+                      child: Text(
+                        '${(_opacity * 100).round()}%',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancelButton),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+          ),
+          child: Text(
+            l10n.cancelButton,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 22,
+            ),
+          ),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: () {
             widget.onOpacityChanged(_opacity);
             Navigator.pop(context);
           },
-          child: Text(l10n.applyButton),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.orangeAccent, width: 2),
+            ),
+          ),
+          child: Text(
+            l10n.applyButton,
+            style: const TextStyle(
+              color: Colors.orangeAccent,
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
         ),
       ],
     );
