@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'shape.dart';
 
+/// A simple rectangle shape with top-left origin and size (width, height).
 class RectShape extends Shape {
   final double x;
   final double y;
@@ -9,12 +10,10 @@ class RectShape extends Shape {
 
   RectShape(this.x, this.y, this.width, this.height);
 
-  @override
-  Offset? get labelConnectionPoint => null;
-
+  /// Parses shape from JSON map.
   static RectShape? fromJson(Map<String, dynamic> json) {
     try {
-      // support format: { bbox: [x, y, w, h] }
+      // Format 1: { "bbox": [x, y, width, height] }
       if (json.containsKey('bbox') && json['bbox'] is List) {
         final list = json['bbox'] as List;
         if (list.length >= 4) {
@@ -30,15 +29,15 @@ class RectShape extends Shape {
         }
       }
 
-      // support format: { x: ..., y: ..., width: ..., height: ... }
-      final missingFields = <String>[];
-      if (!json.containsKey('x')) missingFields.add('x');
-      if (!json.containsKey('y')) missingFields.add('y');
-      if (!json.containsKey('width')) missingFields.add('width');
-      if (!json.containsKey('height')) missingFields.add('height');
+      // Format 2: { x: ..., y: ..., width: ..., height: ... }
+      final missing = <String>[];
+      if (!json.containsKey('x')) missing.add('x');
+      if (!json.containsKey('y')) missing.add('y');
+      if (!json.containsKey('width')) missing.add('width');
+      if (!json.containsKey('height')) missing.add('height');
 
-      if (missingFields.isNotEmpty) {
-        print('[RectShape] Warning: Missing fields: ${missingFields.join(', ')}. Skipping shape. Raw: $json');
+      if (missing.isNotEmpty) {
+        print('[RectShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
         return null;
       }
 
@@ -54,6 +53,7 @@ class RectShape extends Shape {
     }
   }
 
+  /// Converts the shape to a JSON-serializable map.
   @override
   Map<String, dynamic> toJson() => {
         'x': x,
@@ -62,33 +62,29 @@ class RectShape extends Shape {
         'height': height,
       };
 
-  @override
-  Rect get boundingBox => Rect.fromLTWH(x, y, width, height);
-
-  @override
-  bool containsPoint(Offset point) {
-    return boundingBox.contains(point);
-  }
-
+  /// Draws the rectangle on the canvas.
   @override
   void paint(Canvas canvas, Paint paint) {
     final rect = Rect.fromLTWH(x, y, width, height);
     canvas.drawRect(rect, paint);
   }
 
+  /// Returns the top-left position.
   @override
-  List<Offset> getCorners() {
-    return [
-      Offset(x, y),
-      Offset(x + width, y),
-      Offset(x + width, y + height),
-      Offset(x, y + height),
-    ];
+  Offset getPosition() => Offset(x, y);
+
+  /// Moves the rectangle to a new top-left position (absolute).
+  @override
+  RectShape moveTo(Offset newPosition) {
+    return RectShape(
+      newPosition.dx,
+      newPosition.dy,
+      width,
+      height,
+    );
   }
 
-  @override
-  Offset get labelOffset => Offset(x + 15, y);
-
+  /// Moves the rectangle by a delta (relative).
   @override
   RectShape move(Offset delta) {
     return RectShape(
@@ -99,13 +95,13 @@ class RectShape extends Shape {
     );
   }
 
+  /// Resizes the rectangle based on which handle is being dragged.
   @override
   RectShape resize({
     required int handleIndex,
     required Offset newPosition,
     required List<Offset> originalCorners,
   }) {
-    // Ensure width and height are always positive
     switch (handleIndex) {
       case 0: // top-left
         return RectShape(
@@ -139,4 +135,31 @@ class RectShape extends Shape {
         return this;
     }
   }
+
+  /// Returns the corners: [top-left, top-right, bottom-right, bottom-left].
+  @override
+  List<Offset> getCorners() {
+    return [
+      Offset(x, y),
+      Offset(x + width, y),
+      Offset(x + width, y + height),
+      Offset(x, y + height),
+    ];
+  }
+
+  /// Label offset to the right of the top-left corner.
+  @override
+  Offset get labelOffset => Offset(x + 15, y);
+
+  /// Optional label line connection point (not used here).
+  @override
+  Offset? get labelConnectionPoint => null;
+
+  /// Bounding box equals the rectangle itself.
+  @override
+  Rect get boundingBox => Rect.fromLTWH(x, y, width, height);
+
+  /// Checks if a point is inside the rectangle.
+  @override
+  bool containsPoint(Offset point) => boundingBox.contains(point);
 }

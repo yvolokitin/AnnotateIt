@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'shape.dart';
 
+/// A circle shape defined by a center point and radius.
 class CircleShape extends Shape {
   final double centerX;
   final double centerY;
@@ -8,6 +9,7 @@ class CircleShape extends Shape {
 
   CircleShape(this.centerX, this.centerY, this.radius);
 
+  /// Parses a CircleShape from JSON format.
   static CircleShape? fromJson(Map<String, dynamic> json) {
     final missing = <String>[];
     if (!json.containsKey('cx')) missing.add('cx');
@@ -31,6 +33,7 @@ class CircleShape extends Shape {
     }
   }
 
+  /// Converts the shape to a JSON-serializable map.
   @override
   Map<String, dynamic> toJson() => {
         'cx': centerX,
@@ -38,18 +41,42 @@ class CircleShape extends Shape {
         'r': radius,
       };
 
+  /// Returns the center point of the circle.
   Offset get center => Offset(centerX, centerY);
 
-  Rect toRect() => Rect.fromCircle(center: center, radius: radius);
-
+  /// Returns the top-left origin of bounding box.
   @override
-  void paint(Canvas canvas, Paint paint) {
-    canvas.drawCircle(center, radius, paint);
+  Offset getPosition() => center;
+
+  /// Moves the shape's center to the given position.
+  @override
+  Shape moveTo(Offset newPosition) {
+    return CircleShape(newPosition.dx, newPosition.dy, radius);
   }
 
+  /// Moves the circle by a delta offset.
   @override
-  Rect get boundingBox => toRect();
+  CircleShape move(Offset delta) {
+    return CircleShape(centerX + delta.dx, centerY + delta.dy, radius);
+  }
 
+  /// Resizes the circle by setting radius = distance to newPosition.
+  @override
+  CircleShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    final newRadius = (newPosition - center).distance;
+    const minRadius = 4.0;
+    return CircleShape(centerX, centerY, newRadius.clamp(minRadius, double.infinity));
+  }
+
+  /// Returns bounding rectangle of the circle.
+  @override
+  Rect get boundingBox => Rect.fromCircle(center: center, radius: radius);
+
+  /// Checks if a point lies inside the circle.
   @override
   bool containsPoint(Offset point) {
     final dx = point.dx - centerX;
@@ -57,51 +84,26 @@ class CircleShape extends Shape {
     return dx * dx + dy * dy <= radius * radius;
   }
 
+  /// Draws the circle on the canvas.
   @override
-  CircleShape move(Offset delta) {
-    return CircleShape(
-      centerX + delta.dx,
-      centerY + delta.dy,
-      radius,
-    );
+  void paint(Canvas canvas, Paint paint) {
+    canvas.drawCircle(center, radius, paint);
   }
 
+  /// Returns 4 handle positions: top, right, bottom, left.
   @override
-  CircleShape resize({
-    required int handleIndex,
-    required Offset newPosition,
-    required List<Offset> originalCorners,
-  }) {
-    // For circles, we'll use the distance from center to new position as the radius
-    final newRadius = (newPosition - center).distance;
-    
-    // Ensure minimum radius
-    final minRadius = 4.0;
-    final clampedRadius = newRadius > minRadius ? newRadius : minRadius;
+  List<Offset> getCorners() => [
+        Offset(centerX, centerY - radius),
+        Offset(centerX + radius, centerY),
+        Offset(centerX, centerY + radius),
+        Offset(centerX - radius, centerY),
+      ];
 
-    return CircleShape(
-      centerX,
-      centerY,
-      clampedRadius,
-    );
-  }
-
-  // For circles, we'll provide 4 handles at cardinal directions
-  List<Offset> getCorners() {
-    return [
-      Offset(centerX, centerY - radius), // top
-      Offset(centerX + radius, centerY), // right
-      Offset(centerX, centerY + radius), // bottom
-      Offset(centerX - radius, centerY), // left
-    ];
-  }
-
+  /// Suggested label position above the circle.
   @override
-  Offset get labelOffset => Offset(
-    centerX, 
-    centerY - radius - (radius * 0.3) // 30% of radius as offset
-  );
+  Offset get labelOffset => Offset(centerX, centerY - radius - (radius * 0.3));
 
+  /// Optional point where label line connects to shape center.
   @override
-  Offset? get labelConnectionPoint => Offset(centerX, centerY);
+  Offset? get labelConnectionPoint => center;
 }

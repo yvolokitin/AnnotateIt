@@ -1,7 +1,9 @@
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'shape.dart';
 
+/// A shape representing a rotated rectangle.
 class RotatedRectShape extends Shape {
   final double centerX;
   final double centerY;
@@ -11,6 +13,7 @@ class RotatedRectShape extends Shape {
 
   RotatedRectShape(this.centerX, this.centerY, this.width, this.height, this.angle);
 
+  /// Parses shape data from a JSON map.
   static RotatedRectShape? fromJson(Map<String, dynamic> json) {
     final missing = <String>[];
     if (!json.containsKey('cx')) missing.add('cx');
@@ -38,6 +41,7 @@ class RotatedRectShape extends Shape {
     }
   }
 
+  /// Converts the shape to a JSON-serializable map.
   @override
   Map<String, dynamic> toJson() => {
         'cx': centerX,
@@ -46,6 +50,24 @@ class RotatedRectShape extends Shape {
         'height': height,
         'angle': angle,
       };
+
+  /// Draws the rotated rectangle on the canvas.
+  @override
+  void paint(Canvas canvas, Paint paint) {
+    final corners = toCorners();
+    final path = Path()
+      ..moveTo(corners[0].dx, corners[0].dy)
+      ..lineTo(corners[1].dx, corners[1].dy)
+      ..lineTo(corners[2].dx, corners[2].dy)
+      ..lineTo(corners[3].dx, corners[3].dy)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  /// Returns the 4 corners of the rotated rectangle.
+  @override
+  List<Offset> getCorners() => toCorners();
 
   List<Offset> toCorners() {
     final hw = width / 2;
@@ -65,80 +87,23 @@ class RotatedRectShape extends Shape {
     }).toList();
   }
 
+  /// Returns the shape’s center as its main position.
   @override
-  List<Offset> getCorners() => toCorners();
+  Offset getPosition() => Offset(centerX, centerY);
 
+  /// Absolute movement — creates a shape at a new center.
   @override
-  Offset get labelOffset {
-    // Calculate the top center point of the unrotated rectangle
-    final unrotatedTopCenter = Offset(centerX, centerY - height / 2);
-
-    // Apply rotation to this point
-    final rotatedX = centerX + math.cos(angle) * (unrotatedTopCenter.dx - centerX) - 
-                           math.sin(angle) * (unrotatedTopCenter.dy - centerY);
-    final rotatedY = centerY + math.sin(angle) * (unrotatedTopCenter.dx - centerX) + 
-                           math.cos(angle) * (unrotatedTopCenter.dy - centerY);
-  
-    // Move 20 pixels further out along the rotated "up" direction
-    return Offset(
-      rotatedX - math.sin(angle) * 20,
-      rotatedY - math.cos(angle) * 20,
+  RotatedRectShape moveTo(Offset newPosition) {
+    return RotatedRectShape(
+      newPosition.dx,
+      newPosition.dy,
+      width,
+      height,
+      angle,
     );
   }
 
-  @override
-  Offset? get labelConnectionPoint => Offset(centerX, centerY);
-
-  @override
-  void paint(Canvas canvas, Paint paint) {
-    final corners = toCorners();
-    final path = Path()
-      ..moveTo(corners[0].dx, corners[0].dy)
-      ..lineTo(corners[1].dx, corners[1].dy)
-      ..lineTo(corners[2].dx, corners[2].dy)
-      ..lineTo(corners[3].dx, corners[3].dy)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  Rect get boundingBox {
-    final corners = toCorners();
-    double minX = corners.first.dx;
-    double maxX = corners.first.dx;
-    double minY = corners.first.dy;
-    double maxY = corners.first.dy;
-
-    for (final corner in corners) {
-      if (corner.dx < minX) minX = corner.dx;
-      if (corner.dx > maxX) maxX = corner.dx;
-      if (corner.dy < minY) minY = corner.dy;
-      if (corner.dy > maxY) maxY = corner.dy;
-    }
-
-    return Rect.fromLTRB(minX, minY, maxX, maxY);
-  }
-
-  @override
-  bool containsPoint(Offset point) {
-    final translated = point - Offset(centerX, centerY);
-
-    // Reverse rotate the point
-    final cosA = math.cos(-angle);
-    final sinA = math.sin(-angle);
-    final rotated = Offset(
-      cosA * translated.dx - sinA * translated.dy,
-      sinA * translated.dx + cosA * translated.dy,
-    );
-
-    // Simple AABB check in unrotated space
-    return rotated.dx >= -width / 2 &&
-         rotated.dx <= width / 2 &&
-         rotated.dy >= -height / 2 &&
-         rotated.dy <= height / 2;
-  }
-
+  /// Relative movement — shifts center by delta.
   @override
   RotatedRectShape move(Offset delta) {
     return RotatedRectShape(
@@ -150,13 +115,14 @@ class RotatedRectShape extends Shape {
     );
   }
 
+  /// Resizes the shape by changing width and height relative to [handleIndex].
   @override
   RotatedRectShape resize({
     required int handleIndex,
     required Offset newPosition,
     required List<Offset> originalCorners,
   }) {
-    // First, convert new position to local unrotated coordinates
+    // Convert new position to unrotated local coordinates
     final localPoint = newPosition - Offset(centerX, centerY);
     final cosA = math.cos(-angle);
     final sinA = math.sin(-angle);
@@ -165,7 +131,6 @@ class RotatedRectShape extends Shape {
       sinA * localPoint.dx + cosA * localPoint.dy,
     );
 
-    // Calculate new width and height based on which corner is being dragged
     double newWidth = width;
     double newHeight = height;
 
@@ -188,17 +153,67 @@ class RotatedRectShape extends Shape {
         break;
     }
 
-    // Ensure minimum size
     final minSize = 8.0;
     newWidth = math.max(newWidth, minSize);
     newHeight = math.max(newHeight, minSize);
 
-    return RotatedRectShape(
-      centerX,
-      centerY,
-      newWidth,
-      newHeight,
-      angle,
+    return RotatedRectShape(centerX, centerY, newWidth, newHeight, angle);
+  }
+
+  /// Returns the bounding box (AABB) around the rotated corners.
+  @override
+  Rect get boundingBox {
+    final corners = toCorners();
+    double minX = corners.first.dx;
+    double maxX = corners.first.dx;
+    double minY = corners.first.dy;
+    double maxY = corners.first.dy;
+
+    for (final corner in corners) {
+      if (corner.dx < minX) minX = corner.dx;
+      if (corner.dx > maxX) maxX = corner.dx;
+      if (corner.dy < minY) minY = corner.dy;
+      if (corner.dy > maxY) maxY = corner.dy;
+    }
+
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  /// Checks if a point is inside the rotated rectangle.
+  @override
+  bool containsPoint(Offset point) {
+    final translated = point - Offset(centerX, centerY);
+    final cosA = math.cos(-angle);
+    final sinA = math.sin(-angle);
+
+    final rotated = Offset(
+      cosA * translated.dx - sinA * translated.dy,
+      sinA * translated.dx + cosA * translated.dy,
+    );
+
+    return rotated.dx >= -width / 2 &&
+           rotated.dx <= width / 2 &&
+           rotated.dy >= -height / 2 &&
+           rotated.dy <= height / 2;
+  }
+
+  /// Returns a label offset above the top edge.
+  @override
+  Offset get labelOffset {
+    final unrotatedTop = Offset(centerX, centerY - height / 2);
+
+    final rotatedX = centerX + math.cos(angle) * (unrotatedTop.dx - centerX) -
+                             math.sin(angle) * (unrotatedTop.dy - centerY);
+    final rotatedY = centerY + math.sin(angle) * (unrotatedTop.dx - centerX) +
+                             math.cos(angle) * (unrotatedTop.dy - centerY);
+
+    return Offset(
+      rotatedX - math.sin(angle) * 20,
+      rotatedY - math.cos(angle) * 20,
     );
   }
+
+  /// Connection point for label lines (center of shape).
+  @override
+  Offset? get labelConnectionPoint => Offset(centerX, centerY);
 }

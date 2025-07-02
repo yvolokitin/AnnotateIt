@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'shape.dart';
 
+/// A polygon shape represented by a list of points (Offset).
 class PolygonShape extends Shape {
   final List<Offset> points;
 
   PolygonShape(this.points);
 
+  /// Parses a PolygonShape from a JSON map.
   static PolygonShape? fromJson(Map<String, dynamic> json) {
     if (!json.containsKey('points') || json['points'] is! List) {
       print('[PolygonShape] Warning: Missing or invalid "points" key. Data: $json');
@@ -16,15 +18,15 @@ class PolygonShape extends Shape {
     final parsedPoints = <Offset>[];
 
     try {
-      // Try nested format: [[x, y], [x, y], ...]
+      // Nested format: [[x, y], [x, y], ...]
       if (rawPoints.isNotEmpty && rawPoints.first is List) {
         for (final p in rawPoints) {
           if (p is List && p.length >= 2 && p[0] is num && p[1] is num) {
             parsedPoints.add(Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()));
-          } 
+          }
         }
       }
-      // Try flat format: [x1, y1, x2, y2, ...]
+      // Flat format: [x1, y1, x2, y2, ...]
       else {
         for (int i = 0; i < rawPoints.length - 1; i += 2) {
           final x = rawPoints[i];
@@ -46,27 +48,80 @@ class PolygonShape extends Shape {
       return null;
     }
   }
-  
+
+  /// Converts the shape to a JSON-serializable map.
   @override
   Map<String, dynamic> toJson() => {
         'points': points.map((p) => [p.dx, p.dy]).toList(),
       };
 
-  Path toPath() {
+  /// Returns the top-left corner (first point) or Offset.zero if empty.
+  @override
+  Offset getPosition() {
+    return points.isNotEmpty ? points.first : Offset.zero;
+  }
+
+  /// Moves the entire polygon to a new position, aligning its first point.
+  @override
+  Shape moveTo(Offset newPosition) {
+    if (points.isEmpty) return this;
+    final delta = newPosition - points.first;
+    final movedPoints = points.map((p) => p + delta).toList();
+    return PolygonShape(movedPoints);
+  }
+
+  /// Moves the polygon by a delta offset.
+  @override
+  PolygonShape move(Offset delta) {
+    return PolygonShape(
+      points.map((p) => p + delta).toList(),
+    );
+  }
+
+  /// Resizes the polygon by moving a single corner.
+  @override
+  PolygonShape resize({
+    required int handleIndex,
+    required Offset newPosition,
+    required List<Offset> originalCorners,
+  }) {
+    if (handleIndex < 0 || handleIndex >= points.length) return this;
+    final newPoints = List<Offset>.from(points);
+    newPoints[handleIndex] = newPosition;
+    return PolygonShape(newPoints);
+  }
+
+  /// Draws the polygon using Path.
+  @override
+  void paint(Canvas canvas, Paint paint) {
     final path = Path();
     if (points.isNotEmpty) {
-      path.moveTo(points[0].dx, points[0].dy);
+      path.moveTo(points.first.dx, points.first.dy);
       for (int i = 1; i < points.length; i++) {
         path.lineTo(points[i].dx, points[i].dy);
       }
       path.close();
     }
-    return path;
+    canvas.drawPath(path, paint);
   }
 
-  Rect get boundingRect {
-    if (points.isEmpty) return Rect.zero;
+  /// Checks if a point is inside the polygon.
+  @override
+  bool containsPoint(Offset point) {
+    final path = Path();
+    if (points.isEmpty) return false;
+    path.moveTo(points.first.dx, points.first.dy);
+    for (final p in points.skip(1)) {
+      path.lineTo(p.dx, p.dy);
+    }
+    path.close();
+    return path.contains(point);
+  }
 
+  /// Bounding rectangle of the polygon.
+  @override
+  Rect get boundingBox {
+    if (points.isEmpty) return Rect.zero;
     double minX = points.first.dx;
     double maxX = points.first.dx;
     double minY = points.first.dy;
@@ -82,65 +137,22 @@ class PolygonShape extends Shape {
     return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
 
+  /// Returns all points of the polygon (for resize handles).
   @override
-  void paint(Canvas canvas, Paint paint) {
-    final path = toPath();
-    canvas.drawPath(path, paint);
-  }
+  List<Offset> getCorners() => List<Offset>.from(points);
 
+  /// Offset for placing the label (top center of bounding box).
   @override
-  Rect get boundingBox => boundingRect;
+  Offset get labelOffset => boundingBox.topCenter;
 
-  @override
-  bool containsPoint(Offset point) {
-    final path = toPath();
-    return path.contains(point);
-  }
-
-  @override
-  PolygonShape move(Offset delta) {
-    return PolygonShape(
-      points.map((point) => Offset(point.dx + delta.dx, point.dy + delta.dy)).toList(),
-    );
-  }
-
-  @override
-  PolygonShape resize({
-    required int handleIndex,
-    required Offset newPosition,
-    required List<Offset> originalCorners,
-  }) {
-    if (handleIndex < 0 || handleIndex >= points.length) return this;
-
-    // Calculate scale factors based on bounding box changes
-    final oldBounds = boundingRect;
-    final newPoints = List<Offset>.from(points);
-
-    // Move the selected point directly to the new position
-    newPoints[handleIndex] = newPosition;
-
-    return PolygonShape(newPoints);
-  }
-
-  // Helper method to get corner points (same as all polygon points)
-  List<Offset> getCorners() {
-    return List<Offset>.from(points);
-  }
-
-  @override
-  Offset get labelOffset {
-    final heightOffset = boundingBox.height * 0.3; // 30% of height
-    // return boundingBox.topCenter - Offset(0, 20 + heightOffset);
-    return boundingBox.topCenter;// - Offset(0, heightOffset);
-  }
-
+  /// Optional connection point for label line — uses centroid.
   @override
   Offset? get labelConnectionPoint {
     if (points.isEmpty) return null;
     double sumX = 0, sumY = 0;
-    for (final point in points) {
-      sumX += point.dx;
-      sumY += point.dy;
+    for (final p in points) {
+      sumX += p.dx;
+      sumY += p.dy;
     }
     return Offset(sumX / points.length, sumY / points.length);
   }
