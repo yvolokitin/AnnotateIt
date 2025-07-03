@@ -47,18 +47,24 @@ class AnnotatorCanvas extends StatefulWidget {
 }
 
 class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
+  late List<Annotation> _localAnnotations;
+
   Offset? _lastMiddleButtonPosition;
   int _lastResetCount = 0;
   double prevScale = 1;
-  bool done = false;
 
-  Matrix4 matrix = Matrix4.identity()
-    ..scale(0.9);
+  Matrix4 matrix = Matrix4.identity()..scale(0.9);
   Matrix4 inverse = Matrix4.identity();
+
+  Annotation? _draggingAnnotation;
+  Offset? _dragStartPosition;
 
   @override
   void initState() {
     super.initState();
+
+    _localAnnotations = List<Annotation>.from(widget.annotations ?? []);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() {
@@ -72,19 +78,21 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   void didUpdateWidget(covariant AnnotatorCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (widget.annotations != oldWidget.annotations) {
+      _localAnnotations = List<Annotation>.from(widget.annotations ?? []);
+    }
+
     if (widget.resetZoomCount != _lastResetCount) {
       _lastResetCount = widget.resetZoomCount;
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
           matrix = setTransformToFit(widget.image);
         });
-        // notify parent
         widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
       });
     }
-  } 
+  }
 
   void notifyZoomChanged(double zoom) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,14 +101,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   }
 
   Matrix4 setTransformToFit(ui.Image image) {
-    if (context.size == null) {
-      return Matrix4.identity();
-    }
+    if (context.size == null) return Matrix4.identity();
+
     final imageSize = Size(image.width.toDouble(), image.height.toDouble());
     final canvasSize = context.size!;
-
     final ratio = Size(imageSize.width / canvasSize.width, imageSize.height / canvasSize.height);
-
     final scale = 1 / max(ratio.width, ratio.height) * 0.9;
     final scaledImageSize = Size(imageSize.width * scale, imageSize.height * scale);
     final offset = Offset(
@@ -118,21 +123,30 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final position = inverse * localPosition;
     final mScale = 1 - scale;
     setState(() {
-      matrix *= Matrix4( // row major or column major
-          scale, 0, 0, 0,
-          0, scale, 0, 0,
-          0, 0, scale, 0,
-          mScale * position.x, mScale * position.y, 0, 1);
+      matrix *= Matrix4(
+        scale, 0, 0, 0,
+        0, scale, 0, 0,
+        0, 0, scale, 0,
+        mScale * position.x, mScale * position.y, 0, 1);
     });
-
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     if (event.buttons == kMiddleMouseButton) {
-      setState(() {
-        _lastMiddleButtonPosition = event.localPosition;
-      });
+      setState(() => _lastMiddleButtonPosition = event.localPosition);
+      return;
+    }
+
+    if (event.buttons == kPrimaryButton && widget.userAction == UserAction.navigation) {
+      inverse.copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final tapped = _findAnnotationAtPosition(transformed);
+      if (tapped != null) {
+        _draggingAnnotation = tapped;
+        _dragStartPosition = transformed;
+        widget.onAnnotationSelected?.call(tapped);
+      }
     }
   }
 
@@ -145,21 +159,49 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         matrix.translate(delta.dx / zoom, delta.dy / zoom);
       });
     }
+
+    if (event.buttons == kPrimaryButton && _draggingAnnotation != null && _dragStartPosition != null) {
+      inverse.copyInverse(matrix);
+      final currentPosition = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final delta = currentPosition - _dragStartPosition!;
+      final shape = Shape.fromAnnotation(_draggingAnnotation!);
+      if (shape != null) {
+        final moved = shape.move(delta);
+        final updated = _draggingAnnotation!.copyWith(data: moved.toJson(), updatedAt: DateTime.now());
+        _dragStartPosition = currentPosition;
+        _draggingAnnotation = updated;
+
+        // Обновляем в локальной копии
+        final index = _localAnnotations.indexWhere((a) => a.id == updated.id);
+        if (index != -1) {
+          setState(() {
+            _localAnnotations = List<Annotation>.from(_localAnnotations)
+            ..[index] = updated;
+          });
+        }
+
+        widget.onAnnotationUpdated?.call(updated);
+        widget.onAnnotationSelected?.call(updated); // to move border as well
+      }
+    }
   }
 
   void _handlePointerUp(PointerUpEvent event) {
     if (event.buttons == kMiddleMouseButton) {
       setState(() => _lastMiddleButtonPosition = null);
     }
+
+    if (event.kind == PointerDeviceKind.mouse && event.buttons == 0) {
+      _draggingAnnotation = null;
+      _dragStartPosition = null;
+    }
   }
-    
+
   void _handleTapDown(TapDownDetails details) {
     if (widget.userAction == UserAction.navigation) {
-      final inverse = Matrix4.identity()..copyInverse(matrix);
+      inverse.copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
       final tapped = _findAnnotationAtPosition(transformed);
-
-      // Call the correct callback
       widget.onAnnotationSelected?.call(tapped);
     }
   }
@@ -168,27 +210,23 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final annotations = widget.annotations?.reversed ?? [];
     for (final annotation in annotations) {
       final shape = Shape.fromAnnotation(annotation);
-      if (shape == null) continue;
-      if (shape.boundingBox.contains(position) && shape.containsPoint(position)) {
+      if (shape != null && shape.boundingBox.contains(position) && shape.containsPoint(position)) {
         return annotation;
       }
     }
     return null;
   }
 
-
-@override
-Widget build(BuildContext context) {
-  return NotificationListener<SizeChangedLayoutNotification>(
-    onNotification: (f) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          matrix = setTransformToFit(widget.image);
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (f) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() => matrix = setTransformToFit(widget.image));
         });
-      });
-      return false;
-    },
-    child: SizeChangedLayoutNotifier(
+        return false;
+      },
+      child: SizeChangedLayoutNotifier(
         child: SizedBox.expand(
           child: Container(
             clipBehavior: Clip.hardEdge,
@@ -212,7 +250,7 @@ Widget build(BuildContext context) {
                   setState(() => matrix = setTransformToFit(widget.image));
                   notifyZoomChanged(matrix.getMaxScaleOnAxis());
                 },
-                onScaleUpdate: (ScaleUpdateDetails d) {
+                onScaleUpdate: (d) {
                   final scale = 1 - (prevScale - d.scale);
                   prevScale = d.scale;
                   scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale);
@@ -222,7 +260,7 @@ Widget build(BuildContext context) {
                   child: CustomPaint(
                     painter: CanvasPainter(
                       image: widget.image,
-                      annotations: widget.annotations,
+                      annotations: _localAnnotations,
                       selectedAnnotation: widget.selectedAnnotation,
                       scale: matrix.getMaxScaleOnAxis(),
                       opacity: widget.opacity,
