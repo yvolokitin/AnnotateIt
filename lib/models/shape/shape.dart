@@ -73,4 +73,7 @@ abstract class Shape {
       return null;
     }
   }
+
+  /// Ensures the shape stays within image bounds.
+  Shape clampToBounds(Size imageSize);
 }

@@ -216,4 +216,32 @@ class RotatedRectShape extends Shape {
   /// Connection point for label lines (center of shape).
   @override
   Offset? get labelConnectionPoint => Offset(centerX, centerY);
+
+  @override
+  Shape clampToBounds(Size imageSize) {
+    final corners = toCorners();
+
+    final minX = corners.map((c) => c.dx).reduce(math.min);
+    final maxX = corners.map((c) => c.dx).reduce(math.max);
+    final minY = corners.map((c) => c.dy).reduce(math.min);
+    final maxY = corners.map((c) => c.dy).reduce(math.max);
+
+    // Вычисляем на сколько углы выходят за границы
+    double dx = 0;
+    double dy = 0;
+
+    if (minX < 0) dx = -minX;
+    if (maxX > imageSize.width) dx = imageSize.width - maxX;
+
+    if (minY < 0) dy = -minY;
+    if (maxY > imageSize.height) dy = imageSize.height - maxY;
+
+    return RotatedRectShape(
+      centerX + dx,
+      centerY + dy,
+      width,
+      height,
+      angle,
+    );
+  }
 }

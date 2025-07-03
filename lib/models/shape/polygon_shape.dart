@@ -156,4 +156,27 @@ class PolygonShape extends Shape {
     }
     return Offset(sumX / points.length, sumY / points.length);
   }
+
+  @override
+  Shape clampToBounds(Size imageSize) {
+    if (points.isEmpty) return this;
+
+    double dx = 0;
+    double dy = 0;
+
+    for (final p in points) {
+      if (p.dx + dx < 0) dx = dx + (-p.dx);
+      if (p.dx + dx > imageSize.width) dx = dx + (imageSize.width - (p.dx + dx));
+      if (p.dy + dy < 0) dy = dy + (-p.dy);
+      if (p.dy + dy > imageSize.height) dy = dy + (imageSize.height - (p.dy + dy));
+    }
+
+    final clampedPoints = points.map((p) {
+      final x = (p.dx + dx).clamp(0.0, imageSize.width);
+      final y = (p.dy + dy).clamp(0.0, imageSize.height);
+      return Offset(x, y);
+    }).toList();
+
+    return PolygonShape(clampedPoints);
+  }
 }

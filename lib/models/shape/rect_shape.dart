@@ -162,4 +162,16 @@ class RectShape extends Shape {
   /// Checks if a point is inside the rectangle.
   @override
   bool containsPoint(Offset point) => boundingBox.contains(point);
+
+  @override
+  Shape clampToBounds(Size imageSize) {
+    final clampedX = x.clamp(0.0, imageSize.width - width);
+    final clampedY = y.clamp(0.0, imageSize.height - height);
+    return RectShape(
+      clampedX,
+      clampedY,
+      width,
+      height,
+    );
+  }
 }

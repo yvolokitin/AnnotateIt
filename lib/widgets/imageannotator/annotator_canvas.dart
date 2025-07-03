@@ -166,12 +166,13 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       final delta = currentPosition - _dragStartPosition!;
       final shape = Shape.fromAnnotation(_draggingAnnotation!);
       if (shape != null) {
-        final moved = shape.move(delta);
+        // final moved = shape.move(delta);
+        final moved = shape.move(delta).clampToBounds(Size(widget.image.width.toDouble(), widget.image.height.toDouble()));
         final updated = _draggingAnnotation!.copyWith(data: moved.toJson(), updatedAt: DateTime.now());
         _dragStartPosition = currentPosition;
         _draggingAnnotation = updated;
 
-        // Обновляем в локальной копии
+        // update local annotations copy
         final index = _localAnnotations.indexWhere((a) => a.id == updated.id);
         if (index != -1) {
           setState(() {
@@ -181,7 +182,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         }
 
         widget.onAnnotationUpdated?.call(updated);
-        widget.onAnnotationSelected?.call(updated); // to move border as well
+        // to move annotation border together with annotation
+        widget.onAnnotationSelected?.call(updated);
       }
     }
   }

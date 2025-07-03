@@ -106,4 +106,11 @@ class CircleShape extends Shape {
   /// Optional point where label line connects to shape center.
   @override
   Offset? get labelConnectionPoint => center;
+
+  @override
+  Shape clampToBounds(Size imageSize) {
+    final clampedX = centerX.clamp(radius, imageSize.width - radius);
+    final clampedY = centerY.clamp(radius, imageSize.height - radius);
+    return CircleShape(clampedX, clampedY, radius);
+  }
 }
