@@ -52,6 +52,22 @@ class UserDatabase {
     return null;
   }
 
+  Future<void> setAutoSaveAnnotations({
+    required int userId,
+    required bool autoSave,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {
+        'autoSaveAnnotations': autoSave ? 1 : 0,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
   Future<void> setProjectSkipDeleteConfirm({
     required int userId,
     required bool skip,

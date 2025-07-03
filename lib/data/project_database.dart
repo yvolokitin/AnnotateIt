@@ -47,6 +47,7 @@ class ProjectDatabase {
         showTips INTEGER NOT NULL,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
+        autoSaveAnnotations INTEGER NOT NULL DEFAULT 1,
         projectSkipDeleteConfirm INTEGER NOT NULL DEFAULT 0,
         projectShowNoLabels INTEGER NOT NULL DEFAULT 1,
         projectShowImportWarning INTEGER NOT NULL DEFAULT 1,

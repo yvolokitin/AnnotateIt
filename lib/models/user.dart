@@ -13,6 +13,8 @@ class User {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final bool autoSaveAnnotations;
+
   final bool projectSkipDeleteConfirm;
   final bool projectShowNoLabels;
   final bool projectShowImportWarning;
@@ -35,6 +37,7 @@ class User {
     'showTips',
     'createdAt',
     'updatedAt',
+    'autoSaveAnnotations',
     'projectSkipDeleteConfirm',
     'projectShowNoLabels',
     'projectShowImportWarning',
@@ -58,6 +61,7 @@ class User {
     required this.showTips,
     required this.createdAt,
     required this.updatedAt,
+    required this.autoSaveAnnotations,
     required this.projectSkipDeleteConfirm,
     required this.projectShowNoLabels,
     required this.projectShowImportWarning,
@@ -81,6 +85,7 @@ User copyWith({
   bool? showTips,
   DateTime? createdAt,
   DateTime? updatedAt,
+  bool? autoSaveAnnotations,
   bool? projectSkipDeleteConfirm,
   bool? projectShowNoLabels,
   bool? projectShowImportWarning,
@@ -103,6 +108,7 @@ User copyWith({
     showTips: showTips ?? this.showTips,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    autoSaveAnnotations: autoSaveAnnotations ?? this.autoSaveAnnotations,
     projectSkipDeleteConfirm: projectSkipDeleteConfirm ?? this.projectSkipDeleteConfirm,
     projectShowNoLabels: projectShowNoLabels ?? this.projectShowNoLabels,
     projectShowImportWarning: projectShowImportWarning ?? this.projectShowImportWarning,
@@ -127,6 +133,7 @@ User copyWith({
         'showTips': showTips ? 1 : 0,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        'autoSaveAnnotations': autoSaveAnnotations ? 1 : 0,
         'projectSkipDeleteConfirm': projectSkipDeleteConfirm ? 1 : 0,
         'projectShowNoLabels': projectShowNoLabels == true ? 1 : 0,
         'projectShowImportWarning': projectShowImportWarning == true ? 1 : 0,
@@ -151,6 +158,7 @@ User copyWith({
       showTips: map['showTips'] == 1,
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
+      autoSaveAnnotations: map['autoSaveAnnotations'] == 1,
       projectSkipDeleteConfirm: map['projectSkipDeleteConfirm'] == 1,
       projectShowNoLabels: map['projectShowNoLabels'] == 1,
       projectShowImportWarning: map['projectShowImportWarning'] == 1,

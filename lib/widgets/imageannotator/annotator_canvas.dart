@@ -5,11 +5,16 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
+import '../../session/user_session.dart';
+import '../../data/annotation_database.dart';
+
 import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/shape/shape.dart';
+
 import 'canvas_painter.dart';
 import 'user_action.dart';
+import 'constants.dart';
 
 class AnnotatorCanvas extends StatefulWidget {
   final Annotation? selectedAnnotation; 
@@ -58,6 +63,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
   Annotation? _draggingAnnotation;
   Offset? _dragStartPosition;
+
+  int? _activeResizeHandle;
+  List<Offset>? _originalCorners;
 
   @override
   void initState() {
@@ -147,10 +155,27 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _dragStartPosition = transformed;
         widget.onAnnotationSelected?.call(tapped);
       }
+
+      if (_draggingAnnotation != null) {
+        final shape = Shape.fromAnnotation(_draggingAnnotation!);
+        if (shape != null) {
+          final corners = shape.getCorners();
+          final handleRadius = Constants.handleRadius;
+          for (int i = 0; i < corners.length; i++) {
+            if ((transformed - corners[i]).distance <= handleRadius) {
+              _activeResizeHandle = i;
+              _originalCorners = corners;
+              return;
+            }
+          }
+        }
+      }
+
     }
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
+    // Pan the canvas with the middle mouse button
     if (event.buttons == kMiddleMouseButton && _lastMiddleButtonPosition != null) {
       final delta = event.localPosition - _lastMiddleButtonPosition!;
       setState(() {
@@ -158,44 +183,77 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         final zoom = matrix.getMaxScaleOnAxis();
         matrix.translate(delta.dx / zoom, delta.dy / zoom);
       });
+      return;
     }
 
-    if (event.buttons == kPrimaryButton && _draggingAnnotation != null && _dragStartPosition != null) {
+    // Left mouse button drag: either resize or move the annotation
+    if (event.buttons == kPrimaryButton &&
+        _draggingAnnotation != null &&
+        _dragStartPosition != null) {
       inverse.copyInverse(matrix);
       final currentPosition = MatrixUtils.transformPoint(inverse, event.localPosition);
       final delta = currentPosition - _dragStartPosition!;
       final shape = Shape.fromAnnotation(_draggingAnnotation!);
-      if (shape != null) {
-        // final moved = shape.move(delta);
-        final moved = shape.move(delta).clampToBounds(Size(widget.image.width.toDouble(), widget.image.height.toDouble()));
-        final updated = _draggingAnnotation!.copyWith(data: moved.toJson(), updatedAt: DateTime.now());
-        _dragStartPosition = currentPosition;
-        _draggingAnnotation = updated;
+      final imageSize = Size(widget.image.width.toDouble(), widget.image.height.toDouble());
 
-        // update local annotations copy
+      if (shape != null) {
+        Shape newShape;
+
+        // === RESIZE ===
+        if (_activeResizeHandle != null && _originalCorners != null) {
+          newShape = shape.resize(
+            handleIndex: _activeResizeHandle!,
+            newPosition: currentPosition,
+            originalCorners: _originalCorners!,
+          );
+        }
+        // === MOVE ===
+        else {
+          newShape = shape.move(delta);
+          _dragStartPosition = currentPosition;
+        }
+
+        // Clamp shape within image bounds
+        final clampedShape = newShape.clampToBounds(imageSize);
+
+        // Create updated annotation
+        final updated = _draggingAnnotation!.copyWith(
+          data: clampedShape.toJson(),
+          updatedAt: DateTime.now(),
+        );
+
         final index = _localAnnotations.indexWhere((a) => a.id == updated.id);
         if (index != -1) {
           setState(() {
             _localAnnotations = List<Annotation>.from(_localAnnotations)
-            ..[index] = updated;
+              ..[index] = updated;
           });
         }
 
+        _draggingAnnotation = updated;
+
         widget.onAnnotationUpdated?.call(updated);
-        // to move annotation border together with annotation
         widget.onAnnotationSelected?.call(updated);
       }
     }
   }
 
-  void _handlePointerUp(PointerUpEvent event) {
+  void _handlePointerUp(PointerUpEvent event) async {
     if (event.buttons == kMiddleMouseButton) {
       setState(() => _lastMiddleButtonPosition = null);
     }
 
     if (event.kind == PointerDeviceKind.mouse && event.buttons == 0) {
+      final shouldSave = UserSession.instance.autoSaveAnnotations;
+      
+      if (_draggingAnnotation != null && shouldSave) {
+        await AnnotationDatabase.instance.updateAnnotation(_draggingAnnotation!);
+      }
+
       _draggingAnnotation = null;
       _dragStartPosition = null;
+      _activeResizeHandle = null;
+      _originalCorners = null;
     }
   }
 

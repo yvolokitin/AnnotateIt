@@ -1,13 +1,11 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 
 import '../../models/shape/shape.dart';
 import '../../models/annotation.dart';
-//import '../../models/shape/rect_shape.dart';
-//import '../../models/shape/polygon_shape.dart';
-//import '../../models/shape/rotated_rect_shape.dart';
-//import '../../models/shape/circle_shape.dart';
+
+import 'constants.dart';
 
 class CanvasPainter extends CustomPainter {
   final ui.Image image;
@@ -85,7 +83,8 @@ class CanvasPainter extends CustomPainter {
       if (shape != null) {
         final highlightPaint = Paint()
           ..color = Colors.red
-          ..strokeWidth = 4
+          // ..strokeWidth = 4
+          ..strokeWidth = Constants.annotationBorderWidth
           ..style = PaintingStyle.stroke;
         shape.paint(canvas, highlightPaint);
 
@@ -177,8 +176,10 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
 }
 
   void drawCornerHandles(Canvas canvas, List<Offset> corners) {
-    const handleSize = 12.0;
-    const borderWidth = 5.0;
+    final borderWidth = Constants.annotationBorderWidth;
+    final handleSize = Constants.handleSize;
+    // const handleSize = 12.0;
+    // const borderWidth = 5.0;
 
     final fillPaint = Paint()
       ..color = Colors.white

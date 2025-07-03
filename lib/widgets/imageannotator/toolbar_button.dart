@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'toolbar_constants.dart';
+import 'constants.dart';
 
 class ToolbarButton extends StatefulWidget {
   final Widget? icon;
@@ -34,7 +34,7 @@ class _ToolbarButtonState extends State<ToolbarButton> {
     final bool isInteractive = widget.onTap != null && !widget.isDisabled;
     final Color iconColor = widget.isDisabled 
         ? Colors.white38 
-        : (widget.isActive ? Colors.white : ToolbarConstants.iconColor);
+        : (widget.isActive ? Colors.white : Constants.iconColor);
 
     return MouseRegion(
       cursor: isInteractive ? SystemMouseCursors.click : SystemMouseCursors.basic,
@@ -52,24 +52,24 @@ class _ToolbarButtonState extends State<ToolbarButton> {
           message: widget.tooltip ?? '',
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 100),
-            width: ToolbarConstants.buttonSize,
-            height: ToolbarConstants.buttonSize,
-            margin: ToolbarConstants.buttonMargin,
+            width: Constants.buttonSize,
+            height: Constants.buttonSize,
+            margin: Constants.buttonMargin,
             decoration: BoxDecoration(
               color: _isPressed
-                  ? ToolbarConstants.activeBackgroundColor
+                  ? Constants.activeBackgroundColor
                   : widget.isActive
                       ? Colors.grey[850]
                       : _isHovered
                           ? Colors.grey[850]
                           : Colors.transparent,
-              borderRadius: ToolbarConstants.buttonBorderRadius,
+              borderRadius: Constants.buttonBorderRadius,
             ),
             child: Center(
               child: widget.child ?? Icon(
                 (widget.icon as Icon).icon,
                 color: iconColor,
-                size: ToolbarConstants.iconSize,
+                size: Constants.iconSize,
               ),
             ),
           ),

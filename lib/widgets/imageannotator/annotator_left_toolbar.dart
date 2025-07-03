@@ -7,7 +7,7 @@ import '../dialogs/opacity_dialog.dart';
 import 'user_action.dart';
 import 'toolbar_button.dart';
 import 'toolbar_divider.dart';
-import 'toolbar_constants.dart';
+import 'constants.dart';
 
 class AnnotatorLeftToolbar extends StatefulWidget {
   final String type;
@@ -63,9 +63,9 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      width: ToolbarConstants.toolbarWidth,
+      width: Constants.toolbarWidth,
       decoration: BoxDecoration(
-        color: ToolbarConstants.toolbarBackgroundColor,
+        color: Constants.toolbarBackgroundColor,
         border: const Border(
           right: BorderSide(color: Colors.black, width: 2),
         ),
@@ -142,8 +142,8 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             child: widget.showAnnotationNames
                 ? Icon(
                     Icons.text_fields,
-                    color: ToolbarConstants.iconColor,
-                    size: ToolbarConstants.iconSize,
+                    color: Constants.iconColor,
+                    size: Constants.iconSize,
                   )
                 : Stack(
                     alignment: Alignment.center,
@@ -151,7 +151,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                       Icon(
                         Icons.text_fields,
                         color: Colors.white38,
-                        size: ToolbarConstants.iconSize,
+                        size: Constants.iconSize,
                       ),
                       Transform.rotate(
                         angle: -0.7,

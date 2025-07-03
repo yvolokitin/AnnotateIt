@@ -61,6 +61,19 @@ class UserSession {
     _currentUser = user.copyWith(projectSkipDeleteConfirm: skip);
   }
 
+  bool get autoSaveAnnotations {
+    return getUser().autoSaveAnnotations;
+  }
+
+  Future<void> setAutoSaveAnnotations(bool autoSave) async {
+    final user = getUser();
+    await UserDatabase.instance.setAutoSaveAnnotations(
+      userId: user.id!,
+      autoSave: autoSave,
+    );
+    _currentUser = user.copyWith(autoSaveAnnotations: autoSave);
+  }
+
   Future<String> getCurrentUserDatasetFolder() async {
     final path = getUser().datasetFolder;
     final dir = Directory(path);
