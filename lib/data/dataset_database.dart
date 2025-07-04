@@ -49,10 +49,17 @@ class DatasetDatabase {
       }
     }
 
+    final countResult = await db.rawQuery(
+      'SELECT COUNT(*) FROM datasets WHERE projectId = ?',
+      [projectId],
+    );
+    final nextOrder = Sqflite.firstIntValue(countResult) ?? 0;
+
     final now = DateTime.now();
     final dataset = Dataset(
       id: _uuid.v4(),
       projectId: projectId,
+      datasetOrder: nextOrder,
       name: name.trim().isEmpty ? 'Dataset' : name.trim(),
       description: description,
       type: projectType,

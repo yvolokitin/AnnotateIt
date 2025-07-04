@@ -142,6 +142,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     });
   }
 
+  void _handleDefaultLabelSelected(Label? label) {
+    print('!!!!!!!!!!!!!!!!! $label');
+  }
+
   void _handleLabelSelected(Label label) {
     setState(() => selectedLabel = label);
   
@@ -316,6 +320,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             onBack: () => Navigator.pop(context),
             onHelp: () {},
             onAssignedLabel: _handleLabelSelected,
+            onDefaultLabelSelected: _handleDefaultLabelSelected,
           ),
           Expanded(
             child: PageView.builder(
@@ -353,6 +358,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                               cursor: _mouseInsideImage ? cursorIcon : SystemMouseCursors.basic,
                               child: AnnotatorCanvas(
                                 image: image,
+                                mediaItemId: widget.mediaItem.mediaItem.id!,
                                 labels: widget.project.labels ?? [],
                                 annotations: media.annotations,
                                 resetZoomCount: _resetZoomCount,

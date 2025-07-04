@@ -103,6 +103,7 @@ class ProjectDatabase {
       CREATE TABLE datasets (
         id TEXT PRIMARY KEY,
         projectId INTEGER NOT NULL,
+        dataset_order INTEGER DEFAULT 0,
         name TEXT NOT NULL,
         description TEXT,
         type TEXT NOT NULL,
@@ -174,6 +175,7 @@ class ProjectDatabase {
         project_id INTEGER NOT NULL,
         name TEXT NOT NULL,
         color TEXT NOT NULL,
+        is_default INTEGER NOT NULL DEFAULT 0,
         description TEXT,
         createdAt TEXT NOT NULL,
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -228,6 +230,7 @@ Future<Project> createProject(Project project) async {
     final dataset = Dataset(
       id: uuid.v4(),
       projectId: projectId,
+      datasetOrder: 0,
       name: 'Dataset',
       description: 'Default dataset for $projectName',
       type: project.type,
@@ -354,11 +357,18 @@ Future<Project> createProject(Project project) async {
         }
       }
 
+      final countResult = await db.rawQuery(
+        'SELECT COUNT(*) FROM datasets WHERE projectId = ?',
+        [projectId],
+      );
+      final nextOrder = Sqflite.firstIntValue(countResult) ?? 0;
+
       final now = DateTime.now();
       // Create dataset
       final dataset = Dataset(
         id: uuid.v4(),
         projectId: projectId,
+        datasetOrder: nextOrder,
         name: name.trim().isEmpty ? 'Dataset' : name.trim(),
         description: description,
         type: projectType,
@@ -372,32 +382,31 @@ Future<Project> createProject(Project project) async {
         metadata: null,
         createdAt: now,
         updatedAt: now,
+      );
+      await db.insert('datasets', dataset.toMap());
+
+      // If it's a default dataset, update the project record
+      if (isDefault) {
+        await db.update(
+          'projects',
+          {
+            'defaultDatasetId': dataset.id,
+            'lastUpdated': DateTime.now().toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [projectId],
         );
-        await db.insert('datasets', dataset.toMap());
-
-        // If it's a default dataset, update the project record
-        if (isDefault) {
-          await db.update(
-            'projects',
-            {
-              'defaultDatasetId': dataset.id,
-              'lastUpdated': DateTime.now().toIso8601String(),
-            },
-            where: 'id = ?',
-            whereArgs: [projectId],
-          );
-        } else { // else update only lastUpdated timestamp
-          await db.update(
-            'projects',
-            {
-              'lastUpdated': DateTime.now().toIso8601String(),
-            },
-            where: 'id = ?',
-            whereArgs: [projectId],
-          );
-        }
-
-        return dataset;
+      } else { // else update only lastUpdated timestamp
+        await db.update(
+          'projects',
+          {
+            'lastUpdated': DateTime.now().toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [projectId],
+        );
+      }
+      return dataset;
   }
 
   Future<void> updateProjectLastUpdated(int projectId) async {

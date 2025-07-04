@@ -3,6 +3,7 @@ import 'dart:convert';
 class Dataset {
   final String id;
   final int projectId;
+  final int datasetOrder;
   final String name;
   final String description;
   final String type; // detection, classification, segmentation, etc.
@@ -23,6 +24,7 @@ class Dataset {
   Dataset({
     required this.id,
     required this.projectId,
+    required this.datasetOrder,
     required this.name,
     required this.description,
     required this.type,
@@ -36,13 +38,14 @@ class Dataset {
     this.license,
     this.metadata,
     this.updatedAt,
-    this.folders, 
+    this.folders,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'projectId': projectId,
+      'dataset_order': datasetOrder,
       'name': name,
       'description': description,
       'type': type,
@@ -63,6 +66,7 @@ class Dataset {
     return Dataset(
       id: map['id'],
       projectId: map['projectId'],
+      datasetOrder: map['dataset_order'] ?? 0,
       name: map['name'],
       description: map['description'],
       type: map['type'],
@@ -85,6 +89,7 @@ class Dataset {
   Dataset copyWith({
     String? id,
     int? projectId,
+    int? datasetOrder,
     String? name,
     String? description,
     String? type,
@@ -103,6 +108,7 @@ class Dataset {
     return Dataset(
       id: id ?? this.id,
       projectId: projectId ?? this.projectId,
+      datasetOrder: datasetOrder ?? this.datasetOrder,
       name: name ?? this.name,
       description: description ?? this.description,
       type: type ?? this.type,
@@ -123,23 +129,24 @@ class Dataset {
   @override
   String toString() {
     return 'Dataset(\n'
-      '  id: $id,\n'
-      '  projectId: $projectId,\n'
-      '  name: $name,\n'
-      '  description: $description,\n'
-      '  type: $type,\n'
-      '  source: $source,\n'
-      '  format: $format,\n'
-      '  version: $version,\n'
-      '  mediaCount: $mediaCount,\n'
-      '  annotationCount: $annotationCount,\n'
-      '  defaultDataset: $defaultDataset,\n'
-      '  license: $license,\n'
-      '  metadata: $metadata,\n'
-      '  createdAt: $createdAt,\n'
-      '  updatedAt: $updatedAt\n'
-      '  folders: $folders\n'
-      ')';
+        '  id: $id,\n'
+        '  projectId: $projectId,\n'
+        '  datasetOrder: $datasetOrder,\n'
+        '  name: $name,\n'
+        '  description: $description,\n'
+        '  type: $type,\n'
+        '  source: $source,\n'
+        '  format: $format,\n'
+        '  version: $version,\n'
+        '  mediaCount: $mediaCount,\n'
+        '  annotationCount: $annotationCount,\n'
+        '  defaultDataset: $defaultDataset,\n'
+        '  license: $license,\n'
+        '  metadata: $metadata,\n'
+        '  createdAt: $createdAt,\n'
+        '  updatedAt: $updatedAt,\n'
+        '  folders: $folders\n'
+        ')';
   }
 
   static dynamic _tryParseJson(String value) {

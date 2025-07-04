@@ -81,6 +81,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     fetchedDatasets.add(Dataset(
       id: 'add_new_tab',
       projectId: widget.project.id!,
+      datasetOrder: 0,
       name: '+',
       description: '',
       type: widget.project.type,

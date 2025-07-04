@@ -19,7 +19,7 @@ class AnnotatorTopToolbar extends StatefulWidget {
     required this.onBack,
     required this.onHelp,
     required this.onAssignedLabel,
-    this.onDefaultLabelSelected,
+    required this.onDefaultLabelSelected,
   });
 
   @override
@@ -42,8 +42,8 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     bool detection = widget.project.type.toLowerCase().contains('detection');
-    // bool classification = widget.project.type.toLowerCase().contains('detection');
-    bool segmentation = widget.project.type.toLowerCase().contains('detection');
+    bool segmentation = widget.project.type.toLowerCase().contains('segmentation');
+    // bool classification = widget.project.type.toLowerCase().contains('classification');
 
     return Container(
       height: 62,

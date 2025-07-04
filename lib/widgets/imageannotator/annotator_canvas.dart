@@ -17,10 +17,12 @@ import 'user_action.dart';
 import 'constants.dart';
 
 class AnnotatorCanvas extends StatefulWidget {
-  final Annotation? selectedAnnotation; 
-  final List<Annotation>? annotations;
-  final UserAction userAction;
   final ui.Image image;
+  final int mediaItemId;
+
+  final List<Annotation>? annotations;
+  final Annotation? selectedAnnotation; 
+  final UserAction userAction;
   final List<Label> labels;
   final Label selectedLabel;
   final int resetZoomCount;
@@ -33,6 +35,7 @@ class AnnotatorCanvas extends StatefulWidget {
 
   const AnnotatorCanvas({
     required this.image,
+    required this.mediaItemId,
     required this.labels,
     required this.annotations,
     required this.resetZoomCount,
@@ -63,6 +66,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
   Annotation? _draggingAnnotation;
   Offset? _dragStartPosition;
+
+  Offset? _drawingStart;
+  Offset? _drawingCurrent;
 
   int? _activeResizeHandle;
   List<Offset>? _originalCorners;
@@ -171,7 +177,15 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         }
       }
 
+    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.bbox_annotation) {
+      inverse.copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      setState(() {
+        _drawingStart = transformed;
+        _drawingCurrent = transformed;
+      });
     }
+
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -188,6 +202,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
     // Left mouse button drag: either resize or move the annotation
     if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.navigation &&
         _draggingAnnotation != null &&
         _dragStartPosition != null) {
       inverse.copyInverse(matrix);
@@ -236,6 +251,17 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         widget.onAnnotationSelected?.call(updated);
       }
     }
+
+    if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.bbox_annotation &&
+        _drawingStart != null) {
+      inverse.copyInverse(matrix);
+      final current = MatrixUtils.transformPoint(inverse, event.localPosition);
+      setState(() {
+        _drawingCurrent = current;
+      });
+    }
+
   }
 
   void _handlePointerUp(PointerUpEvent event) async {
@@ -255,6 +281,43 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       _activeResizeHandle = null;
       _originalCorners = null;
     }
+
+    if (widget.userAction == UserAction.bbox_annotation && _drawingStart != null && _drawingCurrent != null) {
+      final rect = Rect.fromPoints(_drawingStart!, _drawingCurrent!);
+
+      if (rect.width > 4 && rect.height > 4) {
+        final newAnnotation = Annotation(
+          id: DateTime.now().millisecondsSinceEpoch,
+          mediaItemId: widget.mediaItemId,
+          labelId: widget.selectedLabel.id!,
+          annotationType: 'bbox',
+          data: {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          },
+          // annotator: UserSession.instance.getUser().id!,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        setState(() {
+          _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
+          widget.onAnnotationSelected?.call(newAnnotation);
+        });
+
+        widget.onAnnotationUpdated?.call(newAnnotation);
+
+        if (UserSession.instance.autoSaveAnnotations) {
+          await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+        }
+      }
+
+      _drawingStart = null;
+      _drawingCurrent = null;
+    }
+
   }
 
   void _handleTapDown(TapDownDetails details) {

@@ -62,7 +62,7 @@ class CanvasPainter extends CustomPainter {
           shape.paint(canvas, fillPaint);
 
           if (showAnnotationNames) {
-            drawLabel(
+            drawLabelName(
               canvas,
               size,
               annotation.name ?? 'Unknown',
@@ -83,7 +83,6 @@ class CanvasPainter extends CustomPainter {
       if (shape != null) {
         final highlightPaint = Paint()
           ..color = Colors.red
-          // ..strokeWidth = 4
           ..strokeWidth = Constants.annotationBorderWidth
           ..style = PaintingStyle.stroke;
         shape.paint(canvas, highlightPaint);
@@ -201,83 +200,86 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
     return color.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 
-Size drawLabel(
-  Canvas canvas,
-  Size size,
-  String name,
-  Color color,
-  Offset labelPosition, {
-  Offset? shapeConnectionPoint,
-}) {
-  // Text styling
-  final textStyle = TextStyle(
-    color: foregroundColorByLuminance(color),
-    fontFamily: 'Arial',
-    fontSize: 20 / scale,
-    height: 1.0,
-    fontWeight: FontWeight.bold,
-  );
-
-  final textSpan = TextSpan(text: name, style: textStyle);
-  final textPainter = TextPainter(
-    text: textSpan,
-    textDirection: TextDirection.ltr,
-  );
-  textPainter.layout();
-
-  // Padding calculations
-  final horizontalPadding = 8.0 / scale;
-  final verticalPadding = 4.0 / scale;
-
-  // Label box positioning
-  final labelBottomY = labelPosition.dy;
-  final labelTopY = labelBottomY - textPainter.height - (2 * verticalPadding);
-  final labelX = labelPosition.dx - horizontalPadding;
-
-  // Label background rectangle
-  final labelRect = Rect.fromLTWH(
-    labelX,
-    labelTopY,
-    textPainter.width + (2 * horizontalPadding),
-    textPainter.height + (2 * verticalPadding),
-  );
-
-  // Draw connecting line from shape center to label bottom center
-  if (shapeConnectionPoint != null) {
-    final linePaint = Paint()
-      ..color = color
-      ..strokeWidth = 2.0 / scale
-      ..style = PaintingStyle.stroke;
-
-    final labelConnectionPoint = Offset(
-      labelRect.center.dx,
-      labelRect.bottom,
+  Size drawLabelName(
+    Canvas canvas,
+    Size size,
+    String name,
+    Color color,
+    Offset labelPosition, {
+    Offset? shapeConnectionPoint,
+  }) {
+    // Truncate label name if too long
+    final truncatedName = name.length > 13 ? '${name.substring(0, 10)}...' : name;
+  
+      // Text styling
+    final textStyle = TextStyle(
+      color: foregroundColorByLuminance(color),
+      fontFamily: 'Arial',
+      fontSize: 17 / scale,
+      height: 1.0,
+      fontWeight: FontWeight.bold,
     );
 
-    canvas.drawLine(
-      shapeConnectionPoint,
-      labelConnectionPoint,
-      linePaint,
+    final textSpan = TextSpan(text: truncatedName, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
     );
+    textPainter.layout();
+
+    // Padding calculations
+    final horizontalPadding = 9.0 / scale;
+    final verticalPadding = 6.0 / scale;
+
+    // Label box positioning
+    final labelBottomY = labelPosition.dy;
+    final labelTopY = labelBottomY - textPainter.height - (2 * verticalPadding);
+    final labelX = labelPosition.dx - horizontalPadding;
+
+    // Label background rectangle
+    final labelRect = Rect.fromLTWH(
+      labelX,
+      labelTopY,
+      textPainter.width + (2 * horizontalPadding),
+      textPainter.height + (2 * verticalPadding),
+    );
+
+    // Draw connecting line from shape center to label bottom center
+    if (shapeConnectionPoint != null) {
+      final linePaint = Paint()
+        ..color = color
+        ..strokeWidth = 2.0 / scale
+        ..style = PaintingStyle.stroke;
+
+      final labelConnectionPoint = Offset(
+        labelRect.center.dx,
+        labelRect.bottom,
+      );
+
+      canvas.drawLine(
+        shapeConnectionPoint,
+        labelConnectionPoint,
+        linePaint,
+      );
+    }
+
+    // Draw label background
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(labelRect, Radius.circular(4.0 / scale)),
+      Paint()..color = color,
+    );
+
+    // Draw text
+    textPainter.paint(
+      canvas,
+      Offset(
+        labelX + horizontalPadding,
+        labelTopY + verticalPadding,
+      ),
+    );
+
+    return labelRect.size;
   }
-
-  // Draw label background
-  canvas.drawRRect(
-    RRect.fromRectAndRadius(labelRect, Radius.circular(4.0 / scale)),
-    Paint()..color = color,
-  );
-
-  // Draw text
-  textPainter.paint(
-    canvas,
-    Offset(
-      labelX + horizontalPadding,
-      labelTopY + verticalPadding,
-    ),
-  );
-
-  return labelRect.size;
-}
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
