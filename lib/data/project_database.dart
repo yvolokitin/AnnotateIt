@@ -2,7 +2,10 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
-import 'package:path/path.dart';
+// import 'package:path/path.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import '../models/project.dart';
 import '../models/dataset.dart';
@@ -27,8 +30,8 @@ class ProjectDatabase {
 
   Future<Database> _initDB(String fileName) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
-    return await openDatabase(path, version: 1, onCreate: _createProjectDBTables);
+    final returnPath = path.join(dbPath, fileName);
+    return await openDatabase(returnPath, version: 1, onCreate: _createProjectDBTables);
   }
 
   Future<void> _createProjectDBTables(Database db, int version) async {
@@ -509,6 +512,19 @@ Future<Project> createProject(Project project) async {
     }
   }
 
+Future<String> _getDefaultAnnotationRootPath() async {
+  final directory = await getApplicationDocumentsDirectory();
+  final returnPath = path.join(directory.path, 'AnnotateItApp');
+
+  final dir = Directory(returnPath);
+  if (!(await dir.exists())) {
+    await dir.create(recursive: true);
+  }
+
+  return returnPath;
+}
+
+/*
   Future<String> _getDefaultAnnotationRootPath() async {
     if (Platform.isWindows) {
       return 'C:\\Users\\${Platform.environment['USERNAME']}\\Documents\\AnnotateItApp';
@@ -520,6 +536,7 @@ Future<Project> createProject(Project project) async {
       return '/AnnotateItApp';
     }
   }
+*/
 
   Future<int> getProjectCount() async {
     final db = await instance.database;
