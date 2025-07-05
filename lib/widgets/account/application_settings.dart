@@ -97,38 +97,37 @@ class ApplicationSettings extends StatelessWidget {
     );
   }
 
-Widget _buildSwitch(String title, bool value, ValueChanged<bool> onChanged) {
-  const redThumb = Color(0xFFFF0000);
-  const redTrack = Color(0x3FFF0000);
-
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Expanded(
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.normal,
-            color: Colors.white70,
+  Widget _buildSwitch(String title, bool value, ValueChanged<bool> onChanged) {
+    const redThumb = Color(0xFFFF0000);
+    const redTrack = Color(0x3FFF0000);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.normal,
+              color: Colors.white70,
+            ),
           ),
         ),
-      ),
-      Switch(
-        value: value,
-        onChanged: onChanged,
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) return redThumb;
-          return Colors.grey;
-        }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) return redTrack;
-          return Colors.grey.shade700;
-        }),
-      ),
-    ],
-  );
-}
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          thumbColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) return redThumb;
+            return Colors.grey;
+          }),
+          trackColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) return redTrack;
+            return Colors.grey.shade700;
+          }),
+        ),
+      ],
+    );
+  }
 
   Widget _buildSwitchWithNote({
     required String title,

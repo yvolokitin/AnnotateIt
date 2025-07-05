@@ -27,13 +27,15 @@ class ProjectTileState extends State<ProjectTile> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // Adaptive sizes
-    final nameFontSize = screenWidth < 600 ? 18.0 : screenWidth < 1000 ? 20.0 : 24.0;
-    final typeFontSize = screenWidth < 600 ? 16.0 : screenWidth < 1000 ? 18.0 : 22.0;
-    final dateFontSize = screenWidth < 600 ? 14.0 : screenWidth < 1000 ? 16.0 : 18.0;
-    final verticalSpacing = screenWidth < 600 ? 2.0 : 4.0;
-    final labelFontSize = screenWidth < 600 ? 14.0 : 16.0;
 
+    final double thumbnailHeight = screenWidth > 1100 ? 180 : screenWidth > 860 ? 160 : 140;
+    final double thumbnailWidth = screenWidth > 1100 ? 350 : screenWidth > 860 ? 280 : 180;
+    final double nameFontSize = screenWidth > 1100 ? 24.0 : screenWidth > 860 ? 20.0 : 18.0;
+    final double typeFontSize = screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 16.0;
+    final double dateFontSize = screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0;
+    final double verticalSpacing = screenWidth > 1100 ? 6.0 : screenWidth > 860 ? 4.0 : 2.0;
+    final double labelFontSize = screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0;
+  
     return MouseRegion(
       // Change cursor to hand when hovering
       cursor: SystemMouseCursors.click,
@@ -41,13 +43,12 @@ class ProjectTileState extends State<ProjectTile> {
       onExit: (_) => setState(() => _isHovered = false), // Hover end
 
       child: GestureDetector(
-        onTap: widget.onTap ??
-          () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
-
+        // onTap: widget.onTap ?? () => print("Project '${widget.project.name}' clicked, but no onTap handler provided"),
+        onTap: widget.onTap,
         child: Card(
-          color: Colors.grey.shade800, // Dark theme background
+          color: Colors.grey.shade800,
           margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          elevation: _isHovered ? 8 : 3, // Add shadow on hover
+          elevation: _isHovered ? 8 : 3,
           shape: RoundedRectangleBorder(
             side: BorderSide(
               color: _isHovered ? Colors.red : Colors.transparent,
@@ -56,15 +57,15 @@ class ProjectTileState extends State<ProjectTile> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(0.0), // ensure image will be 100% in height and weight
+            padding: const EdgeInsets.all(0.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Thumbnail (Left Side)
                 if (screenWidth >= 650)
                   Container(
-                    width: 350,
-                    height: 180,
+                    width: thumbnailWidth, // 350,
+                    height: thumbnailHeight, // 180,
                     decoration: BoxDecoration(
                       color: Colors.grey[850], // Background color
                       borderRadius: BorderRadius.only(

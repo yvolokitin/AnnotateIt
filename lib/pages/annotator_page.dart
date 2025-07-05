@@ -107,7 +107,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   void _handlePageChange(int index) {
     setState(() {
       _currentIndex = index;
-      _selectedAnnotation = null; // Clear selection when changing images
+      // Clear selection when changing images
+      _selectedAnnotation = null;
     });
     _preloadAdjacentImages(index);
   }

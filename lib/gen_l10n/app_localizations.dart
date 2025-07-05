@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get saveButton;
 
+  /// No description provided for @helpButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get helpButton;
+
   /// No description provided for @closeButton.
   ///
   /// In en, this message translates to:
@@ -699,6 +705,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'this annotation'**
   String get unnamedAnnotation;
+
+  /// No description provided for @accountStorage_importFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Datasets import Folder'**
+  String get accountStorage_importFolderTitle;
+
+  /// No description provided for @accountStorage_thumbnailsFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnails Folder'**
+  String get accountStorage_thumbnailsFolderTitle;
+
+  /// No description provided for @accountStorage_exportFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Datasets export Folder'**
+  String get accountStorage_exportFolderTitle;
+
+  /// No description provided for @accountStorage_folderTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get accountStorage_folderTooltip;
+
+  /// No description provided for @accountStorage_helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Help'**
+  String get accountStorage_helpTitle;
+
+  /// No description provided for @accountStorage_helpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.'**
+  String get accountStorage_helpMessage;
+
+  /// No description provided for @accountStorage_helpTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n'**
+  String get accountStorage_helpTips;
 }
 
 class _AppLocalizationsDelegate

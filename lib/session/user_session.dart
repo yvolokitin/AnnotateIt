@@ -28,8 +28,6 @@ import '../data/user_database.dart';
 /// final currentUser = UserSession.instance.getUser();
 /// print(currentUser.email);
 /// ```
-///
-/// Throws if [getUser] is called before [setUser] has been used.
 class UserSession {
   final _logger = Logger('UserSession');
 
@@ -74,12 +72,22 @@ class UserSession {
     _currentUser = user.copyWith(autoSaveAnnotations: autoSave);
   }
 
-  Future<String> getCurrentUserDatasetFolder() async {
-    final path = getUser().datasetFolder;
+  Future<String> getCurrentUserDatasetImportFolder() async {
+    final path = getUser().datasetImportFolder;
     final dir = Directory(path);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
-      _logger.info('Created dataset folder: $path');
+      _logger.info('Created dataset import folder: $path');
+    }
+    return path;
+  }
+
+  Future<String> getCurrentUserDatasetExportFolder() async {
+    final path = getUser().datasetExportFolder;
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      _logger.info('Created dataset export folder: $path');
     }
     return path;
   }
@@ -92,6 +100,33 @@ class UserSession {
       _logger.info('Created thumbnail folder: $path');
     }
     return path;
+  }
+
+  Future<void> setCurrentUserDatasetImportFolder(String path) async {
+    final user = getUser();
+    await UserDatabase.instance.update(
+      user.copyWith(datasetImportFolder: path),
+    );
+    _currentUser = user.copyWith(datasetImportFolder: path);
+    _logger.info('Updated dataset import folder to: $path');
+  }
+
+  Future<void> setCurrentUserDatasetExportFolder(String path) async {
+    final user = getUser();
+    await UserDatabase.instance.update(
+      user.copyWith(datasetExportFolder: path),
+    );
+    _currentUser = user.copyWith(datasetExportFolder: path);
+    _logger.info('Updated dataset export folder to: $path');
+  }
+
+  Future<void> setCurrentUserThumbnailFolder(String path) async {
+    final user = getUser();
+    await UserDatabase.instance.update(
+      user.copyWith(thumbnailFolder: path),
+    );
+    _currentUser = user.copyWith(thumbnailFolder: path);
+    _logger.info('Updated thumbnail folder to: $path');
   }
 
   void clear() {

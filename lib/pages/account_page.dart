@@ -20,8 +20,6 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
   late TabController _tabController;
   User? _user;
   bool _loading = true;
-  bool _isEditingProfile = false;
-  bool _isEditingStorage = false;
   final _logger = Logger('AccountPage');
 
   @override
@@ -34,16 +32,21 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
   Future<void> _loadUser() async {
     var user = await UserDatabase.instance.getUser();
 
-    final datasetPath = await UserSession.instance.getCurrentUserDatasetFolder();
+    final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
+    final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
     final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
 
-    if (user != null && (user.datasetFolder.isEmpty || user.thumbnailFolder.isEmpty)) {
+    if (user != null &&
+        (user.datasetImportFolder.isEmpty ||
+         user.datasetExportFolder.isEmpty ||
+         user.thumbnailFolder.isEmpty)) {
       user = user.copyWith(
-        datasetFolder: user.datasetFolder.isEmpty ? datasetPath : user.datasetFolder,
+        datasetImportFolder: user.datasetImportFolder.isEmpty ? importPath : user.datasetImportFolder,
+        datasetExportFolder: user.datasetExportFolder.isEmpty ? exportPath : user.datasetExportFolder,
         thumbnailFolder: user.thumbnailFolder.isEmpty ? thumbnailPath : user.thumbnailFolder,
       );
       await UserDatabase.instance.update(user);
-      _logger.info('Updated user with default dataset and thumbnail folders.');
+      _logger.info('Updated user with default import/export/thumbnail folders.');
     }
 
     setState(() {
@@ -69,7 +72,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
     final screenWidth = MediaQuery.of(context).size.width;
 
     if (_loading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -83,7 +86,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                 height: 95,
                 width: double.infinity,
                 color: const Color(0xFF11191F),
-                child: Text(""),
+                child: const Text(""),
               ),
             Expanded(
               child: Padding(
@@ -105,10 +108,10 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.person_outline),
-                              if (screenWidth > 700)...[
-                                  SizedBox(width: 8),
-                                  const Text('User'),
+                              const Icon(Icons.person_outline),
+                              if (screenWidth > 700) ...[
+                                const SizedBox(width: 8),
+                                const Text('User'),
                               ],
                               if (screenWidth > 1500)
                                 const Text(' Profile'),
@@ -119,13 +122,13 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.folder_open),
-                              if (screenWidth > 700 && screenWidth <= 1500)...[
-                                  SizedBox(width: 8),
-                                  const Text('Storage'),
+                              const Icon(Icons.folder_open),
+                              if (screenWidth > 700 && screenWidth <= 1500) ...[
+                                const SizedBox(width: 8),
+                                const Text('Storage'),
                               ],
-                              if (screenWidth > 1500)...[
-                                SizedBox(width: 8),
+                              if (screenWidth > 1500) ...[
+                                const SizedBox(width: 8),
                                 const Text('Device Storage'),
                               ],
                             ],
@@ -135,13 +138,13 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.settings, ),
-                              if (screenWidth > 700 && screenWidth <= 1500)...[
-                                  SizedBox(width: 8),
-                                  const Text('Settings'),
+                              const Icon(Icons.settings),
+                              if (screenWidth > 700 && screenWidth <= 1500) ...[
+                                const SizedBox(width: 8),
+                                const Text('Settings'),
                               ],
-                              if (screenWidth > 1500)...[
-                                SizedBox(width: 8),
+                              if (screenWidth > 1500) ...[
+                                const SizedBox(width: 8),
                                 const Text('Application Settings'),
                               ],
                             ],
@@ -153,12 +156,9 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          UserProfile(),
+                          const UserProfile(),
                           AccountStorage(
                             user: _user!,
-                            isEditing: _isEditingStorage,
-                            onToggleEdit: () =>
-                                setState(() => _isEditingStorage = !_isEditingStorage),
                             onUserChange: (updated) => setState(() {
                               _user = updated;
                               _updateUser();

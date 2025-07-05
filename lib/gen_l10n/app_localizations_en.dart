@@ -18,6 +18,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveButton => 'Save';
 
   @override
+  String get helpButton => 'Help';
+
+  @override
   String get closeButton => 'Close';
 
   @override
@@ -355,4 +358,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unnamedAnnotation => 'this annotation';
+
+  @override
+  String get accountStorage_importFolderTitle => 'Datasets import Folder';
+
+  @override
+  String get accountStorage_thumbnailsFolderTitle => 'Thumbnails Folder';
+
+  @override
+  String get accountStorage_exportFolderTitle => 'Datasets export Folder';
+
+  @override
+  String get accountStorage_folderTooltip => 'Choose folder';
+
+  @override
+  String get accountStorage_helpTitle => 'Storage Help';
+
+  @override
+  String get accountStorage_helpMessage =>
+      'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.';
+
+  @override
+  String get accountStorage_helpTips =>
+      'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n';
 }

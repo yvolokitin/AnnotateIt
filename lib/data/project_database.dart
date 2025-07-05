@@ -42,7 +42,8 @@ class ProjectDatabase {
         lastName TEXT NOT NULL,
         email TEXT NOT NULL,
         iconPath TEXT,
-        datasetFolder TEXT,
+        datasetImportFolder TEXT,
+        datasetExportFolder TEXT,
         thumbnailFolder TEXT,
         themeMode TEXT NOT NULL,
         language TEXT NOT NULL,
@@ -57,27 +58,30 @@ class ProjectDatabase {
         datasetEnableDuplicate INTEGER NOT NULL DEFAULT 1,
         datasetEnableDelete INTEGER NOT NULL DEFAULT 1,
         annotationAllowImageCopy INTEGER NOT NULL DEFAULT 1,
-        annotationOpacity REAL NOT NULL DEFAULT 0.35        
+        annotationOpacity REAL NOT NULL DEFAULT 0.35
       )
     ''');
 
     final rootPath = await _getDefaultAnnotationRootPath();
-    final datasetPath = '$rootPath/datasets';
+    final datasetImportPath = '$rootPath/datasets';
+    final datasetExportPath = '$rootPath/datasets';
     final thumbnailPath = '$rootPath/thumbnails';
 
     // Create folders if they don't exist
-    await Directory(datasetPath).create(recursive: true);
+    await Directory(datasetImportPath).create(recursive: true);
+    await Directory(datasetExportPath).create(recursive: true);
     await Directory(thumbnailPath).create(recursive: true);
-    
-    _log.info('_createProjectDBTables:: Created $datasetPath and $thumbnailPath folders');
-    
+
+    _log.info('_createProjectDBTables:: Created $datasetImportPath, $datasetExportPath, and $thumbnailPath folders');
+
     final now = DateTime.now().toIso8601String();
     await db.insert('users', {
       'firstName': 'Captain',
       'lastName': 'Annotator',
       'email': 'captain@labelship.local',
       'iconPath': '',
-      'datasetFolder': datasetPath,
+      'datasetImportFolder': datasetImportPath,
+      'datasetExportFolder': datasetExportPath,
       'thumbnailFolder': thumbnailPath,
       'themeMode': 'dark',
       'language': 'en',
@@ -85,6 +89,14 @@ class ProjectDatabase {
       'showTips': 1,
       'createdAt': now,
       'updatedAt': now,
+      'autoSaveAnnotations': 1,
+      'projectSkipDeleteConfirm': 0,
+      'projectShowNoLabels': 1,
+      'projectShowImportWarning': 1,
+      'datasetEnableDuplicate': 1,
+      'datasetEnableDelete': 1,
+      'annotationAllowImageCopy': 1,
+      'annotationOpacity': 0.35,
     });
 
     await db.execute('''

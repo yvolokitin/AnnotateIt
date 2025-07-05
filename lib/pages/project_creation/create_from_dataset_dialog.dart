@@ -73,7 +73,7 @@ Future<void> _processZipArchive(File file) async {
 
   try {
     final storagePath = await getDefaultStoragePath(() =>
-        UserSession.instance.getCurrentUserDatasetFolder());
+        UserSession.instance.getCurrentUserDatasetImportFolder());
 
     final fileSize = await file.length();
     final bool useIsolate = fileSize > DATASET_ISOLATE_THRESHOLD;

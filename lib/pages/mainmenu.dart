@@ -35,9 +35,9 @@ class MainPageState extends State<MainPage> {
         // 16+ inches screens
         bool isLargeScreen = screenWidth >= 1600;
         // 13-16 inches -> tablets and small laptops
-        bool isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
+        bool isMediumScreen = screenWidth >= 720 && screenWidth < 1600;
         // less than 13 inches -> mobile devices
-        bool isSmallScreen = screenWidth < 1200;
+        bool isSmallScreen = screenWidth < 720;
 
         return Scaffold(
           key: _scaffoldKey,
