@@ -19,6 +19,7 @@ class DatasetAnnotationImporter {
   DatasetAnnotationImporter({required this.annotationDb});
 
   Future<int> addAnnotationsToProjectFromDataset({
+    required String projectType,
     required List<Label> projectLabels,
     required String datasetPath,
     required String format,
@@ -29,6 +30,7 @@ class DatasetAnnotationImporter {
     switch (format.toLowerCase()) {
       case 'coco':
         return await COCOParser.parse(
+          projectType: projectType,
           projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,

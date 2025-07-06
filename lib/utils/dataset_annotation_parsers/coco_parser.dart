@@ -10,7 +10,9 @@ import '../../data/annotation_database.dart';
 class COCOParser {
   static final Logger _logger = Logger('COCOParser');
 
+  /// Parses COCO-format annotations and inserts them into the annotation database.
   static Future<int> parse({
+    required String projectType,
     required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
@@ -50,11 +52,14 @@ class COCOParser {
       }
     }
 
+    // Build image_id -> file_name map
     final imageIdToFileName = {
       for (var img in images) img['id'] as int: img['file_name'] as String,
     };
 
+    final projectTypeLower = projectType.toLowerCase();
     int count = 0;
+
     for (var ann in annotations) {
       final imageId = ann['image_id'] as int?;
       final fileName = imageId != null ? imageIdToFileName[imageId] : null;
@@ -63,7 +68,22 @@ class COCOParser {
         continue;
       }
 
-      final mediaItem = mediaItemsMap[fileName];
+      // Try exact match
+      MediaItem? mediaItem = mediaItemsMap[fileName];
+
+      // Fallback: try to find by endsWith match (ignoring folder paths)
+      if (mediaItem == null) {
+        final possibleMatches = mediaItemsMap.entries.where(
+          (entry) => entry.key.toLowerCase().endsWith(fileName.toLowerCase()),
+        );
+
+        if (possibleMatches.isNotEmpty) {
+          final match = possibleMatches.first;
+          mediaItem = match.value;
+          _logger.fine('[COCO] Fuzzy match found for "$fileName" -> "${match.key}"');
+        }
+      }
+
       if (mediaItem == null) {
         _logger.warning('[COCO] mediaItem for "$fileName" not found in mediaItemsMap');
         continue;
@@ -76,28 +96,56 @@ class COCOParser {
         continue;
       }
 
-      final bbox = ann['bbox'] as List<dynamic>?;
-      if (bbox == null || bbox.length < 4) {
-        _logger.warning('[COCO] invalid or missing bbox for annotation in image $fileName');
-        continue;
-      }
+      // Decide how to insert annotation based on project type
+      if (projectTypeLower.contains('segmentation')) {
+        final segmentation = ann['segmentation'];
+        final hasValidPolygon = segmentation is List && segmentation.isNotEmpty;
 
-      await annotationDb.insertAnnotation(Annotation(
-        mediaItemId: mediaItem.id!,
-        labelId: labelId,
-        annotationType: 'bbox',
-        data: {
-          'x': bbox[0],
-          'y': bbox[1],
-          'width': bbox[2],
-          'height': bbox[3],
-        },
-        confidence: (ann['score'] as num?)?.toDouble(),
-        annotatorId: annotatorId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ));
-      count++;
+        if (hasValidPolygon) {
+          await annotationDb.insertAnnotation(Annotation(
+            mediaItemId: mediaItem.id!,
+            labelId: labelId,
+            annotationType: 'polygon',
+            data: {
+              'points': List<num>.from(segmentation.first), // Use first polygon
+            },
+            confidence: (ann['score'] as num?)?.toDouble(),
+            annotatorId: annotatorId,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ));
+          _logger.finer('[COCO] Inserted polygon annotation for "$fileName"');
+          count++;
+        } else {
+          _logger.warning('[COCO] Missing or invalid segmentation for image $fileName — skipping');
+        }
+      } else if (projectTypeLower.contains('detection')) {
+        final bbox = ann['bbox'] as List<dynamic>?;
+        if (bbox == null || bbox.length < 4) {
+          _logger.warning('[COCO] Invalid or missing bbox for detection project: image $fileName');
+          continue;
+        }
+
+        await annotationDb.insertAnnotation(Annotation(
+          mediaItemId: mediaItem.id!,
+          labelId: labelId,
+          annotationType: 'bbox',
+          data: {
+            'x': bbox[0],
+            'y': bbox[1],
+            'width': bbox[2],
+            'height': bbox[3],
+          },
+          confidence: (ann['score'] as num?)?.toDouble(),
+          annotatorId: annotatorId,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+        _logger.finer('[COCO] Inserted bbox annotation for "$fileName"');
+        count++;
+      } else {
+        _logger.warning('[COCO] Unknown projectType "$projectType" — skipping annotation for $fileName');
+      }
     }
 
     _logger.info('[COCO] Added $count annotations from ${annotationsFile.path}');
