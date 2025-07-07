@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:math';
+
 import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
 
@@ -6,11 +8,14 @@ import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
 import '../../data/annotation_database.dart';
+import '../../data/labels_database.dart';
 
 class VOCParser {
   static final Logger _logger = Logger('VOCParser');
+  static final Random _random = Random();
 
   static Future<int> parse({
+    required String projectType,
     required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
@@ -24,7 +29,13 @@ class VOCParser {
       return 0;
     }
 
+    final Map<String, Label> labelNameMap = {
+      for (final label in projectLabels) label.name.toLowerCase(): label
+    };
+
+    final projectTypeLower = projectType.toLowerCase();
     int addedCount = 0;
+
     final files = annotationsDir
         .listSync()
         .whereType<File>()
@@ -51,34 +62,58 @@ class VOCParser {
 
         if (nameElements.isEmpty || bndboxElements.isEmpty) continue;
 
+        final labelName = nameElements.first.text.toLowerCase();
+        Label? label = labelNameMap[labelName];
+
+        if (label == null || label.id == null) {
+          _logger.warning('[VOC] Unknown label "$labelName". Skipping object in $filename');
+          continue;
+        }
+
+        // Assign random color if needed
+        if (label.color == '#000000') {
+          final newColor = _randomHexColor();
+          label = label.copyWith(color: newColor);
+          await LabelsDatabase.instance.updateLabel(label);
+          _logger.fine('[VOC] Assigned color $newColor to label "$labelName"');
+        }
+
         final bndbox = bndboxElements.first;
         final xmin = double.tryParse(bndbox.findElements('xmin').first.text) ?? 0;
         final ymin = double.tryParse(bndbox.findElements('ymin').first.text) ?? 0;
         final xmax = double.tryParse(bndbox.findElements('xmax').first.text) ?? 0;
         final ymax = double.tryParse(bndbox.findElements('ymax').first.text) ?? 0;
 
-        final annotation = Annotation(
-          mediaItemId: mediaItem.id!,
-          labelId: null, // optional: map label name to label ID
-          annotationType: 'bbox',
-          data: {
-            'x': xmin,
-            'y': ymin,
-            'width': xmax - xmin,
-            'height': ymax - ymin,
-          },
-          confidence: null,
-          annotatorId: annotatorId,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        if (projectTypeLower.contains('detection')) {
+          final annotation = Annotation(
+            mediaItemId: mediaItem.id!,
+            labelId: label.id!,
+            annotationType: 'bbox',
+            data: {
+              'x': xmin,
+              'y': ymin,
+              'width': xmax - xmin,
+              'height': ymax - ymin,
+            },
+            confidence: null,
+            annotatorId: annotatorId,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
 
-        await annotationDb.insertAnnotation(annotation);
-        addedCount++;
+          await annotationDb.insertAnnotation(annotation);
+          addedCount++;
+        } else {
+          _logger.warning('[VOC] Skipping non-detection object in $filename');
+        }
       }
     }
 
     _logger.info('[VOC] Added $addedCount annotations from ${annotationsDir.path}');
     return addedCount;
+  }
+
+  static String _randomHexColor() {
+    return '#${_random.nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
   }
 }

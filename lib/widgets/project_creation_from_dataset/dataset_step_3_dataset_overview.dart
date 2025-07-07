@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/archive.dart';
 
 import 'dataset_dialog_show_all_labels.dart';
+import '../../../models/archive.dart';
 
 class StepDatasetOverview extends StatelessWidget {
   final Archive archive;
-
   const StepDatasetOverview({super.key, required this.archive});
 
   @override
@@ -21,30 +20,27 @@ class StepDatasetOverview extends StatelessWidget {
             children: [
               _buildCard(
                 context,
-                "Dataset Name and Path",
+                Icon(Icons.folder_copy_outlined, color: Colors.redAccent, size: 30),
+                "Dataset name, path, type and format(s)",
                 [
                   _buildRow(context, "ZIP Archive file name", archive.zipFileName),
                   _buildRow(context, "ZIP Archive Path", archive.datasetPath),
                   _buildRow(context, "Number of files in ZIP Archive", archive.mediaCount.toString()),
-                ],
-              ),
-              _buildCard(
-                context,
-                "Dataset Type and Format",
-                [
                   _buildRow(context, "Dataset Format", archive.datasetFormat),
                   _buildTaskTypesRow(context, archive.taskTypes),
                 ],
               ),
+
               _buildCard(
                 context,
-                "Dataset Annotations",
+                Icon(Icons.new_label_outlined, color: Colors.redAccent, size: 30),
+                "Dataset Annotations and Labels",
                 [
                   _buildRow(context, "Number of Annotated Files", archive.annotatedFilesCount.toString()),
                   _buildRow(context, "Number of Annotations", archive.annotationCount.toString()),
+                  _buildLabelsCard(context, "Dataset Labels", archive.labels),
                 ],
               ),
-              _buildLabelsCard(context, "Dataset Labels", archive.labels),
             ],
           ),
         ),
@@ -52,7 +48,7 @@ class StepDatasetOverview extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context, String title, List<Widget> rows) {
+  Widget _buildCard(BuildContext context, Icon icon, String title, List<Widget> rows) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -60,7 +56,7 @@ class StepDatasetOverview extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 280,
+        width: 480,
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
@@ -73,7 +69,7 @@ class StepDatasetOverview extends StatelessWidget {
           ],
         ),
         child: Material(
-          color: Colors.transparent,
+          color: Colors.grey[850], // transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             splashColor: Colors.redAccent.withOpacity(0.2),
@@ -85,8 +81,8 @@ class StepDatasetOverview extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.flutter_dash, color: Colors.redAccent, size: 30),
-                      const SizedBox(width: 10),
+                      icon,
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Text(
                           title,

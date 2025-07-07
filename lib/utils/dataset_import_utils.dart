@@ -20,8 +20,7 @@ class DatasetAnnotationStats {
   });
 }
 
-Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(
-    Directory datasetDir, String datasetType) async {
+Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datasetDir, String datasetType) async {
   int annotationCount = 0;
   final annotatedMediaFiles = <String>{};
   final labels = <String>{};

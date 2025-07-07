@@ -1,18 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 
+import '../../data/annotation_database.dart';
+import '../../data/labels_database.dart';
+
 import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
-import '../../data/annotation_database.dart';
 
 class DatumaroParser {
   static final Logger _logger = Logger('DatumaroParser');
+  static final Random _random = Random();
 
+  /// Parses Datumaro-format annotations and inserts them into the annotation database.
   static Future<int> parse({
+    required String projectType,
     required List<Label> projectLabels,
     required String datasetPath,
     required Map<String, MediaItem> mediaItemsMap,
@@ -49,6 +55,19 @@ class DatumaroParser {
     final content = await annotationFile.readAsString();
     final Map<String, dynamic> data = jsonDecode(content);
 
+    // Load colors from mask.colormap
+    final Map<int, String> labelColors = {};
+    final colormap = data['categories']?['mask']?['colormap'];
+    if (colormap is List) {
+      for (final entry in colormap) {
+        final id = entry['label_id'];
+        final r = entry['r'], g = entry['g'], b = entry['b'];
+        if (id != null && r != null && g != null && b != null) {
+          labelColors[id] = '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+        }
+      }
+    }
+
     final Map<int, Label> labelIndexMap = {
       for (int i = 0; i < projectLabels.length; i++) i: projectLabels[i]
     };
@@ -59,10 +78,9 @@ class DatumaroParser {
     int addedCount = 0;
     final Map<int, int> labelCount = {};
     final DateTime timestamp = DateTime.now();
+    final projectTypeLower = projectType.toLowerCase();
 
-    void logAndSkip(String message) {
-      _logger.warning('[Datumaro] $message');
-    }
+    void logAndSkip(String msg) => _logger.warning('[Datumaro] $msg');
 
     Future<void> tryAddAnnotation({
       required MediaItem mediaItem,
@@ -81,51 +99,56 @@ class DatumaroParser {
         return;
       }
 
-      final type = ann['type'] ?? 'unknown';
-      final data = ann['data'] ?? ann;
+      // Assign color if missing
+      if (label.color == null || label.color == '#000000') {
+        final hexColor = labelIndex != null && labelColors.containsKey(labelIndex)
+            ? labelColors[labelIndex]!
+            : _randomHexColor();
+        label = label.copyWith(color: hexColor);
+        await LabelsDatabase.instance.updateLabel(label);
+        _logger.fine('[Datumaro] assigned color $hexColor to label "${label.name}"');
+      }
 
-      await annotationDb.insertAnnotation(
-        Annotation(
+      final type = ann['type'] ?? 'unknown';
+
+      if (projectTypeLower.contains('detection') && type == 'bbox') {
+        final data = ann['data'] ?? ann;
+        await annotationDb.insertAnnotation(Annotation(
           id: null,
           mediaItemId: mediaItem.id!,
-          labelId: label.id,
-          annotationType: type,
+          labelId: label.id!,
+          annotationType: 'bbox',
           data: data,
-          confidence: (ann['confidence'] != null)
-              ? (ann['confidence'] as num).toDouble()
-              : null,
+          confidence: (ann['confidence'] as num?)?.toDouble(),
           annotatorId: annotatorId,
           createdAt: timestamp,
           updatedAt: timestamp,
-        ),
-      );
-
-      labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
-      addedCount++;
+        ));
+        addedCount++;
+        labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
+      } else if (projectTypeLower.contains('segmentation') && type == 'polygon') {
+        final data = ann['points'] ?? ann['data'] ?? ann;
+        await annotationDb.insertAnnotation(Annotation(
+          id: null,
+          mediaItemId: mediaItem.id!,
+          labelId: label.id!,
+          annotationType: 'polygon',
+          data: {'points': data},
+          confidence: (ann['confidence'] as num?)?.toDouble(),
+          annotatorId: annotatorId,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        ));
+        addedCount++;
+        labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
+      } else {
+        logAndSkip('Skipped annotation of type "$type" in ${mediaItem.filePath} for projectType "$projectType"');
+      }
     }
 
-    if (data.containsKey('annotations')) {
-      final annotations = data['annotations'];
-      if (annotations is Map<String, dynamic>) {
-        for (final entry in annotations.entries) {
-          final imageName = entry.key;
-          final mediaItem = mediaItemsMap[p.basename(imageName).toLowerCase()];
-          if (mediaItem == null) {
-            logAndSkip('image "$imageName" not found in mediaItems. Skipping.');
-            continue;
-          }
-
-          final annotationList = entry.value;
-          if (annotationList is List) {
-            for (final ann in annotationList) {
-              if (ann is Map<String, dynamic>) {
-                await tryAddAnnotation(mediaItem: mediaItem, ann: ann);
-              }
-            }
-          }
-        }
-      }
-    } else if (data.containsKey('items')) {
+    /// Process annotations based on structure
+    if (data.containsKey('items')) {
+      // Preferred format
       final items = data['items'];
       if (items is List) {
         for (final item in items) {
@@ -150,8 +173,30 @@ class DatumaroParser {
           }
         }
       }
+    } else if (data.containsKey('annotations')) {
+      // Older format
+      final annotations = data['annotations'];
+      if (annotations is Map<String, dynamic>) {
+        for (final entry in annotations.entries) {
+          final imageName = entry.key;
+          final mediaItem = mediaItemsMap[p.basename(imageName).toLowerCase()];
+          if (mediaItem == null) {
+            logAndSkip('image "$imageName" not found in mediaItems. Skipping.');
+            continue;
+          }
+
+          final annotationList = entry.value;
+          if (annotationList is List) {
+            for (final ann in annotationList) {
+              if (ann is Map<String, dynamic>) {
+                await tryAddAnnotation(mediaItem: mediaItem, ann: ann);
+              }
+            }
+          }
+        }
+      }
     } else {
-      _logger.warning('[Datumaro] unknown format: missing "annotations" or "items" key');
+      _logger.warning('[Datumaro] unknown format: missing "items" or "annotations" key');
     }
 
     for (final entry in labelCount.entries) {
@@ -160,5 +205,9 @@ class DatumaroParser {
 
     _logger.info('[Datumaro] added $addedCount annotations from ${annotationFile.path}');
     return addedCount;
+  }
+
+  static String _randomHexColor() {
+    return '#${_random.nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
   }
 }

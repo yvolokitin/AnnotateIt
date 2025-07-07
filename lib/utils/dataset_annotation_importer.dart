@@ -39,8 +39,20 @@ class DatasetAnnotationImporter {
           annotatorId: annotatorId,
         );
 
+      case 'datumaro':
+        return await DatumaroParser.parse(
+          projectType: projectType,
+          projectLabels: projectLabels,
+          datasetPath: datasetPath,
+          mediaItemsMap: mediaItemsMap,
+          annotationDb: annotationDb,
+          projectId: projectId,
+          annotatorId: annotatorId,
+        );
+
       case 'yolo':
         return await YOLOParser.parse(
+          projectType: projectType,
           projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
@@ -51,16 +63,7 @@ class DatasetAnnotationImporter {
 
       case 'voc':
         return await VOCParser.parse(
-          projectLabels: projectLabels,
-          datasetPath: datasetPath,
-          mediaItemsMap: mediaItemsMap,
-          annotationDb: annotationDb,
-          projectId: projectId,
-          annotatorId: annotatorId,
-        );
-
-      case 'datumaro':
-        return await DatumaroParser.parse(
+          projectType: projectType,
           projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
@@ -71,6 +74,7 @@ class DatasetAnnotationImporter {
 
       case 'labelme':
         return await LabelMeParser.parse(
+          projectType: projectType,
           projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,
@@ -81,6 +85,7 @@ class DatasetAnnotationImporter {
 
       case 'cvat':
         return await CVATParser.parse(
+          projectType: projectType,
           projectLabels: projectLabels,
           datasetPath: datasetPath,
           mediaItemsMap: mediaItemsMap,

@@ -13,10 +13,10 @@ import '../../widgets/dialogs/alert_error_dialog.dart';
 
 import '../../widgets/project_creation_from_dataset/dataset_upload_prompt.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_description_widget.dart';
-import '../../widgets/project_creation_from_dataset/dataset_step_task_confirmation.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_progress_bar.dart';
-import '../../widgets/project_creation_from_dataset/dataset_step_dataset_overview.dart';
-import '../../widgets/project_creation_from_dataset/dataset_step_project_creation.dart';
+import '../../widgets/project_creation_from_dataset/dataset_step_4_task_confirmation.dart';
+import '../../widgets/project_creation_from_dataset/dataset_step_3_dataset_overview.dart';
+import '../../widgets/project_creation_from_dataset/dataset_step_5_project_creation.dart';
 import '../../widgets/project_creation_from_dataset/dataset_dialog_discard_confirmation.dart';
 
 class CreateFromDatasetDialog extends StatefulWidget {
