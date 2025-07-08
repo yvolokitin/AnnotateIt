@@ -23,6 +23,11 @@ import 'package:vap/gen_l10n/app_localizations.dart';
 ThemeData themeData = getSystemTheme();
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize database for desktop (Windows, macOS, Linux)
+  await initializeDatabase();
+
   // Setup logging
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
@@ -34,13 +39,6 @@ void main() async {
       print('StackTrace: ${record.stackTrace}');
     }
   });
-
-  // Initialize database for desktop (Windows, macOS, Linux)
-  // sqfliteFfiInit(); 
-  // databaseFactory = databaseFactoryFfi;
-  await initializeDatabase();
-  
-  WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the shared database
   final db = await ProjectDatabase.instance.database;
@@ -85,7 +83,6 @@ class AnnotateItAppState extends State<AnnotateItApp> {
     return MaterialApp(
       title: "Annot@It",
       theme: theme,
-      // home: MainPage(),
 
       home: Container(
         color: Colors.black,
