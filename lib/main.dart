@@ -7,7 +7,8 @@ import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 
 // Import FFI for SQLite
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:vap/data/database_initializer.dart';
 
 import 'data/user_database.dart';
 import 'session/user_session.dart';
@@ -35,8 +36,9 @@ void main() async {
   });
 
   // Initialize database for desktop (Windows, macOS, Linux)
-  sqfliteFfiInit(); 
-  databaseFactory = databaseFactoryFfi;
+  // sqfliteFfiInit(); 
+  // databaseFactory = databaseFactoryFfi;
+  await initializeDatabase();
   
   WidgetsFlutterBinding.ensureInitialized();
 
