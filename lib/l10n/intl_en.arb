@@ -4,6 +4,9 @@
   "discardButton": "Discard",
   "saveButton": "Save",
   "helpButton": "Help",
+  "nextButton": "Next",
+  "backButton": "Back",
+  "changeButton": "Confirm",
   "closeButton": "Close",
   "cancelButton": "Cancel",
   "deleteButton": "Delete",
@@ -147,6 +150,17 @@
   "accountStorage_folderTooltip": "Choose folder",
   "accountStorage_helpTitle": "Storage Help",
   "accountStorage_helpMessage": "You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.",
-  "accountStorage_helpTips": "Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n"
+  "accountStorage_helpTips": "Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n",
+
+  "changeProjectTypeTitle": "Change Your Project Type",
+  "changeProjectTypeStepOneSubtitle": "Please select a new project type from the list below",
+  "changeProjectTypeStepTwoSubtitle": "Please confirm your choice",
+
+  "changeProjectTypeWarningTitle": "Warning: You are about to change the project type.",
+  "changeProjectTypeConversionIntro": "All existing annotations will be converted as follows:",
+  "changeProjectTypeConversionDetails": "- Bounding boxes (Detection) -> converted to rectangular polygons.\n- Polygons (Segmentation) -> converted to tight-fitting bounding boxes.\n\nNote: These conversions may reduce precision, especially when converting polygons to boxes, as detailed shape information will be lost.\n\n- Detection / Segmentation → Classification:\n  Images will be classified based on the most frequent label in the annotations:\n     -> If image has 5 objects labeled \"Dog\" and 10 labeled \"Cat\", it will be classified as \"Cat\".\n     -> If the counts are equal, the first label found will be used.\n\n- Classification -> Detection / Segmentation:\n  No annotations will be transferred. You will need to re-annotate all media items manually, as classification projects do not contain region-level data.",
+  "changeProjectTypeErrorTitle": "Migration Failed",
+  "changeProjectTypeErrorMessage": "An error occurred while changing the project type. The changes could not be applied.",
+  "changeProjectTypeErrorTips": "Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support."
 
 }

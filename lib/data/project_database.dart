@@ -449,6 +449,22 @@ Future<Project> createProject(Project project) async {
     );
   }
 
+  Future<void> updateProjectTypeAndTimestamp({
+    required int projectId,
+    required String newType,
+  }) async {
+    final db = await database;
+    await db.update(
+      'projects',
+      {
+        'type': newType,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+  }
+
   Future<int> deleteProject(int projectId) async {
     final db = await database;
 
@@ -524,31 +540,17 @@ Future<Project> createProject(Project project) async {
     }
   }
 
-Future<String> _getDefaultAnnotationRootPath() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final returnPath = path.join(directory.path, 'AnnotateItApp');
-
-  final dir = Directory(returnPath);
-  if (!(await dir.exists())) {
-    await dir.create(recursive: true);
-  }
-
-  return returnPath;
-}
-
-/*
   Future<String> _getDefaultAnnotationRootPath() async {
-    if (Platform.isWindows) {
-      return 'C:\\Users\\${Platform.environment['USERNAME']}\\Documents\\AnnotateItApp';
-    } else if (Platform.isLinux || Platform.isMacOS) {
-      return '/home/${Platform.environment['USER']}/AnnotateItApp';
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      return '/storage/emulated/0/AnnotateItApp';
-    } else {
-      return '/AnnotateItApp';
+    final directory = await getApplicationDocumentsDirectory();
+    final returnPath = path.join(directory.path, 'AnnotateItApp');
+
+    final dir = Directory(returnPath);
+    if (!(await dir.exists())) {
+      await dir.create(recursive: true);
     }
+
+    return returnPath;
   }
-*/
 
   Future<int> getProjectCount() async {
     final db = await instance.database;

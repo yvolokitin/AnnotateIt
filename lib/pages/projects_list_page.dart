@@ -15,6 +15,7 @@ import "../widgets/dialogs/edit_project_name_dialog.dart";
 import "project_details_page.dart";
 import "project_creation/create_from_dataset_dialog.dart";
 import "project_creation/create_new_project_dialog.dart";
+import "project_creation/change_project_type_dialog.dart";
 
 class ProjectsListPage extends StatefulWidget {
   const ProjectsListPage({super.key});
@@ -72,6 +73,17 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     if (updatedName != null) {
       // Refresh project list after saving
       _loadProjects();
+    }
+  }
+
+  void _handleChangeProjectType(Project project) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => ChangeProjectTypeDialog(project: project),
+    );
+
+    if (result == 'refresh') {
+      _loadProjects(); // Refresh the list if new project was created
     }
   }
 
@@ -297,7 +309,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _editProjectName(project);
+                  _handleChangeProjectType(project);
                 },
               ),
 

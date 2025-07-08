@@ -18,16 +18,28 @@ class PolygonShape extends Shape {
     final parsedPoints = <Offset>[];
 
     try {
-      // Nested format: [[x, y], [x, y], ...]
+      // case 1: nested format: [[x, y], [x, y], ...]
       if (rawPoints.isNotEmpty && rawPoints.first is List) {
         for (final p in rawPoints) {
           if (p is List && p.length >= 2 && p[0] is num && p[1] is num) {
             parsedPoints.add(Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()));
           }
         }
-      }
-      // Flat format: [x1, y1, x2, y2, ...]
-      else {
+
+      // case 2: map format - [{'x': ..., 'y': ...}]
+      } else if (rawPoints.isNotEmpty && rawPoints.first is Map) {
+        for (final p in rawPoints) {
+          if (p is Map && p.containsKey('x') && p.containsKey('y')) {
+            final x = p['x'];
+            final y = p['y'];
+            if (x is num && y is num) {
+              parsedPoints.add(Offset(x.toDouble(), y.toDouble()));
+            }
+          }
+        }
+
+      // case 3: flat format: [x1, y1, x2, y2, ...]
+      } else {
         for (int i = 0; i < rawPoints.length - 1; i += 2) {
           final x = rawPoints[i];
           final y = rawPoints[i + 1];

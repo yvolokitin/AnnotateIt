@@ -50,8 +50,6 @@ class StepDatasetTaskConfirmationState
     final detectedTasks = widget.archive.taskTypes.toSet();
     final allEnabled = detectedTasks.contains("Unknown") || detectedTasks.isEmpty;
 
-    print ('1111111 detectedTasks: $detectedTasks');
-
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20),

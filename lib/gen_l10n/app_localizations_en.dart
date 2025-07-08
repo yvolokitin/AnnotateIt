@@ -21,6 +21,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpButton => 'Help';
 
   @override
+  String get nextButton => 'Next';
+
+  @override
+  String get backButton => 'Back';
+
+  @override
+  String get changeButton => 'Confirm';
+
+  @override
   String get closeButton => 'Close';
 
   @override
@@ -265,7 +274,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.';
 
   @override
-  String get changeProjectTypeTitle => 'Change project type';
+  String get changeProjectTypeTitle => 'Change Your Project Type';
 
   @override
   String get deleteProjectTitle => 'Delete Project';
@@ -381,4 +390,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountStorage_helpTips =>
       'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n';
+
+  @override
+  String get changeProjectTypeStepOneSubtitle =>
+      'Please select a new project type from the list below';
+
+  @override
+  String get changeProjectTypeStepTwoSubtitle => 'Please confirm your choice';
+
+  @override
+  String get changeProjectTypeWarningTitle =>
+      'Warning: You are about to change the project type.';
+
+  @override
+  String get changeProjectTypeConversionIntro =>
+      'All existing annotations will be converted as follows:';
+
+  @override
+  String get changeProjectTypeConversionDetails =>
+      '- Bounding boxes (Detection) -> converted to rectangular polygons.\n- Polygons (Segmentation) -> converted to tight-fitting bounding boxes.\n\nNote: These conversions may reduce precision, especially when converting polygons to boxes, as detailed shape information will be lost.\n\n- Detection / Segmentation → Classification:\n  Images will be classified based on the most frequent label in the annotations:\n     -> If image has 5 objects labeled \"Dog\" and 10 labeled \"Cat\", it will be classified as \"Cat\".\n     -> If the counts are equal, the first label found will be used.\n\n- Classification -> Detection / Segmentation:\n  No annotations will be transferred. You will need to re-annotate all media items manually, as classification projects do not contain region-level data.';
+
+  @override
+  String get changeProjectTypeErrorTitle => 'Migration Failed';
+
+  @override
+  String get changeProjectTypeErrorMessage =>
+      'An error occurred while changing the project type. The changes could not be applied.';
+
+  @override
+  String get changeProjectTypeErrorTips =>
+      'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.';
 }

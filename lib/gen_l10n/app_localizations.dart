@@ -118,6 +118,24 @@ abstract class AppLocalizations {
   /// **'Help'**
   String get helpButton;
 
+  /// No description provided for @nextButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get nextButton;
+
+  /// No description provided for @backButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backButton;
+
+  /// No description provided for @changeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get changeButton;
+
   /// No description provided for @closeButton.
   ///
   /// In en, this message translates to:
@@ -541,7 +559,7 @@ abstract class AppLocalizations {
   /// No description provided for @changeProjectTypeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Change project type'**
+  /// **'Change Your Project Type'**
   String get changeProjectTypeTitle;
 
   /// No description provided for @deleteProjectTitle.
@@ -747,6 +765,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n'**
   String get accountStorage_helpTips;
+
+  /// No description provided for @changeProjectTypeStepOneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a new project type from the list below'**
+  String get changeProjectTypeStepOneSubtitle;
+
+  /// No description provided for @changeProjectTypeStepTwoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your choice'**
+  String get changeProjectTypeStepTwoSubtitle;
+
+  /// No description provided for @changeProjectTypeWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: You are about to change the project type.'**
+  String get changeProjectTypeWarningTitle;
+
+  /// No description provided for @changeProjectTypeConversionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'All existing annotations will be converted as follows:'**
+  String get changeProjectTypeConversionIntro;
+
+  /// No description provided for @changeProjectTypeConversionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'- Bounding boxes (Detection) -> converted to rectangular polygons.\n- Polygons (Segmentation) -> converted to tight-fitting bounding boxes.\n\nNote: These conversions may reduce precision, especially when converting polygons to boxes, as detailed shape information will be lost.\n\n- Detection / Segmentation → Classification:\n  Images will be classified based on the most frequent label in the annotations:\n     -> If image has 5 objects labeled \"Dog\" and 10 labeled \"Cat\", it will be classified as \"Cat\".\n     -> If the counts are equal, the first label found will be used.\n\n- Classification -> Detection / Segmentation:\n  No annotations will be transferred. You will need to re-annotate all media items manually, as classification projects do not contain region-level data.'**
+  String get changeProjectTypeConversionDetails;
+
+  /// No description provided for @changeProjectTypeErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Migration Failed'**
+  String get changeProjectTypeErrorTitle;
+
+  /// No description provided for @changeProjectTypeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while changing the project type. The changes could not be applied.'**
+  String get changeProjectTypeErrorMessage;
+
+  /// No description provided for @changeProjectTypeErrorTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.'**
+  String get changeProjectTypeErrorTips;
 }
 
 class _AppLocalizationsDelegate

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vap/gen_l10n/app_localizations.dart';
+
 import 'package:vap/models/project.dart';
-import 'package:vap/data/labels_database.dart';
 import 'package:vap/utils/project_utils.dart';
 
 class DeleteProjectDialog extends StatefulWidget {
@@ -30,6 +30,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
   @override
   void initState() {
     super.initState();
+    _labelCount = widget.project.labels!.length;
   }
 
   Future<void> _handleDelete() async {
