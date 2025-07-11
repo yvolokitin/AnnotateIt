@@ -79,7 +79,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             icon: Icon(Icons.near_me_outlined),
             onTap: () => _selectUserAction(UserAction.navigation),
             isActive: widget.selectedAction == UserAction.navigation,
-            tooltip: l10n.toolbar_navigation,
+            tooltip: l10n.toolbarNavigation,
           ),
 
           // Bounding Box Button (conditionally shown)
@@ -89,7 +89,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               icon: Icon(Icons.format_shapes_rounded),
               onTap: () => _selectUserAction(UserAction.bbox_annotation),
               isActive: widget.selectedAction == UserAction.bbox_annotation,
-              tooltip: l10n.toolbar_bbox,
+              tooltip: l10n.toolbarBbox,
             ),
           ],
 
@@ -100,7 +100,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               icon: Icon(Icons.auto_awesome_outlined),
               onTap: () => _selectUserAction(UserAction.sam_annotation),
               isActive: widget.selectedAction == UserAction.sam_annotation,
-              tooltip: l10n.toolbar_segmentation,
+              tooltip: l10n.toolbarSegmentation,
             ),
           ],
 
@@ -109,7 +109,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ToolbarButton(
             icon: Icon(Icons.fit_screen_outlined),
             onTap: widget.onResetZoomPressed,
-            tooltip: l10n.toolbar_reset_zoom,
+            tooltip: l10n.toolbarResetZoom,
           ),
 
           // Dataset Grid Toggle
@@ -121,7 +121,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               widget.onShowDatasetGridChanged(showDatasetGrid);
             },
             isActive: showDatasetGrid,
-            tooltip: l10n.toolbar_toggle_grid,
+            tooltip: l10n.toolbarToggleGrid,
           ),
 
           // Opacity Settings
@@ -130,7 +130,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             icon: Icon(Icons.settings),
             onTap: () => _openOpacityDialog(context),
             isActive: showOpacityDialog,
-            tooltip: l10n.toolbar_opacity_settings,
+            tooltip: l10n.toolbarOpacitySettings,
           ),
 
           // Annotation Names Toggle
@@ -138,7 +138,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ToolbarButton(
             onTap: () => widget.onShowAnnotationNames(!widget.showAnnotationNames),
             isActive: !widget.showAnnotationNames,
-            tooltip: l10n.toolbar_toggle_annotation_names,
+            tooltip: l10n.toolbarToggleAnnotationNames,
             child: widget.showAnnotationNames
                 ? Icon(
                     Icons.text_fields,
@@ -170,7 +170,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ToolbarButton(
             icon: Icon(Icons.rotate_left_rounded),
             onTap: null,
-            tooltip: l10n.toolbar_rotate_left,
+            tooltip: l10n.toolbarRotateLeft,
             isDisabled: true,
           ),
 
@@ -178,7 +178,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ToolbarButton(
             icon: Icon(Icons.rotate_right_rounded),
             onTap: null,
-            tooltip: l10n.toolbar_rotate_right,
+            tooltip: l10n.toolbarRotateRight,
             isDisabled: true,
           ),
 
@@ -188,12 +188,12 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             onTap: () {
               AlertErrorDialog.show(
                 context,
-                l10n.dialog_help_title,
-                l10n.dialog_help_content,
-                tips: l10n.dialog_help_tips,
+                l10n.dialogHelpTitle,
+                l10n.dialogHelpContent,
+                tips: l10n.dialogHelpTips,
               );
             },
-            tooltip: l10n.toolbar_help,
+            tooltip: l10n.toolbarHelp,
           ),
           const SizedBox(height: 10),
         ],

@@ -76,7 +76,6 @@ class _AccountStorageState extends State<AccountStorage> {
                 _folderField(
                   controller: _datasetImportController,
                   onPathSelected: (val) async {
-                    print('Dataset IMPORT $val');
                     _datasetImportController.text = val;
                     widget.onUserChange(widget.user.copyWith(datasetImportFolder: val));
                     await UserSession.instance.setCurrentUserDatasetImportFolder(val);
@@ -106,7 +105,7 @@ class _AccountStorageState extends State<AccountStorage> {
                 _folderField(
                   controller: _datasetExportController,
                   onPathSelected: (val) async {
-                    print('Dataset EXPORT $val');
+                    // print('Dataset EXPORT $val');
                     _datasetExportController.text = val;
                     widget.onUserChange(widget.user.copyWith(datasetExportFolder: val));
                     await UserSession.instance.setCurrentUserDatasetExportFolder(val);
@@ -137,7 +136,11 @@ class _AccountStorageState extends State<AccountStorage> {
             padding: titlePadding,
             child: Text(
               title,
-              style: const TextStyle(fontSize: 24, color: Colors.white),
+              style: TextStyle(
+                fontSize: 24,
+                fontFamily: 'CascadiaCode',
+                color: Colors.white,
+                ),
             ),
           ),
           ...children.map((child) => Padding(padding: padding, child: child)).toList(),
@@ -189,7 +192,7 @@ class _AccountStorageState extends State<AccountStorage> {
         SizedBox(width: 16),
         IconButton(
           icon: const Icon(Icons.help_outline_rounded),
-          tooltip: l10n.helpButton,
+          tooltip: l10n.buttonHelp,
           onPressed: () {
             AlertErrorDialog.show(
               context,

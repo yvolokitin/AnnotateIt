@@ -37,13 +37,14 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
             l10n.duplicateImage,
             style: const TextStyle(
               fontSize: 24,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               color: Colors.white
             ),
           ),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white70),
-            tooltip: l10n.cancelButton,
+            tooltip: l10n.buttonCancel,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -64,6 +65,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateWithAnnotations,
               style: const TextStyle(
                 fontSize: 22,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white
               ),
@@ -72,6 +74,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateWithAnnotationsHint,
               style: const TextStyle(
                 fontSize: 20,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70
               ),
@@ -86,6 +89,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateImageOnly,
               style: const TextStyle(
                 fontSize: 22,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white
               ),
@@ -94,6 +98,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateImageOnlyHint,
               style: const TextStyle(
                 fontSize: 20,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70
               ),
@@ -110,6 +115,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.saveDuplicateChoiceAsDefault,
               style: const TextStyle(
                 fontSize: 16,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70,
               ),
@@ -131,10 +137,11 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
           ),
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.cancelButton,
+            l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 22,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -157,6 +164,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),

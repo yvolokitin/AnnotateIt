@@ -159,7 +159,12 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
         if (screenWidth > 1200)...[
           Text(
             _getLabelCreationNote(widget.projectType),
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal, color: Colors.white70),
+            style: const TextStyle(
+              fontSize: 20,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.normal,
+              color: Colors.white70,
+            ),
           ),
           const SizedBox(height: 30),
         ],
@@ -191,7 +196,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
               ),
             ),
 
-            const SizedBox(width: 20),
+            SizedBox(width: screenWidth > 650 ? 20 : 5),
             Expanded(
               child: TextField(
                 controller: _labelController,
@@ -199,6 +204,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                   hintText: l10n.labelNameHint,
                   hintStyle: TextStyle(
                     color: Colors.white54,
+                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: screenWidth > 1200 ? 22 : 18,
                   ),
@@ -219,37 +225,52 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                 style: TextStyle(
                   fontSize: screenWidth > 1200 ? 22 : 18,
                   color: Colors.white,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
 
-            const SizedBox(width: 20),
-            SizedBox(
-              height: screenWidth > 1200 ? 46 : 36,
-              child: ElevatedButton(
-                onPressed: _addLabel,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: BorderSide(color: Colors.redAccent, width: 2),
+            SizedBox(width: screenWidth > 650 ? 20 : 5),
+            
+            if (screenWidth >= 650)...[
+              SizedBox(
+                height: screenWidth > 1200 ? 46 : (screenWidth > 640) ? 36 : 24,
+                child: ElevatedButton(
+                  onPressed: _addLabel,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: BorderSide(color: Colors.redAccent, width: 2),
+                    ),
                   ),
-                ),
-                child: Text(
-                  l10n.createLabelButton,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenWidth > 1200 ? 22 : 20,
-                    fontWeight: FontWeight.bold,
+                  child: Text(
+                    l10n.createLabelButton,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth > 1200 ? 22 : 20,
+                    ),
                   ),
                 ),
               ),
+            ],
+          
+          if (screenWidth < 650)...[
+            IconButton(
+              onPressed: _addLabel,
+              icon: const Icon(Icons.add_circle_outline, color: Colors.redAccent),
+              tooltip: l10n.createLabelButton,
+              iconSize: 28,
             ),
-
+          ],
           ],
         ),
+
+        const SizedBox(height: 10),
 
         Flexible(
           child: EditLabelsListDialog(

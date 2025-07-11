@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/annotated_labeled_media.dart';
-
 import '../../dialogs/image_details_dialog.dart';
 import '../../dialogs/set_image_icon_dialog.dart';
 import '../../dialogs/delete_image_dialog.dart';
@@ -39,7 +38,6 @@ class ImageTileMenuButton extends StatelessWidget {
             );
             break;
           case 'delete':
-            // showDialog(context: context, builder: (_) => DeleteImageDialog(mediaItems: [media.mediaItem]));
             showDialog(
               context: context,
               builder: (_) => DeleteImageDialog(
@@ -51,7 +49,6 @@ class ImageTileMenuButton extends StatelessWidget {
             );
             break;
           case 'seticon':
-            // showDialog(context: context, builder: (_) => SetImageIconDialog(media: media.mediaItem));
             showDialog(
               context: context,
               builder: (_) => SetImageIconDialog(
@@ -82,6 +79,18 @@ class _MenuItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [Icon(icon, size: 22), const SizedBox(width: 8), Text(text)]);
+    return Row(
+      children: [
+        Icon(icon, size: 22),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            fontFamily: 'CascadiaCode',
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      ]
+    );
   }
 }

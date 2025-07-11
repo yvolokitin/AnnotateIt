@@ -107,6 +107,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
     color: foregroundColorByLuminance(annotation.color ?? Colors.grey),
     fontSize: 16,
     fontWeight: FontWeight.bold,
+    fontFamily: 'CascadiaCode',
   );
   final textPainter = TextPainter(
     text: TextSpan(text: text, style: textStyle),
@@ -177,8 +178,6 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   void drawCornerHandles(Canvas canvas, List<Offset> corners) {
     final borderWidth = Constants.annotationBorderWidth;
     final handleSize = Constants.handleSize;
-    // const handleSize = 12.0;
-    // const borderWidth = 5.0;
 
     final fillPaint = Paint()
       ..color = Colors.white
@@ -214,9 +213,9 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       // Text styling
     final textStyle = TextStyle(
       color: foregroundColorByLuminance(color),
-      fontFamily: 'Arial',
       fontSize: 17 / scale,
       height: 1.0,
+      fontFamily: 'CascadiaCode',
       fontWeight: FontWeight.bold,
     );
 

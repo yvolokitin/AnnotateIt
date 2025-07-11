@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
+
 import '../../models/user.dart';
 
 class ApplicationSettings extends StatelessWidget {
@@ -13,6 +15,7 @@ class ApplicationSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isWide = MediaQuery.of(context).size.width > 800;
     final isTablet = MediaQuery.of(context).size.width > 500;
 
@@ -23,44 +26,44 @@ class ApplicationSettings extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection('General Settings', [
+            _buildSection(l10n.settingsGeneralTitle, [
               _buildCountrySelection(context, isWide, isTablet),
-              _buildThemeSelection(),
+              _buildThemeSelection(context),
             ], isWide),
 
-            _buildSection('Project Creation', [
+            _buildSection(l10n.settingsProjectCreationTitle, [
               _buildSwitchWithNote(
-                title: 'Always ask to confirm when create a project with no labels',
+                title: l10n.settingsProjectCreationConfirmNoLabels,
                 value: user.projectShowNoLabels ?? true,
                 onChanged: (val) => onUserChange(user.copyWith(projectShowNoLabels: val)),
-                note: 'You’ll be warned if you try to create a project without any labels defined.',
+                note: l10n.settingsProjectCreationConfirmNoLabelsNote,
               ),
             ], isWide),
 
-            _buildSection('Dataset View', [
+            _buildSection(l10n.settingsDatasetViewTitle, [
               _buildSwitchWithNote(
-                title: 'Duplicate (make a copy) image always with annotations',
+                title: l10n.settingsDatasetViewDuplicateWithAnnotations,
                 value: user.datasetEnableDuplicate ?? true,
                 onChanged: (val) => onUserChange(user.copyWith(datasetEnableDuplicate: val)),
-                note: 'When duplicating, annotations will be included unless you change settings.',
+                note: l10n.settingsDatasetViewDuplicateWithAnnotationsNote,
               ),
               _buildSwitchWithNote(
-                title: 'When delete image from Dataset, always delete it from OS / file system',
+                title: l10n.settingsDatasetViewDeleteFromOS,
                 value: user.datasetEnableDelete ?? true,
                 onChanged: (val) => onUserChange(user.copyWith(datasetEnableDelete: val)),
-                note: 'Deletes the file from disk too, not just from the dataset.',
+                note: l10n.settingsDatasetViewDeleteFromOSNote,
               ),
             ], isWide),
 
-            _buildSection('Annotation Settings', [
+            _buildSection(l10n.settingsAnnotationTitle, [
               _buildSliderWithButtons(
                 context,
-                'Annotation opacity',
+                l10n.settingsAnnotationOpacity,
                 user.annotationOpacity ?? 0.35,
                 (val) => onUserChange(user.copyWith(annotationOpacity: val)),
               ),
               _buildSwitch(
-                'Always Save or Submit annotation when move to the next image',
+                l10n.settingsAnnotationAutoSave,
                 user.annotationAllowImageCopy ?? true,
                 (val) => onUserChange(user.copyWith(annotationAllowImageCopy: val)),
               ),
@@ -88,7 +91,11 @@ class ApplicationSettings extends StatelessWidget {
             padding: titlePadding,
             child: Text(
               title,
-              style: const TextStyle(fontSize: 24, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 24,
+                fontFamily: 'CascadiaCode',
+                color: Colors.white,
+              ),
             ),
           ),
           ...children.map((child) => Padding(padding: padding, child: child)).toList(),
@@ -108,6 +115,7 @@ class ApplicationSettings extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 20,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.normal,
               color: Colors.white70,
             ),
@@ -141,7 +149,14 @@ class ApplicationSettings extends StatelessWidget {
         _buildSwitch(title, value, onChanged),
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Text(note, style: const TextStyle(fontSize: 18, color: Colors.white60)),
+          child: Text(
+            note,
+            style: const TextStyle(
+              fontSize: 18,
+              fontFamily: 'CascadiaCode',
+              color: Colors.white60,
+            ),
+          ),
         ),
       ],
     );
@@ -155,7 +170,13 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: const TextStyle(color: Colors.white)),
+      Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontFamily: 'CascadiaCode',
+        ),
+      ),
       Row(
         children: [
           IconButton(
@@ -195,13 +216,18 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
   );
 }
 
-  Widget _buildThemeSelection() {
+  Widget _buildThemeSelection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Theme selection',
-          style: TextStyle(fontSize: 20, color: Colors.white70),
+        Text(
+          l10n.settingsThemeTitle,
+          style: TextStyle(
+            fontSize: 20,
+            fontFamily: 'CascadiaCode',
+            color: Colors.white70,
+          ),
         ),
         const SizedBox(height: 8),
         Row(
@@ -220,6 +246,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                         style: TextStyle(
                           color: user.themeMode == mode ? Colors.black : Colors.white70,
                           fontWeight: user.themeMode == mode ? FontWeight.bold : FontWeight.normal,
+                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -247,9 +274,13 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Country / Language',
-          style: TextStyle(fontSize: 20, color: Colors.white70),
+        Text(
+          AppLocalizations.of(context)!.settingsLanguageTitle,
+          style: TextStyle(
+            fontSize: 20,
+            fontFamily: 'CascadiaCode',
+            color: Colors.white70,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -280,6 +311,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
+                          fontFamily: 'CascadiaCode',
                           color: isSelected ? Colors.black : Colors.white70,
                         ),
                       ),

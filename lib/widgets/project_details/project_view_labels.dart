@@ -143,6 +143,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                 style: const TextStyle(
                   fontSize: 24,
                   color: Colors.white,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                 ),
               ),

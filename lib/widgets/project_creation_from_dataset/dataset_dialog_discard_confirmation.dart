@@ -19,18 +19,18 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
       backgroundColor: Colors.grey[800],
       title: Text(
         l10n.discardDatasetImportTitle,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
       ),
       content: Text(
         l10n.discardDatasetImportMessage,
-        style: TextStyle(color: Colors.white70),
+        style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode',),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(
-            l10n.keepButton,
-            style: TextStyle(color: Colors.white54)
+            l10n.buttonKeep,
+            style: TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode',)
           ),
         ),
         ElevatedButton(
@@ -41,8 +41,8 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Text(
-            l10n.discardButton,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            l10n.buttonDiscard,
+            style: TextStyle(color: Colors.black, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
         ),
       ],
     );

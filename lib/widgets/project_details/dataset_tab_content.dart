@@ -10,7 +10,7 @@ import '../dialogs/delete_image_dialog.dart';
 
 import 'dataset_upload_buttons.dart';
 import 'paginated_image_grid.dart';
-import 'no_media_dialog.dart';
+import '../dialogs/no_media_dialog.dart';
 
 class DatasetTabContent extends StatefulWidget {
   final Project project;
@@ -149,8 +149,8 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
               ? const Center(child: CircularProgressIndicator())
               : widget.mediaItems!.isEmpty
                   ? NoMediaDialog(
-                      project_id: widget.project.id!,
-                      dataset_id: widget.datasetId,
+                      projectId: widget.project.id!,
+                      datasetId: widget.datasetId,
                     )
                   : PaginatedImageGrid(
                       project: widget.project,
@@ -164,7 +164,6 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
                       onPageChanged: widget.onPageChanged,
                       onSelectionChanged: _handleSelectionChanged,
                       onImageDuplicated: (media, withAnnotations) {
-                        print('DatasetTabContent:: duplicating image withAnnotations: $withAnnotations');
                         widget.onImageDuplicated?.call(media, withAnnotations);
                       },
                     ),

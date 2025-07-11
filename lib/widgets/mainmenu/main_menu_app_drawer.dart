@@ -34,16 +34,10 @@ class MainMenuAppDrawer extends StatelessWidget {
             onTap: () => onItemSelected(1),
           ),
           MainMenuDrawerItem(
-            icon: Icons.school_outlined,
-            title: l10n.menuLearn,
-            isSelected: selectedIndex == 2,
-            onTap: () => onItemSelected(2),
-          ),
-          MainMenuDrawerItem(
             icon: Icons.error_outline_rounded,
             title: l10n.menuAbout,
-            isSelected: selectedIndex == 3,
-            onTap: () => onItemSelected(3),
+            isSelected: selectedIndex == 2,
+            onTap: () => onItemSelected(2),
           ),
         ],
       ),

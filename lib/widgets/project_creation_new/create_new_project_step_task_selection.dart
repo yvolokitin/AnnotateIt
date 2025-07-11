@@ -37,13 +37,10 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
   }
 
   void _onTabChanged() {
-    if (_tabController.indexIsChanging) return; // Wait until change settles
-
+    if (_tabController.indexIsChanging) return;
     setState(() {
       _selectedTab = _tabs[_tabController.index];
     });
-
-    // Notify parent of current tab change with empty task if none selected
     widget.onTaskSelectionChanged(_selectedTab, "");
   }
 
@@ -56,6 +53,7 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
         TextField(
@@ -63,8 +61,9 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
           cursorColor: Colors.white, 
           style: TextStyle(
             color: Colors.white,
+            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
-            fontSize: 22,
+            fontSize: screenWidth>1200 ? 22 : 18,
           ),
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.projectNameLabel,
@@ -92,8 +91,16 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
           indicatorWeight: 3.0,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white24,
-          labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
-          unselectedLabelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
+          labelStyle: TextStyle(
+            fontSize: screenWidth>1200 ? 24 : 20,
+            fontFamily: 'CascadiaCode',
+            fontWeight: FontWeight.normal,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontSize: screenWidth>1200 ? 24 : 20,
+            fontFamily: 'CascadiaCode',
+            fontWeight: FontWeight.normal,
+          ),
           tabs: _tabs.map((label) => Tab(text: label)).toList(),
         ),
 

@@ -67,6 +67,7 @@ class _LabelDropdownState extends State<LabelDropdown> {
                   label.name,
                   style: widget.theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
+                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ],

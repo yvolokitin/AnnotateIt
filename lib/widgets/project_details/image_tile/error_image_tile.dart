@@ -21,7 +21,14 @@ class ErrorImageTile extends StatelessWidget {
         children: [
           const Icon(Icons.broken_image, color: Colors.white24, size: 40),
           const SizedBox(height: 8),
-          Text(message, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white38,
+              fontFamily: 'CascadiaCode',
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );

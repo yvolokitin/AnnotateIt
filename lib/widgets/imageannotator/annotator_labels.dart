@@ -56,6 +56,7 @@ class AnnotatorLabels extends StatelessWidget {
   }
 
 Widget _buildChip(BuildContext context, Label label) {
+  double screenWidth = MediaQuery.of(context).size.width;
   final isLong = label.name.length > 15;
   final displayName = isLong ? '${label.name.substring(0, 15)}…' : label.name;
 
@@ -107,7 +108,11 @@ Widget _buildChip(BuildContext context, Label label) {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   softWrap: false,
-                  style: const TextStyle(color: Colors.white, fontSize: 20),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: screenWidth> 700 ? 20 : 16,
+                    fontFamily: 'CascadiaCode',
+                  ),
                 ),
               ),
             ],
@@ -157,7 +162,10 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
-                      style: const TextStyle(fontSize: 18),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'CascadiaCode',
+                      ),
                     ),
                   ),
                 ),
@@ -188,7 +196,14 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('More', style: TextStyle(color: Colors.white, fontSize: 20)),
+          Text(
+            'More',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontFamily: 'CascadiaCode',
+            ),
+          ),
           SizedBox(width: 6),
           Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 20),
         ],
@@ -209,7 +224,7 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
 
   static double _measureTextWidth(String text, {required double size}) {
     final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: TextStyle(fontSize: size)),
+      text: TextSpan(text: text, style: TextStyle(fontSize: size, fontFamily: 'CascadiaCode',)),
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width;

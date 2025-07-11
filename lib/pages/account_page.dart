@@ -111,10 +111,22 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.person_outline),
                               if (screenWidth > 700) ...[
                                 const SizedBox(width: 8),
-                                const Text('User'),
+                                const Text(
+                                  'User',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ],
                               if (screenWidth > 1500)
-                                const Text(' Profile'),
+                                const Text(
+                                  'Profile',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -125,11 +137,23 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.folder_open),
                               if (screenWidth > 700 && screenWidth <= 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text('Storage'),
+                                const Text(
+                                  'Storage',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ],
                               if (screenWidth > 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text('Device Storage'),
+                                const Text(
+                                  'Device Storage',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ],
                             ],
                           ),
@@ -141,11 +165,23 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.settings),
                               if (screenWidth > 700 && screenWidth <= 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text('Settings'),
+                                const Text(
+                                  'Settings',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ],
                               if (screenWidth > 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text('Application Settings'),
+                                const Text(
+                                  'Application Settings',
+                                  style: TextStyle(
+                                    fontFamily: 'CascadiaCode',
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ],
                             ],
                           ),

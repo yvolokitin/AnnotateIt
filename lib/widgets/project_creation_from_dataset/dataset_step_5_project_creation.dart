@@ -41,9 +41,13 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
           const SizedBox(height: 24),
           Text(
             hasProgress
-                ? 'Importing media (${widget.current} / ${widget.total})...'
-                : 'Please wait...',
-            style: const TextStyle(color: Colors.white, fontSize: 18),
+              ? 'Importing media (${widget.current} / ${widget.total})...'
+              : 'Please wait...',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -51,7 +55,11 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
             'and all annotations are being parsed.\n\n'
             'This may take a few moments depending on dataset size.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
         ],
       );
@@ -65,24 +73,37 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
             const SizedBox(height: 24),
             const Text(
               'Project Creation Failed',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'Reason:\n${widget.errorMessage}',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontFamily: 'CascadiaCode',
+              ),
             ),
             const SizedBox(height: 24),
             const Text(
               'You can close this window and try the dataset import again.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontFamily: 'CascadiaCode',
+              ),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               icon: const Icon(Icons.close, color: Colors.black),
-              label: const Text('Close', style: TextStyle(color: Colors.black)),
+              label: const Text('Close', style: TextStyle(color: Colors.black, fontFamily: 'CascadiaCode',)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

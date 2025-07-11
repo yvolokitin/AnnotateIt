@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
@@ -40,7 +41,6 @@ class PaginatedImageGrid extends StatefulWidget {
 
 class _PaginatedImageGridState extends State<PaginatedImageGrid> {
   int _getCrossAxisCount() {
-    // print('PaginatedImageGrid:: itemsPerPage: ${widget.itemsPerPage}');
     switch (widget.itemsPerPage) {
       case 8:
         return 2;
@@ -59,13 +59,13 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mediaItems = widget.annotatedMediaItems;
 
     return Column(
       children: [
         Expanded(
           child: GridView.builder(
-            // padding: const EdgeInsets.all(16),
             itemCount: mediaItems.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _getCrossAxisCount(),
@@ -93,7 +93,6 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                     );
                   },
                   onImageDuplicated: (media, withAnnotations) {
-                    print('PaginatedImageGrid:: duplicating image withAnnotations: $withAnnotations');
                     widget.onImageDuplicated?.call(media, withAnnotations);
                   },
                 );
@@ -112,19 +111,32 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                 onPressed: widget.currentPage > 0
                     ? () => widget.onPageChanged(widget.currentPage - 1)
                     : null,
-                child: const Text("<- Back"),
+                child: Text(
+                  l10n.dialogBack,
+                  style: const TextStyle(
+                    fontFamily: 'CascadiaCode',
+                  ),
+                ),
               ),
               const SizedBox(width: 20),
               Text(
-                "Page ${widget.currentPage + 1} from ${widget.totalPages}",
-                style: const TextStyle(color: Colors.white),
+                l10n.paginationPageFromTotal(widget.currentPage + 1, widget.totalPages),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'CascadiaCode',
+                ),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: widget.currentPage < widget.totalPages - 1
                     ? () => widget.onPageChanged(widget.currentPage + 1)
                     : null,
-                child: const Text("Next ->"),
+                child: Text(
+                  l10n.dialogNext,
+                  style: const TextStyle(
+                    fontFamily: 'CascadiaCode',
+                  ),
+                ),
               ),
             ],
           ),

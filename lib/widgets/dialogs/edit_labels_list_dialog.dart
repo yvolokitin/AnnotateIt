@@ -46,6 +46,7 @@ class EditLabelsListDialog extends StatelessWidget {
                     l10n.noLabelsTitle,
                     style: TextStyle(
                       color: Colors.white,
+                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: screenWidth > 1450 ? 24 : 20,
                     ),
@@ -53,20 +54,32 @@ class EditLabelsListDialog extends StatelessWidget {
                   SizedBox(height: screenWidth > 1450 ? 40 : 10),
                   Text(
                     l10n.noLabelsExplain1,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: screenWidth>640 ? 18 : 14,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                   Text(
                     l10n.noLabelsExplain2,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: screenWidth>640 ? 18 : 14,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                   Text(
                     l10n.noLabelsExplain3,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: screenWidth>640 ? 18 : 14,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                   SizedBox(
-                    height: screenWidth > 1450 ? 300 : 200,
+                    height: screenWidth > 1450 ? 300 : (screenWidth>640) ? 200 : 140,
                     child: Padding(
-                      padding: EdgeInsets.all(screenWidth > 1450 ? 45 : 20),
+                      padding: EdgeInsets.all(screenWidth > 1450 ? 45 : (screenWidth>640) ? 20 : 6),
                       child: Image.asset(
                         'assets/images/no_labels.png',
                         fit: BoxFit.contain,
@@ -75,19 +88,33 @@ class EditLabelsListDialog extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.noLabelsExplain4,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain5,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain6,
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
+                  if (screenWidth>640)...[
+                    const SizedBox(height: 24),
+                    Text(
+                      l10n.noLabelsExplain4,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      l10n.noLabelsExplain5,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      l10n.noLabelsExplain6,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                        fontSize: 18,
+                      ),
+                    ),
+                  ]
                 ],
               ),
             ),
@@ -170,6 +197,7 @@ class EditLabelsListDialog extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 20,
                                         color: Colors.white,
+                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
                                       ),
                                       decoration: InputDecoration(

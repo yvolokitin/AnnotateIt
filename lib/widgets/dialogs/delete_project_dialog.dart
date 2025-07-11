@@ -62,7 +62,12 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Delete Project'),
+            Text(
+              l10n.deleteProjectTitle,
+              style: const TextStyle(
+                fontFamily: 'CascadiaCode',
+              ),
+            ),
             const SizedBox(height: 8),
             const Divider(thickness: 1, color: Colors.white),
           ],
@@ -75,11 +80,17 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
           child: _isDeleting
               ? Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    SizedBox(height: 40),
-                    CircularProgressIndicator(),
-                    SizedBox(height: 20),
-                    Text('Deleting project...', style: TextStyle(color: Colors.white70)),
+                  children: [
+                    const SizedBox(height: 40),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.deleteProjectInProgress,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),
                   ],
                 )
               : Column(
@@ -87,8 +98,12 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Are you sure you want to permanently delete the project "${widget.project.name}"?',
-                      style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.white70),
+                      l10n.deleteProjectConfirm(widget.project.name),
+                      style: const TextStyle(
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.normal,
+                        color: Colors.white70,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -97,8 +112,12 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                         const SizedBox(width: 25),
                         Expanded(
                           child: Text(
-                            'Project was created at $creationDate\nNumber of Labels: $_labelCount',
-                            style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.white54),
+                            l10n.deleteProjectInfoLine(creationDate, _labelCount),
+                            style: const TextStyle(
+                              fontFamily: 'CascadiaCode',
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white54,
+                            ),
                           ),
                         ),
                       ],
@@ -107,9 +126,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                     CheckboxListTile(
                       value: _deleteFromDisk,
                       onChanged: (val) => setState(() => _deleteFromDisk = val ?? false),
-                      title: const Text(
-                        'Also delete all files from disk',
-                        style: TextStyle(fontWeight: FontWeight.normal, color: Colors.white),
+                      title: Text(
+                        l10n.deleteProjectOptionDeleteFromDisk,
+                        style: const TextStyle(
+                          fontFamily: 'CascadiaCode',
+                          fontWeight: FontWeight.normal,
+                          color: Colors.white,
+                        ),
                       ),
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: Colors.redAccent,
@@ -117,9 +140,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                     CheckboxListTile(
                       value: _dontAskAgain,
                       onChanged: (val) => setState(() => _dontAskAgain = val ?? false),
-                      title: const Text(
-                        "Don't ask me again",
-                        style: TextStyle(fontWeight: FontWeight.normal, color: Colors.white),
+                      title: Text(
+                        l10n.deleteProjectOptionDontAskAgain,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'CascadiaCode',
+                          fontWeight: FontWeight.normal,
+                        ),
                       ),
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: Colors.grey,
@@ -140,11 +167,12 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                     ),
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
+                  child: Text(
+                    l10n.buttonCancel,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
+                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -159,11 +187,12 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                     ),
                   ),
                   onPressed: _handleDelete,
-                  child: const Text(
-                    'Delete',
+                  child: Text(
+                    l10n.buttonDelete,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
+                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                     ),
                   ),

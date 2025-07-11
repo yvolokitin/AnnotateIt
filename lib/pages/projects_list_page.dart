@@ -1,13 +1,14 @@
 import "package:flutter/material.dart";
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 import '../session/user_session.dart';
 import "../models/project.dart";
 import "../data/project_database.dart";
 import "../data/labels_database.dart";
 
+import "../widgets/project_list/empty_project_placeholder.dart";
 import "../widgets/project_list/project_tile.dart";
-import "../widgets/projects_topbar.dart";
-import "../widgets/empty_project_placeholder.dart";
+import "../widgets/project_list/projects_topbar.dart";
 
 import '../widgets/dialogs/delete_project_dialog.dart';
 import "../widgets/dialogs/edit_project_name_dialog.dart";
@@ -18,7 +19,10 @@ import "project_creation/create_new_project_dialog.dart";
 import "project_creation/change_project_type_dialog.dart";
 
 class ProjectsListPage extends StatefulWidget {
-  const ProjectsListPage({super.key});
+
+  const ProjectsListPage({
+    super.key,
+  });
 
   @override
   ProjectsListPageState createState() => ProjectsListPageState();
@@ -85,13 +89,6 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     if (result == 'refresh') {
       _loadProjects(); // Refresh the list if new project was created
     }
-  }
-
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-      _filteredProjects = _applySearchAndSort(_allProjects);
-    });
   }
 
   void _onSortSelected(String option) {
@@ -180,6 +177,9 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: _isLoading
         ? Center(
@@ -195,7 +195,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
         : Column(
         children: [
           // Row with Create Button, Search Bar, and Sort Icon
-          ProjectsTopBar(
+          if (screenWidth > 270)...[
+            ProjectsTopBar(
               sortDetection: sortDetection,
               sortClassification: sortClassification,
               sortSegmentation: sortSegmentation,
@@ -222,7 +223,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   _filteredProjects = _applySearchAndSort(_allProjects);
                 });
               },
-          ),
+            ),
+          ],
 
           // Project List -> list of ProjectTile's (in widgets)
           Expanded(
@@ -235,7 +237,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                     onImportFromDataset: _handleImportFromDataset,
                   ),
                 ),
-              )                
+              )
               : ListView.builder(
                 itemCount: _filteredProjects.length,
                 itemBuilder: (context, index) {

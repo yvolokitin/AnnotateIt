@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
 import '../buttons/hover_icon_button.dart';
+import '../dialogs/alert_error_dialog.dart';
 
 class ProjectDetailsAppBar extends StatelessWidget {
   final VoidCallback onBackPressed;
@@ -35,7 +37,16 @@ class ProjectDetailsAppBar extends StatelessWidget {
           HoverIconButton(
             icon: Icons.help_outline,
             margin: const EdgeInsets.only(right: 20.0),
-            onPressed: () => print("Help is not implemented yet"),
+            onPressed: () {
+              final l10n = AppLocalizations.of(context)!;
+
+              AlertErrorDialog.show(
+                context,
+                l10n.projectHelpTitle,
+                l10n.projectHelpMessage,
+                tips: l10n.projectHelpTips,
+              );
+            }
           ),
         ],
       ),

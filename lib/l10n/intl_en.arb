@@ -1,31 +1,84 @@
 {
   "@@locale": "en",
-  "keepButton": "Keep",
-  "discardButton": "Discard",
-  "saveButton": "Save",
-  "helpButton": "Help",
-  "nextButton": "Next",
-  "backButton": "Back",
-  "changeButton": "Confirm",
-  "closeButton": "Close",
-  "cancelButton": "Cancel",
-  "deleteButton": "Delete",
-  "duplicateButton": "Duplicate",
-  "applyButton": "Apply",
+
+  "buttonKeep": "Keep",
+  "buttonSave": "Save",
+  "buttonHelp": "Help",
+  "buttonEdit": "Edit",
+  "buttonNext": "Next",
+  "buttonBack": "Back",
+  "buttonApply": "Apply",
+  "buttonClose": "Close",
+  "buttonCancel": "Cancel",
+  "buttonFinish": "Finish",
+  "buttonDelete": "Delete",
+  "buttonDuplicate": "Duplicate",
+  "buttonConfirm": "Confirm",
+  "buttonDiscard": "Discard",
+  "buttonFeedbackShort": "Fdbck",
+
+  "aboutTitle": "About Annot@It",
+  "aboutDescription": "Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you're working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.",
+  "aboutFeaturesTitle": "Key Features:",
+  "aboutFeatures": "- Multiple Project Types: Create and manage projects tailored for different computer vision tasks.\n- Data Upload & Management: Easily upload and organize your datasets for seamless annotation.\n- Advanced Annotation Tools – Use bounding boxes, polygons, keypoints, and segmentation masks.\n- Export & Integration – Export labeled data in various formats compatible with AI/ML frameworks.",
+  "aboutCallToAction": "Start your annotation journey today and build high-quality datasets for your computer vision models!",
+
+  "userProfileName": "Captain Annotator",
+  "userProfileFeedbackButton": "Feedback",
+  "userProfileEditProfileButton": "Edit Profile",
+  "userProfileProjects": "Projects",
+  "userProfileLabels": "Labels",
+  "userProfileMedia": "Media",
+  "userProfileAnnotations": "Annotations",
+
+  "settingsGeneralTitle": "General Settings",
+  "settingsProjectCreationTitle": "Project Creation",
+  "settingsProjectCreationConfirmNoLabels": "Always ask to confirm when create a project with no labels",
+  "settingsProjectCreationConfirmNoLabelsNote": "You’ll be warned if you try to create a project without any labels defined.",
+  "settingsDatasetViewTitle": "Dataset View",
+  "settingsDatasetViewDuplicateWithAnnotations": "Duplicate (make a copy) image always with annotations",
+  "settingsDatasetViewDuplicateWithAnnotationsNote": "When duplicating, annotations will be included unless you change settings.",
+  "settingsDatasetViewDeleteFromOS": "When delete image from Dataset, always delete it from OS / file system",
+  "settingsDatasetViewDeleteFromOSNote": "Deletes the file from disk too, not just from the dataset.",
+  "settingsAnnotationTitle": "Annotation Settings",
+  "settingsAnnotationOpacity": "Annotation opacity",
+  "settingsAnnotationAutoSave": "Always Save or Submit annotation when move to the next image",
+  "settingsThemeTitle": "Theme selection",
+  "settingsLanguageTitle": "Country / Language",
+
+  "colorPickerTitle": "Pick a color",
+  "colorPickerBasicColors": "Basic Colors",
 
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
   "createProjectStepOneSubtitle": "Please, enter your new project name and select Project type",
   "createProjectStepTwoSubtitle": "Please, create labels for a New project",
-  "emptyProject_title": "Start your first project",
-  "emptyProject_description": "Create a project to begin organizing datasets, annotating media, and applying AI to your vision tasks — all in one streamlined workspace designed to accelerate your computer vision pipeline.",
-  "emptyProject_createNew": "Create New Project",
-  "emptyProject_importDataset": "Create Project from Dataset import",
+
+  "emptyProjectTitle": "Start your first project",
+  "emptyProjectDescription": "Create a project to begin organizing datasets, annotating media, and applying AI to your vision tasks — all in one streamlined workspace designed to accelerate your computer vision pipeline.",
+  "emptyProjectCreateNew": "Create New Project",
+  "emptyProjectCreateNewShort": "New Project",
+  "emptyProjectImportDataset": "Create Project from Dataset import",
+  "emptyProjectImportDatasetShort": "Import Dataset",
+
   "dialogBack": "<- Back",
   "dialogNext": "Next ->",
-  "dialogFinish": "Finish",
-  "dialogCloseTooltip": "Close",
+
+  "paginationPageFromTotal": "Page {current} from {total}",
+  "@paginationPageFromTotal": {
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+
   "taskTypeRequiredTitle": "Task Type Required",
   "taskTypeRequiredMessage": "You need to select a task type before continuing. The current tab '{tab}' has no task type selected. Each project must be associated with a task (e.g., object detection, classification, or segmentation) so the system knows how to process your data.",
   "@taskTypeRequiredMessage": {
@@ -45,6 +98,17 @@
   "menuAccount": "Account",
   "menuLearn": "Learn",
   "menuAbout": "About",
+
+  "menuCreateNewProject": "Create new project",
+  "menuCreateFromDataset": "Create from Dataset",
+  "menuImportDataset": "Create project from Dataset Import",
+  "menuSortLastUpdated": "Last updated",
+  "menuSortNewestOldest": "Newest-Oldest",
+  "menuSortOldestNewest": "Oldest-Newest",
+  "menuSortType": "Project Type",
+  "menuSortAz": "A-Z",
+  "menuSortZa": "Z-A",
+
   "projectNameLabel": "Project Name",
   "tabDetection": "Detection",
   "tabClassification": "Classification",
@@ -106,7 +170,7 @@
   "duplicateWithAnnotationsHint": "A copy of the image will be created along with all annotation data.",
   "duplicateImageOnly": "Duplicate image only",
   "duplicateImageOnlyHint": "Only the image will be copied, without annotations.",
-  "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)",
+  "saveDuplicateChoiceAsDefault": "Save this reply as default answer and do not ask again\n(You can change this in Account -> Application settings -> Dataset navigation)",
 
   "editProjectTitle": "Edit project name",
   "editProjectDescription": "Please, choose a clear, descriptive project name (3 - 86 characters). It's recommended to avoid special characters.",
@@ -114,7 +178,22 @@
   "changeProjectTypeTitle": "Change project type",
 
   "deleteProjectTitle": "Delete Project",
+  "deleteProjectInProgress": "Deleting project...",
+  "deleteProjectOptionDeleteFromDisk": "Also delete all files from disk",
+  "deleteProjectOptionDontAskAgain": "Don't ask me again",
   "deleteProjectConfirm": "Are you sure you want to delete the project \"{projectName}\"?",
+  "@deleteProjectConfirm": {
+    "placeholders": {
+      "projectName": {}
+    }
+  },
+  "deleteProjectInfoLine": "Project was created at {creationDate}\nNumber of Labels: {labelCount}",
+  "@deleteProjectInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "labelCount": {}
+    }
+  },
 
   "noLabelsTitle": "You have no Labels in the Project",
   "noLabelsExplain1": "You can't annotate without labels because labels give meaning to what you're marking",
@@ -124,21 +203,29 @@
   "noLabelsExplain5": "Whether you're tagging objects in images, classifying, or segmenting regions,",
   "noLabelsExplain6": "labels are essential for organizing your annotations clearly and consistently.",
 
-  "toolbar_navigation": "Navigation",
-  "toolbar_bbox": "Bounding Box",
-  "toolbar_segmentation": "Segmentation",
-  "toolbar_reset_zoom": "Reset Zoom",
-  "toolbar_toggle_grid": "Toggle Grid",
-  "toolbar_opacity_settings": "Opacity Settings",
-  "toolbar_toggle_annotation_names": "Toggle Annotation Names",
-  "toolbar_rotate_left": "Rotate Left (Coming Soon)",
-  "toolbar_rotate_right": "Rotate Right (Coming Soon)",
-  "toolbar_help": "Help",
-  "dialog_opacity_title": "Annotation Fill Opacity",
-  "dialog_help_title": "Annotator Toolbar Help",
-  "dialog_help_content": "• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.",
-  "dialog_help_tips": "Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!",
-  "dialog_opacity_explanation": "Adjust the opacity level to make the content more or less transparent.",
+  "noMediaDialogUploadPrompt": "You need to upload images or videos",
+  "noMediaDialogSupportedImageTypesTitle": "Supported images types:",
+  "noMediaDialogSupportedImageTypesList": "jpg, jpeg, png, bmp, jfif, webp",
+  "noMediaDialogSupportedVideoFormatsLink": "Click here to see which video formats are supported on your platform",
+  "noMediaDialogSupportedVideoFormatsTitle": "Supported Video Formats",
+  "noMediaDialogSupportedVideoFormatsList": "Commonly Supported Formats:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browser-dependent)\n- MKV: Android (partial), Windows\n- AVI: Android/Windows only (partial)",
+  "noMediaDialogSupportedVideoFormatsWarning": "Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.",
+
+  "toolbarNavigation": "Navigation",
+  "toolbarBbox": "Bounding Box",
+  "toolbarSegmentation": "Segmentation",
+  "toolbarResetZoom": "Reset Zoom",
+  "toolbarToggleGrid": "Toggle Grid",
+  "toolbarOpacitySettings": "Opacity Settings",
+  "toolbarToggleAnnotationNames": "Toggle Annotation Names",
+  "toolbarRotateLeft": "Rotate Left (Coming Soon)",
+  "toolbarRotateRight": "Rotate Right (Coming Soon)",
+  "toolbarHelp": "Help",
+  "dialogOpacityTitle": "Annotation Fill Opacity",
+  "dialogHelpTitle": "Annotator Toolbar Help",
+  "dialogHelpContent": "• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.",
+  "dialogHelpTips": "Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!",
+  "dialogOpacityExplanation": "Adjust the opacity level to make the content more or less transparent.",
 
   "deleteAnnotationTitle": "Delete Annotation",
   "deleteAnnotationMessage": "Are you sure you want to delete",
@@ -161,6 +248,10 @@
   "changeProjectTypeConversionDetails": "- Bounding boxes (Detection) -> converted to rectangular polygons.\n- Polygons (Segmentation) -> converted to tight-fitting bounding boxes.\n\nNote: These conversions may reduce precision, especially when converting polygons to boxes, as detailed shape information will be lost.\n\n- Detection / Segmentation → Classification:\n  Images will be classified based on the most frequent label in the annotations:\n     -> If image has 5 objects labeled \"Dog\" and 10 labeled \"Cat\", it will be classified as \"Cat\".\n     -> If the counts are equal, the first label found will be used.\n\n- Classification -> Detection / Segmentation:\n  No annotations will be transferred. You will need to re-annotate all media items manually, as classification projects do not contain region-level data.",
   "changeProjectTypeErrorTitle": "Migration Failed",
   "changeProjectTypeErrorMessage": "An error occurred while changing the project type. The changes could not be applied.",
-  "changeProjectTypeErrorTips": "Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support."
+  "changeProjectTypeErrorTips": "Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.",
+
+  "projectHelpTitle": "How Projects Work",
+  "projectHelpMessage": "Projects allow you to organize datasets, media files, and annotations in one place. You can create new projects for different tasks like detection, classification, or segmentation.",
+  "projectHelpTips": "Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically."
 
 }

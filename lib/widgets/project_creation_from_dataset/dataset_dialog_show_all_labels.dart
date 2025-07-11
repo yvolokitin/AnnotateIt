@@ -25,8 +25,13 @@ class ShowAllLabelsDialog extends StatelessWidget {
             runSpacing: 6,
             children: sortedLabels
                 .map((label) => Chip(
-                      label: Text(label,
-                          style: const TextStyle(color: Colors.black)),
+                      label: Text(
+                        label,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                       backgroundColor: Colors.redAccent,
                     ))
                 .toList(),
@@ -36,7 +41,13 @@ class ShowAllLabelsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.closeButton, style: const TextStyle(color: Colors.redAccent)),
+          child: Text(
+            l10n.buttonClose,
+            style: const TextStyle(
+              color: Colors.redAccent,
+              fontFamily: 'CascadiaCode',
+            ),
+          ),
         ),
       ],
     );

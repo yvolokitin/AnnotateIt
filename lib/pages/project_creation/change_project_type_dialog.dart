@@ -81,6 +81,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                     l10n.changeProjectTypeTitle,
                                     style: TextStyle(
                                       fontSize: isLargeScreen ? 26 : 22,
+                                      fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -96,6 +97,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                       : l10n.changeProjectTypeStepTwoSubtitle,
                                     style: const TextStyle(
                                       fontSize: 22,
+                                      fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.normal,
                                       color: Colors.white24,
                                     ),
@@ -127,7 +129,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                     right: 5,
                     child: IconButton(
                       icon: const Icon(Icons.close, color: Colors.white70),
-                      tooltip: l10n.closeButton,
+                      tooltip: l10n.buttonClose,
                       onPressed: () => {
                         if (currentStep != 3) {
                           Navigator.of(context).pop()
@@ -162,7 +164,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
     return StepProjectTypeSelection(
       projectType: widget.project.type,
       onSelectionChanged: (newProjectType) {
-        print('newProjectType $newProjectType');
         setState(() {
           currentProjectType = newProjectType;
         });
@@ -205,8 +206,11 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
             }
           },
           child: Text(
-            l10n.cancelButton,
-            style: TextStyle(color: Colors.white54)
+            l10n.buttonCancel,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
         ),
         Row(
@@ -215,8 +219,11 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
               TextButton(
                 onPressed: () => setState(() => currentStep--),
                 child: Text(
-                  l10n.backButton,
-                  style: TextStyle(color: Colors.white54)
+                  l10n.buttonBack,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontFamily: 'CascadiaCode',
+                  ),
                 ),
               ),
             const SizedBox(width: 8),
@@ -231,9 +238,10 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                 ),
               ),
               child: Text(
-                currentStep == 1 ? l10n.nextButton : l10n.changeButton,
+                currentStep == 1 ? l10n.buttonNext : l10n.buttonConfirm,
                 style: const TextStyle(
                   color: Colors.white,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),

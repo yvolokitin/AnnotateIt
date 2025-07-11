@@ -21,7 +21,7 @@ class DatasetTabBar extends StatelessWidget {
       controller: controller,
       isScrollable: true,
       indicatorColor: Colors.redAccent,
-      labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode',),
       unselectedLabelColor: Colors.white60,
       tabs: List.generate(datasets.length, (i) {
         final dataset = datasets[i];
@@ -36,6 +36,7 @@ class DatasetTabBar extends StatelessWidget {
               Text(
                 dataset.name,
                 style: TextStyle(
+                  fontFamily: 'CascadiaCode',
                   fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -48,17 +49,35 @@ class DatasetTabBar extends StatelessWidget {
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'rename',
-                      child: Text('Rename'),
+                      child: Text(
+                        'Rename',
+                        style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                     ),
                     if (!isDefault)
                       const PopupMenuItem(
                         value: 'set_default',
-                        child: Text('Set as Default'),
+                        child: Text(
+                          'Set as Default',
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                       ),
                     if (!isDefault)
                       const PopupMenuItem(
                         value: 'delete',
-                        child: Text('Delete'),
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                       ),
                   ],
                   icon: const Icon(Icons.more_vert, size: 18),

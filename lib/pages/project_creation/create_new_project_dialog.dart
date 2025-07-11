@@ -63,7 +63,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 1600;
-    final isTablet = screenWidth >= 800 && screenWidth < 1600;
+    final isTablet = screenWidth >= 900 && screenWidth < 1600;
     final l10n = AppLocalizations.of(context)!;
 
     return LayoutBuilder(
@@ -90,7 +90,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 40),
+                    padding: EdgeInsets.only(top: screenWidth>1400 ? 40 : 10),
                     child: Column(
                       children: [
                         Align(
@@ -111,41 +111,44 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                                     style: TextStyle(
                                       fontSize: isLargeScreen ? 26 : 22,
                                       fontWeight: FontWeight.bold,
+                                      fontFamily: 'CascadiaCode',
                                       color: Colors.white,
                                     ),
                                   ),
                                 ]
                               ),
                               const SizedBox(height: 4),
-                              Row(
-                                children: [                              
-                                  Text(
-                                    _step == 0
-                                      ? l10n.createProjectStepOneSubtitle
-                                      : l10n.createProjectStepTwoSubtitle,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.white24,
+                              if (screenWidth>445)...[
+                                Row(
+                                  children: [                              
+                                    Text(
+                                      _step == 0
+                                        ? l10n.createProjectStepOneSubtitle
+                                        : l10n.createProjectStepTwoSubtitle,
+                                      style: TextStyle(
+                                        fontSize: isLargeScreen ? 22 : (screenWidth>660) ? 18 : 12,
+                                        fontWeight: FontWeight.normal,
+                                        fontFamily: 'CascadiaCode',
+                                        color: Colors.white24,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenWidth>1200 ? 12 : (screenWidth>650) ? 6 : 2),
                         const Divider(color: Colors.white70),
-
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.all(15),
+                            padding: EdgeInsets.all(screenWidth>1200 ? 15 : 4),
                             child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenWidth>1200 ? 12 : (screenWidth>650) ? 6 : 2),
                         _buildBottomButtons(),
                       ],
                     ),
@@ -156,7 +159,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                     right: 5,
                     child: IconButton(
                       icon: const Icon(Icons.close, color: Colors.white70),
-                      tooltip: 'Close',
+                      tooltip: l10n.buttonClose,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -206,8 +209,11 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.cancelButton,
-            style: TextStyle(color: Colors.white54)
+            l10n.buttonCancel,
+            style: TextStyle(
+              color: Colors.white54,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
         ),
         Row(
@@ -217,7 +223,10 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 onPressed: () => setState(() => _step--),
                 child: Text(
                   l10n.dialogBack,
-                  style: TextStyle(color: Colors.white54)
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontFamily: 'CascadiaCode',
+                  ),
                 ),
               ),
             const SizedBox(width: 8),
@@ -232,9 +241,10 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 ),
               ),
               child: Text(
-                _step == 0 ? l10n.dialogNext : l10n.dialogFinish,
+                _step == 0 ? l10n.dialogNext : l10n.buttonFinish,
                 style: const TextStyle(
                   color: Colors.white,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),

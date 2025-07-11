@@ -67,6 +67,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
             l10n.editProjectTitle,
             style: TextStyle(
               color: Colors.orangeAccent,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
@@ -85,6 +86,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
               l10n.editProjectDescription,
               style: TextStyle(
                 color: Colors.white70,
+                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: (screenWidth > 1200) ? 24 : 20,
               ),
@@ -101,6 +103,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
                     color: Colors.white54,
+                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: screenWidth > 1200 ? 22 : 18,
                   ),
@@ -121,6 +124,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: (screenWidth > 1200) ? 22 : 18,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -141,10 +145,11 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 ),
               ),
               child: Text(
-                l10n.closeButton,
+                l10n.buttonClose,
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.normal,
+                  fontFamily: 'CascadiaCode',
                   fontSize: (screenWidth > 1200) ? 22 : 20,
                 ),
               ),
@@ -166,9 +171,10 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    l10n.saveButton,
+                    l10n.buttonSave,
                     style: TextStyle(
                       color: Colors.white,
+                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: (screenWidth > 1200) ? 22 : 20,
                     ),

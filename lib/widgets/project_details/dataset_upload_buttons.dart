@@ -194,7 +194,11 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             const SizedBox(width: 20),
             Text(
               "${widget.totalCount} files",
-              style: const TextStyle(color: Colors.white, fontSize: 22),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontFamily: 'CascadiaCode',
+              ),
             ),
           ],
 
@@ -202,7 +206,11 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           if (showDeleteButton && widget.selectedCount > 0) ...[
             Text(
               " / ${widget.selectedCount} selected",
-              style: const TextStyle(color: Colors.white, fontSize: 22),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontFamily: 'CascadiaCode',
+              ),
             ),
             const SizedBox(width: 20),
             MouseRegion(
@@ -225,7 +233,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       Icons.delete,
                       color: _hoveringDelete ? Colors.redAccent : Colors.white,
                     ),
-                    tooltip: l10n.deleteButton,
+                    tooltip: l10n.buttonDelete,
                     onPressed: widget.onDeleteSelected,
                   ),
                 ),
@@ -245,7 +253,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             items: [8, 16, 24, 36, 48].map((value) {
               return DropdownMenuItem<int>(
                 value: value,
-                child: Text('$value per page', style: const TextStyle(color: Colors.white, fontSize: 22)),
+                child: Text(
+                  '$value per page',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontFamily: 'CascadiaCode',
+                  ),
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -325,6 +340,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
+            fontFamily: 'CascadiaCode',
           ),
         ),
       );

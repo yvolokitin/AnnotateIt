@@ -51,6 +51,7 @@ class ProjectDetailsDrawerItem extends StatelessWidget {
                         fontSize: textSize,
                         color: isSelected ? Colors.white : Colors.white,
                         fontWeight: FontWeight.normal,
+                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                 ],

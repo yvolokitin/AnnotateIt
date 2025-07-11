@@ -9,40 +9,143 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get keepButton => 'Keep';
+  String get buttonKeep => 'Keep';
 
   @override
-  String get discardButton => 'Discard';
+  String get buttonSave => 'Save';
 
   @override
-  String get saveButton => 'Save';
+  String get buttonHelp => 'Help';
 
   @override
-  String get helpButton => 'Help';
+  String get buttonEdit => 'Edit';
 
   @override
-  String get nextButton => 'Next';
+  String get buttonNext => 'Next';
 
   @override
-  String get backButton => 'Back';
+  String get buttonBack => 'Back';
 
   @override
-  String get changeButton => 'Confirm';
+  String get buttonApply => 'Apply';
 
   @override
-  String get closeButton => 'Close';
+  String get buttonClose => 'Close';
 
   @override
-  String get cancelButton => 'Cancel';
+  String get buttonCancel => 'Cancel';
 
   @override
-  String get deleteButton => 'Delete';
+  String get buttonFinish => 'Finish';
 
   @override
-  String get duplicateButton => 'Duplicate';
+  String get buttonDelete => 'Delete';
 
   @override
-  String get applyButton => 'Apply';
+  String get buttonDuplicate => 'Duplicate';
+
+  @override
+  String get buttonConfirm => 'Confirm';
+
+  @override
+  String get buttonDiscard => 'Discard';
+
+  @override
+  String get buttonFeedbackShort => 'Fdbck';
+
+  @override
+  String get aboutTitle => 'About Annot@It';
+
+  @override
+  String get aboutDescription =>
+      'Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.';
+
+  @override
+  String get aboutFeaturesTitle => 'Key Features:';
+
+  @override
+  String get aboutFeatures =>
+      '- Multiple Project Types: Create and manage projects tailored for different computer vision tasks.\n- Data Upload & Management: Easily upload and organize your datasets for seamless annotation.\n- Advanced Annotation Tools – Use bounding boxes, polygons, keypoints, and segmentation masks.\n- Export & Integration – Export labeled data in various formats compatible with AI/ML frameworks.';
+
+  @override
+  String get aboutCallToAction =>
+      'Start your annotation journey today and build high-quality datasets for your computer vision models!';
+
+  @override
+  String get userProfileName => 'Captain Annotator';
+
+  @override
+  String get userProfileFeedbackButton => 'Feedback';
+
+  @override
+  String get userProfileEditProfileButton => 'Edit Profile';
+
+  @override
+  String get userProfileProjects => 'Projects';
+
+  @override
+  String get userProfileLabels => 'Labels';
+
+  @override
+  String get userProfileMedia => 'Media';
+
+  @override
+  String get userProfileAnnotations => 'Annotations';
+
+  @override
+  String get settingsGeneralTitle => 'General Settings';
+
+  @override
+  String get settingsProjectCreationTitle => 'Project Creation';
+
+  @override
+  String get settingsProjectCreationConfirmNoLabels =>
+      'Always ask to confirm when create a project with no labels';
+
+  @override
+  String get settingsProjectCreationConfirmNoLabelsNote =>
+      'You’ll be warned if you try to create a project without any labels defined.';
+
+  @override
+  String get settingsDatasetViewTitle => 'Dataset View';
+
+  @override
+  String get settingsDatasetViewDuplicateWithAnnotations =>
+      'Duplicate (make a copy) image always with annotations';
+
+  @override
+  String get settingsDatasetViewDuplicateWithAnnotationsNote =>
+      'When duplicating, annotations will be included unless you change settings.';
+
+  @override
+  String get settingsDatasetViewDeleteFromOS =>
+      'When delete image from Dataset, always delete it from OS / file system';
+
+  @override
+  String get settingsDatasetViewDeleteFromOSNote =>
+      'Deletes the file from disk too, not just from the dataset.';
+
+  @override
+  String get settingsAnnotationTitle => 'Annotation Settings';
+
+  @override
+  String get settingsAnnotationOpacity => 'Annotation opacity';
+
+  @override
+  String get settingsAnnotationAutoSave =>
+      'Always Save or Submit annotation when move to the next image';
+
+  @override
+  String get settingsThemeTitle => 'Theme selection';
+
+  @override
+  String get settingsLanguageTitle => 'Country / Language';
+
+  @override
+  String get colorPickerTitle => 'Pick a color';
+
+  @override
+  String get colorPickerBasicColors => 'Basic Colors';
 
   @override
   String get importDataset => 'Import dataset';
@@ -62,17 +165,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please, create labels for a New project';
 
   @override
-  String get emptyProject_title => 'Start your first project';
+  String get emptyProjectTitle => 'Start your first project';
 
   @override
-  String get emptyProject_description =>
+  String get emptyProjectDescription =>
       'Create a project to begin organizing datasets, annotating media, and applying AI to your vision tasks — all in one streamlined workspace designed to accelerate your computer vision pipeline.';
 
   @override
-  String get emptyProject_createNew => 'Create New Project';
+  String get emptyProjectCreateNew => 'Create New Project';
 
   @override
-  String get emptyProject_importDataset => 'Create Project from Dataset import';
+  String get emptyProjectCreateNewShort => 'New Project';
+
+  @override
+  String get emptyProjectImportDataset => 'Create Project from Dataset import';
+
+  @override
+  String get emptyProjectImportDatasetShort => 'Import Dataset';
 
   @override
   String get dialogBack => '<- Back';
@@ -81,10 +190,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dialogNext => 'Next ->';
 
   @override
-  String get dialogFinish => 'Finish';
-
-  @override
-  String get dialogCloseTooltip => 'Close';
+  String paginationPageFromTotal(int current, int total) {
+    return 'Page $current from $total';
+  }
 
   @override
   String get taskTypeRequiredTitle => 'Task Type Required';
@@ -110,6 +218,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuAbout => 'About';
+
+  @override
+  String get menuCreateNewProject => 'Create new project';
+
+  @override
+  String get menuCreateFromDataset => 'Create from Dataset';
+
+  @override
+  String get menuImportDataset => 'Create project from Dataset Import';
+
+  @override
+  String get menuSortLastUpdated => 'Last updated';
+
+  @override
+  String get menuSortNewestOldest => 'Newest-Oldest';
+
+  @override
+  String get menuSortOldestNewest => 'Oldest-Newest';
+
+  @override
+  String get menuSortType => 'Project Type';
+
+  @override
+  String get menuSortAz => 'A-Z';
+
+  @override
+  String get menuSortZa => 'Z-A';
 
   @override
   String get projectNameLabel => 'Project Name';
@@ -264,7 +399,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveDuplicateChoiceAsDefault =>
-      'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)';
+      'Save this reply as default answer and do not ask again\n(You can change this in Account -> Application settings -> Dataset navigation)';
 
   @override
   String get editProjectTitle => 'Edit project name';
@@ -280,8 +415,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteProjectTitle => 'Delete Project';
 
   @override
+  String get deleteProjectInProgress => 'Deleting project...';
+
+  @override
+  String get deleteProjectOptionDeleteFromDisk =>
+      'Also delete all files from disk';
+
+  @override
+  String get deleteProjectOptionDontAskAgain => 'Don\'t ask me again';
+
+  @override
   String deleteProjectConfirm(Object projectName) {
     return 'Are you sure you want to delete the project \"$projectName\"?';
+  }
+
+  @override
+  String deleteProjectInfoLine(Object creationDate, Object labelCount) {
+    return 'Project was created at $creationDate\nNumber of Labels: $labelCount';
   }
 
   @override
@@ -312,51 +462,77 @@ class AppLocalizationsEn extends AppLocalizations {
       'labels are essential for organizing your annotations clearly and consistently.';
 
   @override
-  String get toolbar_navigation => 'Navigation';
+  String get noMediaDialogUploadPrompt => 'You need to upload images or videos';
 
   @override
-  String get toolbar_bbox => 'Bounding Box';
+  String get noMediaDialogSupportedImageTypesTitle => 'Supported images types:';
 
   @override
-  String get toolbar_segmentation => 'Segmentation';
+  String get noMediaDialogSupportedImageTypesList =>
+      'jpg, jpeg, png, bmp, jfif, webp';
 
   @override
-  String get toolbar_reset_zoom => 'Reset Zoom';
+  String get noMediaDialogSupportedVideoFormatsLink =>
+      'Click here to see which video formats are supported on your platform';
 
   @override
-  String get toolbar_toggle_grid => 'Toggle Grid';
+  String get noMediaDialogSupportedVideoFormatsTitle =>
+      'Supported Video Formats';
 
   @override
-  String get toolbar_opacity_settings => 'Opacity Settings';
+  String get noMediaDialogSupportedVideoFormatsList =>
+      'Commonly Supported Formats:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browser-dependent)\n- MKV: Android (partial), Windows\n- AVI: Android/Windows only (partial)';
 
   @override
-  String get toolbar_toggle_annotation_names => 'Toggle Annotation Names';
+  String get noMediaDialogSupportedVideoFormatsWarning =>
+      'Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.';
 
   @override
-  String get toolbar_rotate_left => 'Rotate Left (Coming Soon)';
+  String get toolbarNavigation => 'Navigation';
 
   @override
-  String get toolbar_rotate_right => 'Rotate Right (Coming Soon)';
+  String get toolbarBbox => 'Bounding Box';
 
   @override
-  String get toolbar_help => 'Help';
+  String get toolbarSegmentation => 'Segmentation';
 
   @override
-  String get dialog_opacity_title => 'Annotation Fill Opacity';
+  String get toolbarResetZoom => 'Reset Zoom';
 
   @override
-  String get dialog_help_title => 'Annotator Toolbar Help';
+  String get toolbarToggleGrid => 'Toggle Grid';
 
   @override
-  String get dialog_help_content =>
+  String get toolbarOpacitySettings => 'Opacity Settings';
+
+  @override
+  String get toolbarToggleAnnotationNames => 'Toggle Annotation Names';
+
+  @override
+  String get toolbarRotateLeft => 'Rotate Left (Coming Soon)';
+
+  @override
+  String get toolbarRotateRight => 'Rotate Right (Coming Soon)';
+
+  @override
+  String get toolbarHelp => 'Help';
+
+  @override
+  String get dialogOpacityTitle => 'Annotation Fill Opacity';
+
+  @override
+  String get dialogHelpTitle => 'Annotator Toolbar Help';
+
+  @override
+  String get dialogHelpContent =>
       '• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.';
 
   @override
-  String get dialog_help_tips =>
+  String get dialogHelpTips =>
       'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!';
 
   @override
-  String get dialog_opacity_explanation =>
+  String get dialogOpacityExplanation =>
       'Adjust the opacity level to make the content more or less transparent.';
 
   @override
@@ -420,4 +596,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get changeProjectTypeErrorTips =>
       'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.';
+
+  @override
+  String get projectHelpTitle => 'How Projects Work';
+
+  @override
+  String get projectHelpMessage =>
+      'Projects allow you to organize datasets, media files, and annotations in one place. You can create new projects for different tasks like detection, classification, or segmentation.';
+
+  @override
+  String get projectHelpTips =>
+      'Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically.';
 }

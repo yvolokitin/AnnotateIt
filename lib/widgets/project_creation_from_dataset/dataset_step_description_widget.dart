@@ -18,12 +18,20 @@ class StepDescriptionWidget extends StatelessWidget {
     if (currentStep == 1) {
       return const Text(
         "Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format",
-        style: TextStyle(fontSize: 22, color: Colors.white70),
+        style: TextStyle(
+          fontSize: 22,
+          color: Colors.white70,
+          fontFamily: 'CascadiaCode',
+        ),
       );
     } else if (currentStep == 2) {
       return const Text(
         "Extracting ZIP in local storage ...",
-        style: TextStyle(fontSize: 22, color: Colors.white70),
+        style: TextStyle(
+          fontSize: 22,
+          color: Colors.white70,
+          fontFamily: 'CascadiaCode',
+        ),
       );
     } else if (currentStep == 3) {
       return Column(
@@ -40,6 +48,7 @@ class StepDescriptionWidget extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.blueAccent,
                 fontSize: 18,
+                fontFamily: 'CascadiaCode',
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -47,14 +56,22 @@ class StepDescriptionWidget extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             "Detected task type: $datasetFormat",
-            style: const TextStyle(fontSize: 22, color: Colors.white70),
+            style: const TextStyle(
+              fontSize: 22,
+              color: Colors.white70,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
         ],
       );
     } else {
       return const Text(
         "Edit your project labels",
-        style: TextStyle(fontSize: 22, color: Colors.white70),
+        style: TextStyle(
+          fontSize: 22,
+          color: Colors.white70,
+          fontFamily: 'CascadiaCode',
+        ),
       );
     }
   }

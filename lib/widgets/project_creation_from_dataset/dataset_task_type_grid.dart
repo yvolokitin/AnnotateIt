@@ -86,8 +86,9 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   task['title']!,
-                                  style: const TextStyle(
-                                    fontSize: 20,
+                                  style: TextStyle(
+                                    fontSize: width>1200 ? 20 : 18,
+                                    fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.bold,
                                   ),
                                   maxLines: 1,
@@ -99,8 +100,10 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             task['description']!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white70,
+                              fontFamily: 'CascadiaCode',
+                              fontSize: width>1200 ? 16 : 10,
                             ),
                             maxLines: width > 600 ? 2 : 3,
                             overflow: TextOverflow.ellipsis,

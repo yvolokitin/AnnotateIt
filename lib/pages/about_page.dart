@@ -1,54 +1,76 @@
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 
-// About Widget
 class AboutWidget extends StatelessWidget {
   const AboutWidget({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      padding: EdgeInsets.all(56), // 56px padding on all sides
-      decoration: BoxDecoration(
-        // border: Border.all(color: Colors.red, width: 3), 
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.topLeft, // Align text to top-left
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align text from the left
-        children: [
-          Text(
-            "About Annot@It",
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      color: Colors.grey[800],
+      width: double.infinity,
+      height: double.infinity, // Fill vertical space
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: (width > 1200) ? const EdgeInsets.all(24) : const EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 30),
+              Text(
+                l10n.aboutTitle,
+                style: TextStyle(
+                  fontSize: width>1200 ? 26 : 16,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: width>1200 ? 24 : 12),
+
+              Text(
+                l10n.aboutDescription,
+                style: TextStyle(
+                  fontSize: width>1200 ? 22 : 16,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              SizedBox(height: 30),
+
+              Text(
+                l10n.aboutFeaturesTitle,
+                style: TextStyle(
+                  fontSize: width>1200 ? 22 : 16,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: width>1200 ? 24 : 12),
+              Text(
+                l10n.aboutFeatures,
+                style: TextStyle(
+                  fontSize: width>1200 ? 22 : 16,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              SizedBox(height: 35),
+              Text(
+                l10n.aboutCallToAction,
+                style: TextStyle(
+                  fontSize: width>1200 ? 24 : 16,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 12), // Spacing between title and body text
-          Text(
-            "Annot@It is annotation application, which is designed "
-            "to streamline the annotation process for computer vision projects. "
-            "Whether you're working on image classification, object detection, "
-            "segmentation, or other vision tasks, Annot@It provides the flexibility "
-            "and precision needed for high-quality data labeling.",
-            style: TextStyle(fontSize: 22),
-          ),
-          SizedBox(height: 12),
-          Text(
-            "Key Features:",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 6),
-          Text(
-            "• Multiple Project Types – Create and manage projects tailored for different computer vision tasks.\n"
-            "• Data Upload & Management – Easily upload and organize your datasets for seamless annotation.\n"
-            "• Advanced Annotation Tools – Use bounding boxes, polygons, keypoints, and segmentation masks.\n"
-            "• Collaboration & Workflow – Work with teams, assign tasks, and track progress in real-time.\n"
-            "• Export & Integration – Export labeled data in various formats compatible with AI/ML frameworks.",
-            style: TextStyle(fontSize: 22),
-          ),
-          SizedBox(height: 12),
-          Text(
-            "Start your annotation journey today and build high-quality datasets for your computer vision models! 🚀",
-            style: TextStyle(fontSize: 22, fontStyle: FontStyle.italic),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
-  final int currentStep; // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project
+  // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project
+  final int currentStep;
 
   const DatasetStepProgressBar({super.key, required this.currentStep});
 
@@ -67,6 +68,7 @@ class DatasetStepProgressBar extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           style: TextStyle(
             fontSize: 14,
+            fontFamily: 'CascadiaCode',
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             color: isActive || isCompleted ? Colors.white : Colors.white54,
           ),

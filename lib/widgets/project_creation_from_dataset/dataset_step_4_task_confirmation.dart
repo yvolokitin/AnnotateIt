@@ -64,14 +64,20 @@ class StepDatasetTaskConfirmationState
                     style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'CascadiaCode',
                         color: Colors.white),
                   ),
                 ),
                 if (!allEnabled)
                 Row(
                   children: [
-                    const Text("Allow Project Type Change",
-                        style: TextStyle(color: Colors.white70)),
+                    const Text(
+                      "Allow Project Type Change",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),
                     Switch(
                       value: ignoreDisabled,
                       onChanged: (value) {
@@ -183,6 +189,7 @@ class StepDatasetTaskConfirmationState
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               color: Colors.white,
+                                              fontFamily: 'CascadiaCode',
                                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                             ),
                                           ),

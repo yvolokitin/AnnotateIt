@@ -88,6 +88,7 @@ class StepDatasetOverview extends StatelessWidget {
                           title,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'CascadiaCode',
                             color: colorScheme.onSurface,
                           ),
                         ),
@@ -118,6 +119,7 @@ class StepDatasetOverview extends StatelessWidget {
             "Dataset Task(s):",
             style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              fontFamily: 'CascadiaCode',
               color: colorScheme.onSurface,
             ),
           ),
@@ -126,7 +128,14 @@ class StepDatasetOverview extends StatelessWidget {
             spacing: 6,
             runSpacing: 4,
             children: taskTypes
-                .map((task) => Text(task, style: const TextStyle(fontSize: 16))).toList(),
+              .map((task) => Text(
+                task,
+                style: const TextStyle(
+                  fontFamily: 'CascadiaCode',
+                  fontSize: 16,
+                ),
+              ),
+            ).toList(),
           ),
         ],
       ),
@@ -177,6 +186,7 @@ class StepDatasetOverview extends StatelessWidget {
                           title,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'CascadiaCode',
                             color: colorScheme.onSurface,
                           ),
                         ),
@@ -186,7 +196,10 @@ class StepDatasetOverview extends StatelessWidget {
                   const SizedBox(height: 20),
                   Text(
                     "Total: ${labels.length}",
-                    style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                   const SizedBox(height: 10),
                   visibleLabels.isNotEmpty
@@ -195,14 +208,24 @@ class StepDatasetOverview extends StatelessWidget {
                           runSpacing: 4,
                           children: visibleLabels
                               .map((label) => Chip(
-                                    label: Text(label,
-                                        style: const TextStyle(color: Colors.black)),
+                                    label: Text(
+                                      label,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'CascadiaCode',
+                                      ),
+                                    ),
                                     backgroundColor: Colors.redAccent,
                                   ))
                               .toList(),
                         )
-                      : Text("No labels detected.",
-                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+                      : Text(
+                        "No labels detected.",
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                   if (hasMore) ...[
                     const SizedBox(height: 10),
                     ElevatedButton.icon(
@@ -214,7 +237,12 @@ class StepDatasetOverview extends StatelessWidget {
                         ),
                       ),
                       onPressed: () => _showAllLabelsDialog(context, labels),
-                      label: const Text("Show all labels"),
+                      label: Text(
+                        "Show all labels",
+                        style: TextStyle(
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                     ),
                   ],
                 ],
@@ -253,6 +281,7 @@ class StepDatasetOverview extends StatelessWidget {
             "$key: ",
             style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              fontFamily: 'CascadiaCode',
               color: colorScheme.onSurface,
             ),
           ),
@@ -260,6 +289,7 @@ class StepDatasetOverview extends StatelessWidget {
             child: Text(
               value,
               style: textTheme.bodyMedium?.copyWith(
+                fontFamily: 'CascadiaCode',
                 color: colorScheme.onSurfaceVariant,
               ),
               overflow: TextOverflow.ellipsis,

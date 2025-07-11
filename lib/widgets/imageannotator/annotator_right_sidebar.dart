@@ -38,6 +38,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -69,8 +70,10 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Text(
                 "Annotations (${widget.annotations.length})",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: (screenWidth > 700) ? 20 : 17,
+                  fontFamily: 'CascadiaCode',
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -95,6 +98,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
           "No annotations yet",
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.hintColor,
+            fontFamily: 'CascadiaCode',
           ),
         ),
       ),

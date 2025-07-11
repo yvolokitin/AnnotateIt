@@ -61,18 +61,19 @@ class _OpacityDialogState extends State<OpacityDialog> {
               ),
               const SizedBox(width: 12),
               Text(
-                l10n.dialog_opacity_title,
+                l10n.dialogOpacityTitle,
                 style: const TextStyle(
                   color: Colors.orangeAccent,
-                  fontWeight: FontWeight.bold,
                   fontSize: 24,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.orangeAccent),
-            tooltip: 'Close',
+            tooltip: l10n.buttonClose,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -92,9 +93,10 @@ class _OpacityDialogState extends State<OpacityDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.dialog_opacity_explanation,
+                      l10n.dialogOpacityExplanation,
                       style: const TextStyle(
                         color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.normal,
                         fontSize: 22,
                       ),
@@ -116,6 +118,7 @@ class _OpacityDialogState extends State<OpacityDialog> {
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 22,
+                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -134,10 +137,11 @@ class _OpacityDialogState extends State<OpacityDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
           ),
           child: Text(
-            l10n.cancelButton,
+            l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 22,
+              fontFamily: 'CascadiaCode',
             ),
           ),
         ),
@@ -155,10 +159,11 @@ class _OpacityDialogState extends State<OpacityDialog> {
             ),
           ),
           child: Text(
-            l10n.applyButton,
+            l10n.buttonApply,
             style: const TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,
+              fontFamily: 'CascadiaCode',
               fontSize: 22,
             ),
           ),

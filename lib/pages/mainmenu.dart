@@ -1,11 +1,16 @@
 import "package:flutter/material.dart";
 
-import '../widgets/mainmenu/main_menu_navigation_rail_menu.dart';
-import '../widgets/mainmenu/main_menu_app_drawer.dart';
-import "../widgets/mainmenu/header.dart";
+import "../data/project_database.dart";
 
+import "../widgets/mainmenu/header.dart";
+import '../widgets/mainmenu/main_menu_app_drawer.dart';
+import '../widgets/mainmenu/main_menu_navigation_rail_menu.dart';
+
+import "project_creation/create_from_dataset_dialog.dart";
+import "project_creation/create_new_project_dialog.dart";
+
+import "project_details_page.dart";
 import "projects_list_page.dart";
-import "learn_page.dart";
 import "about_page.dart";
 import "account_page.dart";
 
@@ -29,34 +34,22 @@ class MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        double screenWidth = MediaQuery.of(context).size.width;
-        // 16+ inches screens
-        bool isLargeScreen = screenWidth >= 1600;
-        // 13-16 inches -> tablets and small laptops
-        bool isMediumScreen = screenWidth >= 720 && screenWidth < 1600;
-        // less than 13 inches -> mobile devices
-        bool isSmallScreen = screenWidth < 720;
-
+        print('Height $screenHeight, Width $screenWidth');
         return Scaffold(
           key: _scaffoldKey,
           body: Column(
             children: [
-              // Always visible top header (Persistent App Header (always on top)
-              AppHeader(
-                onHeaderPressed: isSmallScreen
-                  ? () {
-                      _scaffoldKey.currentState?.openDrawer();
-                    }
-                  : null,
-              ),
-
+              AppHeader(),
               Expanded(
                 child: Row(
                   children: [
                     // Full drawer for large screens
-                    if (isLargeScreen)
+                    if (screenWidth >= 1600)
                       Expanded(
                         flex: 2,
                         child: Column(
@@ -82,10 +75,35 @@ class MainPageState extends State<MainPage> {
                       ),
 
                     // NavigationRail for medium screens
-                    if (isMediumScreen)
+                    if (screenWidth < 1600)
                       MainMenuNavigationRailMenu(
                         selectedIndex: selectedIndex,
                         onItemSelected: _onItemTapped,
+                        onCreateProject: () async {
+                          final result = await showDialog<String>(
+                            context: context,
+                            builder: (context) => CreateNewProjectDialog(),
+                          );
+                          if (result == 'refresh') {
+                            setState(() {});
+                          }
+                        },
+                        onCreateFromDataset: () async {
+                          final result = await showDialog<int>(
+                            context: context,
+                            builder: (_) => const CreateFromDatasetDialog(),
+                          );
+                          if (result != null) {
+                            final newProject = await ProjectDatabase.instance.fetchProjectById(result);
+                            if (newProject != null && context.mounted) {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ProjectDetailsPage(newProject)),
+                              );
+                              setState(() {}); // перерисовать ProjectsListPage
+                            }
+                          }
+                        },
                       ),
 
                     // Main content area
@@ -100,17 +118,6 @@ class MainPageState extends State<MainPage> {
               ),
             ],
           ),
-
-          // Drawer only for small screens
-          drawer: isSmallScreen
-              ? MainMenuAppDrawer(
-                  selectedIndex: selectedIndex,
-                  onItemSelected: (index) {
-                    _onItemTapped(index);
-                    Navigator.pop(context); // Close the drawer after selection
-                  },
-                )
-              : null,
         );
       },
     );
@@ -120,12 +127,13 @@ class MainPageState extends State<MainPage> {
     switch (index) {
       case 0:
         return ProjectsListPage();
+
       case 1:
         return AccountPage();
+
       case 2:
-        return LearnWidget();
-      case 3:
         return AboutWidget();
+
       default:
         return ProjectsListPage();
     }

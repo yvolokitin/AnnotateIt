@@ -23,6 +23,7 @@ class DeleteAnnotationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return AlertDialog(
@@ -44,9 +45,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                AppLocalizations.of(context)!.deleteAnnotationTitle,
+                l10n.deleteAnnotationTitle,
                 style: const TextStyle(
                   color: Colors.orangeAccent,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -71,9 +73,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
                 child: Text(
-                  '${AppLocalizations.of(context)!.deleteAnnotationMessage} "${annotation.name ?? AppLocalizations.of(context)!.unnamedAnnotation}"?',
+                  '${l10n.deleteAnnotationMessage} "${annotation.name ?? l10n.unnamedAnnotation}"?',
                   style: const TextStyle(
                     color: Colors.white70,
+                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: 22,
                   ),
@@ -92,9 +95,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
           ),
           child: Text(
-            AppLocalizations.of(context)!.cancelButton,
+            l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white70,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),
@@ -111,9 +115,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
             ),
           ),
           child: Text(
-            AppLocalizations.of(context)!.deleteButton,
+            l10n.buttonDelete,
             style: const TextStyle(
               color: Colors.white,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),

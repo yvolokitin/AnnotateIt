@@ -17,7 +17,15 @@ class AnnotationBadge extends StatelessWidget {
         children: [
           const Icon(Icons.label_important, size: 16, color: Colors.amber),
           const SizedBox(width: 4),
-          Text('$count', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(
+            '$count',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

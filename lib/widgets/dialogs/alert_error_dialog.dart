@@ -56,6 +56,7 @@ class AlertErrorDialog extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Colors.orangeAccent,
+                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -84,6 +85,7 @@ class AlertErrorDialog extends StatelessWidget {
                   message,
                   style: const TextStyle(
                     color: Colors.white70,
+                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: 22,
                   ),
@@ -96,6 +98,7 @@ class AlertErrorDialog extends StatelessWidget {
                     tips!,
                     style: const TextStyle(
                       color: Colors.white60,
+                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                       fontSize: 22,
                     ),
@@ -119,9 +122,10 @@ class AlertErrorDialog extends StatelessWidget {
             ),
           ),
           child: Text(
-            AppLocalizations.of(context)!.closeButton,
+            AppLocalizations.of(context)!.buttonClose,
             style: TextStyle(
               color: Colors.orangeAccent,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),

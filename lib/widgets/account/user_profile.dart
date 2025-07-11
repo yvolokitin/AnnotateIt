@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
+
 import '../../data/project_database.dart';
 
 class UserProfile extends StatelessWidget {
-  const UserProfile({Key? key}) : super(key: key);
+  const UserProfile({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    String editButton = screenWidth>500 ? l10n.userProfileEditProfileButton : l10n.buttonEdit;
+    String fdbkButton = screenWidth>500 ? l10n.userProfileFeedbackButton : l10n.buttonFeedbackShort;
+
     return Scaffold(
       body: Column(
         children: [
@@ -18,10 +28,12 @@ class UserProfile extends StatelessWidget {
                 children: [
                   Text(
                     "Captain Annotator",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenWidth > 1200 ? 24 : 18,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -32,7 +44,13 @@ class UserProfile extends StatelessWidget {
                         elevation: 0,
                         backgroundColor: Colors.grey.shade300,
                         foregroundColor: Colors.black87,
-                        label: const Text("Feedback", style: TextStyle(fontSize: 22)),
+                        label: Text(
+                          fdbkButton,
+                          style: TextStyle(
+                            fontSize: screenWidth > 1200 ? 22 : 16,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                         icon: const Icon(Icons.feedback_outlined),
                       ),
                       const SizedBox(width: 16.0),
@@ -40,7 +58,13 @@ class UserProfile extends StatelessWidget {
                         onPressed: () {},
                         elevation: 0,
                         backgroundColor: Colors.redAccent,
-                        label: const Text("Edit Profile", style: TextStyle(fontSize: 22)),
+                        label: Text(
+                          editButton,
+                          style: TextStyle(
+                            fontSize: screenWidth > 1200 ? 22 : 16,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                         icon: const Icon(Icons.edit),
                       ),
                     ],
@@ -72,7 +96,6 @@ class _TopPortion extends StatelessWidget {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [Color.fromARGB(255, 66, 66, 66), Color.fromARGB(255, 66, 66, 66)],
-              // colors: [Color.fromARGB(255, 244, 67, 54), Color.fromARGB(255, 66, 66, 66)],
 
             ),
             borderRadius: BorderRadius.only(
@@ -88,7 +111,6 @@ class _TopPortion extends StatelessWidget {
             height: 170,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              // border: Border.all(color: const Color.fromARGB(255, 244, 67, 54), width: 6),
             ),
             child: ClipOval(
               child: Image.asset(
@@ -139,11 +161,14 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     final items = [
-      ProfileInfoItem("Projects", projectCount),
-      ProfileInfoItem("Labels", labelCount),
-      ProfileInfoItem("Media", mediaCount),
-      ProfileInfoItem("Annotations", annotationCount),
+      ProfileInfoItem(screenWidth>500 ? l10n.userProfileProjects : l10n.userProfileProjects[0], projectCount),
+      ProfileInfoItem(screenWidth>500 ? l10n.userProfileLabels : l10n.userProfileLabels[0], labelCount),
+      ProfileInfoItem(screenWidth>500 ? l10n.userProfileMedia : l10n.userProfileMedia[0], mediaCount),
+      ProfileInfoItem(screenWidth>500 ? l10n.userProfileAnnotations : l10n.userProfileAnnotations[0], annotationCount),
     ];
 
     return Container(
@@ -167,6 +192,7 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
 
   Widget _singleItem(BuildContext context, ProfileInfoItem item) {
     final isLoading = item.value == null;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -174,23 +200,29 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  item.value.toString(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
+            ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+            : Text(
+              item.value.toString(),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'CascadiaCode',
+                fontSize: 20,
+              ),
+            ),
         ),
+
         Text(
-          item.title,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 16.8),
-        ),
+            item.title,
+            style: TextStyle(
+              fontSize: screenWidth > 1200 ? 16 : 12,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
       ],
     );
   }

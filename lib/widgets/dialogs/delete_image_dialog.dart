@@ -28,6 +28,7 @@ class DeleteImageDialog extends StatelessWidget {
           l10n.removeFilesFromDatasetConfirm(mediaItems.length),
           style: const TextStyle(
             color: Colors.white70,
+            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -43,7 +44,10 @@ class DeleteImageDialog extends StatelessWidget {
                 Expanded(
                   child: Text(
                     fileName,
-                    style: const TextStyle(color: Colors.white54),
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontFamily: 'CascadiaCode',
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -59,7 +63,12 @@ class DeleteImageDialog extends StatelessWidget {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.removeFilesFromDataset),
+          Text(
+            l10n.removeFilesFromDataset,
+            style: TextStyle(
+              fontFamily: 'CascadiaCode',
+            ),
+          ),
           const SizedBox(height: 8),
           const Divider(thickness: 1, color: Colors.white),
         ],
@@ -83,10 +92,11 @@ class DeleteImageDialog extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
           child: Text(
-            l10n.cancelButton,
+            l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -106,10 +116,11 @@ class DeleteImageDialog extends StatelessWidget {
             Navigator.pop(context);
           },
           child: Text(
-            l10n.deleteButton,
+            l10n.buttonDelete,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -44,6 +44,7 @@ class MainMenuDrawerItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: screenWidth>1600 ? 28 : 24,
                     color: Colors.white,
+                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                   ),
                 ),

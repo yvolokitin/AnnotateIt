@@ -71,11 +71,22 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                 children: [
                   const Text(
                     "File Details",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const Divider(color: Colors.white24),
                   const SizedBox(height: 8),
-                  SelectableText(media.filePath, style: const TextStyle(color: Colors.white70, fontFamily: 'monospace')),
+                  SelectableText(
+                    media.filePath,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontFamily: 'CascadiaCode',
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   isFullscreen
                       ? Column(
@@ -133,6 +144,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -190,12 +202,25 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
 
   Widget _buildAnnotationsList() {
     if (widget.media.annotations.isEmpty) {
-      return const Text("No annotations", style: TextStyle(color: Colors.white70));
+      return const Text(
+        "No annotations",
+        style: TextStyle(
+          color: Colors.white70,
+          fontFamily: 'CascadiaCode',
+        ),
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Annotations:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        const Text(
+          "Annotations:",
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'CascadiaCode',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 8),
         ...widget.media.annotations.map((a) {
           final type = a.annotationType;
@@ -207,8 +232,13 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               color: Colors.grey[700],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text("$type / $createdAt",
-                style: const TextStyle(color: Colors.white, fontFamily: 'monospace')),
+            child: Text(
+              "$type / $createdAt",
+              style: const TextStyle(
+                color: Colors.white,
+                fontFamily: 'CascadiaCode',
+              ),
+            ),
           );
         }).toList(),
       ],
@@ -224,16 +254,16 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
             TextSpan(
               text: "$label: ",
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                fontFamily: 'CascadiaCode',
               ),
             ),
             TextSpan(
               text: value,
               style: const TextStyle(
                 color: Colors.white70,
-                fontFamily: 'monospace',
+                fontFamily: 'CascadiaCode',
               ),
             ),
           ],

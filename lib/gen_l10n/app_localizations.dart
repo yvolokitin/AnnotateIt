@@ -94,77 +94,263 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
-  /// No description provided for @keepButton.
+  /// No description provided for @buttonKeep.
   ///
   /// In en, this message translates to:
   /// **'Keep'**
-  String get keepButton;
+  String get buttonKeep;
 
-  /// No description provided for @discardButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard'**
-  String get discardButton;
-
-  /// No description provided for @saveButton.
+  /// No description provided for @buttonSave.
   ///
   /// In en, this message translates to:
   /// **'Save'**
-  String get saveButton;
+  String get buttonSave;
 
-  /// No description provided for @helpButton.
+  /// No description provided for @buttonHelp.
   ///
   /// In en, this message translates to:
   /// **'Help'**
-  String get helpButton;
+  String get buttonHelp;
 
-  /// No description provided for @nextButton.
+  /// No description provided for @buttonEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get buttonEdit;
+
+  /// No description provided for @buttonNext.
   ///
   /// In en, this message translates to:
   /// **'Next'**
-  String get nextButton;
+  String get buttonNext;
 
-  /// No description provided for @backButton.
+  /// No description provided for @buttonBack.
   ///
   /// In en, this message translates to:
   /// **'Back'**
-  String get backButton;
+  String get buttonBack;
 
-  /// No description provided for @changeButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm'**
-  String get changeButton;
-
-  /// No description provided for @closeButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get closeButton;
-
-  /// No description provided for @cancelButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancelButton;
-
-  /// No description provided for @deleteButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get deleteButton;
-
-  /// No description provided for @duplicateButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicate'**
-  String get duplicateButton;
-
-  /// No description provided for @applyButton.
+  /// No description provided for @buttonApply.
   ///
   /// In en, this message translates to:
   /// **'Apply'**
-  String get applyButton;
+  String get buttonApply;
+
+  /// No description provided for @buttonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get buttonClose;
+
+  /// No description provided for @buttonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get buttonCancel;
+
+  /// No description provided for @buttonFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get buttonFinish;
+
+  /// No description provided for @buttonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get buttonDelete;
+
+  /// No description provided for @buttonDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get buttonDuplicate;
+
+  /// No description provided for @buttonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get buttonConfirm;
+
+  /// No description provided for @buttonDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get buttonDiscard;
+
+  /// No description provided for @buttonFeedbackShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fdbck'**
+  String get buttonFeedbackShort;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About Annot@It'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Features:'**
+  String get aboutFeaturesTitle;
+
+  /// No description provided for @aboutFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'- Multiple Project Types: Create and manage projects tailored for different computer vision tasks.\n- Data Upload & Management: Easily upload and organize your datasets for seamless annotation.\n- Advanced Annotation Tools – Use bounding boxes, polygons, keypoints, and segmentation masks.\n- Export & Integration – Export labeled data in various formats compatible with AI/ML frameworks.'**
+  String get aboutFeatures;
+
+  /// No description provided for @aboutCallToAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your annotation journey today and build high-quality datasets for your computer vision models!'**
+  String get aboutCallToAction;
+
+  /// No description provided for @userProfileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Captain Annotator'**
+  String get userProfileName;
+
+  /// No description provided for @userProfileFeedbackButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get userProfileFeedbackButton;
+
+  /// No description provided for @userProfileEditProfileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get userProfileEditProfileButton;
+
+  /// No description provided for @userProfileProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get userProfileProjects;
+
+  /// No description provided for @userProfileLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels'**
+  String get userProfileLabels;
+
+  /// No description provided for @userProfileMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media'**
+  String get userProfileMedia;
+
+  /// No description provided for @userProfileAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotations'**
+  String get userProfileAnnotations;
+
+  /// No description provided for @settingsGeneralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General Settings'**
+  String get settingsGeneralTitle;
+
+  /// No description provided for @settingsProjectCreationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Creation'**
+  String get settingsProjectCreationTitle;
+
+  /// No description provided for @settingsProjectCreationConfirmNoLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Always ask to confirm when create a project with no labels'**
+  String get settingsProjectCreationConfirmNoLabels;
+
+  /// No description provided for @settingsProjectCreationConfirmNoLabelsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll be warned if you try to create a project without any labels defined.'**
+  String get settingsProjectCreationConfirmNoLabelsNote;
+
+  /// No description provided for @settingsDatasetViewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dataset View'**
+  String get settingsDatasetViewTitle;
+
+  /// No description provided for @settingsDatasetViewDuplicateWithAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate (make a copy) image always with annotations'**
+  String get settingsDatasetViewDuplicateWithAnnotations;
+
+  /// No description provided for @settingsDatasetViewDuplicateWithAnnotationsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When duplicating, annotations will be included unless you change settings.'**
+  String get settingsDatasetViewDuplicateWithAnnotationsNote;
+
+  /// No description provided for @settingsDatasetViewDeleteFromOS.
+  ///
+  /// In en, this message translates to:
+  /// **'When delete image from Dataset, always delete it from OS / file system'**
+  String get settingsDatasetViewDeleteFromOS;
+
+  /// No description provided for @settingsDatasetViewDeleteFromOSNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes the file from disk too, not just from the dataset.'**
+  String get settingsDatasetViewDeleteFromOSNote;
+
+  /// No description provided for @settingsAnnotationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation Settings'**
+  String get settingsAnnotationTitle;
+
+  /// No description provided for @settingsAnnotationOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation opacity'**
+  String get settingsAnnotationOpacity;
+
+  /// No description provided for @settingsAnnotationAutoSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Always Save or Submit annotation when move to the next image'**
+  String get settingsAnnotationAutoSave;
+
+  /// No description provided for @settingsThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme selection'**
+  String get settingsThemeTitle;
+
+  /// No description provided for @settingsLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Country / Language'**
+  String get settingsLanguageTitle;
+
+  /// No description provided for @colorPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a color'**
+  String get colorPickerTitle;
+
+  /// No description provided for @colorPickerBasicColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Colors'**
+  String get colorPickerBasicColors;
 
   /// No description provided for @importDataset.
   ///
@@ -196,29 +382,41 @@ abstract class AppLocalizations {
   /// **'Please, create labels for a New project'**
   String get createProjectStepTwoSubtitle;
 
-  /// No description provided for @emptyProject_title.
+  /// No description provided for @emptyProjectTitle.
   ///
   /// In en, this message translates to:
   /// **'Start your first project'**
-  String get emptyProject_title;
+  String get emptyProjectTitle;
 
-  /// No description provided for @emptyProject_description.
+  /// No description provided for @emptyProjectDescription.
   ///
   /// In en, this message translates to:
   /// **'Create a project to begin organizing datasets, annotating media, and applying AI to your vision tasks — all in one streamlined workspace designed to accelerate your computer vision pipeline.'**
-  String get emptyProject_description;
+  String get emptyProjectDescription;
 
-  /// No description provided for @emptyProject_createNew.
+  /// No description provided for @emptyProjectCreateNew.
   ///
   /// In en, this message translates to:
   /// **'Create New Project'**
-  String get emptyProject_createNew;
+  String get emptyProjectCreateNew;
 
-  /// No description provided for @emptyProject_importDataset.
+  /// No description provided for @emptyProjectCreateNewShort.
+  ///
+  /// In en, this message translates to:
+  /// **'New Project'**
+  String get emptyProjectCreateNewShort;
+
+  /// No description provided for @emptyProjectImportDataset.
   ///
   /// In en, this message translates to:
   /// **'Create Project from Dataset import'**
-  String get emptyProject_importDataset;
+  String get emptyProjectImportDataset;
+
+  /// No description provided for @emptyProjectImportDatasetShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Dataset'**
+  String get emptyProjectImportDatasetShort;
 
   /// No description provided for @dialogBack.
   ///
@@ -232,17 +430,11 @@ abstract class AppLocalizations {
   /// **'Next ->'**
   String get dialogNext;
 
-  /// No description provided for @dialogFinish.
+  /// No description provided for @paginationPageFromTotal.
   ///
   /// In en, this message translates to:
-  /// **'Finish'**
-  String get dialogFinish;
-
-  /// No description provided for @dialogCloseTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get dialogCloseTooltip;
+  /// **'Page {current} from {total}'**
+  String paginationPageFromTotal(int current, int total);
 
   /// No description provided for @taskTypeRequiredTitle.
   ///
@@ -285,6 +477,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get menuAbout;
+
+  /// No description provided for @menuCreateNewProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new project'**
+  String get menuCreateNewProject;
+
+  /// No description provided for @menuCreateFromDataset.
+  ///
+  /// In en, this message translates to:
+  /// **'Create from Dataset'**
+  String get menuCreateFromDataset;
+
+  /// No description provided for @menuImportDataset.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project from Dataset Import'**
+  String get menuImportDataset;
+
+  /// No description provided for @menuSortLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get menuSortLastUpdated;
+
+  /// No description provided for @menuSortNewestOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest-Oldest'**
+  String get menuSortNewestOldest;
+
+  /// No description provided for @menuSortOldestNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest-Newest'**
+  String get menuSortOldestNewest;
+
+  /// No description provided for @menuSortType.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Type'**
+  String get menuSortType;
+
+  /// No description provided for @menuSortAz.
+  ///
+  /// In en, this message translates to:
+  /// **'A-Z'**
+  String get menuSortAz;
+
+  /// No description provided for @menuSortZa.
+  ///
+  /// In en, this message translates to:
+  /// **'Z-A'**
+  String get menuSortZa;
 
   /// No description provided for @projectNameLabel.
   ///
@@ -541,7 +787,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDuplicateChoiceAsDefault.
   ///
   /// In en, this message translates to:
-  /// **'Save this reply as default answer and do not ask again\n(You can change this in Account → Application settings → Dataset navigation)'**
+  /// **'Save this reply as default answer and do not ask again\n(You can change this in Account -> Application settings -> Dataset navigation)'**
   String get saveDuplicateChoiceAsDefault;
 
   /// No description provided for @editProjectTitle.
@@ -568,11 +814,35 @@ abstract class AppLocalizations {
   /// **'Delete Project'**
   String get deleteProjectTitle;
 
+  /// No description provided for @deleteProjectInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting project...'**
+  String get deleteProjectInProgress;
+
+  /// No description provided for @deleteProjectOptionDeleteFromDisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete all files from disk'**
+  String get deleteProjectOptionDeleteFromDisk;
+
+  /// No description provided for @deleteProjectOptionDontAskAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t ask me again'**
+  String get deleteProjectOptionDontAskAgain;
+
   /// No description provided for @deleteProjectConfirm.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete the project \"{projectName}\"?'**
   String deleteProjectConfirm(Object projectName);
+
+  /// No description provided for @deleteProjectInfoLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Project was created at {creationDate}\nNumber of Labels: {labelCount}'**
+  String deleteProjectInfoLine(Object creationDate, Object labelCount);
 
   /// No description provided for @noLabelsTitle.
   ///
@@ -616,95 +886,137 @@ abstract class AppLocalizations {
   /// **'labels are essential for organizing your annotations clearly and consistently.'**
   String get noLabelsExplain6;
 
-  /// No description provided for @toolbar_navigation.
+  /// No description provided for @noMediaDialogUploadPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to upload images or videos'**
+  String get noMediaDialogUploadPrompt;
+
+  /// No description provided for @noMediaDialogSupportedImageTypesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported images types:'**
+  String get noMediaDialogSupportedImageTypesTitle;
+
+  /// No description provided for @noMediaDialogSupportedImageTypesList.
+  ///
+  /// In en, this message translates to:
+  /// **'jpg, jpeg, png, bmp, jfif, webp'**
+  String get noMediaDialogSupportedImageTypesList;
+
+  /// No description provided for @noMediaDialogSupportedVideoFormatsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Click here to see which video formats are supported on your platform'**
+  String get noMediaDialogSupportedVideoFormatsLink;
+
+  /// No description provided for @noMediaDialogSupportedVideoFormatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Video Formats'**
+  String get noMediaDialogSupportedVideoFormatsTitle;
+
+  /// No description provided for @noMediaDialogSupportedVideoFormatsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Commonly Supported Formats:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browser-dependent)\n- MKV: Android (partial), Windows\n- AVI: Android/Windows only (partial)'**
+  String get noMediaDialogSupportedVideoFormatsList;
+
+  /// No description provided for @noMediaDialogSupportedVideoFormatsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.'**
+  String get noMediaDialogSupportedVideoFormatsWarning;
+
+  /// No description provided for @toolbarNavigation.
   ///
   /// In en, this message translates to:
   /// **'Navigation'**
-  String get toolbar_navigation;
+  String get toolbarNavigation;
 
-  /// No description provided for @toolbar_bbox.
+  /// No description provided for @toolbarBbox.
   ///
   /// In en, this message translates to:
   /// **'Bounding Box'**
-  String get toolbar_bbox;
+  String get toolbarBbox;
 
-  /// No description provided for @toolbar_segmentation.
+  /// No description provided for @toolbarSegmentation.
   ///
   /// In en, this message translates to:
   /// **'Segmentation'**
-  String get toolbar_segmentation;
+  String get toolbarSegmentation;
 
-  /// No description provided for @toolbar_reset_zoom.
+  /// No description provided for @toolbarResetZoom.
   ///
   /// In en, this message translates to:
   /// **'Reset Zoom'**
-  String get toolbar_reset_zoom;
+  String get toolbarResetZoom;
 
-  /// No description provided for @toolbar_toggle_grid.
+  /// No description provided for @toolbarToggleGrid.
   ///
   /// In en, this message translates to:
   /// **'Toggle Grid'**
-  String get toolbar_toggle_grid;
+  String get toolbarToggleGrid;
 
-  /// No description provided for @toolbar_opacity_settings.
+  /// No description provided for @toolbarOpacitySettings.
   ///
   /// In en, this message translates to:
   /// **'Opacity Settings'**
-  String get toolbar_opacity_settings;
+  String get toolbarOpacitySettings;
 
-  /// No description provided for @toolbar_toggle_annotation_names.
+  /// No description provided for @toolbarToggleAnnotationNames.
   ///
   /// In en, this message translates to:
   /// **'Toggle Annotation Names'**
-  String get toolbar_toggle_annotation_names;
+  String get toolbarToggleAnnotationNames;
 
-  /// No description provided for @toolbar_rotate_left.
+  /// No description provided for @toolbarRotateLeft.
   ///
   /// In en, this message translates to:
   /// **'Rotate Left (Coming Soon)'**
-  String get toolbar_rotate_left;
+  String get toolbarRotateLeft;
 
-  /// No description provided for @toolbar_rotate_right.
+  /// No description provided for @toolbarRotateRight.
   ///
   /// In en, this message translates to:
   /// **'Rotate Right (Coming Soon)'**
-  String get toolbar_rotate_right;
+  String get toolbarRotateRight;
 
-  /// No description provided for @toolbar_help.
+  /// No description provided for @toolbarHelp.
   ///
   /// In en, this message translates to:
   /// **'Help'**
-  String get toolbar_help;
+  String get toolbarHelp;
 
-  /// No description provided for @dialog_opacity_title.
+  /// No description provided for @dialogOpacityTitle.
   ///
   /// In en, this message translates to:
   /// **'Annotation Fill Opacity'**
-  String get dialog_opacity_title;
+  String get dialogOpacityTitle;
 
-  /// No description provided for @dialog_help_title.
+  /// No description provided for @dialogHelpTitle.
   ///
   /// In en, this message translates to:
   /// **'Annotator Toolbar Help'**
-  String get dialog_help_title;
+  String get dialogHelpTitle;
 
-  /// No description provided for @dialog_help_content.
+  /// No description provided for @dialogHelpContent.
   ///
   /// In en, this message translates to:
   /// **'• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.'**
-  String get dialog_help_content;
+  String get dialogHelpContent;
 
-  /// No description provided for @dialog_help_tips.
+  /// No description provided for @dialogHelpTips.
   ///
   /// In en, this message translates to:
   /// **'Tip: Use Navigation mode to select and edit annotations.\nMore shortcuts and features coming soon!'**
-  String get dialog_help_tips;
+  String get dialogHelpTips;
 
-  /// No description provided for @dialog_opacity_explanation.
+  /// No description provided for @dialogOpacityExplanation.
   ///
   /// In en, this message translates to:
   /// **'Adjust the opacity level to make the content more or less transparent.'**
-  String get dialog_opacity_explanation;
+  String get dialogOpacityExplanation;
 
   /// No description provided for @deleteAnnotationTitle.
   ///
@@ -813,6 +1125,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.'**
   String get changeProjectTypeErrorTips;
+
+  /// No description provided for @projectHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How Projects Work'**
+  String get projectHelpTitle;
+
+  /// No description provided for @projectHelpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects allow you to organize datasets, media files, and annotations in one place. You can create new projects for different tasks like detection, classification, or segmentation.'**
+  String get projectHelpMessage;
+
+  /// No description provided for @projectHelpTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically.'**
+  String get projectHelpTips;
 }
 
 class _AppLocalizationsDelegate

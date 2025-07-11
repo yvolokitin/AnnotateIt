@@ -98,7 +98,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                             value: selectedLabel,
                             dropdownColor: Colors.grey[850],
                             iconEnabledColor: Colors.white,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
                             icon: const SizedBox.shrink(),
                             borderRadius: BorderRadius.circular(6),
                             isExpanded: true, // ensures full width is used inside dropdown
@@ -108,8 +108,9 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                                 child: Text(
                                   "Select default label",
                                   style: TextStyle(
-                                    fontSize: (screenWidth < 1280) ? 16 : 20,
+                                    fontSize: (screenWidth > 1280) ? 18 : 14,
                                     fontWeight: FontWeight.normal,
+                                    fontFamily: 'CascadiaCode',
                                   ),
                                 ),
                               ),
@@ -131,8 +132,9 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                                         child: Text(
                                           label.name,
                                           style: TextStyle(
-                                            fontSize: (screenWidth < 1280) ? 16 : 20,
+                                            fontSize: (screenWidth > 1280) ? 20 : 16,
                                             fontWeight: FontWeight.normal,
+                                            fontFamily: 'CascadiaCode',
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
@@ -183,21 +185,19 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
             ),
           ],
 
-          const SizedBox(width: 40), // 62 + 20 + 20
+          SizedBox(width: screenWidth > 1280 ? 40 : 20), // 62 + 20 + 20
 
           SizedBox(
             width: screenWidth>1400 ? screenWidth * 0.8 : screenWidth * 0.5,
             child: AnnotatorLabels(
               labels: labels,
               onLabelSelected: (label) {
-                print('Label selected: ${label.name}');
                 widget.onAssignedLabel?.call(label);
               }
             ),
           ),
 
-          // AnnotatorLabels(labels: labels),
-          const SizedBox(width: 20),
+          SizedBox(width: screenWidth > 1280 ? 20 : 5),
         ],
       ),
     );

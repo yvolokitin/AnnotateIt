@@ -30,6 +30,7 @@ class SetImageIconDialog extends StatelessWidget {
         l10n.setAsProjectIconConfirm(media.filePath),
         style: const TextStyle(
           color: Colors.white70,
+          fontFamily: 'CascadiaCode',
           fontWeight: FontWeight.normal,
         ),
       ),
@@ -44,10 +45,11 @@ class SetImageIconDialog extends StatelessWidget {
             ),
           ),
           child: Text(
-            l10n.cancelButton,
+            l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 22,
+              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               ),
           ),
@@ -72,6 +74,7 @@ class SetImageIconDialog extends StatelessWidget {
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              fontFamily: 'CascadiaCode',
               ),
           ),
         ),

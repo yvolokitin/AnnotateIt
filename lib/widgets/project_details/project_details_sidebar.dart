@@ -79,6 +79,7 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'CascadiaCode',
                         fontSize: 24,
                       ),
                     ),
@@ -124,6 +125,7 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.normal,
+              fontFamily: 'CascadiaCode',
               fontSize: 22,
             ),
             maxLines: 2,
@@ -136,6 +138,7 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
             style: const TextStyle(
               color: Colors.white60,
               fontWeight: FontWeight.normal,
+              fontFamily: 'CascadiaCode',
               fontSize: 18,
             ),
           ),

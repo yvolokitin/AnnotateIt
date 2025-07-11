@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class ColorPickerDialog extends StatefulWidget {
@@ -55,9 +56,16 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: Colors.grey[800],
-      title: const Text("Pick a color", style: TextStyle(color: Colors.white)),
+      title: Text(
+        l10n.colorPickerTitle,
+        style: TextStyle(
+          color: Colors.white,
+          fontFamily: 'CascadiaCode',
+        ),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -76,9 +84,15 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               pickerAreaHeightPercent: 0.8,
             ),
             const SizedBox(height: 25),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: Text("Basic Colors", style: TextStyle(color: Colors.white70)),
+              child: Text(
+                l10n.colorPickerBasicColors,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontFamily: 'CascadiaCode',
+                ),
+              ),
             ),
             const SizedBox(height: 15),
 
@@ -129,7 +143,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel", style: TextStyle(color: Colors.white70)),
+          child: Text(
+            l10n.buttonCancel,
+            style: TextStyle(
+              color: Colors.white70,
+              fontFamily: 'CascadiaCode',
+            ),
+          ),
         ),
         ElevatedButton(
           onPressed: () {
@@ -141,9 +161,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text(
-            "Confirm",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          child: Text(
+            l10n.buttonConfirm,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.bold
+            ),
           ),
         ),
       ],

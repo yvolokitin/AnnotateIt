@@ -139,7 +139,8 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
               hintStyle: TextStyle(
                 color: Colors.white54,
                 fontSize: screenWidth > 1200 ? 22 : 18,
-                fontWeight: FontWeight.normal
+                fontWeight: FontWeight.normal,
+                fontFamily: 'CascadiaCode',
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
@@ -155,7 +156,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
                 borderSide: const BorderSide(color: Colors.white70, width: 1),
               ),
             ),
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
           ),
         ),
         SizedBox(width: 20),
@@ -178,6 +179,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
                 color: Colors.white,
                 fontSize: screenWidth > 1200 ? 22 : 20,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'CascadiaCode',
               ),
             ),
           ),
