@@ -382,12 +382,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get removeFilesFromDatasetInProgress => 'Deleting files...';
+
+  @override
   String get removeFilesFromDataset => 'Remove files from Dataset?';
 
   @override
   String removeFilesFromDatasetConfirm(Object amount) {
     return 'Are you sure you want to delete the following file(s) (\'$amount\')?\n\nAll corresponding annotations will be removed as well.';
   }
+
+  @override
+  String get removeFilesFailedTitle => 'Deletion Failed';
+
+  @override
+  String get removeFilesFailedMessage => 'Some files could not be deleted';
+
+  @override
+  String get removeFilesFailedTips =>
+      'Please check file permissions and try again';
 
   @override
   String get duplicateImage => 'Duplicate Image';
@@ -691,4 +704,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get datasetDialogAnalyzingDatasetTips =>
       'Large datasets with many files or complex annotations may take extra time.';
+
+  @override
+  String get datasetDialogFilePickErrorTitle => 'File Selection Error';
+
+  @override
+  String get datasetDialogFilePickErrorMessage =>
+      'Failed to select the file. Please try again.';
+
+  @override
+  String get datasetDialogGenericErrorTips =>
+      'Please check your file and try again. If the problem persists, contact support.';
 }

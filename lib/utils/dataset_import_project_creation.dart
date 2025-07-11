@@ -30,100 +30,120 @@ class DatasetImportProjectCreation {
     Archive archive,
     {required ProgressCallback onProgress}
   ) async {
-    final currentUser = UserSession.instance.getUser();
+    try {
+      _logger.info('Starting project creation from dataset');
+      final currentUser = UserSession.instance.getUser();
 
-    // Step 1: Create the project
-    final newProject = await ProjectDatabase.instance.createProject(
-      Project(
-        name: archive.zipFileName,
-        type: archive.selectedTaskType ?? 'Unknown',
-        icon: "assets/images/default_project_image.svg",
-        creationDate: DateTime.now(),
-        lastUpdated: DateTime.now(),
-        defaultDatasetId: null,
-        ownerId: currentUser.id ?? -1,
-      ),
-    );
-
-    // Step 2: Validate dataset creation
-    // final String? defaultDatasetId = await ProjectDatabase.instance.getDefaultDatasetId(newProjectId);
-    // if (defaultDatasetId == null) {
-    //   throw Exception("Created Project $newProjectId has no default dataset assigned.");
-    // }
-
-    // Step 3: Create MediaFolder
-    final folderId = await DatasetDatabase.instance.createMediaFolder(
-      path: archive.datasetPath,
-      name: archive.zipFileName.split('.').first,
-      createdAt: DateTime.now(),
-    );
-    // Step 4: Link MediaFolder to Dataset
-    await DatasetDatabase.instance.linkMediaFolderToDataset(
-      datasetId: newProject.defaultDatasetId!,
-      folderId: folderId,
-    );
-
-    // Step 5: Add media items to dataset
-    final String? firstImagePath = await addMediaItemsToDataset(
-      datasetPath: archive.datasetPath,
-      datasetId: newProject.defaultDatasetId!,
-      ownerId: currentUser.id ?? -1,
-      onProgress: onProgress,
-    );
-
-    // Step 6: Update project icon
-    if (firstImagePath != null) {
-      final thumbnailFile = await generateThumbnailFromImage(File(firstImagePath), newProject.id.toString());
-      if (thumbnailFile != null) {
-        await ProjectDatabase.instance.updateProjectIcon(newProject.id!, thumbnailFile.path);
-      }
-    }
-
-    // Step 7: Update the default dataset with archive info
-    final existingDataset = await DatasetDatabase.instance.loadDatasetWithFolderIds(newProject.defaultDatasetId!);
-    if (existingDataset != null) {
-      final updatedDataset = existingDataset.copyWith(
-        name: 'Dataset', // archive.zipFileName.split('.').first,
-        description: 'Imported from archive',
-        type: archive.selectedTaskType ?? 'detection',
-        format: archive.datasetFormat,
-        source: 'imported',
-        version: '1.0.0',
-        mediaCount: archive.mediaCount,
-        annotationCount: archive.annotationCount,
-        updatedAt: DateTime.now(),
+      // Step 1: Create the project
+      _logger.info('Creating project...');
+      final newProject = await ProjectDatabase.instance.createProject(
+        Project(
+          name: archive.zipFileName,
+          type: archive.selectedTaskType ?? 'Unknown',
+          icon: "assets/images/default_project_image.svg",
+          creationDate: DateTime.now(),
+          lastUpdated: DateTime.now(),
+          defaultDatasetId: null,
+          ownerId: currentUser.id ?? -1,
+        ),
       );
 
-      await DatasetDatabase.instance.updateDataset(updatedDataset);
-    }
-  
-    // Step 8: Add labels (if present)
-    if (archive.labels.isNotEmpty) {
-      final projectLabels = await addLabelsToProject(
-        projectId: newProject.id!,
-        labelNames: archive.labels,
+      // Step 2: Create and link media folder
+      _logger.info('Creating media folder...');
+      final folderId = await DatasetDatabase.instance.createMediaFolder(
+        path: archive.datasetPath,
+        name: archive.zipFileName.split('.').first,
+        createdAt: DateTime.now(),
+      );
+      
+      await DatasetDatabase.instance.linkMediaFolderToDataset(
+        datasetId: newProject.defaultDatasetId!,
+        folderId: folderId,
       );
 
-      final mediaItemsMap = await fetchMediaItemsMap(newProject.defaultDatasetId!);
-
-      final importer = DatasetAnnotationImporter(annotationDb: AnnotationDatabase.instance);
-      final addedCount = await importer.addAnnotationsToProjectFromDataset(
-        projectType: newProject.type,
-        projectLabels: projectLabels,
+      // Step 3: Add media items with progress reporting
+      _logger.info('Adding media items...');
+      final String? firstImagePath = await addMediaItemsToDataset(
         datasetPath: archive.datasetPath,
-        format: archive.datasetFormat,
-        mediaItemsMap: mediaItemsMap,
-        projectId: newProject.id!,
-        annotatorId: currentUser.id ?? -1,
+        datasetId: newProject.defaultDatasetId!,
+        ownerId: currentUser.id ?? -1,
+        onProgress: onProgress,
       );
-    
-      print('Added $addedCount annotations.');
 
-    } else {
-      print("No labels detected in dataset. Skipping label import.");
+      // Step 4: Update project thumbnail if available
+      if (firstImagePath != null) {
+        _logger.info('Generating thumbnail...');
+        final thumbnailFile = await generateThumbnailFromImage(
+          File(firstImagePath), 
+          newProject.id.toString()
+        );
+        if (thumbnailFile != null) {
+          await ProjectDatabase.instance.updateProjectIcon(
+            newProject.id!, 
+            thumbnailFile.path
+          );
+        }
+      }
+
+      // Step 5: Update dataset metadata
+      _logger.info('Updating dataset metadata...');
+      final existingDataset = await DatasetDatabase.instance
+        .loadDatasetWithFolderIds(newProject.defaultDatasetId!);
+      
+      if (existingDataset != null) {
+        final updatedDataset = existingDataset.copyWith(
+          name: 'Dataset',
+          description: 'Imported from archive',
+          type: archive.selectedTaskType ?? 'detection',
+          format: archive.datasetFormat,
+          source: 'imported',
+          version: '1.0.0',
+          mediaCount: archive.mediaCount,
+          annotationCount: archive.annotationCount,
+          updatedAt: DateTime.now(),
+        );
+
+        await DatasetDatabase.instance.updateDataset(updatedDataset);
+      }
+  
+      // Step 6: Import labels and annotations if available
+      if (archive.labels.isNotEmpty) {
+        _logger.info('Importing labels...');
+        final projectLabels = await addLabelsToProject(
+          projectId: newProject.id!,
+          labelNames: archive.labels,
+        );
+
+        _logger.info('Fetching media items map...');
+        final mediaItemsMap = await fetchMediaItemsMap(newProject.defaultDatasetId!);
+
+        _logger.info('Importing annotations...');
+        final importer = DatasetAnnotationImporter(
+          annotationDb: AnnotationDatabase.instance
+        );
+        
+        final addedCount = await importer.addAnnotationsToProjectFromDataset(
+          projectType: newProject.type,
+          projectLabels: projectLabels,
+          datasetPath: archive.datasetPath,
+          format: archive.datasetFormat,
+          mediaItemsMap: mediaItemsMap,
+          projectId: newProject.id!,
+          annotatorId: currentUser.id ?? -1,
+        );
+        
+        _logger.info('Added $addedCount annotations.');
+      } else {
+        _logger.info("No labels detected in dataset. Skipping label import.");
+      }
+
+      _logger.info('Project creation completed successfully');
+      return newProject.id!;
+
+    } catch (e, stack) {
+      _logger.severe('Error in createProjectWithDataset', e, stack);
+      rethrow;
     }
-
-    return newProject.id!;
   }
 
   static Future<String?> addMediaItemsToDataset({

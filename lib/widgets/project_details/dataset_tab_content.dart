@@ -90,7 +90,7 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
     _handleSelectionChanged(currentItems);
   }
 
-
+/*
   void _handleDeleteSelected() async {
     if (_selectedItems.isEmpty) return;
 
@@ -115,6 +115,29 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
       widget.onMediaDeleted();
     }
   }
+*/
+
+void _handleDeleteSelected() async {
+  if (_selectedItems.isEmpty) return;
+
+  final deletedPaths = await showDialog<List<String>>(
+    context: context,
+    builder: (context) => DeleteImageDialog(
+      mediaItems: _selectedItems.map((e) => e.mediaItem).toList(),
+      onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
+    ),
+  );
+
+  if (deletedPaths != null && deletedPaths.isNotEmpty) {
+    // Immediately remove deleted items from the current view
+    setState(() {
+      _selectedItems.removeWhere((item) => deletedPaths.contains(item.mediaItem.filePath));
+    });
+
+    // Refresh the page after deletion
+    widget.onMediaDeleted();
+  }
+}
 
   void _handleItemsPerPageChanged(int newItemsPerPage) {
     widget.onItemsPerPageChanged(newItemsPerPage);

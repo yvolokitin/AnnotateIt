@@ -60,120 +60,119 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isFullscreen = isMobile || isTablet;
 
-    final dialogContent = SafeArea(
-      child: Stack(
+    return AlertDialog(
+      backgroundColor: Colors.grey[800],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.orangeAccent, width: 1),
+      ),
+      titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "File Details",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontFamily: 'CascadiaCode',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const Divider(color: Colors.white24),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    media.filePath,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  isFullscreen
-                      ? Column(
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              height: 200,
-                              child: Image.file(File(media.filePath), fit: BoxFit.contain),
-                            ),
-                            const SizedBox(height: 24),
-                            _buildDetailsList(media),
-                            const SizedBox(height: 24),
-                            _buildAnnotationsList(),
-                          ],
-                        )
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: screenWidth * 0.2,
-                              child: Image.file(File(media.filePath), fit: BoxFit.contain),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: SizedBox(
-                                width: screenWidth * 0.4,
-                                child: _buildDetailsList(media),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: SizedBox(
-                                width: screenWidth * 0.4 - 64,
-                                child: _buildAnnotationsList(),
-                              ),
-                            ),
-                          ],
-                        ),
-                  const SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[850],
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          side: const BorderSide(color: Colors.red, width: 2),
-                        ),
-                      ),
-                      child: const Text(
-                        "Close",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'CascadiaCode',
-                        ),
-                      ),
-                    ),
-                  )
-                ],
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline,
+                size: 32,
+                color: Colors.orangeAccent,
               ),
-            ),
+              const SizedBox(width: 12),
+              const Text(
+                "File Details",
+                style: TextStyle(
+                  color: Colors.orangeAccent,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.orangeAccent),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(color: Colors.orangeAccent),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SelectableText(
+                  media.filePath,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontFamily: 'CascadiaCode',
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (!isFullscreen) 
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: screenWidth * 0.2,
+                      child: Image.file(File(media.filePath), fit: BoxFit.contain),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildDetailsList(media)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildAnnotationsList()),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: Image.file(File(media.filePath), fit: BoxFit.contain),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailsList(media),
+                    const SizedBox(height: 16),
+                    _buildAnnotationsList(),
+                  ],
+                ),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.orangeAccent),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[800],
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.orangeAccent, width: 2),
+            ),
+          ),
+          child: const Text(
+            "Close",
+            style: TextStyle(
+              color: Colors.orangeAccent,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
+        ),
+      ],
     );
-
-    return isFullscreen
-        ? Dialog.fullscreen(
-            backgroundColor: Colors.grey[850],
-            child: dialogContent,
-          )
-        : Dialog(
-            backgroundColor: Colors.grey[850],
-            child: dialogContent,
-          );
   }
 
   Widget _buildDetailsList(media) {
@@ -207,6 +206,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         style: TextStyle(
           color: Colors.white70,
           fontFamily: 'CascadiaCode',
+          fontSize: 18,
         ),
       );
     }
@@ -219,6 +219,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
             color: Colors.white,
             fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
         ),
         const SizedBox(height: 8),
@@ -237,6 +238,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'CascadiaCode',
+                fontSize: 16,
               ),
             ),
           );
@@ -257,6 +259,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'CascadiaCode',
+                fontSize: 18,
               ),
             ),
             TextSpan(
@@ -264,6 +267,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               style: const TextStyle(
                 color: Colors.white70,
                 fontFamily: 'CascadiaCode',
+                fontSize: 18,
               ),
             ),
           ],

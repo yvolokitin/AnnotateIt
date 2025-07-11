@@ -178,7 +178,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
     await loadMediaForDataset(currentDatasetId, itemsPerPage, _currentPage);
   }
-
+/*
   void _handleDeleteSelectedMedia() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -201,6 +201,36 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       });
     }
   }
+*/
+  
+void _handleDeleteSelectedMedia() async {
+  final deletedPaths = await showDialog<List<String>>(
+    context: context,
+    builder: (context) => DeleteImageDialog(
+      mediaItems: _selectedMediaItems.toList(),
+      onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
+    ),
+  );
+
+  if (deletedPaths != null && deletedPaths.isNotEmpty) {
+    // Remove deleted items from the current view
+    setState(() {
+      final currentDatasetId = datasets[_tabController!.index].id;
+      final currentMediaList = annotatedMediaByDataset[currentDatasetId] ?? [];
+      
+      annotatedMediaByDataset[currentDatasetId] = currentMediaList.where((media) {
+        return !deletedPaths.contains(media.mediaItem.filePath);
+      }).toList();
+      
+      _selectedMediaItems.clear();
+      _fileCount -= deletedPaths.length;
+    });
+
+    // Refresh the dataset from database
+    final datasetId = datasets[_tabController!.index].id;
+    await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
+  }
+}
 
   void _rebuildTabController() {
     _tabController?.removeListener(_handleTabChange);

@@ -760,6 +760,12 @@ abstract class AppLocalizations {
   /// **'Do you want to use \'{filePath}\' as the icon for this project?\n\nThis will replace any previously set icon.'**
   String setAsProjectIconConfirm(Object filePath);
 
+  /// No description provided for @removeFilesFromDatasetInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting files...'**
+  String get removeFilesFromDatasetInProgress;
+
   /// No description provided for @removeFilesFromDataset.
   ///
   /// In en, this message translates to:
@@ -771,6 +777,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete the following file(s) (\'{amount}\')?\n\nAll corresponding annotations will be removed as well.'**
   String removeFilesFromDatasetConfirm(Object amount);
+
+  /// No description provided for @removeFilesFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion Failed'**
+  String get removeFilesFailedTitle;
+
+  /// No description provided for @removeFilesFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Some files could not be deleted'**
+  String get removeFilesFailedMessage;
+
+  /// No description provided for @removeFilesFailedTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check file permissions and try again'**
+  String get removeFilesFailedTips;
 
   /// No description provided for @duplicateImage.
   ///
@@ -1287,6 +1311,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Large datasets with many files or complex annotations may take extra time.'**
   String get datasetDialogAnalyzingDatasetTips;
+
+  /// No description provided for @datasetDialogFilePickErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File Selection Error'**
+  String get datasetDialogFilePickErrorTitle;
+
+  /// No description provided for @datasetDialogFilePickErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to select the file. Please try again.'**
+  String get datasetDialogFilePickErrorMessage;
+
+  /// No description provided for @datasetDialogGenericErrorTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your file and try again. If the problem persists, contact support.'**
+  String get datasetDialogGenericErrorTips;
 }
 
 class _AppLocalizationsDelegate

@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
-
 import '../../../models/annotated_labeled_media.dart';
 import '../../dialogs/image_details_dialog.dart';
 import '../../dialogs/set_image_icon_dialog.dart';
 import '../../dialogs/delete_image_dialog.dart';
 import '../../dialogs/duplicate_image_dialog.dart';
 
-
 class ImageTileMenuButton extends StatelessWidget {
   final AnnotatedLabeledMedia media;
   final void Function(bool withAnnotations)? onDuplicate;
+  final void Function()? onDeleted;
 
   const ImageTileMenuButton({
     required this.media,
     this.onDuplicate,
+    this.onDeleted,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      color: Colors.grey[900],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      color: Colors.grey[800],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+        side: const BorderSide(color: Colors.white70, width: 1),
+      ),
       icon: const Icon(Icons.more_vert, color: Colors.white),
       onSelected: (value) async {
         switch (value) {
@@ -37,17 +40,6 @@ class ImageTileMenuButton extends StatelessWidget {
               ),
             );
             break;
-          case 'delete':
-            showDialog(
-              context: context,
-              builder: (_) => DeleteImageDialog(
-                mediaItems: [media.mediaItem],
-                onConfirmed: () {
-                  debugPrint('Image deleted: ${media.mediaItem.filePath}');
-                },
-              ),
-            );
-            break;
           case 'seticon':
             showDialog(
               context: context,
@@ -58,6 +50,20 @@ class ImageTileMenuButton extends StatelessWidget {
                 },
               ),
             );
+            break;
+          case 'delete':
+            final deleted = await showDialog<List<String>>(
+              context: context,
+              builder: (_) => DeleteImageDialog(
+                mediaItems: [media.mediaItem],
+                onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
+              ),
+            );
+            
+            if (deleted != null && deleted.isNotEmpty) {
+              debugPrint('Image deleted: ${media.mediaItem.filePath}');
+              onDeleted?.call();
+            }
             break;
         }
       },
@@ -79,18 +85,20 @@ class _MenuItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Row(
       children: [
-        Icon(icon, size: 22),
-        const SizedBox(width: 8),
+        Icon(icon, size: screenWidth > 1200 ? 26 : 22),
+        SizedBox(width: screenWidth > 1200 ? 8 : 4),
         Text(
           text,
           style: TextStyle(
+            fontSize: screenWidth > 1200 ? 22 : 18,
             fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
           ),
         ),
-      ]
+      ],
     );
   }
 }
