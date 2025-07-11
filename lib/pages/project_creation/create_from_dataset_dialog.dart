@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:vap/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 
 import '../../../models/archive.dart';
@@ -123,11 +124,12 @@ Future<void> _processZipArchive(File file) async {
 
     if (!mounted) return;
 
+    final l10n = AppLocalizations.of(context)!;
     await AlertErrorDialog.show(
       context,
-      "Import Failed",
-      "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
-      tips: "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: $e",
+      l10n.datasetDialogImportFailedTitle,
+      l10n.datasetDialogImportFailedMessage,
+      tips: "${l10n.datasetDialogImportFailedTips} $e",
     );
     
     setState(() {
@@ -140,6 +142,8 @@ Future<void> _processZipArchive(File file) async {
 }
 
   Future<void> _goToNextStep() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_currentStep == 3 && _archive != null) {
       _archive = _archive!.withDefaultSelectedTaskType();
       setState(() => _currentStep = 4);
@@ -149,9 +153,9 @@ Future<void> _processZipArchive(File file) async {
       if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
         await AlertErrorDialog.show(
           context,
-          'No Project Type Selected',
-          'Please select a Project Type based on the detected annotation types in your dataset.',
-          tips: 'Check your dataset format and ensure annotations follow a supported structure like COCO, YOLO, VOC or Datumaro.',
+          l10n.datasetDialogNoProjectTypeTitle,
+          l10n.datasetDialogNoProjectTypeMessage,
+          tips: l10n.datasetDialogNoProjectTypeTips,
         );
         return;
       }
@@ -189,12 +193,13 @@ Future<void> _processZipArchive(File file) async {
   }
 
   Future<void> _handleCancel() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_isUploading) {
       await AlertErrorDialog.show(
         context,
-        "Processing Dataset",
-        "We are currently extracting your ZIP archive, analyzing its contents, and detecting the dataset format and annotation type. This may take a few seconds to a few minutes depending on the dataset size and structure. Please do not close this window or navigate away during the process.",
-        tips: "Large archives with many images or annotation files can take longer to process.",
+        l10n.datasetDialogProcessingDatasetTitle,
+        l10n.datasetDialogProcessingDatasetMessage,
+        tips: l10n.datasetDialogProcessingDatasetTips,
       );
       return;
     }
@@ -202,9 +207,9 @@ Future<void> _processZipArchive(File file) async {
     if (_isCreatingProject) {
       await AlertErrorDialog.show(
         context,
-        "Creating Project",
-        "We are setting up your project, initializing its metadata, and saving all configurations. This includes assigning labels, creating datasets, and linking associated media files. Please wait a moment and avoid closing this window until the process is complete.",
-        tips: "Projects with many labels or media files might take slightly longer.",
+        l10n.datasetDialogCreatingProjectTitle,
+        l10n.datasetDialogCreatingProjectMessage,
+        tips: l10n.datasetDialogCreatingProjectTips,
       );
       return;
     }
@@ -224,6 +229,7 @@ Future<void> _processZipArchive(File file) async {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isLargeScreen = constraints.maxWidth >= 1600;
@@ -241,9 +247,9 @@ Future<void> _processZipArchive(File file) async {
             if (_isUploading) {
               await AlertErrorDialog.show(
                 context,
-                "Processing Dataset",
-                "We are currently analyzing your dataset archive. This includes extracting files, detecting dataset structure, identifying annotation formats, and collecting media and label information. Please wait until the process is complete. Closing the window or navigating away may interrupt the operation.",
-                tips: "Large datasets with many files or complex annotations may take extra time.",
+                l10n.datasetDialogAnalyzingDatasetTitle,
+                l10n.datasetDialogAnalyzingDatasetMessage,
+                tips: l10n.datasetDialogAnalyzingDatasetTips,
               );
               return false;
             }
@@ -278,14 +284,22 @@ Future<void> _processZipArchive(File file) async {
   }
 
   Widget _buildDialogContent() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
+
     return Stack(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Import Dataset to Create Project",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            Text(
+              l10n.datasetDialogTitle,
+              style: TextStyle(
+                fontSize: screenWidth > 1200 ? 26 : 22,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 8),
             StepDescriptionWidget(
@@ -299,29 +313,35 @@ Future<void> _processZipArchive(File file) async {
             Expanded(
               child: Center(
                 child: _isUploading
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            color: Colors.redAccent,
-                            strokeWidth: 5,
-                            value: _progress == 0.0 || _progress == 1.0 ? null : _progress,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            _progress == 0
-                                ? "Processing..."
-                                : "Processing... ${(100 * _progress).toInt()}%",
-                            style: const TextStyle(color: Colors.white70, fontSize: 18),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _useIsolateMode ? "Isolate Mode Enabled" : "Normal Mode",
-                            style: const TextStyle(color: Colors.white38, fontSize: 14),
-                          ),
-                        ],
-                      )
-                    : _buildStepContent(),
+                  ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: Colors.redAccent,
+                        strokeWidth: 5,
+                        value: _progress == 0.0 || _progress == 1.0 ? null : _progress,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        _progress == 0 ? l10n.datasetDialogProcessing : "Processing... ${(100 * _progress).toInt()}%",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _useIsolateMode ? l10n.datasetDialogModeIsolate : l10n.datasetDialogModeNormal,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  )
+                  : _buildStepContent(),
               ),
             ),
             const SizedBox(height: 24),
@@ -330,9 +350,16 @@ Future<void> _processZipArchive(File file) async {
               children: [
                 TextButton(
                   onPressed: _handleCancel,
-                  child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+                  child: Text(
+                    l10n.buttonCancel,
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontFamily: 'CascadiaCode',
+                    ),
+                  ),
                 ),
-                if ((_currentStep == 3 || _currentStep == 4) && !_isUploading)
+
+                if ((_currentStep == 3 || _currentStep == 4) && !_isUploading)...[
                   ElevatedButton(
                     onPressed: _goToNextStep,
                     style: ElevatedButton.styleFrom(
@@ -341,10 +368,15 @@ Future<void> _processZipArchive(File file) async {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
-                      _currentStep == 3 ? "Next: Confirm Task" : "Create Project",
-                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      _currentStep == 3 ? l10n.buttonNextConfirmTask : l10n.buttonCreateProject,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                ],
               ],
             ),
           ],
@@ -354,7 +386,7 @@ Future<void> _processZipArchive(File file) async {
           right: 5,
           child: IconButton(
             icon: const Icon(Icons.close, color: Colors.white70),
-            tooltip: 'Close',
+            tooltip: l10n.buttonClose,
             onPressed: _handleCancel,
           ),
         ),
@@ -363,6 +395,7 @@ Future<void> _processZipArchive(File file) async {
   }
 
   Widget _buildStepContent() {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentStep == 1) {
       return UploadPrompt(onPickFile: _pickZipArchive);
 
@@ -387,7 +420,13 @@ Future<void> _processZipArchive(File file) async {
       );
 
     } else {
-      return const Text("No dataset loaded.", style: TextStyle(color: Colors.white70));
+      return Text(
+        l10n.datasetDialogNoDatasetLoaded,
+        style: TextStyle(
+          color: Colors.white70,
+          fontFamily: 'CascadiaCode',
+        ),
+      );
     }
   }
 }

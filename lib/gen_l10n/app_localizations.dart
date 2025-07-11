@@ -184,6 +184,18 @@ abstract class AppLocalizations {
   /// **'Fdbck'**
   String get buttonFeedbackShort;
 
+  /// No description provided for @buttonNextConfirmTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: Confirm Task'**
+  String get buttonNextConfirmTask;
+
+  /// No description provided for @buttonCreateProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Project'**
+  String get buttonCreateProject;
+
   /// No description provided for @aboutTitle.
   ///
   /// In en, this message translates to:
@@ -351,6 +363,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Basic Colors'**
   String get colorPickerBasicColors;
+
+  /// No description provided for @loadingProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading projects...'**
+  String get loadingProjects;
 
   /// No description provided for @importDataset.
   ///
@@ -805,7 +823,7 @@ abstract class AppLocalizations {
   /// No description provided for @changeProjectTypeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Change Your Project Type'**
+  /// **'Change project type'**
   String get changeProjectTypeTitle;
 
   /// No description provided for @deleteProjectTitle.
@@ -1143,6 +1161,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically.'**
   String get projectHelpTips;
+
+  /// No description provided for @datasetDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Dataset to Create Project'**
+  String get datasetDialogTitle;
+
+  /// No description provided for @datasetDialogProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get datasetDialogProcessing;
+
+  /// No description provided for @datasetDialogProcessingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing... {percent}%'**
+  String datasetDialogProcessingProgress(Object percent);
+
+  /// No description provided for @datasetDialogModeIsolate.
+  ///
+  /// In en, this message translates to:
+  /// **'Isolate Mode Enabled'**
+  String get datasetDialogModeIsolate;
+
+  /// No description provided for @datasetDialogModeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal Mode'**
+  String get datasetDialogModeNormal;
+
+  /// No description provided for @datasetDialogNoDatasetLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'No dataset loaded.'**
+  String get datasetDialogNoDatasetLoaded;
+
+  /// No description provided for @datasetDialogImportFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Failed'**
+  String get datasetDialogImportFailedTitle;
+
+  /// No description provided for @datasetDialogImportFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.'**
+  String get datasetDialogImportFailedMessage;
+
+  /// No description provided for @datasetDialogImportFailedTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: '**
+  String get datasetDialogImportFailedTips;
+
+  /// No description provided for @datasetDialogNoProjectTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Project Type Selected'**
+  String get datasetDialogNoProjectTypeTitle;
+
+  /// No description provided for @datasetDialogNoProjectTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a Project Type based on the detected annotation types in your dataset.'**
+  String get datasetDialogNoProjectTypeMessage;
+
+  /// No description provided for @datasetDialogNoProjectTypeTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your dataset format and ensure annotations follow a supported structure like COCO, YOLO, VOC or Datumaro.'**
+  String get datasetDialogNoProjectTypeTips;
+
+  /// No description provided for @datasetDialogProcessingDatasetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Dataset'**
+  String get datasetDialogProcessingDatasetTitle;
+
+  /// No description provided for @datasetDialogProcessingDatasetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are currently extracting your ZIP archive, analyzing its contents, and detecting the dataset format and annotation type. This may take a few seconds to a few minutes depending on the dataset size and structure. Please do not close this window or navigate away during the process.'**
+  String get datasetDialogProcessingDatasetMessage;
+
+  /// No description provided for @datasetDialogProcessingDatasetTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Large archives with many images or annotation files can take longer to process.'**
+  String get datasetDialogProcessingDatasetTips;
+
+  /// No description provided for @datasetDialogCreatingProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating Project'**
+  String get datasetDialogCreatingProjectTitle;
+
+  /// No description provided for @datasetDialogCreatingProjectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are setting up your project, initializing its metadata, and saving all configurations. This includes assigning labels, creating datasets, and linking associated media files. Please wait a moment and avoid closing this window until the process is complete.'**
+  String get datasetDialogCreatingProjectMessage;
+
+  /// No description provided for @datasetDialogCreatingProjectTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects with many labels or media files might take slightly longer.'**
+  String get datasetDialogCreatingProjectTips;
+
+  /// No description provided for @datasetDialogAnalyzingDatasetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing Dataset'**
+  String get datasetDialogAnalyzingDatasetTitle;
+
+  /// No description provided for @datasetDialogAnalyzingDatasetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are currently analyzing your dataset archive. This includes extracting files, detecting dataset structure, identifying annotation formats, and collecting media and label information. Please wait until the process is complete. Closing the window or navigating away may interrupt the operation.'**
+  String get datasetDialogAnalyzingDatasetMessage;
+
+  /// No description provided for @datasetDialogAnalyzingDatasetTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Large datasets with many files or complex annotations may take extra time.'**
+  String get datasetDialogAnalyzingDatasetTips;
 }
 
 class _AppLocalizationsDelegate

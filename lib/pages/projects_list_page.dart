@@ -188,14 +188,20 @@ class ProjectsListPageState extends State<ProjectsListPage> {
             children: [
               CircularProgressIndicator(),
               const SizedBox(height: 12),
-              Text("Loading projects...", style: TextStyle(color: Colors.white70)),
+              Text(
+                l10n.loadingProjects,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontFamily: 'CascadiaCode',
+                ),
+              ),
             ],
           ),
         )
         : Column(
         children: [
           // Row with Create Button, Search Bar, and Sort Icon
-          if (screenWidth > 270)...[
+          if (screenWidth >= 270)...[
             ProjectsTopBar(
               sortDetection: sortDetection,
               sortClassification: sortClassification,
@@ -267,6 +273,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
   // Function to show Edit / Change type and Delete options
   void _showProjectOptions(BuildContext context, Project project) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -282,10 +289,11 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   size: 30,
                 ),
                 title: Text(
-                  "Edit project name",
+                  l10n.editProjectTitle,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.normal,
+                    fontFamily: 'CascadiaCode',
                     color: Colors.white70
                   ),
                 ),
@@ -302,10 +310,11 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   size: 30,
                 ),
                 title: Text(
-                  "Change project type",
+                  l10n.changeProjectTypeTitle,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.normal,
+                    fontFamily: 'CascadiaCode',
                     color: Colors.white70,
                     ),
                 ),
@@ -322,10 +331,11 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   size: 30,
                 ),
                 title: Text(
-                  "Delete project",
+                  l10n.deleteProjectTitle,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.normal,
+                    fontFamily: 'CascadiaCode',
                     color: Colors.white70,
                   ),
                 ),

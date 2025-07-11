@@ -61,7 +61,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 40),
+                    padding: EdgeInsets.only(top: screenWidth>1400 ? 40 : 10),
                     child: Column(
                       children: [
                         Align(
@@ -89,36 +89,38 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                 ]
                               ),
                               const SizedBox(height: 4),
-                              Row(
-                                children: [                              
-                                  Text(
-                                    currentStep == 1
-                                      ? l10n.changeProjectTypeStepOneSubtitle
-                                      : l10n.changeProjectTypeStepTwoSubtitle,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontFamily: 'CascadiaCode',
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.white24,
+                              if (screenWidth > 700)...[
+                                Row(
+                                  children: [                              
+                                    Text(
+                                      currentStep == 1
+                                        ? l10n.changeProjectTypeStepOneSubtitle
+                                        : l10n.changeProjectTypeStepTwoSubtitle,
+                                      style: TextStyle(
+                                        fontSize: screenWidth > 1200 ? 22 : 18,
+                                        fontFamily: 'CascadiaCode',
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.white24,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenWidth > 700 ? 12 : 6),
                         const Divider(color: Colors.white70),
 
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.all(15),
+                            padding: EdgeInsets.all(screenWidth > 700 ? 15 : 5),
                             child: _buildCurrentStep(),
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenWidth > 700 ? 12 : 4),
                         _buildBottomButtons(),
                       ],
                     ),

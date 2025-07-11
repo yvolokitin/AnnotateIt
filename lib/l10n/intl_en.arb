@@ -16,6 +16,8 @@
   "buttonConfirm": "Confirm",
   "buttonDiscard": "Discard",
   "buttonFeedbackShort": "Fdbck",
+  "buttonNextConfirmTask": "Next: Confirm Task",
+  "buttonCreateProject": "Create Project",
 
   "aboutTitle": "About Annot@It",
   "aboutDescription": "Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you're working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.",
@@ -49,6 +51,7 @@
   "colorPickerTitle": "Pick a color",
   "colorPickerBasicColors": "Basic Colors",
 
+  "loadingProjects": "Loading projects...",
   "importDataset": "Import dataset",
   "uploadMedia": "Upload media",
   "createProjectTitle": "Create a New Project",
@@ -239,7 +242,6 @@
   "accountStorage_helpMessage": "You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.",
   "accountStorage_helpTips": "Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n",
 
-  "changeProjectTypeTitle": "Change Your Project Type",
   "changeProjectTypeStepOneSubtitle": "Please select a new project type from the list below",
   "changeProjectTypeStepTwoSubtitle": "Please confirm your choice",
 
@@ -252,6 +254,33 @@
 
   "projectHelpTitle": "How Projects Work",
   "projectHelpMessage": "Projects allow you to organize datasets, media files, and annotations in one place. You can create new projects for different tasks like detection, classification, or segmentation.",
-  "projectHelpTips": "Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically."
+  "projectHelpTips": "Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically.",
+
+  "datasetDialogTitle": "Import Dataset to Create Project",
+  "datasetDialogProcessing": "Processing...",
+  "datasetDialogProcessingProgress": "Processing... {percent}%",
+  "datasetDialogModeIsolate": "Isolate Mode Enabled",
+  "datasetDialogModeNormal": "Normal Mode",
+  "datasetDialogNoDatasetLoaded": "No dataset loaded.",
+
+  "datasetDialogImportFailedTitle": "Import Failed",
+  "datasetDialogImportFailedMessage": "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
+  "datasetDialogImportFailedTips": "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: ",
+
+  "datasetDialogNoProjectTypeTitle": "No Project Type Selected",
+  "datasetDialogNoProjectTypeMessage": "Please select a Project Type based on the detected annotation types in your dataset.",
+  "datasetDialogNoProjectTypeTips": "Check your dataset format and ensure annotations follow a supported structure like COCO, YOLO, VOC or Datumaro.",
+
+  "datasetDialogProcessingDatasetTitle": "Processing Dataset",
+  "datasetDialogProcessingDatasetMessage": "We are currently extracting your ZIP archive, analyzing its contents, and detecting the dataset format and annotation type. This may take a few seconds to a few minutes depending on the dataset size and structure. Please do not close this window or navigate away during the process.",
+  "datasetDialogProcessingDatasetTips": "Large archives with many images or annotation files can take longer to process.",
+
+  "datasetDialogCreatingProjectTitle": "Creating Project",
+  "datasetDialogCreatingProjectMessage": "We are setting up your project, initializing its metadata, and saving all configurations. This includes assigning labels, creating datasets, and linking associated media files. Please wait a moment and avoid closing this window until the process is complete.",
+  "datasetDialogCreatingProjectTips": "Projects with many labels or media files might take slightly longer.",
+
+  "datasetDialogAnalyzingDatasetTitle": "Analyzing Dataset",
+  "datasetDialogAnalyzingDatasetMessage": "We are currently analyzing your dataset archive. This includes extracting files, detecting dataset structure, identifying annotation formats, and collecting media and label information. Please wait until the process is complete. Closing the window or navigating away may interrupt the operation.",
+  "datasetDialogAnalyzingDatasetTips": "Large datasets with many files or complex annotations may take extra time."
 
 }

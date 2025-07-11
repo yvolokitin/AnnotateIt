@@ -83,7 +83,7 @@ class DatasetImportProjectCreation {
     final existingDataset = await DatasetDatabase.instance.loadDatasetWithFolderIds(newProject.defaultDatasetId!);
     if (existingDataset != null) {
       final updatedDataset = existingDataset.copyWith(
-        name: archive.zipFileName.split('.').first,
+        name: 'Dataset', // archive.zipFileName.split('.').first,
         description: 'Imported from archive',
         type: archive.selectedTaskType ?? 'detection',
         format: archive.datasetFormat,

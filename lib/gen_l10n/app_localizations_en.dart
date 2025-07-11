@@ -54,6 +54,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buttonFeedbackShort => 'Fdbck';
 
   @override
+  String get buttonNextConfirmTask => 'Next: Confirm Task';
+
+  @override
+  String get buttonCreateProject => 'Create Project';
+
+  @override
   String get aboutTitle => 'About Annot@It';
 
   @override
@@ -146,6 +152,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorPickerBasicColors => 'Basic Colors';
+
+  @override
+  String get loadingProjects => 'Loading projects...';
 
   @override
   String get importDataset => 'Import dataset';
@@ -409,7 +418,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.';
 
   @override
-  String get changeProjectTypeTitle => 'Change Your Project Type';
+  String get changeProjectTypeTitle => 'Change project type';
 
   @override
   String get deleteProjectTitle => 'Delete Project';
@@ -607,4 +616,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get projectHelpTips =>
       'Tip: You can import datasets in COCO, YOLO, VOC, Labelme and Datumaro format to create a project automatically.';
+
+  @override
+  String get datasetDialogTitle => 'Import Dataset to Create Project';
+
+  @override
+  String get datasetDialogProcessing => 'Processing...';
+
+  @override
+  String datasetDialogProcessingProgress(Object percent) {
+    return 'Processing... $percent%';
+  }
+
+  @override
+  String get datasetDialogModeIsolate => 'Isolate Mode Enabled';
+
+  @override
+  String get datasetDialogModeNormal => 'Normal Mode';
+
+  @override
+  String get datasetDialogNoDatasetLoaded => 'No dataset loaded.';
+
+  @override
+  String get datasetDialogImportFailedTitle => 'Import Failed';
+
+  @override
+  String get datasetDialogImportFailedMessage =>
+      'The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.';
+
+  @override
+  String get datasetDialogImportFailedTips =>
+      'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: ';
+
+  @override
+  String get datasetDialogNoProjectTypeTitle => 'No Project Type Selected';
+
+  @override
+  String get datasetDialogNoProjectTypeMessage =>
+      'Please select a Project Type based on the detected annotation types in your dataset.';
+
+  @override
+  String get datasetDialogNoProjectTypeTips =>
+      'Check your dataset format and ensure annotations follow a supported structure like COCO, YOLO, VOC or Datumaro.';
+
+  @override
+  String get datasetDialogProcessingDatasetTitle => 'Processing Dataset';
+
+  @override
+  String get datasetDialogProcessingDatasetMessage =>
+      'We are currently extracting your ZIP archive, analyzing its contents, and detecting the dataset format and annotation type. This may take a few seconds to a few minutes depending on the dataset size and structure. Please do not close this window or navigate away during the process.';
+
+  @override
+  String get datasetDialogProcessingDatasetTips =>
+      'Large archives with many images or annotation files can take longer to process.';
+
+  @override
+  String get datasetDialogCreatingProjectTitle => 'Creating Project';
+
+  @override
+  String get datasetDialogCreatingProjectMessage =>
+      'We are setting up your project, initializing its metadata, and saving all configurations. This includes assigning labels, creating datasets, and linking associated media files. Please wait a moment and avoid closing this window until the process is complete.';
+
+  @override
+  String get datasetDialogCreatingProjectTips =>
+      'Projects with many labels or media files might take slightly longer.';
+
+  @override
+  String get datasetDialogAnalyzingDatasetTitle => 'Analyzing Dataset';
+
+  @override
+  String get datasetDialogAnalyzingDatasetMessage =>
+      'We are currently analyzing your dataset archive. This includes extracting files, detecting dataset structure, identifying annotation formats, and collecting media and label information. Please wait until the process is complete. Closing the window or navigating away may interrupt the operation.';
+
+  @override
+  String get datasetDialogAnalyzingDatasetTips =>
+      'Large datasets with many files or complex annotations may take extra time.';
 }
