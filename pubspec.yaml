@@ -141,3 +141,11 @@ flutter:
   
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+msix_config:
+  display_name: AnnotateIt
+  publisher_display_name: AnnotateIt
+  identity_name: annotateit.ai
+  msix_version: 1.0.0.0
+  logo_path: assets/logo/annotateit_logo-removebg.png
+  capabilities: broadFileSystemAccess

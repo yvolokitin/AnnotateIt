@@ -1,4 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
+
+set(BINARY_NAME "AnnotateIt")
+
+# Define the binary name and the project
+set(PROJECT_NAME "annotateit")
+set(BINARY_NAME "annotateit")
+
+# Define application icon
+set(APPLICATION_ICON_WINDOWS "resources/annotateit_256x256.ico")
+
 project(runner LANGUAGES CXX)
 
 # Define the application target. To change its name, change BINARY_NAME in the
