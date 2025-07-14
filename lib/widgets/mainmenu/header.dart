@@ -43,7 +43,7 @@ class AppHeaderState extends State<AppHeader> {
             ),
             // clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              'assets/logo/annotateit-removebg.png',
+              'assets/logo/annotateit.png',
               height: headerHeight,
             ),
           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../dialogs/delete_image_dialog.dart';
+import '../dialogs/delete_dataset_dialog.dart';
+import '../dialogs/edit_dataset_name_dialog.dart';
 
 import '../../utils/image_utils.dart' as image_utils;
 import '../../models/annotated_labeled_media.dart';
@@ -178,59 +180,35 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
     await loadMediaForDataset(currentDatasetId, itemsPerPage, _currentPage);
   }
-/*
+  
   void _handleDeleteSelectedMedia() async {
-    final confirmed = await showDialog<bool>(
+    final deletedPaths = await showDialog<List<String>>(
       context: context,
       builder: (context) => DeleteImageDialog(
         mediaItems: _selectedMediaItems.toList(),
-        onConfirmed: () => Navigator.pop(context, true),
+        onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
       ),
     );
 
-    if (confirmed == true) {
-      for (final media in _selectedMediaItems) {
-        await DatasetDatabase.instance.deleteMediaItemWithAnnotations(media.id!);
-      }
+    if (deletedPaths != null && deletedPaths.isNotEmpty) {
+      // Remove deleted items from the current view
+      setState(() {
+        final currentDatasetId = datasets[_tabController!.index].id;
+        final currentMediaList = annotatedMediaByDataset[currentDatasetId] ?? [];
+      
+        annotatedMediaByDataset[currentDatasetId] = currentMediaList.where((media) {
+          return !deletedPaths.contains(media.mediaItem.filePath);
+        }).toList();
+      
+        _selectedMediaItems.clear();
+        _fileCount -= deletedPaths.length;
+      });
 
+      // Refresh the dataset from database
       final datasetId = datasets[_tabController!.index].id;
       await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
-
-      setState(() {
-        _selectedMediaItems.clear();
-      });
     }
   }
-*/
-  
-void _handleDeleteSelectedMedia() async {
-  final deletedPaths = await showDialog<List<String>>(
-    context: context,
-    builder: (context) => DeleteImageDialog(
-      mediaItems: _selectedMediaItems.toList(),
-      onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
-    ),
-  );
-
-  if (deletedPaths != null && deletedPaths.isNotEmpty) {
-    // Remove deleted items from the current view
-    setState(() {
-      final currentDatasetId = datasets[_tabController!.index].id;
-      final currentMediaList = annotatedMediaByDataset[currentDatasetId] ?? [];
-      
-      annotatedMediaByDataset[currentDatasetId] = currentMediaList.where((media) {
-        return !deletedPaths.contains(media.mediaItem.filePath);
-      }).toList();
-      
-      _selectedMediaItems.clear();
-      _fileCount -= deletedPaths.length;
-    });
-
-    // Refresh the dataset from database
-    final datasetId = datasets[_tabController!.index].id;
-    await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
-  }
-}
 
   void _rebuildTabController() {
     _tabController?.removeListener(_handleTabChange);
@@ -329,6 +307,60 @@ void _handleDeleteSelectedMedia() async {
     });
   }
 
+  void _setDefaultDataset(Dataset dataset) async {
+    await ProjectDatabase.instance.updateDefaultDataset(projectId: widget.project.id!, datasetId: dataset.id);
+    await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+
+    setState(() {
+      datasets.removeWhere((d) => d.id == dataset.id);
+      datasets.insert(0, dataset);
+
+      _rebuildTabController();
+      _tabController!.index = 0;
+
+      _datasetTabCache.clear();
+    });
+  }
+
+  void _renameDataset(Dataset dataset) async {
+    await showDialog<Dataset>(
+      context: context,
+      builder: (context) => EditDatasetNameDialog(
+        dataset: dataset,
+        onDatasetNameUpdated: (updated) {
+          setState(() {
+            final index = datasets.indexWhere((d) => d.id == dataset.id);
+            datasets[index] = updated;
+            _datasetTabCache.remove(updated.id);
+          });
+        },
+      ),
+    );
+  }
+
+  void _deleteDataset(Dataset dataset) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => DeleteDatasetDialog(dataset: dataset),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        datasets.removeWhere((d) => d.id == dataset.id);
+        annotatedMediaByDataset.remove(dataset.id);
+        _datasetTabCache.remove(dataset.id);
+      });
+
+      _rebuildTabController();
+      if (_tabController!.index >= datasets.length) {
+        _tabController!.index = datasets.length - 1;
+      }
+
+      loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
+    }
+  }
+
+/*
   void _renameDataset(Dataset dataset) async {
     final controller = TextEditingController(text: dataset.name);
     final result = await showDialog<String>(
@@ -357,21 +389,6 @@ void _handleDeleteSelectedMedia() async {
         _datasetTabCache.remove(updated.id);
       });
     }
-  }
-
-  void _setDefaultDataset(Dataset dataset) async {
-    await ProjectDatabase.instance.updateDefaultDataset(projectId: widget.project.id!, datasetId: dataset.id);
-    await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
-
-    setState(() {
-      datasets.removeWhere((d) => d.id == dataset.id);
-      datasets.insert(0, dataset);
-
-      _rebuildTabController();
-      _tabController!.index = 0;
-
-      _datasetTabCache.clear();
-    });
   }
 
   void _deleteDataset(Dataset dataset) async {
@@ -405,7 +422,7 @@ void _handleDeleteSelectedMedia() async {
       loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
     }
   }
-
+*/
   @override
   void dispose() {
     _tabController?.removeListener(_handleTabChange);

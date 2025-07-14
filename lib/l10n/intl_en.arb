@@ -202,6 +202,26 @@
     }
   },
 
+  "deleteDatasetTitle": "Delete Dataset",
+  "deleteDatasetInProgress": "Deleting dataset... Please wait.",
+  "deleteDatasetConfirm": "Are you sure you want to delete \"{datasetName}\"?",
+  "@deleteDatasetConfirm": {
+    "placeholders": {
+      "datasetName": {}
+    }
+  },
+  "deleteDatasetInfoLine": "This dataset was created on {creationDate} and contains {mediaCount} media items and {annotationCount} annotations.",
+  "@deleteDatasetInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "mediaCount": {},
+      "annotationCount": {}
+    }
+  },
+
+  "editDatasetTitle": "Rename Dataset",
+  "editDatasetDescription": "Enter a new name for this dataset:",
+  
   "noLabelsTitle": "You have no Labels in the Project",
   "noLabelsExplain1": "You can't annotate without labels because labels give meaning to what you're marking",
   "noLabelsExplain2": "— without them, the model would not know what the annotation represents.",

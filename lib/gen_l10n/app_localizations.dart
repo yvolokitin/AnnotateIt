@@ -886,6 +886,46 @@ abstract class AppLocalizations {
   /// **'Project was created at {creationDate}\nNumber of Labels: {labelCount}'**
   String deleteProjectInfoLine(Object creationDate, Object labelCount);
 
+  /// No description provided for @deleteDatasetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Dataset'**
+  String get deleteDatasetTitle;
+
+  /// No description provided for @deleteDatasetInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting dataset... Please wait.'**
+  String get deleteDatasetInProgress;
+
+  /// No description provided for @deleteDatasetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{datasetName}\"?'**
+  String deleteDatasetConfirm(Object datasetName);
+
+  /// No description provided for @deleteDatasetInfoLine.
+  ///
+  /// In en, this message translates to:
+  /// **'This dataset was created on {creationDate} and contains {mediaCount} media items and {annotationCount} annotations.'**
+  String deleteDatasetInfoLine(
+    Object creationDate,
+    Object mediaCount,
+    Object annotationCount,
+  );
+
+  /// No description provided for @editDatasetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Dataset'**
+  String get editDatasetTitle;
+
+  /// No description provided for @editDatasetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new name for this dataset:'**
+  String get editDatasetDescription;
+
   /// No description provided for @noLabelsTitle.
   ///
   /// In en, this message translates to:

@@ -46,6 +46,13 @@ class DatasetTabBar extends StatelessWidget {
                   onSelected: (value) {
                     onMenuAction(dataset, value);
                   },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: Colors.white24,
+                      width: 1,
+                    ),
+                  ),
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'rename',

@@ -457,6 +457,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get deleteDatasetTitle => 'Delete Dataset';
+
+  @override
+  String get deleteDatasetInProgress => 'Deleting dataset... Please wait.';
+
+  @override
+  String deleteDatasetConfirm(Object datasetName) {
+    return 'Are you sure you want to delete \"$datasetName\"?';
+  }
+
+  @override
+  String deleteDatasetInfoLine(
+    Object creationDate,
+    Object mediaCount,
+    Object annotationCount,
+  ) {
+    return 'This dataset was created on $creationDate and contains $mediaCount media items and $annotationCount annotations.';
+  }
+
+  @override
+  String get editDatasetTitle => 'Rename Dataset';
+
+  @override
+  String get editDatasetDescription => 'Enter a new name for this dataset:';
+
+  @override
   String get noLabelsTitle => 'You have no Labels in the Project';
 
   @override

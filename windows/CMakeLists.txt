@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(annotateit LANGUAGES CXX)
 
-set(BINARY_NAME annotateit)
+set(BINARY_NAME "annotateit")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
