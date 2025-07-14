@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
+import '../../gen_l10n/app_localizations.dart';
 import '../../models/media_item.dart';
 import '../../data/dataset_database.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';

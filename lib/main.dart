@@ -1,14 +1,12 @@
-import "package:vap/pages/mainmenu.dart";
-import "package:vap/utils/theme.dart";
-
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-
 import 'package:logging/logging.dart';
 
+import "pages/mainmenu.dart";
+import "utils/theme.dart";
+
 // Import FFI for SQLite
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:vap/data/database_initializer.dart';
+import 'data/database_initializer.dart';
 
 import 'data/user_database.dart';
 import 'session/user_session.dart';
@@ -18,7 +16,7 @@ import "data/annotation_database.dart";
 import "data/project_database.dart";
 import "data/labels_database.dart";
 
-import 'package:vap/gen_l10n/app_localizations.dart';
+import 'gen_l10n/app_localizations.dart';
 
 ThemeData themeData = getSystemTheme();
 

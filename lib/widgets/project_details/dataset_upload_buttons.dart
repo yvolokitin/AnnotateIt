@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:vap/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../gen_l10n/app_localizations.dart';
 import '../../models/project.dart';
 import '../../utils/image_utils.dart';
 import '../../data/dataset_database.dart';

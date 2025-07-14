@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
-
+import '../../gen_l10n/app_localizations.dart';
 import '../../models/user.dart';
 
 class ApplicationSettings extends StatelessWidget {

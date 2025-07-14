@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
 
+import '../../gen_l10n/app_localizations.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
-
-import '../../widgets/project_creation_new/create_new_project_step_task_selection.dart';
 import '../../widgets/project_creation_new/create_new_project_step_labels.dart';
+import '../../widgets/project_creation_new/create_new_project_step_task_selection.dart';
 
-import '../../session/user_session.dart';
 import '../project_details_page.dart';
+import '../../session/user_session.dart';
 
 import '../../data/project_database.dart';
 import '../../data/labels_database.dart';
-
 import '../../models/project.dart';
 import '../../models/label.dart';
 

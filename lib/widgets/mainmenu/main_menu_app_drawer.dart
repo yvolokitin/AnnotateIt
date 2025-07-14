@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
-
+import '../../gen_l10n/app_localizations.dart';
 import 'main_menu_drawer_item.dart';
 
 class MainMenuAppDrawer extends StatelessWidget {

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(BINARY_NAME "AnnotateIt")
+set(BINARY_NAME "annotateit")
 
 # Define the binary name and the project
 set(PROJECT_NAME "annotateit")

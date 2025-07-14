@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 import '../../models/user.dart';
 import '../../session/user_session.dart';

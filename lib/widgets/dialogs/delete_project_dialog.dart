@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
+import '../../gen_l10n/app_localizations.dart';
 
-import 'package:vap/models/project.dart';
-import 'package:vap/utils/project_utils.dart';
+import '../../models/project.dart';
+import '../../utils/project_utils.dart';
 
 class DeleteProjectDialog extends StatefulWidget {
   final Project project;

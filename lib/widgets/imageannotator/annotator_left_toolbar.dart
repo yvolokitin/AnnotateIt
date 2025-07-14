@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vap/gen_l10n/app_localizations.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/opacity_dialog.dart';
