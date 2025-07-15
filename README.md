@@ -1,7 +1,7 @@
-# VAP
-Vision Annotation Platform
+# AnnotateIt
+AnnotateIt Vision Annotation Platform
 
-VAP Project Structure
+AnnotateIt Project Structure
 lib/
  +-- core/                # Core utilities and shared components
  ¦   +-- constants/       # App-wide constants
@@ -17,16 +17,9 @@ lib/
  ¦   +-- models/         # DTOs and data models
  ¦   +-- repositories/   # Repository implementations
  ¦
- +-- domain/              # Business logic (Entities, Repositories, UseCases)
- ¦   +-- entities/        # Core business models
- ¦   +-- repositories/    # Repository contracts (Interfaces)
- ¦   +-- usecases/        # Business logic, interactors
- ¦
  +-- presentation/        # UI Layer
- ¦   +-- screens/         # Screens and pages
+ ¦   +-- pages/           # Pages
  ¦   +-- widgets/         # Reusable widgets
- ¦   +-- providers/       # State management (Riverpod, Provider, Bloc, etc.)
+ ¦   +-- utils/           # File utils
  ¦
  +-- main.dart            # Entry point of the application
- +-- routes.dart          # App-wide navigation management
- +-- injection.dart       # Dependency injection setup (GetIt)

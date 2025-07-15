@@ -277,93 +277,94 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(
-                  Icons.edit_note_outlined,
-                  color: Colors.white70,
-                  size: 30,
-                ),
-                title: Text(
-                  l10n.editProjectTitle,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: 'CascadiaCode',
-                    color: Colors.white70
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _editProjectName(project);
-                },
-              ),
-
-              ListTile(
-                leading: Icon(
-                  Icons.build_circle_outlined,
-                  color: Colors.white70,
-                  size: 30,
-                ),
-                title: Text(
-                  l10n.changeProjectTypeTitle,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: 'CascadiaCode',
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.edit_note_outlined,
                     color: Colors.white70,
+                    size: 30,
+                  ),
+                  title: Text(
+                    l10n.editProjectTitle,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white70
                     ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _handleChangeProjectType(project);
-                },
-              ),
-
-              ListTile(
-                leading: Icon(
-                  Icons.delete_sweep_outlined,
-                  color: Colors.white70,
-                  size: 30,
-                ),
-                title: Text(
-                  l10n.deleteProjectTitle,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: 'CascadiaCode',
-                    color: Colors.white70,
                   ),
-                ),
-                onTap: () {
-                    final currentContext = context;
+                  onTap: () {
                     Navigator.pop(context);
+                    _editProjectName(project);
+                  },
+                ),
 
-                    Future.delayed(Duration.zero, () {
-                      showDialog(
-                        context: currentContext,
-                        builder: (_) => DeleteProjectDialog(
-                          project: project,
-                          onConfirmed: () {
-                            // Refresh the list after deletion
-                            _loadProjects();
-                          },
-                          onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
-                            if (dontAskAgain) {
-                              await UserSession.instance.setProjectSkipDeleteConfirm(true);
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                ListTile(
+                  leading: Icon(
+                    Icons.build_circle_outlined,
+                    color: Colors.white70,
+                    size: 30,
+                  ),
+                  title: Text(
+                    l10n.changeProjectTypeTitle,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white70,
+                      ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _handleChangeProjectType(project);
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(
+                    Icons.delete_sweep_outlined,
+                    color: Colors.white70,
+                    size: 30,
+                  ),
+                  title: Text(
+                    l10n.deleteProjectTitle,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white70,
+                    ),
+                  ),
+                  onTap: () {
+                      final currentContext = context;
+                      Navigator.pop(context);
+                      Future.delayed(Duration.zero, () {
+                        showDialog(
+                          context: currentContext,
+                          builder: (_) => DeleteProjectDialog(
+                            project: project,
+                            onConfirmed: () {
+                              // Refresh the list after deletion
+                              _loadProjects();
+                            },
+                            onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
+                              if (dontAskAgain) {
+                                await UserSession.instance.setProjectSkipDeleteConfirm(true);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },

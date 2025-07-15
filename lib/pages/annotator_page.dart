@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:async/async.dart';
 
 import '../data/dataset_database.dart';
 import '../data/annotation_database.dart';
@@ -314,105 +313,107 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          AnnotatorTopToolbar(
-            project: widget.project,
-            onBack: () => Navigator.pop(context),
-            onHelp: () {},
-            onAssignedLabel: _handleLabelSelected,
-            onDefaultLabelSelected: _handleDefaultLabelSelected,
-          ),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: widget.totalMediaCount,
-              onPageChanged: _handlePageChange,
-              itemBuilder: (context, index) {
-                final media = _mediaCache[index];
-                final image = _imageCache[index];
-
-                if (media == null || image == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                return Row(
-                  children: [
-                    AnnotatorLeftToolbar(
-                      type: widget.project.type,
-                      opacity: labelOpacity,
-                      selectedAction: userAction,
-                      showAnnotationNames: showAnnotationNames,
-                      onOpacityChanged: (v) => setState(() => labelOpacity = v),
-                      onResetZoomPressed: () => setState(() => _resetZoomCount++),
-                      onShowDatasetGridChanged: (v) => setState(() => showRightSidebar = v),
-                      onActionSelected: _handleActionSelected,
-                      onShowAnnotationNames: (v) => setState(() => showAnnotationNames = v),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: MouseRegion(
-                              onEnter: (_) => setState(() => _mouseInsideImage = true),
-                              onExit: (_) => setState(() => _mouseInsideImage = false),
-                              cursor: _mouseInsideImage ? cursorIcon : SystemMouseCursors.basic,
-                              child: AnnotatorCanvas(
-                                image: image,
-                                mediaItemId: widget.mediaItem.mediaItem.id!,
-                                labels: widget.project.labels ?? [],
-                                annotations: media.annotations,
-                                resetZoomCount: _resetZoomCount,
-                                showAnnotationNames: showAnnotationNames,
-                                opacity: labelOpacity,
-                                userAction: userAction,
-                                selectedLabel: selectedLabel,
-                                selectedAnnotation: _selectedAnnotation,
-                                onZoomChanged: (zoom) {
-                                  if (mounted) {
-                                    setState(() => _currentZoom = zoom);
-                                  }
-                                },
-                                onAnnotationUpdated: _handleAnnotationUpdated,
-                                onAnnotationSelected: _handleAnnotationSelected,
+      body: SafeArea(
+        child: Column(
+          children: [
+            AnnotatorTopToolbar(
+              project: widget.project,
+              onBack: () => Navigator.pop(context),
+              onHelp: () {},
+              onAssignedLabel: _handleLabelSelected,
+              onDefaultLabelSelected: _handleDefaultLabelSelected,
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: widget.totalMediaCount,
+                onPageChanged: _handlePageChange,
+                // disables swipe navigation
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final media = _mediaCache[index];
+                  final image = _imageCache[index];
+                  if (media == null || image == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return Row(
+                    children: [
+                      AnnotatorLeftToolbar(
+                        type: widget.project.type,
+                        opacity: labelOpacity,
+                        selectedAction: userAction,
+                        showAnnotationNames: showAnnotationNames,
+                        onOpacityChanged: (v) => setState(() => labelOpacity = v),
+                        onResetZoomPressed: () => setState(() => _resetZoomCount++),
+                        onShowDatasetGridChanged: (v) => setState(() => showRightSidebar = v),
+                        onActionSelected: _handleActionSelected,
+                        onShowAnnotationNames: (v) => setState(() => showAnnotationNames = v),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: MouseRegion(
+                                onEnter: (_) => setState(() => _mouseInsideImage = true),
+                                onExit: (_) => setState(() => _mouseInsideImage = false),
+                                cursor: _mouseInsideImage ? cursorIcon : SystemMouseCursors.basic,
+                                child: AnnotatorCanvas(
+                                  image: image,
+                                  mediaItemId: widget.mediaItem.mediaItem.id!,
+                                  labels: widget.project.labels ?? [],
+                                  annotations: media.annotations,
+                                  resetZoomCount: _resetZoomCount,
+                                  showAnnotationNames: showAnnotationNames,
+                                  opacity: labelOpacity,
+                                  userAction: userAction,
+                                  selectedLabel: selectedLabel,
+                                  selectedAnnotation: _selectedAnnotation,
+                                  onZoomChanged: (zoom) {
+                                    if (mounted) {
+                                      setState(() => _currentZoom = zoom);
+                                    }
+                                  },
+                                  onAnnotationUpdated: _handleAnnotationUpdated,
+                                  onAnnotationSelected: _handleAnnotationSelected,
+                                ),
                               ),
                             ),
-                          ),
-                          AnnotatorBottomToolbar(
-                            currentZoom: _currentZoom,
-                            currentMedia: media.mediaItem,
-                            onZoomIn: () {},
-                            onZoomOut: () {},
-                            onPrevImg: () {
-                              final newPage = _currentIndex - 1;
-                              _pageController.jumpToPage(newPage >= 0 ? newPage : widget.totalMediaCount - 1);
-                            },
-                            onNextImg: () {
-                              final newPage = _currentIndex + 1;
-                              _pageController.jumpToPage(newPage < widget.totalMediaCount ? newPage : 0);
-                            },
-                            onSaveAnnotations: () {
-                              // TODO: save annotations
-                            },
-                          ),
-                        ],
+                            AnnotatorBottomToolbar(
+                              currentZoom: _currentZoom,
+                              currentMedia: media.mediaItem,
+                              onZoomIn: () {},
+                              onZoomOut: () {},
+                              onPrevImg: () {
+                                final newPage = _currentIndex - 1;
+                                _pageController.jumpToPage(newPage >= 0 ? newPage : widget.totalMediaCount - 1);
+                              },
+                              onNextImg: () {
+                                final newPage = _currentIndex + 1;
+                                _pageController.jumpToPage(newPage < widget.totalMediaCount ? newPage : 0);
+                              },
+                              onSaveAnnotations: () {
+                                // TODO: save annotations
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    AnnotatorRightSidebar(
-                      collapsed: !showRightSidebar,
-                      labels: widget.project.labels ?? [],
-                      annotations: media.annotations ?? [],
-                      selectedAnnotation: _selectedAnnotation,
-                      onAnnotationSelected: _handleAnnotationSelected,
-                      onAnnotationLabelChanged: _handleAnnotationLabelChanged,
-                      onAnnotationDelete: _handleAnnotationDelete,
-                    ),
-                  ],
-                );
-              },
+                      AnnotatorRightSidebar(
+                        collapsed: !showRightSidebar,
+                        labels: widget.project.labels ?? [],
+                        annotations: media.annotations ?? [],
+                        selectedAnnotation: _selectedAnnotation,
+                        onAnnotationSelected: _handleAnnotationSelected,
+                        onAnnotationLabelChanged: _handleAnnotationLabelChanged,
+                        onAnnotationDelete: _handleAnnotationDelete,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

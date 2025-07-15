@@ -87,6 +87,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/logo/annotateit.png
+     - assets/logo/annotateit_white.png
      - assets/images/media_upload.svg
      - assets/icons/labels_icon.svg
      - assets/icons/dataset_icon.svg
@@ -142,7 +143,7 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/logo/annotateit.png"
+  image_path: "assets/logo/annotateit_ro.png"
   min_sdk_android: 21
 
 msix_config:
@@ -150,5 +151,5 @@ msix_config:
   publisher_display_name: AnnotateIt
   identity_name: annotateit.ai
   msix_version: 1.0.0.0
-  logo_path: assets/logo/annotateit.png
+  logo_path: assets/logo/annotateit_ro.png
   capabilities: broadFileSystemAccess

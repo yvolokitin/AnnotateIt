@@ -82,9 +82,11 @@ class AnnotateItAppState extends State<AnnotateItApp> {
       title: "Annot@It",
       theme: theme,
 
-      home: Container(
-        color: Colors.black,
-        child: MainPage(),
+      home: SafeArea(
+        child: Container(
+          color: Colors.black,
+          child: MainPage(),
+        ),
       ),
 
       // Localization setup

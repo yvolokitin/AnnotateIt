@@ -50,33 +50,35 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[850],
-      body: Column(
-        children: [
-          ProjectDetailsAppBar(
-            onBackPressed: () => Navigator.pop(context, 'refresh'),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                ProjectDetailsNavigation(
-                  selectedIndex: selectedIndex,
-                  onItemSelected: _onItemTapped,
-                  project: project,
-                ),
-                ProjectDetailsContentSwitcher(
-                  selectedIndex: selectedIndex,
-                  project: project,
-                  labels: labels,
-                  onLabelsUpdated: (updatedLabels) {
-                    setState(() => labels = updatedLabels);
-                  },
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey[850],
+        body: Column(
+          children: [
+            ProjectDetailsAppBar(
+              onBackPressed: () => Navigator.pop(context, 'refresh'),
             ),
-          ),
-        ],
+            Expanded(
+              child: Row(
+                children: [
+                  ProjectDetailsNavigation(
+                    selectedIndex: selectedIndex,
+                    onItemSelected: _onItemTapped,
+                    project: project,
+                  ),
+                  ProjectDetailsContentSwitcher(
+                    selectedIndex: selectedIndex,
+                    project: project,
+                    labels: labels,
+                    onLabelsUpdated: (updatedLabels) {
+                      setState(() => labels = updatedLabels);
+                  },  
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

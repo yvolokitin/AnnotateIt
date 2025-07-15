@@ -43,12 +43,12 @@ class AppHeaderState extends State<AppHeader> {
             ),
             // clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              'assets/logo/annotateit.png',
+              'assets/logo/annotateit_white.png', // annotateit.png',
               height: headerHeight,
             ),
           ),
 
-          SizedBox(width: screenWidth>1600 ? 16 : 12),
+          const Spacer(),
           Container(
             height: headerHeight,
             padding: EdgeInsets.only(
@@ -64,7 +64,7 @@ class AppHeaderState extends State<AppHeader> {
               ),
             ),
           ),
-
+          SizedBox(width: screenWidth>1600 ? 16 : 12),
         ],
       ),
     );
