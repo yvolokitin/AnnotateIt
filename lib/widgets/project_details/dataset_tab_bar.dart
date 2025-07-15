@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/dataset.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class DatasetTabBar extends StatelessWidget {
   final List<Dataset> datasets;
@@ -29,6 +30,8 @@ class DatasetTabBar extends StatelessWidget {
         final isDefault = dataset.id == defaultDatasetId;
         final isAddTab = dataset.id == 'add_new_tab';
 
+        final l10n = AppLocalizations.of(context)!;
+        final screenWidth = MediaQuery.of(context).size.width;
         return Tab(
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -37,6 +40,7 @@ class DatasetTabBar extends StatelessWidget {
                 dataset.name,
                 style: TextStyle(
                   fontFamily: 'CascadiaCode',
+                  fontSize: screenWidth > 1200 ? 22 : 18,
                   fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -54,35 +58,38 @@ class DatasetTabBar extends StatelessWidget {
                     ),
                   ),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'rename',
                       child: Text(
-                        'Rename',
+                        l10n.rename,
                         style: TextStyle(
                           fontWeight: FontWeight.normal,
                           fontFamily: 'CascadiaCode',
+                          fontSize: screenWidth > 1200 ? 22 : 18,
                         ),
                       ),
                     ),
                     if (!isDefault)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'set_default',
                         child: Text(
-                          'Set as Default',
+                          l10n.setAsDefault,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontFamily: 'CascadiaCode',
+                            fontSize: screenWidth > 1200 ? 22 : 18,
                           ),
                         ),
                       ),
                     if (!isDefault)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Text(
-                          'Delete',
+                          l10n.delete,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontFamily: 'CascadiaCode',
+                            fontSize: screenWidth > 1200 ? 22 : 18,
                           ),
                         ),
                       ),

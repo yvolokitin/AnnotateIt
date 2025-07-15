@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../data/dataset_database.dart';
-
 import '../../models/annotated_labeled_media.dart';
 import '../../models/label.dart';
 import '../../models/project.dart';
@@ -90,54 +88,27 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
     _handleSelectionChanged(currentItems);
   }
 
-/*
   void _handleDeleteSelected() async {
     if (_selectedItems.isEmpty) return;
 
-    final confirmed = await showDialog<bool>(
+    final deletedPaths = await showDialog<List<String>>(
       context: context,
       builder: (context) => DeleteImageDialog(
         mediaItems: _selectedItems.map((e) => e.mediaItem).toList(),
-        onConfirmed: () => Navigator.pop(context, true),
+        onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
       ),
     );
 
-    if (confirmed == true) {
-      for (final media in _selectedItems) {
-        await DatasetDatabase.instance.deleteMediaItemWithAnnotations(media.mediaItem.id!);
-      }
-
+    if (deletedPaths != null && deletedPaths.isNotEmpty) {
+      // Immediately remove deleted items from the current view
       setState(() {
-        _selectedItems.clear();
+        _selectedItems.removeWhere((item) => deletedPaths.contains(item.mediaItem.filePath));
       });
 
       // Refresh the page after deletion
       widget.onMediaDeleted();
     }
   }
-*/
-
-void _handleDeleteSelected() async {
-  if (_selectedItems.isEmpty) return;
-
-  final deletedPaths = await showDialog<List<String>>(
-    context: context,
-    builder: (context) => DeleteImageDialog(
-      mediaItems: _selectedItems.map((e) => e.mediaItem).toList(),
-      onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
-    ),
-  );
-
-  if (deletedPaths != null && deletedPaths.isNotEmpty) {
-    // Immediately remove deleted items from the current view
-    setState(() {
-      _selectedItems.removeWhere((item) => deletedPaths.contains(item.mediaItem.filePath));
-    });
-
-    // Refresh the page after deletion
-    widget.onMediaDeleted();
-  }
-}
 
   void _handleItemsPerPageChanged(int newItemsPerPage) {
     widget.onItemsPerPageChanged(newItemsPerPage);

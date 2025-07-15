@@ -158,7 +158,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   }
 
   Future<Map<String, dynamic>> getVideoMetadata(String path) async {
-    print('getVideoMetadata (stub with zeros) called for: $path');
+    // print('getVideoMetadata (stub with zeros) called for: $path');
     return {
       'width': 0,
       'height': 0,
@@ -170,12 +170,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
     final bool showDeleteButton = widget.allSelected || ((widget.selectedCount < widget.itemsPerPage) && (widget.allSelected == false));
 
     return Container(
-      height: 120,
+      height: screenWidth>1200 ? 120 : screenWidth>650 ? 80 : 60,
       width: double.infinity,
-      child: Row(
+        child: Row(
         children: [
           if (widget.totalCount > 0) ...[
             MouseRegion(
@@ -185,34 +186,33 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                   widget.allSelected
                     ? Icons.check_box
                     : Icons.check_box_outline_blank,
-                  color: Colors.white,
+                  color: Colors.white70,
                   size: 24,
                 ),
                 onPressed: widget.onToggleSelectAll,
               ),
             ),
-            const SizedBox(width: 20),
+            SizedBox(width: screenWidth > 700 ? 20 : 10),
             Text(
-              "${widget.totalCount} files",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
+              screenWidth > 1190 ? "${widget.totalCount} files" : "${widget.totalCount}",
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: screenWidth > 900 ? 22 : 18,
                 fontFamily: 'CascadiaCode',
               ),
             ),
           ],
 
-          // if (widget.selectedCount > 0) ...[
           if (showDeleteButton && widget.selectedCount > 0) ...[
             Text(
-              " / ${widget.selectedCount} selected",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
+              screenWidth > 1190 ? " / ${widget.selectedCount} selected " : " / ${widget.selectedCount}",
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: screenWidth > 900 ? 22 : 18,
                 fontFamily: 'CascadiaCode',
               ),
             ),
-            const SizedBox(width: 20),
+            SizedBox(width: screenWidth > 700 ? 20 : 10),
             MouseRegion(
               onEnter: (_) => setState(() => _hoveringDelete = true),
               onExit: (_) => setState(() => _hoveringDelete = false),
@@ -231,7 +231,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                   child: IconButton(
                     icon: Icon(
                       Icons.delete,
-                      color: _hoveringDelete ? Colors.redAccent : Colors.white,
+                      color: _hoveringDelete ? Colors.redAccent : Colors.white70,
                     ),
                     tooltip: l10n.buttonDelete,
                     onPressed: widget.onDeleteSelected,
@@ -243,49 +243,54 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
           const Spacer(),
 
-          const SizedBox(width: 20),
-          DropdownButton<int>(
-            value: _currentItemsPerPage,
-            dropdownColor: Colors.grey[900],
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            iconEnabledColor: Colors.white,
-            underline: Container(height: 0),
-            items: [8, 16, 24, 36, 48].map((value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text(
-                  '$value per page',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontFamily: 'CascadiaCode',
+          if (screenWidth > 1024)...[
+            const SizedBox(width: 20),
+            DropdownButton<int>(
+              value: _currentItemsPerPage,
+              dropdownColor: Colors.grey[900],
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              iconEnabledColor: Colors.white,
+              underline: Container(height: 0),
+              items: [8, 16, 24, 36, 48].map((value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(
+                    '$value per page',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null && value != _currentItemsPerPage) {
-                setState(() {
-                  _currentItemsPerPage = value;
-                });
-                widget.onItemsPerPageChanged?.call(value);
-              }
-            },
-          ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null && value != _currentItemsPerPage) {
+                  setState(() {
+                    _currentItemsPerPage = value;
+                  });
+                  widget.onItemsPerPageChanged?.call(value);
+                }
+              },
+            ),
+          ],
 
-          const SizedBox(width: 20),
+          SizedBox(width: screenWidth > 700 ? 20 : 10),
           _buildButton(
             context,
-            label: l10n.importDataset,
-            borderColor: Colors.grey,
+            buttonName: l10n.importDataset,
+            buttonIcon: Icons.upload,
+            borderColor: Colors.white70,
           ),
 
-          const SizedBox(width: 20),
+          SizedBox(width: screenWidth > 700 ? 20 : 10),
           _buildButton(
             context,
-            label: l10n.uploadMedia,
+            buttonName: l10n.uploadMedia,
+            buttonIcon: Icons.add_to_photos,
             borderColor: Colors.red,
           ),
+          const SizedBox(width: 10),
         ],
       ),
     );
@@ -293,32 +298,30 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
   Widget _buildButton(
     BuildContext context, {
-    required String label,
+    required String buttonName,
+    required IconData buttonIcon,
     required Color borderColor,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final bool isCompact = screenWidth < 1024;
-
-    final IconData icon = label.toLowerCase().contains("upload")
-        ? Icons.upload
-        : Icons.dataset;
-
-    if (isCompact) {
-      return IconButton(
+    if (screenWidth < 1024) {
+      return ElevatedButton(
         onPressed: widget.isUploading
-            ? null
-            : () async {
-                await _uploadMedia(context);
-              },
-        icon: Icon(icon, color: Colors.white, size: 36),
-        tooltip: label,
-        style: IconButton.styleFrom(
-          backgroundColor: Colors.grey[900],
-          shape: CircleBorder(
-            side: BorderSide(color: borderColor, width: 2),
-          ),
+          ? null
+          : () async {
+            await _uploadMedia(context);
+          },
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          padding: const EdgeInsets.all(14),
+          backgroundColor: Colors.transparent,
+          side: BorderSide(color: borderColor, width: 1),
         ),
+        child: Icon(
+          buttonIcon,
+          color: borderColor,
+          size: screenWidth > 700 ? 30 : 24),
       );
+
     } else {
       return ElevatedButton(
         onPressed: widget.isUploading
@@ -327,7 +330,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                 await _uploadMedia(context);
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[900],
+          backgroundColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -335,7 +338,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           ),
         ),
         child: Text(
-          label,
+          buttonName,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 22,

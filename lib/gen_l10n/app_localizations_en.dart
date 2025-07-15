@@ -96,6 +96,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userProfileMedia => 'Media';
 
   @override
+  String get userProfileOverview => 'Overview';
+
+  @override
   String get userProfileAnnotations => 'Annotations';
 
   @override
@@ -197,6 +200,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogNext => 'Next ->';
+
+  @override
+  String get rename => 'Rename';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get setAsDefault => 'Set as Default';
 
   @override
   String paginationPageFromTotal(int current, int total) {
@@ -510,7 +522,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'labels are essential for organizing your annotations clearly and consistently.';
 
   @override
-  String get noMediaDialogUploadPrompt => 'You need to upload images or videos';
+  String get noMediaDialogUploadPrompt => 'You have to upload images or videos';
+
+  @override
+  String get noMediaDialogUploadPromptShort => 'Upload media';
 
   @override
   String get noMediaDialogSupportedImageTypesTitle => 'Supported images types:';

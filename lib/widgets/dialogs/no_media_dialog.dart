@@ -33,17 +33,16 @@ class NoMediaDialogState extends State<NoMediaDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  if (screenWidth >= 800)...[
-                    const SizedBox(height: 40),
-                  ],
+                  SizedBox(height: screenWidth >= 700 ? 40 : 0),
 
                   Text(
-                    l10n.noMediaDialogUploadPrompt,
+                    screenWidth>600 ? l10n.noMediaDialogUploadPrompt : l10n.noMediaDialogUploadPromptShort,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'CascadiaCode',
-                      fontSize: 24),
+                      fontSize: screenWidth >= 1200 ? 24 : 20
+                    ),
                   ),
 
                   if (screenWidth >= 800)
@@ -61,16 +60,16 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                     l10n.noMediaDialogSupportedImageTypesTitle,
                     style: TextStyle(
                       color: Colors.grey,
-                      fontSize: 20,
                       fontFamily: 'CascadiaCode',
+                      fontSize: screenWidth >= 700 ? 20 : 16,
                     ),
                   ),
                   Text(
                     l10n.noMediaDialogSupportedImageTypesList,
                     style: TextStyle(
                       color: Colors.grey,
-                      fontSize: 20,
                       fontFamily: 'CascadiaCode',
+                      fontSize: screenWidth >= 700 ? 20 : 16,
                     ),
                   ),
 
@@ -85,7 +84,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                         color: Colors.white54,
                         decoration: TextDecoration.underline,
                         fontFamily: 'CascadiaCode',
-                        fontSize: 20,
+                        fontSize: screenWidth >= 700 ? 20 : 16,
                       ),
                     ),
                   ),

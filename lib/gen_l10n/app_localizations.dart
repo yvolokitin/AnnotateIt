@@ -262,6 +262,12 @@ abstract class AppLocalizations {
   /// **'Media'**
   String get userProfileMedia;
 
+  /// No description provided for @userProfileOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get userProfileOverview;
+
   /// No description provided for @userProfileAnnotations.
   ///
   /// In en, this message translates to:
@@ -447,6 +453,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next ->'**
   String get dialogNext;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @setAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Default'**
+  String get setAsDefault;
 
   /// No description provided for @paginationPageFromTotal.
   ///
@@ -971,8 +995,14 @@ abstract class AppLocalizations {
   /// No description provided for @noMediaDialogUploadPrompt.
   ///
   /// In en, this message translates to:
-  /// **'You need to upload images or videos'**
+  /// **'You have to upload images or videos'**
   String get noMediaDialogUploadPrompt;
+
+  /// No description provided for @noMediaDialogUploadPromptShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload media'**
+  String get noMediaDialogUploadPromptShort;
 
   /// No description provided for @noMediaDialogSupportedImageTypesTitle.
   ///

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ProjectDetailsNavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
@@ -12,28 +13,35 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onItemSelected,
-      selectedIconTheme: const IconThemeData(color: Colors.red),
-      selectedLabelTextStyle: const TextStyle(color: Colors.red, fontFamily: 'CascadiaCode',),
-      unselectedIconTheme: const IconThemeData(color: Colors.white70),
-      unselectedLabelTextStyle: const TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode',),
-      backgroundColor: Colors.grey[800],
+    final screenWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
 
-      destinations: [
-        _buildDestination(0, Icons.wallpaper_rounded, 'Media'),
-        _buildDestination(1, Icons.discount_outlined, 'Labels'),
-        _buildDestination(2, Icons.library_books_outlined, 'Overview'),
-      ],
+    return Container(
+      width: screenWidth > 550 ? 70 : 60,
+      color: Colors.grey[800],
+      child: NavigationRail(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onItemSelected,
+        selectedIconTheme: const IconThemeData(color: Colors.red),
+        selectedLabelTextStyle: const TextStyle(color: Colors.red, fontFamily: 'CascadiaCode',),
+        unselectedIconTheme: const IconThemeData(color: Colors.white70),
+        unselectedLabelTextStyle: const TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode',),
+        backgroundColor: Colors.grey[800],
+
+        destinations: [
+          _buildDestination(0, Icons.wallpaper_rounded, l10n.userProfileMedia, screenWidth),
+          _buildDestination(1, Icons.discount_outlined, l10n.userProfileLabels, screenWidth),
+          _buildDestination(2, Icons.library_books_outlined, l10n.userProfileOverview, screenWidth),
+        ],
+      ),
     );
   }
 
-  NavigationRailDestination _buildDestination(int index, IconData icon, String label) {
+  NavigationRailDestination _buildDestination(int index, IconData icon, String label, double width) {
     return NavigationRailDestination(
       icon: Container(
-        width: 48,
-        height: 48,
+        width: width > 550 ? 48 : 44,
+        height: width > 550 ? 48 : 44,
         decoration: BoxDecoration(
           color: selectedIndex == index ? Colors.grey[850] : Colors.transparent,
           borderRadius: BorderRadius.circular(8),

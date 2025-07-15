@@ -13,8 +13,9 @@ class ProjectDetailsAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      height: MediaQuery.of(context).size.width >= 1800 ? 80 : 60,
+      height: screenWidth >= 1800 ? 80 : screenWidth > 550 ? 60 : 50,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[800],
@@ -30,15 +31,14 @@ class ProjectDetailsAppBar extends StatelessWidget {
         children: [
           HoverIconButton(
             icon: Icons.arrow_back,
-            margin: const EdgeInsets.only(left: 20.0),
+            margin: EdgeInsets.only(left: screenWidth > 550 ? 16 : 10),
             onPressed: onBackPressed,
           ),
           HoverIconButton(
             icon: Icons.help_outline,
-            margin: const EdgeInsets.only(right: 20.0),
+            margin: EdgeInsets.only(right: screenWidth > 550 ? 16 : 10),
             onPressed: () {
               final l10n = AppLocalizations.of(context)!;
-
               AlertErrorDialog.show(
                 context,
                 l10n.projectHelpTitle,

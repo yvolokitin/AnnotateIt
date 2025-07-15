@@ -38,6 +38,7 @@ class ProjectViewMediaGalery extends StatefulWidget {
 
 class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with TickerProviderStateMixin {
   Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
+  bool _dependenciesInitialized = false;
   List<Dataset> datasets = [];
   String currentDatasetId = '';
   TabController? _tabController;
@@ -66,8 +67,23 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   @override
   void initState() {
     super.initState();
-    currentDatasetId = widget.datasetId;
-    _loadDatasets();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_dependenciesInitialized) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      // for mobile devices, use smaller items per page
+      if (screenWidth < 1024) {
+        itemsPerPage = 8;
+      }
+
+      currentDatasetId = widget.datasetId;
+      _loadDatasets();
+
+      _dependenciesInitialized = true;
+    }
   }
 
   Future<void> _loadDatasets() async {
@@ -180,7 +196,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
     await loadMediaForDataset(currentDatasetId, itemsPerPage, _currentPage);
   }
-  
+/*
   void _handleDeleteSelectedMedia() async {
     final deletedPaths = await showDialog<List<String>>(
       context: context,
@@ -209,7 +225,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
     }
   }
-
+*/
   void _rebuildTabController() {
     _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
@@ -360,69 +376,6 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     }
   }
 
-/*
-  void _renameDataset(Dataset dataset) async {
-    final controller = TextEditingController(text: dataset.name);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename Dataset'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'New name'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('Rename')),
-        ],
-      ),
-    );
-
-    if (result != null && result.trim().isNotEmpty) {
-      final updated = dataset.copyWith(name: result.trim());
-      await DatasetDatabase.instance.updateDataset(updated);
-      await ProjectDatabase.instance.updateProjectLastUpdated(updated.projectId);
-
-      setState(() {
-        final index = datasets.indexWhere((d) => d.id == dataset.id);
-        datasets[index] = updated;
-        _datasetTabCache.remove(updated.id);
-      });
-    }
-  }
-
-  void _deleteDataset(Dataset dataset) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Dataset'),
-        content: Text("Are you sure you want to delete '\${dataset.name}'?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await DatasetDatabase.instance.deleteDataset(dataset.id);
-      await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
-
-      setState(() {
-        datasets.removeWhere((d) => d.id == dataset.id);
-        annotatedMediaByDataset.remove(dataset.id);
-        _datasetTabCache.remove(dataset.id);
-      });
-
-      _rebuildTabController();
-      if (_tabController!.index >= datasets.length) {
-        _tabController!.index = datasets.length - 1;
-      }
-
-      loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
-    }
-  }
-*/
   @override
   void dispose() {
     _tabController?.removeListener(_handleTabChange);

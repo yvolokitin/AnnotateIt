@@ -36,6 +36,7 @@ class AlertErrorDialog extends StatelessWidget {
 
     return AlertDialog(
       backgroundColor: Colors.grey[800],
+      // insetPadding: screenWidth > 700 ? const EdgeInsets.symmetric(horizontal: 40, vertical: 24) : EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -54,11 +55,11 @@ class AlertErrorDialog extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.orangeAccent,
                   fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: screenWidth > 700 ? 24 : 20,
                 ),
               ),
             ],
@@ -70,11 +71,7 @@ class AlertErrorDialog extends StatelessWidget {
           ),
         ],
       ),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.6,
-        ),
-        child: SingleChildScrollView(
+      content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,11 +80,11 @@ class AlertErrorDialog extends StatelessWidget {
                 padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
                 child: Text(
                   message,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white70,
                     fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
-                    fontSize: 22,
+                    fontSize: screenWidth > 700 ? 22 : 18,
                   ),
                 ),
               ),
@@ -96,19 +93,18 @@ class AlertErrorDialog extends StatelessWidget {
                   padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
                   child: Text(
                     tips!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white60,
                       fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
-                      fontSize: 22,
+                      fontSize: screenWidth > 700 ? 22 : 18,
                     ),
                   ),
                 ),
-              const SizedBox(height: 25),
+              SizedBox(height: screenWidth > 700 ? 25 : 15),
               const Divider(color: Colors.orangeAccent),
             ],
           ),
-        ),
       ),
       actions: [
         ElevatedButton(
@@ -127,7 +123,7 @@ class AlertErrorDialog extends StatelessWidget {
               color: Colors.orangeAccent,
               fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
-              fontSize: 22,
+              fontSize: screenWidth > 700 ? 22 : 18,
             ),
           ),
         ),

@@ -31,6 +31,7 @@
   "userProfileProjects": "Projects",
   "userProfileLabels": "Labels",
   "userProfileMedia": "Media",
+  "userProfileOverview": "Overview",
   "userProfileAnnotations": "Annotations",
 
   "settingsGeneralTitle": "General Settings",
@@ -67,6 +68,10 @@
 
   "dialogBack": "<- Back",
   "dialogNext": "Next ->",
+
+  "rename": "Rename",
+  "delete": "Delete",
+  "setAsDefault": "Set as Default",
 
   "paginationPageFromTotal": "Page {current} from {total}",
   "@paginationPageFromTotal": {
@@ -230,7 +235,8 @@
   "noLabelsExplain5": "Whether you're tagging objects in images, classifying, or segmenting regions,",
   "noLabelsExplain6": "labels are essential for organizing your annotations clearly and consistently.",
 
-  "noMediaDialogUploadPrompt": "You need to upload images or videos",
+  "noMediaDialogUploadPrompt": "You have to upload images or videos",
+  "noMediaDialogUploadPromptShort": "Upload media",
   "noMediaDialogSupportedImageTypesTitle": "Supported images types:",
   "noMediaDialogSupportedImageTypesList": "jpg, jpeg, png, bmp, jfif, webp",
   "noMediaDialogSupportedVideoFormatsLink": "Click here to see which video formats are supported on your platform",

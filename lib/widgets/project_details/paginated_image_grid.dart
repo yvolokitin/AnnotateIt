@@ -43,7 +43,7 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
   int _getCrossAxisCount() {
     switch (widget.itemsPerPage) {
       case 8:
-        return 2;
+        return 3;
       case 16:
         return 4;
       case 24:
@@ -57,10 +57,22 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
     }
   }
 
+  String getPaginationText() {
+    final l10n = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 700) {
+      return l10n.paginationPageFromTotal(widget.currentPage + 1, widget.totalPages);
+
+    } else {
+      return "${(widget.currentPage + 1)} / ${widget.totalPages}";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final mediaItems = widget.annotatedMediaItems;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Column(
       children: [
@@ -111,8 +123,16 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                 onPressed: widget.currentPage > 0
                     ? () => widget.onPageChanged(widget.currentPage - 1)
                     : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.red, width: 1),
+                  ),
+                ),
                 child: Text(
-                  l10n.dialogBack,
+                  screenWidth > 700 ? l10n.dialogBack : '<-',
                   style: const TextStyle(
                     fontFamily: 'CascadiaCode',
                   ),
@@ -120,7 +140,7 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
               ),
               const SizedBox(width: 20),
               Text(
-                l10n.paginationPageFromTotal(widget.currentPage + 1, widget.totalPages),
+                getPaginationText(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontFamily: 'CascadiaCode',
@@ -131,9 +151,18 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                 onPressed: widget.currentPage < widget.totalPages - 1
                     ? () => widget.onPageChanged(widget.currentPage + 1)
                     : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.red, width: 1),
+                  ),
+                ),
                 child: Text(
-                  l10n.dialogNext,
+                  screenWidth > 700 ? l10n.dialogNext : '->',
                   style: const TextStyle(
+                    color: Colors.white,
                     fontFamily: 'CascadiaCode',
                   ),
                 ),
