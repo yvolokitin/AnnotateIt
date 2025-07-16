@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:archive/archive_io.dart' as zip;
 import 'package:xml/xml.dart';
+import 'package:logging/logging.dart';
 
 import '../models/archive.dart';
 
@@ -19,6 +20,8 @@ class DatasetAnnotationStats {
     required this.labels,
   });
 }
+
+final _logger = Logger('DatasetImportUtils');
 
 Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datasetDir, String datasetType) async {
   int annotationCount = 0;
@@ -603,76 +606,77 @@ Future<Archive> processZipLocallyWithIsolates({
   required void Function(double progress) onDetectProgress,
 }) async {
   final receivePort = ReceivePort();
-
-  // Extract in isolate
-  await Isolate.spawn(extractInIsolate, [
-    zipFile.path,
-    storagePath,
-    receivePort.sendPort,
-  ]);
-
-  String extractedPath = '';
-  await for (final message in receivePort) {
-    if (message is Map<String, dynamic>) {
-      if (message['type'] == 'extract_progress') {
-        onExtractProgress(message['progress'] ?? 0.0);
-      } else if (message['type'] == 'extract_done') {
-        extractedPath = message['path'];
-        onExtractDone(extractedPath);
-        break;
-      } else if (message['type'] == 'extract_error') {
-        throw Exception("Extract isolate error: ${message['error']}");
-      }
-    }
-  }
-
-  // Detect dataset type in isolate
   final detectionPort = ReceivePort();
-  await Isolate.spawn(detectInIsolate, [
-    extractedPath,
-    detectionPort.sendPort,
-  ]);
 
-  String datasetType = '';
-  await for (final message in detectionPort) {
-    if (message is Map<String, dynamic>) {
-      if (message['type'] == 'detect_progress') {
-        onDetectProgress(message['progress'] ?? 0.0);
-      } else if (message['type'] == 'detect_done') {
-        datasetType = message['taskType'];
-        break;
+  try {
+    // Extract in isolate
+    await Isolate.spawn(extractInIsolate, [
+      zipFile.path,
+      storagePath,
+      receivePort.sendPort,
+    ]);
+
+    String extractedPath = '';
+    await for (final message in receivePort) {
+      if (message is Map<String, dynamic>) {
+        if (message['type'] == 'extract_progress') {
+          onExtractProgress(message['progress'] ?? 0.0);
+        } else if (message['type'] == 'extract_done') {
+          extractedPath = message['path'];
+          onExtractDone(extractedPath);
+          break;
+        } else if (message['type'] == 'extract_error') {
+          throw Exception("Extract isolate error: ${message['error']}");
+        }
       }
     }
-  }
 
-  final extractedDir = Directory(extractedPath);
-  final allFiles = extractedDir.listSync(recursive: true).whereType<File>().toList();
-  final mediaExtensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.mkv'];
+    // Detect dataset type in isolate
+    await Isolate.spawn(detectInIsolate, [
+      extractedPath,
+      detectionPort.sendPort,
+    ]);
 
-  final mediaFiles = allFiles.where((f) =>
+    String datasetType = '';
+    await for (final message in detectionPort) {
+      if (message is Map<String, dynamic>) {
+        if (message['type'] == 'detect_progress') {
+          onDetectProgress(message['progress'] ?? 0.0);
+        } else if (message['type'] == 'detect_done') {
+          datasetType = message['taskType'];
+          break;
+        }
+      }
+    }
+
+    final extractedDir = Directory(extractedPath);
+    final allFiles = extractedDir.listSync(recursive: true).whereType<File>().toList();
+    final mediaExtensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.mkv'];
+
+    final mediaFiles = allFiles.where((f) =>
       mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
 
-  // Count real annotation + annotated media files
-  final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
+    // Count real annotation + annotated media files
+    final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
 
-  // Detect task type based on dataset type + annotations
-  List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
+    // Detect task type based on dataset type + annotations
+    List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
 
-  // Collect annotation file names for label list (same as before)
-  // final annotationExtensions = ['.json', '.xml', '.txt'];
-  // final annotationFiles = allFiles.where((f) =>
-  //    annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
-
-  return Archive(
-    zipFileName: zipFile.path.split(Platform.pathSeparator).last,
-    datasetPath: extractedPath,
-    mediaCount: mediaFiles.length,
-    annotationCount: stats.annotationCount,
-    annotatedFilesCount: stats.annotatedFilesCount,
-    datasetFormat: datasetType,
-    taskTypes: detectedTaskTypes,
-    labels: stats.labels.toList(),
-  );
+    return Archive(
+      zipFileName: zipFile.path.split(Platform.pathSeparator).last,
+      datasetPath: extractedPath,
+      mediaCount: mediaFiles.length,
+      annotationCount: stats.annotationCount,
+      annotatedFilesCount: stats.annotatedFilesCount,
+      datasetFormat: datasetType,
+      taskTypes: detectedTaskTypes,
+      labels: stats.labels.toList(),
+    );
+  } finally {
+    receivePort.close();
+    detectionPort.close();
+    _logger.info('Isolate ports closed');
+  }
 }
 
 /// Isolate function: extracts dataset in background.

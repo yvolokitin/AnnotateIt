@@ -49,14 +49,17 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   int _currentIndex = 0;
   Annotation? _selectedAnnotation;
 
-  Label selectedLabel = Label(id: -1, projectId: -1, name: 'Default', color: '#000000', labelOrder: -1);
+  Label selectedLabel = Label(id: -1, projectId: -1, name: 'Unknown', color: '#808080', labelOrder: -1);
   MouseCursor cursorIcon = SystemMouseCursors.basic;
   UserAction userAction = UserAction.navigation;
 
   bool showAnnotationNames = true;
   bool showRightSidebar = true;
   bool _mouseInsideImage = false;
-  double labelOpacity = 0.35;
+
+  double currentOpacity = 0.35;
+  double currentStrokeWidth = 4.0;
+  double currentCornerSize = 8.0;
 
   final Map<int, AnnotatedLabeledMedia> _mediaCache = {};
   final Map<int, ui.Image> _imageCache = {};
@@ -131,19 +134,30 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     setState(() {
       final currentMedia = _mediaCache[_currentIndex];
       if (currentMedia != null) {
-        final index = currentMedia.annotations?.indexWhere(
-          (a) => a.id == updatedAnnotation.id
-        ) ?? -1;
-
-        if (index != -1) {
-          currentMedia.annotations?[index] = updatedAnnotation;
+        final annotations = List<Annotation>.from(currentMedia.annotations ?? []);
+        final existingIndex = annotations.indexWhere((a) => a.id == updatedAnnotation.id);
+      
+        if (existingIndex != -1) {
+          annotations[existingIndex] = updatedAnnotation;
+        } else {
+          annotations.add(updatedAnnotation);
         }
+
+        _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: annotations);
       }
     });
   }
 
   void _handleDefaultLabelSelected(Label? label) {
-    print('!!!!!!!!!!!!!!!!! $label');
+    setState(() {
+      selectedLabel = label ?? Label(
+        id: -1,
+        projectId: -1,
+        name: 'Unknown',
+        color: '#808080',
+        labelOrder: -1,
+      );
+    });
   }
 
   void _handleLabelSelected(Label label) {
@@ -194,6 +208,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       cursorIcon = action == UserAction.navigation
           ? SystemMouseCursors.basic
           : SystemMouseCursors.precise;
+
+      // Deselect annotation when leaving navigation mode
+      // if (action != UserAction.navigation) {
+        _selectedAnnotation = null;
+      // }
     });
   }
 
@@ -340,10 +359,14 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     children: [
                       AnnotatorLeftToolbar(
                         type: widget.project.type,
-                        opacity: labelOpacity,
+                        opacity: currentOpacity,
+                        strokeWidth: currentStrokeWidth,
+                        cornerSize: currentCornerSize,
                         selectedAction: userAction,
                         showAnnotationNames: showAnnotationNames,
-                        onOpacityChanged: (v) => setState(() => labelOpacity = v),
+                        onOpacityChanged: (value) => setState(() => currentOpacity = value),
+                        onStrokeWidthChanged: (value) => setState(() => currentStrokeWidth = value),
+                        onCornerSizeChanged: (value) => setState(() => currentCornerSize = value),                        
                         onResetZoomPressed: () => setState(() => _resetZoomCount++),
                         onShowDatasetGridChanged: (v) => setState(() => showRightSidebar = v),
                         onActionSelected: _handleActionSelected,
@@ -364,7 +387,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                   annotations: media.annotations,
                                   resetZoomCount: _resetZoomCount,
                                   showAnnotationNames: showAnnotationNames,
-                                  opacity: labelOpacity,
+                                  opacity: currentOpacity,
+                                  strokeWidth: currentStrokeWidth,
+                                  cornerSize: currentCornerSize,
                                   userAction: userAction,
                                   selectedLabel: selectedLabel,
                                   selectedAnnotation: _selectedAnnotation,

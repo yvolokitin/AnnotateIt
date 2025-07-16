@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
+import '../dialogs/annotations_settings_dialog.dart';
 import '../dialogs/alert_error_dialog.dart';
-import '../dialogs/opacity_dialog.dart';
 
 import 'user_action.dart';
 import 'toolbar_button.dart';
@@ -14,8 +14,12 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final double opacity;
   final UserAction selectedAction;
   final bool showAnnotationNames;
+  final double strokeWidth;
+  final double cornerSize;
 
   final ValueChanged<double> onOpacityChanged;
+  final ValueChanged<double> onStrokeWidthChanged;
+  final ValueChanged<double> onCornerSizeChanged;
   final VoidCallback onResetZoomPressed;
   final ValueChanged<bool> onShowDatasetGridChanged;
   final ValueChanged<UserAction> onActionSelected;
@@ -32,6 +36,10 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onShowDatasetGridChanged,
     required this.onActionSelected,
     required this.onShowAnnotationNames,
+    required this.strokeWidth,
+    required this.cornerSize,
+    required this.onStrokeWidthChanged,
+    required this.onCornerSizeChanged,    
   });
 
   @override
@@ -39,20 +47,28 @@ class AnnotatorLeftToolbar extends StatefulWidget {
 }
 
 class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
-  bool showOpacityDialog = false;
+  bool showAnnotationsSettingsDialog  = false;
   bool showDatasetGrid = false;
 
   void _selectUserAction(UserAction action) {
     widget.onActionSelected(action);
   }
 
-  void _openOpacityDialog(BuildContext context) {
-    setState(() => showOpacityDialog = true);
-    OpacityDialog.show(
+  void _openAnnotationsSettingsDialog(BuildContext context) {
+    setState(() => showAnnotationsSettingsDialog = true);
+    AnnotationsSettingsDialog.show(
       context,
       initialOpacity: widget.opacity,
-      onOpacityChanged: widget.onOpacityChanged,
-    ).then((_) => setState(() => showOpacityDialog = false));
+      initialStrokeWidth: widget.strokeWidth,
+      initialCornerSize: widget.cornerSize,
+      onSettingsChanged: (newOpacity, newStrokeWidth, newCornerSize) {
+        setState(() {
+          widget.onOpacityChanged(newOpacity);
+          widget.onStrokeWidthChanged(newStrokeWidth);
+          widget.onCornerSizeChanged(newCornerSize);
+        });
+      },
+    ).then((_) => setState(() => showAnnotationsSettingsDialog = false));
   }
 
   @override
@@ -128,9 +144,9 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ToolbarDivider(isCompact: isCompact),
           ToolbarButton(
             icon: Icon(Icons.settings),
-            onTap: () => _openOpacityDialog(context),
-            isActive: showOpacityDialog,
-            tooltip: l10n.toolbarOpacitySettings,
+            onTap: () => _openAnnotationsSettingsDialog(context),
+            isActive: showAnnotationsSettingsDialog,
+            tooltip: l10n.toolbarAnnotationSettings,
           ),
 
           // Annotation Names Toggle

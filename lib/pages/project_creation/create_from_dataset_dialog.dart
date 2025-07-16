@@ -130,6 +130,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       onExtractProgress: (progress) => setState(() => _processingProgress = progress * 0.5),
       onExtractDone: (_) => setState(() => _processingProgress = 0.5),
       onDetectProgress: (progress) => setState(() => _processingProgress = 0.5 + progress * 0.5),
+    ).timeout(
+      Duration(minutes: 10),
+      onTimeout: () => throw Exception('Dataset processing timeout'),
     );
   }
 
@@ -385,6 +388,12 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             fontSize: 14,
           ),
         ),
+
+        Text(
+          _progressTotal > 0 
+            ? "${l10n.datasetDialogProcessingProgress} $_progressCurrent/$_progressTotal"
+            : l10n.datasetDialogProcessing,
+          ),
       ],
     );
   }

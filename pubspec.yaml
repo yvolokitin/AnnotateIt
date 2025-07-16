@@ -71,6 +71,7 @@ dev_dependencies:
   build_runner: ^2.4.15
   drift_dev: ^2.25.2
   flutter_launcher_icons: ^0.14.4
+  msix: ^3.16.9
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -148,8 +149,10 @@ flutter_launcher_icons:
 
 msix_config:
   display_name: AnnotateIt
-  publisher_display_name: AnnotateIt
-  identity_name: annotateit.ai
+  publisher_display_name: UmnoAI
+  identity_name: UmnoAI.AnnotateIt
+  publisher: CN=C115178E-F1D2-42DB-8DA3-3252207C04BB
   msix_version: 1.0.0.0
   logo_path: assets/logo/annotateit_ro.png
   capabilities: broadFileSystemAccess
+  sign_msix: false

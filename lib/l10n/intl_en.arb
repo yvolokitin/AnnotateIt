@@ -249,7 +249,7 @@
   "toolbarSegmentation": "Segmentation",
   "toolbarResetZoom": "Reset Zoom",
   "toolbarToggleGrid": "Toggle Grid",
-  "toolbarOpacitySettings": "Opacity Settings",
+  "toolbarAnnotationSettings": "Annotation Settings",
   "toolbarToggleAnnotationNames": "Toggle Annotation Names",
   "toolbarRotateLeft": "Rotate Left (Coming Soon)",
   "toolbarRotateRight": "Rotate Right (Coming Soon)",

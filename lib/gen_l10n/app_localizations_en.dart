@@ -566,7 +566,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolbarToggleGrid => 'Toggle Grid';
 
   @override
-  String get toolbarOpacitySettings => 'Opacity Settings';
+  String get toolbarAnnotationSettings => 'Annotation Settings';
 
   @override
   String get toolbarToggleAnnotationNames => 'Toggle Annotation Names';

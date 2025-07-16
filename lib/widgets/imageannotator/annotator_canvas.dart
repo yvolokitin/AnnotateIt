@@ -27,6 +27,8 @@ class AnnotatorCanvas extends StatefulWidget {
   final Label selectedLabel;
   final int resetZoomCount;
   final double opacity;
+  final double strokeWidth;
+  final double cornerSize;
   final bool showAnnotationNames;
 
   final ValueChanged<double>? onZoomChanged;
@@ -40,6 +42,8 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.annotations,
     required this.resetZoomCount,
     required this.opacity,
+    required this.cornerSize,
+    required this.strokeWidth,    
     required this.userAction,
     required this.showAnnotationNames,
     required this.selectedLabel,
@@ -300,7 +304,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           // annotator: UserSession.instance.getUser().id!,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
-        );
+        )
+        ..name = widget.selectedLabel.name
+        ..color = widget.selectedLabel.toColor();
 
         setState(() {
           _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
@@ -387,7 +393,15 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                       selectedAnnotation: widget.selectedAnnotation,
                       scale: matrix.getMaxScaleOnAxis(),
                       opacity: widget.opacity,
+                      strokeWidth: widget.strokeWidth,
+                      cornerSize: widget.cornerSize,
                       showAnnotationNames: widget.showAnnotationNames,
+                      drawingRect: (_drawingStart != null && _drawingCurrent != null)
+                        ? Rect.fromPoints(_drawingStart!, _drawingCurrent!)
+                        : null,
+                      drawingRectColor: (_drawingStart != null)
+                        ? (widget.selectedLabel.toColor() ?? Colors.grey)
+                      : Colors.grey,
                     ),
                   ),
                 ),

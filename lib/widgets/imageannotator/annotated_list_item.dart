@@ -54,7 +54,7 @@ class AnnotatedListItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
             child: Row(
               children: [
                 // Color indicator
@@ -63,7 +63,7 @@ class AnnotatedListItem extends StatelessWidget {
                   height: 14,
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
-                    color: annotation.color ?? colorScheme.primary,
+                    color: annotation.color ?? Colors.grey,
                     borderRadius: BorderRadius.circular(4),
                     // shape: BoxShape.circle,
                     border: Border.all(
@@ -75,9 +75,12 @@ class AnnotatedListItem extends StatelessWidget {
                 // Annotation label
                 Expanded(
                   child: Text(
-                    annotation.name ?? 'Unnamed Annotation',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: textColor,
+                    annotation.name ?? 'Unknown',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.normal,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

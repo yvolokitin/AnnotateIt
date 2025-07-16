@@ -1070,11 +1070,11 @@ abstract class AppLocalizations {
   /// **'Toggle Grid'**
   String get toolbarToggleGrid;
 
-  /// No description provided for @toolbarOpacitySettings.
+  /// No description provided for @toolbarAnnotationSettings.
   ///
   /// In en, this message translates to:
-  /// **'Opacity Settings'**
-  String get toolbarOpacitySettings;
+  /// **'Annotation Settings'**
+  String get toolbarAnnotationSettings;
 
   /// No description provided for @toolbarToggleAnnotationNames.
   ///

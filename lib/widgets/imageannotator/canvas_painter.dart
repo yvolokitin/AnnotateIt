@@ -11,18 +11,26 @@ class CanvasPainter extends CustomPainter {
   final ui.Image image;
   final List<Annotation>? annotations;
   final double scale, opacity;
+  final double strokeWidth;
+  final double cornerSize;
   final Annotation? selectedAnnotation;
   final bool showAnnotationNames;
 
   final bool show_classifications = false;
+  final Rect? drawingRect;
+  final Color? drawingRectColor;
 
   CanvasPainter({
     required this.image,
     required this.annotations,
     required this.scale,
     required this.opacity,
+    required this.strokeWidth,
+    required this.cornerSize,    
     required this.showAnnotationNames,
     this.selectedAnnotation,
+    this.drawingRect,
+    this.drawingRectColor,
   });
 
   @override
@@ -50,7 +58,7 @@ class CanvasPainter extends CustomPainter {
           final color = annotation.color ?? Colors.grey;
           final paint = Paint()
             ..color = color
-            ..strokeWidth = 2
+            ..strokeWidth = strokeWidth / scale
             ..style = PaintingStyle.stroke;
           final fillPaint = Paint()
             ..color = color.withOpacity(opacity)
@@ -83,7 +91,7 @@ class CanvasPainter extends CustomPainter {
       if (shape != null) {
         final highlightPaint = Paint()
           ..color = Colors.red
-          ..strokeWidth = Constants.annotationBorderWidth
+          ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke;
         shape.paint(canvas, highlightPaint);
 
@@ -91,6 +99,16 @@ class CanvasPainter extends CustomPainter {
         final corners = shape.getCorners();
         drawCornerHandles(canvas, corners);
       }
+    }
+
+    // Draw live bounding box (semi-transparent blue)
+    if (drawingRect != null) {
+      final paint = Paint()
+        ..color = (drawingRectColor ?? Colors.grey)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0 / scale;
+
+      canvas.drawRect(drawingRect!, paint);
     }
   }
 
@@ -157,7 +175,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   if (annotation.id == selectedAnnotation?.id) {
     final borderPaint = Paint()
       ..color = Colors.red
-      ..strokeWidth = 2
+      ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
     canvas.drawRRect(
       RRect.fromRectAndRadius(boxRect, const Radius.circular(4.0)),
@@ -176,8 +194,8 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
 }
 
   void drawCornerHandles(Canvas canvas, List<Offset> corners) {
-    final borderWidth = Constants.annotationBorderWidth;
-    final handleSize = Constants.handleSize;
+    final borderWidth = strokeWidth;
+    final handleSize = cornerSize;
 
     final fillPaint = Paint()
       ..color = Colors.white
@@ -283,9 +301,10 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
     return oldDelegate.annotations != annotations ||
-         oldDelegate.selectedAnnotation?.id != selectedAnnotation?.id ||
-         oldDelegate.opacity != opacity ||
-         oldDelegate.scale != scale;
+      oldDelegate.selectedAnnotation?.id != selectedAnnotation?.id ||
+      oldDelegate.opacity != opacity ||
+      oldDelegate.scale != scale ||
+      oldDelegate.drawingRect != drawingRect;
   }
 
   @override

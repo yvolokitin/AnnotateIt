@@ -73,15 +73,19 @@ class DatasetImportProjectCreation {
       // Step 4: Update project thumbnail if available
       if (firstImagePath != null) {
         _logger.info('Generating thumbnail...');
-        final thumbnailFile = await generateThumbnailFromImage(
-          File(firstImagePath), 
-          newProject.id.toString()
-        );
-        if (thumbnailFile != null) {
-          await ProjectDatabase.instance.updateProjectIcon(
-            newProject.id!, 
-            thumbnailFile.path
+        try {
+          final thumbnailFile = await generateThumbnailFromImage(
+            File(firstImagePath), 
+            newProject.id.toString()
           );
+          if (thumbnailFile != null) {
+            await ProjectDatabase.instance.updateProjectIcon(
+              newProject.id!, 
+              thumbnailFile.path
+            );
+          }
+        } catch (e) {
+          _logger.warning('Thumbnail generation failed', e);
         }
       }
 
@@ -261,10 +265,16 @@ class DatasetImportProjectCreation {
       );
 
       current++;
+      onProgress(current, total);
+      if (current % 10 == 0 || current == total) {
+        await Future.delayed(Duration.zero);
+      }
+/*
       if (current % 100 == 0 || current == total) {
         onProgress(current, total);
         print("Progress update: $current / $total files inserted");
       }
+*/      
     }
 
     print("Finished inserting $total media files into dataset $datasetId");

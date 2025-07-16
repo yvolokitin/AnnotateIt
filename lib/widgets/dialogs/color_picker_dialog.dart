@@ -59,12 +59,37 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: Colors.grey[800],
-      title: Text(
-        l10n.colorPickerTitle,
-        style: TextStyle(
-          color: Colors.white,
-          fontFamily: 'CascadiaCode',
-        ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.white24, width: 1),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.palette,
+                size: 32,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.colorPickerTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+        ],
       ),
       content: SingleChildScrollView(
         child: Column(
