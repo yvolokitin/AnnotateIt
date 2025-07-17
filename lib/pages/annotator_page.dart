@@ -53,8 +53,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   MouseCursor cursorIcon = SystemMouseCursors.basic;
   UserAction userAction = UserAction.navigation;
 
+  // do not show right sidebar by default
+  bool showRightSidebar = false;
   bool showAnnotationNames = true;
-  bool showRightSidebar = true;
   bool _mouseInsideImage = false;
 
   double currentOpacity = 0.35;
@@ -163,43 +164,47 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   void _handleLabelSelected(Label label) {
     setState(() => selectedLabel = label);
   
-    // Only automatically create classification annotations if this is a classification project
-    if (!widget.project.type.toLowerCase().contains('classification')) {
-      return;
+    // automatically create classification annotations if this is a classification project
+    if (widget.project.type.toLowerCase().contains('classification')) {
+      final currentMedia = _mediaCache[_currentIndex];
+      if (currentMedia == null) return;
+
+      // Check if this label already exists as a classification
+      final existingIndex = currentMedia.annotations?.indexWhere(
+        (a) => a.annotationType == 'classification' && a.labelId == label.id
+      ) ?? -1;
+
+      if (existingIndex != -1) return;
+
+      // Create new classification annotation
+      final newAnnotations = currentMedia.annotations != null 
+        ? List<Annotation>.from(currentMedia.annotations!)
+        : <Annotation>[];
+
+      newAnnotations.add(Annotation(
+        id: null,
+        mediaItemId: currentMedia.mediaItem.id!,
+        labelId: label.id,
+        annotationType: 'classification',
+        data: {},
+        confidence: 1.0,
+        annotatorId: null,
+        comment: null,
+        status: 'pending',
+        version: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )..name = label.name
+      ..color = label.toColor());
+
+      _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+
+    } else {
+      // For other project types, just update the selected label 222
+      if (_selectedAnnotation != null) {
+        _handleAnnotationLabelChanged(_selectedAnnotation!, label);
+      }
     }
-
-    final currentMedia = _mediaCache[_currentIndex];
-    if (currentMedia == null) return;
-
-    // Check if this label already exists as a classification
-    final existingIndex = currentMedia.annotations?.indexWhere(
-      (a) => a.annotationType == 'classification' && a.labelId == label.id
-    ) ?? -1;
-
-    if (existingIndex != -1) return;
-
-    // Create new classification annotation
-    final newAnnotations = currentMedia.annotations != null 
-      ? List<Annotation>.from(currentMedia.annotations!)
-      : <Annotation>[];
-
-    newAnnotations.add(Annotation(
-      id: null,
-      mediaItemId: currentMedia.mediaItem.id!,
-      labelId: label.id,
-      annotationType: 'classification',
-      data: {},
-      confidence: 1.0,
-      annotatorId: null,
-      comment: null,
-      status: 'pending',
-      version: 1,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    )..name = label.name
-     ..color = label.toColor());
-
-    _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
   }
 
   void _handleActionSelected(UserAction action) {
@@ -209,10 +214,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           ? SystemMouseCursors.basic
           : SystemMouseCursors.precise;
 
-      // Deselect annotation when leaving navigation mode
-      // if (action != UserAction.navigation) {
-        _selectedAnnotation = null;
-      // }
+      // Deselect annotation when leaving navigation/annotation mode
+      _selectedAnnotation = null;
     });
   }
 

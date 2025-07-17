@@ -3,11 +3,13 @@ import '../../models/label.dart';
 
 class AnnotatorLabels extends StatelessWidget {
   final List<Label> labels;
+  final double width;
   final ValueChanged<Label>? onLabelSelected;
 
   const AnnotatorLabels({
     super.key,
     required this.labels,
+    required this.width,
     this.onLabelSelected,
   });
 
@@ -56,7 +58,7 @@ class AnnotatorLabels extends StatelessWidget {
   }
 
 Widget _buildChip(BuildContext context, Label label) {
-  double screenWidth = MediaQuery.of(context).size.width;
+  // double screenWidth = MediaQuery.of(context).size.width;
   final isLong = label.name.length > 15;
   final displayName = isLong ? '${label.name.substring(0, 15)}…' : label.name;
 
@@ -110,7 +112,7 @@ Widget _buildChip(BuildContext context, Label label) {
                   softWrap: false,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: screenWidth> 700 ? 20 : 16,
+                    fontSize: 16,
                     fontFamily: 'CascadiaCode',
                   ),
                 ),
@@ -163,7 +165,7 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
                       maxLines: 1,
                       softWrap: false,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontFamily: 'CascadiaCode',
                       ),
                     ),
@@ -200,7 +202,7 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
             'More',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 16,
               fontFamily: 'CascadiaCode',
             ),
           ),

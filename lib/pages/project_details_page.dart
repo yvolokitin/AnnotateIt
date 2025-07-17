@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 
-import "../models/label.dart";
 import "../models/project.dart";
 import '../data/labels_database.dart';
 
@@ -19,14 +18,12 @@ class ProjectDetailsPage extends StatefulWidget {
 
 class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   late Project project;
-  List<Label> labels = [];
   int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     project = widget.project;
-    labels = List<Label>.from(widget.project.labels ?? []);
     _loadProjectLabels();
   }
 
@@ -35,7 +32,6 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
       if (widget.project.id != null) {
         final loadedLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
         setState(() {
-          labels = loadedLabels;
           project = project.copyWith(labels: loadedLabels);
         });
       }
@@ -69,10 +65,11 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   ProjectDetailsContentSwitcher(
                     selectedIndex: selectedIndex,
                     project: project,
-                    labels: labels,
                     onLabelsUpdated: (updatedLabels) {
-                      setState(() => labels = updatedLabels);
-                  },  
+                      setState(() {
+                        project = project.copyWith(labels: updatedLabels);
+                      });
+                    },  
                   ),
                 ],
               ),

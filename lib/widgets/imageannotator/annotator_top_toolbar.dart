@@ -27,16 +27,16 @@ class AnnotatorTopToolbar extends StatefulWidget {
 }
 
 class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
-  List<Label> labels = [];
+  // List<Label> labels = [];
   Label? selectedLabel;
 
+/*
   @override
   void initState() {
     super.initState();
     labels = List<Label>.from(widget.project.labels ?? []);
-    print('AnnotatorTopToolbar labels.length: ${labels.length}');
   }
-
+*/
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -78,89 +78,87 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
           ),
 
           if (detection || segmentation)...[
-            const SizedBox(width: 25),
+            SizedBox(width: screenWidth > 700 ? 25 : 5),
             Expanded(
               child: Row(
                 children: [
-                  Flexible(
-                    child: SizedBox(
-                      width: 200,
-                      height: 40,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey, width: 2),
+                  SizedBox(
+                    width: 220,
+                    height: 40,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 2),
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.grey[850],
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<Label>(
+                          value: selectedLabel,
+                          dropdownColor: Colors.grey[850],
+                          iconEnabledColor: Colors.white,
+                          style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
+                          icon: const SizedBox.shrink(),
                           borderRadius: BorderRadius.circular(6),
-                          color: Colors.grey[850],
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Label>(
-                            value: selectedLabel,
-                            dropdownColor: Colors.grey[850],
-                            iconEnabledColor: Colors.white,
-                            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
-                            icon: const SizedBox.shrink(),
-                            borderRadius: BorderRadius.circular(6),
-                            isExpanded: true, // ensures full width is used inside dropdown
-                            items: [
-                              DropdownMenuItem<Label>(
-                                value: null,
-                                child: Text(
-                                  "Select default label",
-                                  style: TextStyle(
-                                    fontSize: (screenWidth > 1280) ? 18 : 14,
-                                    fontWeight: FontWeight.normal,
-                                    fontFamily: 'CascadiaCode',
+                          isExpanded: true, // ensures full width is used inside dropdown
+                          items: [
+                            DropdownMenuItem<Label>(
+                              value: null,
+                              child: Text(
+                                "Select default label",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'CascadiaCode',
                                   ),
-                                ),
                               ),
-                              ...labels.map((Label label) {
-                                return DropdownMenuItem<Label>(
-                                  value: label,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 16,
-                                        height: 16,
-                                        decoration: BoxDecoration(
-                                          color: label.toColor(),
-                                          shape: BoxShape.circle,
-                                        ),
+                            ),
+                            ...(List<Label>.from(widget.project.labels?? [])).map((Label label) {
+                              return DropdownMenuItem<Label>(
+                                value: label,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: label.toColor(),
+                                        shape: BoxShape.circle,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Flexible(
-                                        child: Text(
-                                          label.name,
-                                          style: TextStyle(
-                                            fontSize: (screenWidth > 1280) ? 20 : 16,
-                                            fontWeight: FontWeight.normal,
-                                            fontFamily: 'CascadiaCode',
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        label.name,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal,
+                                          fontFamily: 'CascadiaCode',
                                         ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ],
-                            onChanged: (Label? newValue) {
-                              setState(() {
-                                selectedLabel = newValue;
-                              });
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (Label? newValue) {
+                            setState(() {
+                              selectedLabel = newValue;
+                            });
 
-                              if (widget.onDefaultLabelSelected != null) {
-                                widget.onDefaultLabelSelected!(newValue);
-                              }
-                            },
-                          ),
+                            if (widget.onDefaultLabelSelected != null) {
+                              widget.onDefaultLabelSelected!(newValue);
+                            }
+                          },
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (selectedLabel != null)
+                  if (selectedLabel != null)...[
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -180,17 +178,19 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                         child: const Icon(Icons.clear, size: 18, color: Colors.white),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
           ],
 
-          SizedBox(width: screenWidth > 1280 ? 40 : 20), // 62 + 20 + 20
+          SizedBox(width: screenWidth > 1280 ? 30 : 10),
 
           SizedBox(
-            width: screenWidth>1400 ? screenWidth * 0.8 : screenWidth * 0.5,
+            width: (screenWidth-400),
             child: AnnotatorLabels(
-              labels: labels,
+              labels: widget.project.labels ?? [],
+              width: (screenWidth-400),
               onLabelSelected: (label) {
                 widget.onAssignedLabel?.call(label);
               }

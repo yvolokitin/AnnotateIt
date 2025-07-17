@@ -10,14 +10,12 @@ import 'project_view_labels.dart';
 class ProjectDetailsContentSwitcher extends StatelessWidget {
   final int selectedIndex;
   final Project project;
-  final List<Label> labels;
   final Function(List<Label>) onLabelsUpdated;
 
   const ProjectDetailsContentSwitcher({
     super.key,
     required this.selectedIndex,
     required this.project,
-    required this.labels,
     required this.onLabelsUpdated,
   });
 
@@ -42,12 +40,10 @@ class ProjectDetailsContentSwitcher extends StatelessWidget {
         return ProjectViewMediaGalery(
           project: project,
           datasetId: project.defaultDatasetId!,
-          labels: labels,
         );
       case 1:
         return ProjectViewLabels(
           project: project,
-          labels: labels,
           onLabelsUpdated: onLabelsUpdated,
         );
       case 2:
@@ -58,7 +54,6 @@ class ProjectDetailsContentSwitcher extends StatelessWidget {
         return ProjectViewMediaGalery(
           project: project,
           datasetId: project.defaultDatasetId!,
-          labels: labels,
         );
     }
   }

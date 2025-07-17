@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../gen_l10n/app_localizations.dart';
 
+import '../../gen_l10n/app_localizations.dart';
 import '../../models/label.dart';
-import '../dialogs/alert_error_dialog.dart';
+
+import 'alert_error_dialog.dart';
+import 'no_labels_dialog.dart';
+
 
 class EditLabelsListDialog extends StatelessWidget {
   final List<Label> labels;
@@ -29,98 +32,8 @@ class EditLabelsListDialog extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     if (labels.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: IntrinsicHeight(
-            child: Container(
-              padding: EdgeInsets.all(screenWidth > 1150 ? 24 : 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.noLabelsTitle,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'CascadiaCode',
-                      fontWeight: FontWeight.bold,
-                      fontSize: screenWidth > 1450 ? 24 : 20,
-                    ),
-                  ),
-                  SizedBox(height: screenWidth > 1450 ? 40 : 10),
-                  Text(
-                    l10n.noLabelsExplain1,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: screenWidth>640 ? 18 : 14,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain2,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: screenWidth>640 ? 18 : 14,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain3,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: screenWidth>640 ? 18 : 14,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                  SizedBox(
-                    height: screenWidth > 1450 ? 300 : (screenWidth>640) ? 200 : 140,
-                    child: Padding(
-                      padding: EdgeInsets.all(screenWidth > 1450 ? 45 : (screenWidth>640) ? 20 : 6),
-                      child: Image.asset(
-                        'assets/images/no_labels.png',
-                        fit: BoxFit.contain,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
+      return const NoLabelsDialog();
 
-                  if (screenWidth>640)...[
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.noLabelsExplain4,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
-                        fontSize: 18,
-                      ),
-                    ),
-                    Text(
-                      l10n.noLabelsExplain5,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
-                        fontSize: 18,
-                      ),
-                    ),
-                    Text(
-                      l10n.noLabelsExplain6,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
-                        fontSize: 18,
-                      ),
-                    ),
-                  ]
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
     } else {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0),

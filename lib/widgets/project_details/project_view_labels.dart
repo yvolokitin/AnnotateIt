@@ -11,13 +11,13 @@ import 'project_details_add_label.dart';
 
 class ProjectViewLabels extends StatefulWidget {
   final Project project;
-  final List<Label> labels;
+  // final List<Label> labels;
 
   final ValueChanged<List<Label>>? onLabelsUpdated;
 
   const ProjectViewLabels({
     required this.project,
-    required this.labels,
+    // required this.labels,
     this.onLabelsUpdated,
     super.key,
   });
@@ -33,7 +33,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
   @override
   void initState() {
     super.initState();
-    labels = List.from(widget.labels);
+    labels = List.from(widget.project.labels ?? []);
   }
 
   void _showColorPicker(int index) {
@@ -42,13 +42,25 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
       builder: (context) => ColorPickerDialog(
         initialColor: labels[index].color,
         onColorSelected: (newColor) {
-          setState(() {
-            labels[index] = labels[index].copyWith(color: newColor);
-          });
-          widget.onLabelsUpdated!(labels);
+          _handleLabelColorChange(index, newColor);
         },
       ),
     );
+  }
+
+  void _handleLabelColorChange(int index, String newColor) async {
+    final updatedLabel = labels[index].copyWith(color: newColor);
+    await LabelsDatabase.instance.updateLabel(updatedLabel);
+
+    final updated = List<Label>.from(labels);
+    updated[index] = updatedLabel;
+
+    // Update project.labels as well
+    if (widget.project.labels != null && widget.project.labels!.length > index) {
+      widget.project.labels![index] = updatedLabel;
+    }
+
+    _updateLabels(updated);
   }
 
   void _updateLabels(List<Label> updated) {
@@ -78,7 +90,9 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
         widget.project.labels!.add(finalLabel);
       });
 
-      _updateLabels([...labels]);
+      // _updateLabels([...labels]);
+      // Notify parent only once, with the updated list
+      widget.onLabelsUpdated?.call(List<Label>.from(labels));
 
       print('Added new label "$name" with color $color');
     } catch (e) {
@@ -112,15 +126,6 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
 
   void _handleLabelNameChange(int index, String newName) async {
     final updatedLabel = labels[index].copyWith(name: newName);
-    await LabelsDatabase.instance.updateLabel(updatedLabel);
-
-    final updated = List<Label>.from(labels);
-    updated[index] = updatedLabel;
-    _updateLabels(updated);
-  }
-
-  void _handleLabelColorChange(int index, String newColor) async {
-    final updatedLabel = labels[index].copyWith(color: newColor);
     await LabelsDatabase.instance.updateLabel(updatedLabel);
 
     final updated = List<Label>.from(labels);
@@ -170,7 +175,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
             margin: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             padding: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             child: EditLabelsListDialog(
-              labels: labels,
+              labels: widget.project.labels ?? [],
               scrollController: _scrollController,
               onColorTap: _showColorPicker,
               onNameChanged: _handleLabelNameChange,

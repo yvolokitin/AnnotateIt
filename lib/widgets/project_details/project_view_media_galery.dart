@@ -20,14 +20,14 @@ import 'dataset_tab_bar.dart';
 class ProjectViewMediaGalery extends StatefulWidget {
   final Project project;
   final String datasetId;
-  final List<Label> labels;
+  // final List<Label> labels;
 
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
 
   const ProjectViewMediaGalery({
     required this.project,
     required this.datasetId,
-    required this.labels,
+    // required this.labels,
     this.onImageDuplicated,
     super.key,
   });
@@ -425,7 +425,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
                   : DatasetTabContent(
                       project: widget.project,
                       datasetId: currentDatasetId,
-                      labels: widget.labels,
+                      labels: widget.project.labels ?? [],
                       mediaItems: mediaItems,
                       fileCount: _fileCount,
                       totalPages: _totalPages,
