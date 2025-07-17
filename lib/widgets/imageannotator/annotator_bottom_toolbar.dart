@@ -7,23 +7,25 @@ import 'annotator_icon_button.dart';
 class AnnotatorBottomToolbar extends StatefulWidget {
   final double currentZoom;
   final MediaItem currentMedia;
+  final bool showUnknownWarning;
 
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
 
   final VoidCallback onPrevImg;
   final VoidCallback onNextImg;
-  final VoidCallback onSaveAnnotations;
+  final VoidCallback onWarning;
 
   const AnnotatorBottomToolbar({
     super.key,
     required this.currentZoom,
     required this.currentMedia,
+    required this.showUnknownWarning,
     required this.onZoomIn,
     required this.onZoomOut,
     required this.onPrevImg,
     required this.onNextImg,
-    required this.onSaveAnnotations,
+    required this.onWarning,
   });
 
   @override
@@ -105,15 +107,18 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
                 icon: const Icon(Icons.keyboard_arrow_right, color: Colors.white70, size: 36),
               ),
 
-              const SizedBox(width: 20),
-              AnnotatorIconButton(
-                onPressed: widget.onSaveAnnotations,
-                icon: const Icon(Icons.save, color: Colors.white70, size: 32),
-              ),
-
-              const SizedBox(width: 4),
-              if (!isMinimal)
-                Text('Save', style: const TextStyle(color: Colors.white70, fontSize: 18)),
+              if (widget.showUnknownWarning)...[
+                const SizedBox(width: 20),
+                AnnotatorIconButton(
+                  onPressed: widget.onWarning,
+                  icon: Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.red,
+                    size: 36,
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
             ],
           ),
         ],

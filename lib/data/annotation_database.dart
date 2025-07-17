@@ -17,9 +17,9 @@ class AnnotationDatabase {
   }
 
   // Insert new annotation into the database
-  Future<void> insertAnnotation(Annotation annotation) async {
+  Future<int> insertAnnotation(Annotation annotation) async {
     final db = await database;
-    await db.insert('annotations', annotation.toMap());
+    return await db.insert('annotations', annotation.toMap());
   }
 
   // Insert multiple annotations in a single transaction
