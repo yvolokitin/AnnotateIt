@@ -5,12 +5,14 @@ import 'package:file_picker/file_picker.dart';
 
 
 import '../../gen_l10n/app_localizations.dart';
+import '../../models/project.dart';
 import '../../models/label.dart';
 
 import 'alert_error_dialog.dart';
 import 'no_labels_dialog.dart';
 
 class EditLabelsListDialog extends StatelessWidget {
+  final int projectId;
   final List<Label> labels;
   final ScrollController scrollController;
 
@@ -21,6 +23,7 @@ class EditLabelsListDialog extends StatelessWidget {
   
   const EditLabelsListDialog({
     super.key,
+    required this.projectId,
     required this.labels,
     required this.scrollController,
     required this.onColorTap,
@@ -35,7 +38,12 @@ class EditLabelsListDialog extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     if (labels.isEmpty) {
-      return const NoLabelsDialog();
+      return NoLabelsDialog(
+        projectId: projectId,
+        onLabelsImported: (importedLabels) {
+          // Handle imported labels
+        }
+      );
 
     } else {
       return Padding(

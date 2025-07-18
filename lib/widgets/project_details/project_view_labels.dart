@@ -175,6 +175,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
             margin: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             padding: EdgeInsets.all(screenWidth > 1600 ? 15 : 6),
             child: EditLabelsListDialog(
+              projectId: widget.project.id!,
               labels: widget.project.labels ?? [],
               scrollController: _scrollController,
               onColorTap: _showColorPicker,

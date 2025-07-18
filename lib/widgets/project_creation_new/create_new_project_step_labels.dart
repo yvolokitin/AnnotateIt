@@ -9,15 +9,17 @@ import '../dialogs/color_picker_dialog.dart';
 import '../dialogs/edit_labels_list_dialog.dart';
 
 class CreateNewProjectStepLabels extends StatefulWidget {
+  final int projectId;
+  final String projectType;
   final List<Map<String, dynamic>> createdLabels;
   final void Function(List<Map<String, dynamic>>)? onLabelsChanged;
-  final String projectType;
 
   const CreateNewProjectStepLabels({
-    super.key,
-    required this.createdLabels,
+    required this.projectId,
     required this.projectType,
+    required this.createdLabels,
     this.onLabelsChanged,
+    super.key,
   });
 
   @override
@@ -274,6 +276,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
         Flexible(
           child: EditLabelsListDialog(
+            projectId: widget.projectId,
             labels: _labels,
             scrollController: _scrollController,
             onColorTap: _showColorPicker,

@@ -33,6 +33,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buttonClose => 'Close';
 
   @override
+  String get buttonImport => 'Import';
+
+  @override
   String get buttonCancel => 'Cancel';
 
   @override
@@ -52,6 +55,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get buttonFeedbackShort => 'Fdbck';
+
+  @override
+  String get buttonImportLabels => 'Import Labels';
+
+  @override
+  String get buttonExportLabels => 'Export Labels';
 
   @override
   String get buttonNextConfirmTask => 'Next: Confirm Task';
@@ -495,33 +504,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editDatasetDescription => 'Enter a new name for this dataset:';
 
   @override
-  String get noLabelsTitle => 'You have no Labels in the Project';
-
-  @override
-  String get noLabelsExplain1 =>
-      'You can\'t annotate without labels because labels give meaning to what you\'re marking';
-
-  @override
-  String get noLabelsExplain2 =>
-      '— without them, the model would not know what the annotation represents.';
-
-  @override
-  String get noLabelsExplain3 =>
-      'An annotation without a label is just an empty box.';
-
-  @override
-  String get noLabelsExplain4 =>
-      'Labels define the categories or classes you\'re annotating in your dataset.';
-
-  @override
-  String get noLabelsExplain5 =>
-      'Whether you\'re tagging objects in images, classifying, or segmenting regions,';
-
-  @override
-  String get noLabelsExplain6 =>
-      'labels are essential for organizing your annotations clearly and consistently.';
-
-  @override
   String get noMediaDialogUploadPrompt => 'You have to upload images or videos';
 
   @override
@@ -780,4 +762,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuImageDelete => 'Delete';
+
+  @override
+  String get noLabelsTitle => 'You have no Labels in the Project';
+
+  @override
+  String get noLabelsExplain1 =>
+      'You can\'t annotate without labels because labels give meaning to what you\'re marking';
+
+  @override
+  String get noLabelsExplain2 =>
+      'You can add labels manually or import them from a JSON file.';
+
+  @override
+  String get noLabelsExplain3 =>
+      'An annotation without a label is just an empty box.';
+
+  @override
+  String get noLabelsExplain4 =>
+      'Labels define the categories or classes you\'re annotating in your dataset.';
+
+  @override
+  String get noLabelsExplain5 =>
+      'Whether you\'re tagging objects in images, classifying, or segmenting regions,';
+
+  @override
+  String get noLabelsExplain6 =>
+      'labels are essential for organizing your annotations clearly and consistently.';
+
+  @override
+  String get importLabelsPreviewTitle => 'Import Labels Preview';
+
+  @override
+  String get importLabelsFailedTitle => 'Label Import Failed';
+
+  @override
+  String get importLabelsNoLabelsTitle => 'No labels found in this project';
+
+  @override
+  String get importLabelsJsonParseError => 'JSON parsing failed.\n';
+
+  @override
+  String get importLabelsJsonParseTips =>
+      'Make sure the file is valid JSON. You can validate it at https://jsonlint.com/';
+
+  @override
+  String importLabelsJsonNotList(Object type) {
+    return 'Expected a list of labels (array), but got: $type.';
+  }
+
+  @override
+  String get importLabelsJsonNotListTips =>
+      'Your JSON file must start with [ and contain multiple label objects. Each label should include name, color, and labelOrder fields.';
+
+  @override
+  String importLabelsJsonItemNotMap(Object type) {
+    return 'One of the entries in the list is not a valid object: $type';
+  }
+
+  @override
+  String get importLabelsJsonItemNotMapTips =>
+      'Each item in the list must be a valid object with fields: name, color, and labelOrder.';
+
+  @override
+  String get importLabelsJsonLabelParseError =>
+      'Failed to parse one of the labels.\n';
+
+  @override
+  String get importLabelsJsonLabelParseTips =>
+      'Check that each label has required fields like name and color, and values are correct types.';
+
+  @override
+  String get importLabelsUnexpectedError =>
+      'Failed to parse one of the labels.\n';
+
+  @override
+  String get importLabelsUnexpectedErrorTip =>
+      'Please make sure your file is readable and formatted correctly.';
 }

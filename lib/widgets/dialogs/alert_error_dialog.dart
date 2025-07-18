@@ -7,10 +7,10 @@ class AlertErrorDialog extends StatelessWidget {
   final String? tips;
 
   const AlertErrorDialog({
-    super.key,
     required this.title,
     required this.message,
     this.tips,
+    super.key,
   });
 
   static Future<void> show(

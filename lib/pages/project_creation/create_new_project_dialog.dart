@@ -180,10 +180,11 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   Widget _buildStepTwo() {
     return CreateNewProjectStepLabels(
+      projectId: 0,
+      projectType: _selectedTaskType,
       createdLabels: _createdLabels
           .map((label) => {'name': label.name, 'color': label.color})
           .toList(),
-      projectType: _selectedTaskType,
       onLabelsChanged: (labelMaps) {
         setState(() {
           _createdLabels

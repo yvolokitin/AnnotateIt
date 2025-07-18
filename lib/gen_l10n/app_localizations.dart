@@ -142,6 +142,12 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get buttonClose;
 
+  /// No description provided for @buttonImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get buttonImport;
+
   /// No description provided for @buttonCancel.
   ///
   /// In en, this message translates to:
@@ -183,6 +189,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fdbck'**
   String get buttonFeedbackShort;
+
+  /// No description provided for @buttonImportLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Labels'**
+  String get buttonImportLabels;
+
+  /// No description provided for @buttonExportLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Labels'**
+  String get buttonExportLabels;
 
   /// No description provided for @buttonNextConfirmTask.
   ///
@@ -950,48 +968,6 @@ abstract class AppLocalizations {
   /// **'Enter a new name for this dataset:'**
   String get editDatasetDescription;
 
-  /// No description provided for @noLabelsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'You have no Labels in the Project'**
-  String get noLabelsTitle;
-
-  /// No description provided for @noLabelsExplain1.
-  ///
-  /// In en, this message translates to:
-  /// **'You can\'t annotate without labels because labels give meaning to what you\'re marking'**
-  String get noLabelsExplain1;
-
-  /// No description provided for @noLabelsExplain2.
-  ///
-  /// In en, this message translates to:
-  /// **'— without them, the model would not know what the annotation represents.'**
-  String get noLabelsExplain2;
-
-  /// No description provided for @noLabelsExplain3.
-  ///
-  /// In en, this message translates to:
-  /// **'An annotation without a label is just an empty box.'**
-  String get noLabelsExplain3;
-
-  /// No description provided for @noLabelsExplain4.
-  ///
-  /// In en, this message translates to:
-  /// **'Labels define the categories or classes you\'re annotating in your dataset.'**
-  String get noLabelsExplain4;
-
-  /// No description provided for @noLabelsExplain5.
-  ///
-  /// In en, this message translates to:
-  /// **'Whether you\'re tagging objects in images, classifying, or segmenting regions,'**
-  String get noLabelsExplain5;
-
-  /// No description provided for @noLabelsExplain6.
-  ///
-  /// In en, this message translates to:
-  /// **'labels are essential for organizing your annotations clearly and consistently.'**
-  String get noLabelsExplain6;
-
   /// No description provided for @noMediaDialogUploadPrompt.
   ///
   /// In en, this message translates to:
@@ -1447,6 +1423,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get menuImageDelete;
+
+  /// No description provided for @noLabelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no Labels in the Project'**
+  String get noLabelsTitle;
+
+  /// No description provided for @noLabelsExplain1.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t annotate without labels because labels give meaning to what you\'re marking'**
+  String get noLabelsExplain1;
+
+  /// No description provided for @noLabelsExplain2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add labels manually or import them from a JSON file.'**
+  String get noLabelsExplain2;
+
+  /// No description provided for @noLabelsExplain3.
+  ///
+  /// In en, this message translates to:
+  /// **'An annotation without a label is just an empty box.'**
+  String get noLabelsExplain3;
+
+  /// No description provided for @noLabelsExplain4.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels define the categories or classes you\'re annotating in your dataset.'**
+  String get noLabelsExplain4;
+
+  /// No description provided for @noLabelsExplain5.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether you\'re tagging objects in images, classifying, or segmenting regions,'**
+  String get noLabelsExplain5;
+
+  /// No description provided for @noLabelsExplain6.
+  ///
+  /// In en, this message translates to:
+  /// **'labels are essential for organizing your annotations clearly and consistently.'**
+  String get noLabelsExplain6;
+
+  /// No description provided for @importLabelsPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Labels Preview'**
+  String get importLabelsPreviewTitle;
+
+  /// No description provided for @importLabelsFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Label Import Failed'**
+  String get importLabelsFailedTitle;
+
+  /// No description provided for @importLabelsNoLabelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No labels found in this project'**
+  String get importLabelsNoLabelsTitle;
+
+  /// No description provided for @importLabelsJsonParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON parsing failed.\n'**
+  String get importLabelsJsonParseError;
+
+  /// No description provided for @importLabelsJsonParseTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure the file is valid JSON. You can validate it at https://jsonlint.com/'**
+  String get importLabelsJsonParseTips;
+
+  /// No description provided for @importLabelsJsonNotList.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected a list of labels (array), but got: {type}.'**
+  String importLabelsJsonNotList(Object type);
+
+  /// No description provided for @importLabelsJsonNotListTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Your JSON file must start with [ and contain multiple label objects. Each label should include name, color, and labelOrder fields.'**
+  String get importLabelsJsonNotListTips;
+
+  /// No description provided for @importLabelsJsonItemNotMap.
+  ///
+  /// In en, this message translates to:
+  /// **'One of the entries in the list is not a valid object: {type}'**
+  String importLabelsJsonItemNotMap(Object type);
+
+  /// No description provided for @importLabelsJsonItemNotMapTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Each item in the list must be a valid object with fields: name, color, and labelOrder.'**
+  String get importLabelsJsonItemNotMapTips;
+
+  /// No description provided for @importLabelsJsonLabelParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse one of the labels.\n'**
+  String get importLabelsJsonLabelParseError;
+
+  /// No description provided for @importLabelsJsonLabelParseTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that each label has required fields like name and color, and values are correct types.'**
+  String get importLabelsJsonLabelParseTips;
+
+  /// No description provided for @importLabelsUnexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse one of the labels.\n'**
+  String get importLabelsUnexpectedError;
+
+  /// No description provided for @importLabelsUnexpectedErrorTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Please make sure your file is readable and formatted correctly.'**
+  String get importLabelsUnexpectedErrorTip;
 }
 
 class _AppLocalizationsDelegate
