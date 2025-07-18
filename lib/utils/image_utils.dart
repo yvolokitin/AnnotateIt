@@ -49,6 +49,25 @@ Future<void> duplicateMediaItem({
   final originalFile = File(original.mediaItem.filePath);
   final originalExt = path.extension(originalFile.path);
 
+  // Ensure original file is readable and directory is writable
+  if (!await originalFile.exists()) {
+    throw FileSystemException("Original file does not exist", originalFile.path);
+  }
+
+  final parentDir = originalFile.parent;
+
+  // Check if we can write to the directory
+  final testFile = File(path.join(parentDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
+  try {
+    await testFile.writeAsString('test');
+    await testFile.delete(); // cleanup
+  } catch (e) {
+    throw FileSystemException(
+      "Cannot write to directory: ${parentDir.path}. On macOS, use user-selected folders or app-specific storage.",
+      parentDir.path,
+    );
+  }
+
   // Generate a unique filename
   String newFileName;
   String newPath;

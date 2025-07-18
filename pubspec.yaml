@@ -142,10 +142,12 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 flutter_launcher_icons:
-  android: true
-  ios: false
   image_path: "assets/logo/annotateit_ro.png"
   min_sdk_android: 21
+  android: true
+  windows: true
+  macos: true
+  ios: true
 
 msix_config:
   display_name: AnnotateIt
