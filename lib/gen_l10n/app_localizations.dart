@@ -1399,6 +1399,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check your file and try again. If the problem persists, contact support.'**
   String get datasetDialogGenericErrorTips;
+
+  /// No description provided for @thumbnailGenerationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get thumbnailGenerationTitle;
+
+  /// No description provided for @thumbnailGenerationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate thumbnail'**
+  String get thumbnailGenerationFailed;
+
+  /// No description provided for @thumbnailGenerationTryAgainLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again later'**
+  String get thumbnailGenerationTryAgainLater;
+
+  /// No description provided for @thumbnailGenerationInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating thumbnail...'**
+  String get thumbnailGenerationInProgress;
+
+  /// No description provided for @menuImageDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get menuImageDetails;
+
+  /// No description provided for @menuImageDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get menuImageDuplicate;
+
+  /// No description provided for @menuImageSetAsIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Icon'**
+  String get menuImageSetAsIcon;
+
+  /// No description provided for @menuImageDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get menuImageDelete;
 }
 
 class _AppLocalizationsDelegate

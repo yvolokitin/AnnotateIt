@@ -315,6 +315,16 @@
 
   "datasetDialogFilePickErrorTitle": "File Selection Error",
   "datasetDialogFilePickErrorMessage": "Failed to select the file. Please try again.",
-  "datasetDialogGenericErrorTips": "Please check your file and try again. If the problem persists, contact support."
+  "datasetDialogGenericErrorTips": "Please check your file and try again. If the problem persists, contact support.",
+
+  "thumbnailGenerationTitle": "Error",
+  "thumbnailGenerationFailed": "Failed to generate thumbnail",
+  "thumbnailGenerationTryAgainLater": "Please try again later",
+  "thumbnailGenerationInProgress": "Generating thumbnail...",
+
+  "menuImageDetails": "Details",
+  "menuImageDuplicate": "Duplicate",
+  "menuImageSetAsIcon": "Set as Icon",
+  "menuImageDelete": "Delete"
 
 }

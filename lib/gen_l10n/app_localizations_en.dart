@@ -756,4 +756,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get datasetDialogGenericErrorTips =>
       'Please check your file and try again. If the problem persists, contact support.';
+
+  @override
+  String get thumbnailGenerationTitle => 'Error';
+
+  @override
+  String get thumbnailGenerationFailed => 'Failed to generate thumbnail';
+
+  @override
+  String get thumbnailGenerationTryAgainLater => 'Please try again later';
+
+  @override
+  String get thumbnailGenerationInProgress => 'Generating thumbnail...';
+
+  @override
+  String get menuImageDetails => 'Details';
+
+  @override
+  String get menuImageDuplicate => 'Duplicate';
+
+  @override
+  String get menuImageSetAsIcon => 'Set as Icon';
+
+  @override
+  String get menuImageDelete => 'Delete';
 }

@@ -120,8 +120,12 @@ class _ImageTileState extends State<ImageTile> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _hovered ? 1.0 : 0.0,
                   child: ImageTileMenuButton(
+                    project: widget.project,
                     media: widget.mediaItem,
                     onDuplicate: (withAnnotations) => widget.onImageDuplicated?.call(widget.mediaItem, withAnnotations),
+                    onProjectThumbnailUpdate: (thumbnailPath) {
+                      print('Thumbnail updated: $thumbnailPath');
+                    }
                   ),
                 ),
               ),

@@ -55,7 +55,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   UserAction userAction = UserAction.navigation;
 
   // do not show right sidebar by default
-  bool showRightSidebar = false;
+  bool showRightSidebar = true; // false;
   bool showAnnotationNames = true;
   bool _mouseInsideImage = false;
 
@@ -192,64 +192,115 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   void _handleLabelSelected(Label label) async {
     setState(() => selectedLabel = label);
 
-    if (widget.project.type.toLowerCase().contains('classification')) {
+    final type = widget.project.type.toLowerCase();
+
+    if (type.contains('classification')) {
       final currentMedia = _mediaCache[_currentIndex];
       if (currentMedia == null) return;
 
-      final existingIndex = currentMedia.annotations?.indexWhere(
-        (a) => a.annotationType == 'classification' && a.labelId == label.id
-      ) ?? -1;
+      // Multi-label: allow multiple classification annotations
+      if (type.contains('multi-label')) {
+        final exists = currentMedia.annotations?.any(
+          (a) => a.annotationType == 'classification' && a.labelId == label.id
+        ) ?? false;
 
-      if (existingIndex != -1) return;
+        if (exists) return;
 
-      final newAnnotations = currentMedia.annotations != null 
-        ? List<Annotation>.from(currentMedia.annotations!)
-        : <Annotation>[];
+        final newAnnotation = Annotation(
+          id: null,
+          mediaItemId: currentMedia.mediaItem.id!,
+          labelId: label.id,
+          annotationType: 'classification',
+          data: {},
+          confidence: 1.0,
+          annotatorId: null,
+          comment: null,
+          status: 'pending',
+          version: 1,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        )
+        ..name = label.name
+        ..color = label.toColor();
 
-      final newAnnotation = Annotation(
-        id: null,
-        mediaItemId: currentMedia.mediaItem.id!,
-        labelId: label.id,
-        annotationType: 'classification',
-        data: {},
-        confidence: 1.0,
-        annotatorId: null,
-        comment: null,
-        status: 'pending',
-        version: 1,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      )..name = label.name
-       ..color = label.toColor();
+        final insertedId = await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
 
-      // Save to DB
-      final insertedId = await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+        final savedAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: newAnnotation.mediaItemId,
+          labelId: newAnnotation.labelId,
+          annotationType: newAnnotation.annotationType,
+          data: newAnnotation.data,
+          confidence: newAnnotation.confidence,
+          annotatorId: newAnnotation.annotatorId,
+          comment: newAnnotation.comment,
+          status: newAnnotation.status,
+          version: newAnnotation.version,
+          createdAt: newAnnotation.createdAt,
+          updatedAt: newAnnotation.updatedAt,
+        )
+        ..name = newAnnotation.name
+        ..color = newAnnotation.color;
 
-      // Create a new Annotation with the insertedId
-      final savedAnnotation = Annotation(
-        id: insertedId,
-        mediaItemId: newAnnotation.mediaItemId,
-        labelId: newAnnotation.labelId,
-        annotationType: newAnnotation.annotationType,
-        data: newAnnotation.data,
-        confidence: newAnnotation.confidence,
-        annotatorId: newAnnotation.annotatorId,
-        comment: newAnnotation.comment,
-        status: newAnnotation.status,
-        version: newAnnotation.version,
-        createdAt: newAnnotation.createdAt,
-        updatedAt: newAnnotation.updatedAt,
-      )
-      ..name = newAnnotation.name
-      ..color = newAnnotation.color;
+        final newAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+        newAnnotations.add(savedAnnotation);
 
-      newAnnotations.add(savedAnnotation);
+        setState(() {
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+        });
 
-      setState(() {
-        _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
-      });
+      } else {
+        // Binary or multi-class: only one label allowed
+        // Remove any existing classification annotation for this media
+        // Remove any existing classification annotation for this media in DB
+        final db = AnnotationDatabase.instance;
+        final mediaId = currentMedia.mediaItem.id!;
+
+        // Delete all classification annotations for this media item
+        await db.deleteAnnotationsByMedia(mediaId);
+
+        final newAnnotation = Annotation(
+          id: null,
+          mediaItemId: currentMedia.mediaItem.id!,
+          labelId: label.id,
+          annotationType: 'classification',
+          data: {},
+          confidence: 1.0,
+          annotatorId: null,
+          comment: null,
+          status: 'pending',
+          version: 1,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        )
+        ..name = label.name
+        ..color = label.toColor();
+
+        final insertedId = await db.insertAnnotation(newAnnotation);
+
+        final savedAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: newAnnotation.mediaItemId,
+          labelId: newAnnotation.labelId,
+          annotationType: newAnnotation.annotationType,
+          data: newAnnotation.data,
+          confidence: newAnnotation.confidence,
+          annotatorId: newAnnotation.annotatorId,
+          comment: newAnnotation.comment,
+          status: newAnnotation.status,
+          version: newAnnotation.version,
+          createdAt: newAnnotation.createdAt,
+          updatedAt: newAnnotation.updatedAt,
+        )
+        ..name = newAnnotation.name
+        ..color = newAnnotation.color;
+
+        setState(() {
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: [savedAnnotation]);
+        });
+      }
     } else {
-      // For other project types, just update the selected label 222
+      // For other project types, just update the selected label
       if (_selectedAnnotation != null) {
         _handleAnnotationLabelChanged(_selectedAnnotation!, label);
       }

@@ -1,24 +1,35 @@
 import 'package:flutter/material.dart';
+
+import '../../../gen_l10n/app_localizations.dart';
+
 import '../../../models/annotated_labeled_media.dart';
+import '../../../models/project.dart';
+
 import '../../dialogs/image_details_dialog.dart';
 import '../../dialogs/set_image_icon_dialog.dart';
 import '../../dialogs/delete_image_dialog.dart';
 import '../../dialogs/duplicate_image_dialog.dart';
 
 class ImageTileMenuButton extends StatelessWidget {
+  final Project project;
   final AnnotatedLabeledMedia media;
+
   final void Function(bool withAnnotations)? onDuplicate;
   final void Function()? onDeleted;
+  final void Function(String thumbnailPath)? onProjectThumbnailUpdate;
 
   const ImageTileMenuButton({
+    required this.project,
     required this.media,
     this.onDuplicate,
     this.onDeleted,
+    this.onProjectThumbnailUpdate,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
       color: Colors.grey[800],
       shape: RoundedRectangleBorder(
@@ -29,7 +40,12 @@ class ImageTileMenuButton extends StatelessWidget {
       onSelected: (value) async {
         switch (value) {
           case 'details':
-            await showDialog(context: context, builder: (_) => ImageDetailsDialog(media: media));
+            await showDialog(
+              context: context,
+              builder: (_) => ImageDetailsDialog(
+                media: media,
+              ),
+            );
             break;
           case 'duplicate':
             await showDialog(
@@ -45,8 +61,11 @@ class ImageTileMenuButton extends StatelessWidget {
               context: context,
               builder: (_) => SetImageIconDialog(
                 media: media.mediaItem,
-                onConfirmed: () {
-                  debugPrint('Icon set: ${media.mediaItem.filePath}');
+                projectId: project.id.toString(),
+                onConfirmed: (thumbnailPath) {
+                  if (thumbnailPath != null) {
+                    onProjectThumbnailUpdate?.call(thumbnailPath);
+                  }
                 },
               ),
             );
@@ -67,11 +86,11 @@ class ImageTileMenuButton extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: 'details', child: _MenuItemRow(Icons.info_outline, 'Details')),
-        PopupMenuItem(value: 'duplicate', child: _MenuItemRow(Icons.copy, 'Duplicate')),
-        PopupMenuItem(value: 'seticon', child: _MenuItemRow(Icons.image_outlined, 'Set as Icon')),
-        PopupMenuItem(value: 'delete', child: _MenuItemRow(Icons.delete_outline, 'Delete')),
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'details', child: _MenuItemRow(Icons.info_outline, l10n.menuImageDetails)),
+        PopupMenuItem(value: 'duplicate', child: _MenuItemRow(Icons.copy, l10n.menuImageDuplicate)),
+        PopupMenuItem(value: 'seticon', child: _MenuItemRow(Icons.image_outlined, l10n.menuImageSetAsIcon)),
+        PopupMenuItem(value: 'delete', child: _MenuItemRow(Icons.delete_outline, l10n.menuImageDelete)),
       ],
     );
   }
