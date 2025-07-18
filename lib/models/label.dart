@@ -56,7 +56,23 @@ class Label {
     );
   }
 
-  Map<String, dynamic> toMap() {
+    /// Factory for safe import from user JSON (ignores id and forces projectId + labelOrder)
+    factory Label.fromJsonForImport(Map<String, dynamic> map, int projectId, int labelOrder) {
+      return Label(
+        id: null, // Always null for import
+        labelOrder: labelOrder,
+        projectId: projectId,
+        name: map['name'] as String,
+        color: map['color'] as String,
+        isDefault: map['is_default'] == true || map['is_default'] == 1,
+        description: map['description'] as String?,
+        createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt']) ?? DateTime.now()
+          : DateTime.now(),
+      );
+    }
+  
+    Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
       'label_order': labelOrder,

@@ -5,43 +5,79 @@ import 'package:file_picker/file_picker.dart';
 
 
 import '../../gen_l10n/app_localizations.dart';
-import '../../models/project.dart';
 import '../../models/label.dart';
 
 import 'alert_error_dialog.dart';
 import 'no_labels_dialog.dart';
 
-class EditLabelsListDialog extends StatelessWidget {
+class EditLabelsListDialog extends StatefulWidget {
   final int projectId;
   final List<Label> labels;
   final ScrollController scrollController;
 
   final void Function(int index) onColorTap;
-  final void Function(Label label) onDelete;
-  final void Function(int index, String newName) onNameChanged;
-  final void Function(int index, String newColor) onColorChanged;
-  
+  final void Function(List<Label>) onLabelsChanged;
+
   const EditLabelsListDialog({
     super.key,
     required this.projectId,
     required this.labels,
     required this.scrollController,
     required this.onColorTap,
-    required this.onNameChanged,
-    required this.onDelete,
-    required this.onColorChanged,
+    required this.onLabelsChanged,
   });
+
+  @override
+  State<EditLabelsListDialog> createState() => _EditLabelsListDialogState();
+}
+
+class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
+  late List<TextEditingController> _controllers;
+  late List<Label> _labels;
+
+  @override
+  void initState() {
+    super.initState();
+    _labels = List.of(widget.labels);
+    _controllers = _labels.map((label) => TextEditingController(text: label.name)).toList();
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant EditLabelsListDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.labels != oldWidget.labels) {
+      // Clean up old controllers
+      for (final controller in _controllers) {
+        controller.dispose();
+      }
+      // Update internal label state
+      _labels = List.of(widget.labels);
+      // Recreate controllers
+      _controllers = _labels.map((label) => TextEditingController(text: label.name)).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    if (labels.isEmpty) {
+    if (_labels.isEmpty) {
       return NoLabelsDialog(
-        projectId: projectId,
+        projectId: widget.projectId,
         onLabelsImported: (importedLabels) {
-          // Handle imported labels
+          setState(() {
+            _labels = importedLabels;
+          });
+          widget.onLabelsChanged(_labels);
         }
       );
 
@@ -49,7 +85,7 @@ class EditLabelsListDialog extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Scrollbar(
-          controller: scrollController,
+          controller: widget.scrollController,
           thumbVisibility: true,
           thickness: 8,
           trackVisibility: true,
@@ -59,14 +95,12 @@ class EditLabelsListDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: labels.length,
+                    controller: widget.scrollController,
+                    itemCount: _labels.length,
                     itemBuilder: (context, index) {
-                      final label = labels[index];
-                      final TextEditingController controller =
-                          TextEditingController(text: label.name);
+                      final label = _labels[index];
+                      final controller = _controllers[index];
                       bool isEditing = false;
-
                       return StatefulBuilder(
                         builder: (context, setLocalState) {
                           return MouseRegion(
@@ -84,7 +118,7 @@ class EditLabelsListDialog extends StatelessWidget {
                                       const SizedBox(width: 12),
                                       GestureDetector(
                                         onTap: () {
-                                          onColorTap(index);
+                                          widget.onColorTap(index);
                                         },
                                         child: Container(
                                           width: 30,
@@ -105,7 +139,7 @@ class EditLabelsListDialog extends StatelessWidget {
                                             enabled: isEditing,
                                             onSubmitted: (value) {
                                               final newName = value.trim();
-                                              final isDuplicate = labels.any((l) =>
+                                              final isDuplicate = _labels.any((l) =>
                                                   l.name.toLowerCase() == newName.toLowerCase() &&
                                                   l != label);
                                               if (isDuplicate) {
@@ -117,7 +151,10 @@ class EditLabelsListDialog extends StatelessWidget {
                                                 );
                                                 return;
                                               }
-                                              onNameChanged(index, newName);
+                                              setState(() {
+                                                _labels[index] = _labels[index].copyWith(name: newName);
+                                              });
+                                              widget.onLabelsChanged(_labels);
                                               setLocalState(() => isEditing = false);
                                             },
                                             style: TextStyle(
@@ -148,7 +185,7 @@ class EditLabelsListDialog extends StatelessWidget {
                                         onPressed: () {
                                           if (isEditing) {
                                             final newName = controller.text.trim();
-                                            final isDuplicate = labels.any((l) =>
+                                            final isDuplicate = _labels.any((l) =>
                                                 l.name.toLowerCase() == newName.toLowerCase() &&
                                                 l != label);
                                             if (isDuplicate) {
@@ -161,7 +198,10 @@ class EditLabelsListDialog extends StatelessWidget {
                                               );
                                               return;
                                             }
-                                            onNameChanged(index, newName);
+                                            setState(() {
+                                              _labels[index] = _labels[index].copyWith(name: newName);
+                                            });
+                                            widget.onLabelsChanged(_labels);
                                           }
                                           setLocalState(() => isEditing = !isEditing);
                                         },
@@ -172,7 +212,7 @@ class EditLabelsListDialog extends StatelessWidget {
                                       IconButton(
                                         icon: Icon(
                                           Icons.arrow_downward_sharp,
-                                          color: (index == (labels.length - 1)) ? Colors.white24 : Colors.white,
+                                          color: (index == (_labels.length - 1)) ? Colors.white24 : Colors.white,
                                         ),
                                         iconSize: 30,
                                         onPressed: () { },
@@ -192,7 +232,27 @@ class EditLabelsListDialog extends StatelessWidget {
                                       IconButton(
                                         icon: const Icon(Icons.delete, color: Colors.white),
                                         iconSize: 30,
-                                        onPressed: () => onDelete(label),
+                                        // onPressed: () => widget.onDelete(label),
+                                        onPressed: () {
+                                          try {
+                                            setState(() {
+                                              final removedIndex = _labels.indexOf(label);
+                                              if (removedIndex != -1) {
+                                                _labels.removeAt(removedIndex);
+                                                _controllers[removedIndex].dispose();
+                                                _controllers.removeAt(removedIndex);
+                                              }
+                                            });
+                                            widget.onLabelsChanged(_labels);
+                                          } catch (e) {
+                                            AlertErrorDialog.show(
+                                              context,
+                                              l10n.importLabelsFailedTitle,
+                                              'Failed to delete label: ${e.toString()}',
+                                              tips: 'Make sure the label still exists or is not used elsewhere.',
+                                            );
+                                          }
+                                        },
                                       ),
                                       const SizedBox(width: 8),
                                     ],
@@ -213,7 +273,7 @@ class EditLabelsListDialog extends StatelessWidget {
                     // Convert labels to JSON
                     // final json = jsonEncode(labels.map((l) => l.toMap()).toList());
                     final encoder = const JsonEncoder.withIndent('  ');
-                    final json = encoder.convert(labels.map((l) => l.toMap()).toList());
+                    final json = encoder.convert(_labels.map((l) => l.toMap()).toList());
                     // Pick a location to save the file (using file_picker or similar)
                     // Example using file_picker:
                     final result = await FilePicker.platform.saveFile(

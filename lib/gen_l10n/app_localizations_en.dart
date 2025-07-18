@@ -834,9 +834,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importLabelsUnexpectedError =>
-      'Failed to parse one of the labels.\n';
+      'Unexpected error occurred during JSON file import.\n';
 
   @override
   String get importLabelsUnexpectedErrorTip =>
       'Please make sure your file is readable and formatted correctly.';
+
+  @override
+  String get importLabelsDatabaseError => 'Failed to save labels to database';
+
+  @override
+  String get importLabelsDatabaseErrorTips =>
+      'Please check your database connection and try again. If the problem persists, contact support.';
+
+  @override
+  String get importLabelsNameMissingOrEmpty =>
+      'One of the labels is missing a valid name.';
+
+  @override
+  String get importLabelsNameMissingOrEmptyTips =>
+      'Ensure every label in the JSON includes a non-empty \'name\' field.';
 }

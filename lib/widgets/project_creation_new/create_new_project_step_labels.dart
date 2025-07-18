@@ -276,34 +276,22 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
         Flexible(
           child: EditLabelsListDialog(
-            projectId: widget.projectId,
+            projectId: 0, // widget.projectId,
             labels: _labels,
             scrollController: _scrollController,
             onColorTap: _showColorPicker,
-            onNameChanged: (index, newName) {
+
+            onLabelsChanged: (updatedLabels) {
               setState(() {
-                _labels[index] = _labels[index].copyWith(name: newName);
+                _labels
+                  ..clear()
+                  ..addAll(updatedLabels);
               });
               widget.onLabelsChanged?.call(
-                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
+                updatedLabels.map((e) => {'name': e.name, 'color': e.color}).toList(),
               );
             },
-            onDelete: (label) {
-              setState(() {
-                _labels.remove(label);
-              });
-              widget.onLabelsChanged?.call(
-                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-              );
-            },
-            onColorChanged: (index, newColor) {
-              setState(() {
-                _labels[index] = _labels[index].copyWith(color: newColor);
-              });
-              widget.onLabelsChanged?.call(
-                _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-              );
-            },
+
           ),
         ),
       ],

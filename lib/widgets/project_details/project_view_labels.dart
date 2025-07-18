@@ -179,9 +179,32 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
               labels: widget.project.labels ?? [],
               scrollController: _scrollController,
               onColorTap: _showColorPicker,
-              onNameChanged: _handleLabelNameChange,
-              onDelete:  _handleDeleteLabel,
-              onColorChanged: _handleLabelColorChange,
+              onLabelsChanged: (updatedLabels) async {
+                final previousLabels = List<Label>.from(labels);
+                // 1. Handle updates
+                for (final label in updatedLabels) {
+                  if (label.id != null) {
+                    await LabelsDatabase.instance.updateLabel(label);
+                  }
+                }
+                // 2. Handle deletions
+                final deletedLabels = previousLabels.where((oldLabel) =>
+                  !updatedLabels.any((newLabel) => newLabel.id == oldLabel.id)).toList();
+                for (final label in deletedLabels) {
+                  if (label.id != null) {
+                    await LabelsDatabase.instance.deleteLabel(label.id!);
+                  }
+                }
+                // 3. Update local state
+                setState(() {
+                  labels = updatedLabels;
+                  widget.project.labels = updatedLabels;
+                });
+                widget.onLabelsUpdated?.call(updatedLabels);
+              },
+              // onNameChanged: _handleLabelNameChange,
+              // onDelete:  _handleDeleteLabel,
+              // onColorChanged: _handleLabelColorChange,
             ),
           ),
         ),

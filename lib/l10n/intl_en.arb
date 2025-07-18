@@ -351,12 +351,11 @@
   "importLabelsJsonItemNotMapTips": "Each item in the list must be a valid object with fields: name, color, and labelOrder.",
   "importLabelsJsonLabelParseError": "Failed to parse one of the labels.\n",
   "importLabelsJsonLabelParseTips": "Check that each label has required fields like name and color, and values are correct types.",
-  "importLabelsUnexpectedError": "Failed to parse one of the labels.\n",
-  "@importLabelsUnexpectedError": {
-    "runtimeType": {
-      "type": {}
-    }
-  },  
-  "importLabelsUnexpectedErrorTip": "Please make sure your file is readable and formatted correctly."
+  "importLabelsUnexpectedError": "Unexpected error occurred during JSON file import.\n",
+  "importLabelsUnexpectedErrorTip": "Please make sure your file is readable and formatted correctly.",
+  "importLabelsDatabaseError": "Failed to save labels to database",
+  "importLabelsDatabaseErrorTips": "Please check your database connection and try again. If the problem persists, contact support.",
+  "importLabelsNameMissingOrEmpty": "One of the labels is missing a valid name.",
+  "importLabelsNameMissingOrEmptyTips": "Ensure every label in the JSON includes a non-empty 'name' field."
 
 }

@@ -3,9 +3,10 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import '../../gen_l10n/app_localizations.dart';
-import '../dialogs/alert_error_dialog.dart';
+import 'alert_error_dialog.dart';
 import '../../models/label.dart';
+import '../../data/labels_database.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class NoLabelsDialog extends StatelessWidget {
   final int projectId;
@@ -45,7 +46,6 @@ class NoLabelsDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 ElevatedButton(
                   onPressed: () => _importLabelsFromFile(context),
                   style: ElevatedButton.styleFrom(
@@ -66,7 +66,6 @@ class NoLabelsDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 SizedBox(height: screenWidth > 1450 ? 40 : 10),
                 Text(
                   l10n.noLabelsExplain1,
@@ -146,7 +145,6 @@ class NoLabelsDialog extends StatelessWidget {
     BuildContext context,
     List<Label> labels,
     dynamic rawJson,
-    void Function(List<Label>) onConfirmed,
   ) async {
     final l10n = AppLocalizations.of(context)!;
     await showDialog(
@@ -190,10 +188,28 @@ class NoLabelsDialog extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-              onConfirmed(labels);
-              Navigator.pop(context);
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                // when projectId > 0: project already exists in the DB, and labels should be saved
+                if (projectId > 0) {
+                  await LabelsDatabase.instance.updateProjectLabels(projectId, labels);
+                }
+
+                // always notify parent, regardless of projectId
+                onLabelsImported(labels);
+                
+                // close ONLY import labels preview dialog
+                Navigator.pop(context);
+
+              } catch (e) {
+                Navigator.pop(context);
+                AlertErrorDialog.show(
+                  context,
+                  l10n.importLabelsFailedTitle,
+                  '${l10n.importLabelsDatabaseError} ${e.toString()}',
+                  tips: l10n.importLabelsDatabaseErrorTips,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
@@ -250,6 +266,8 @@ class NoLabelsDialog extends StatelessWidget {
       }
 
       final List<Label> labels = [];
+      int fallbackOrder = 0;
+
       for (final item in decoded) {
         if (item is! Map) {
           return AlertErrorDialog.show(
@@ -259,9 +277,28 @@ class NoLabelsDialog extends StatelessWidget {
             tips: l10n.importLabelsJsonItemNotMapTips,
           );
         }
+
         try {
-          final label = Label.fromMap(Map<String, dynamic>.from(item));
-          labels.add(label);
+          final map = Map<String, dynamic>.from(item);
+
+          // Validate name
+          final name = map['name'];
+          if (name == null || name is! String || name.trim().isEmpty) {
+            return AlertErrorDialog.show(
+              context,
+              l10n.importLabelsFailedTitle,
+              l10n.importLabelsNameMissingOrEmpty,
+              tips: l10n.importLabelsNameMissingOrEmptyTips,
+            );
+          }
+
+          final int labelOrder = map.containsKey('label_order') && map['label_order'] is int
+            ? map['label_order']
+            : fallbackOrder++;
+
+          final parsed = Label.fromJsonForImport(map, projectId, labelOrder);
+          labels.add(parsed);
+
         } catch (e) {
           return AlertErrorDialog.show(
             context,
@@ -272,12 +309,7 @@ class NoLabelsDialog extends StatelessWidget {
         }
       }
 
-      await _showLabelImportPreviewDialog(
-        context, labels,
-        decoded,
-        onLabelsImported,
-      );
-
+      await _showLabelImportPreviewDialog(context, labels, decoded);
     } catch (e) {
       await AlertErrorDialog.show(
         context,

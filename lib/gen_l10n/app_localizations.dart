@@ -1535,7 +1535,7 @@ abstract class AppLocalizations {
   /// No description provided for @importLabelsUnexpectedError.
   ///
   /// In en, this message translates to:
-  /// **'Failed to parse one of the labels.\n'**
+  /// **'Unexpected error occurred during JSON file import.\n'**
   String get importLabelsUnexpectedError;
 
   /// No description provided for @importLabelsUnexpectedErrorTip.
@@ -1543,6 +1543,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please make sure your file is readable and formatted correctly.'**
   String get importLabelsUnexpectedErrorTip;
+
+  /// No description provided for @importLabelsDatabaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save labels to database'**
+  String get importLabelsDatabaseError;
+
+  /// No description provided for @importLabelsDatabaseErrorTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your database connection and try again. If the problem persists, contact support.'**
+  String get importLabelsDatabaseErrorTips;
+
+  /// No description provided for @importLabelsNameMissingOrEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'One of the labels is missing a valid name.'**
+  String get importLabelsNameMissingOrEmpty;
+
+  /// No description provided for @importLabelsNameMissingOrEmptyTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure every label in the JSON includes a non-empty \'name\' field.'**
+  String get importLabelsNameMissingOrEmptyTips;
 }
 
 class _AppLocalizationsDelegate
