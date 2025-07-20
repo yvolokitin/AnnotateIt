@@ -30,30 +30,32 @@ class CreateNewProjectDialog extends StatefulWidget {
 }
 
 class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
-  final TextEditingController _nameController = TextEditingController();
-  final Map<String, String> _taskTypePerTab = {};
-  String _selectedTab = 'Detection';
-  int _step = 0;
-  final List<Label> _createdLabels = [];
+  final TextEditingController nameController = TextEditingController();
+  final Map<String, String> taskTypePerTab = {};
+
+  String selectedTab = 'Detection';
+  List<Label> labels = [];
+
+  int currentStep = 0;
 
   /// Returns the task selected for the current tab.
-  String get _selectedTaskType => _taskTypePerTab[_selectedTab] ?? '';
+  String get selectedTaskType => taskTypePerTab[selectedTab] ?? '';
 
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.initialName ?? '';
-    _selectedTab = widget.initialTab ?? 'Detection';
+    nameController.text = widget.initialName ?? '';
+    selectedTab = widget.initialTab ?? 'Detection';
 
     // Initialize initial values if provided
     if (widget.initialTab != null && widget.initialType != null) {
-      _taskTypePerTab[widget.initialTab!] = widget.initialType!;
+      taskTypePerTab[widget.initialTab!] = widget.initialType!;
     }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
+    nameController.dispose();
     super.dispose();
   }
 
@@ -62,6 +64,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
     double screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth >= 1600;
     final isTablet = screenWidth >= 900 && screenWidth < 1600;
+
     final l10n = AppLocalizations.of(context)!;
 
     return LayoutBuilder(
@@ -120,7 +123,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                                 Row(
                                   children: [                              
                                     Text(
-                                      _step == 0
+                                      currentStep == 0
                                         ? l10n.createProjectStepOneSubtitle
                                         : l10n.createProjectStepTwoSubtitle,
                                       style: TextStyle(
@@ -142,7 +145,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                         Expanded(
                           child: Padding(
                             padding: EdgeInsets.all(screenWidth>1200 ? 15 : 4),
-                            child: _step == 0 ? _buildStepOne() : _buildStepTwo(),
+                            child: currentStep == 0 ? _buildStepOne() : _buildStepTwo(),
                           ),
                         ),
 
@@ -172,8 +175,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   Widget _buildStepOne() {
     return CreateNewProjectStepTaskSelection(
-      nameController: _nameController,
-      selectedTaskType: _selectedTaskType,
+      nameController: nameController,
+      selectedTaskType: selectedTaskType,
       onTaskSelectionChanged: _setSelectedTabAndTask,
     );
   }
@@ -181,22 +184,13 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   Widget _buildStepTwo() {
     return CreateNewProjectStepLabels(
       projectId: 0,
-      projectType: _selectedTaskType,
-      createdLabels: _createdLabels
-          .map((label) => {'name': label.name, 'color': label.color})
-          .toList(),
-      onLabelsChanged: (labelMaps) {
+      projectType: selectedTaskType,
+      labels: labels,
+      onLabelsUpdated: (updatedLabels) {
         setState(() {
-          _createdLabels
-            ..clear()
-            ..addAll(labelMaps.map((map) => Label(
-                  labelOrder: 0,
-                  projectId: 0,
-                  name: map['name'],
-                  color: map['color'],
-                )));
+          labels = List<Label>.from(updatedLabels);
         });
-      },
+      },  
     );
   }
 
@@ -217,9 +211,9 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         ),
         Row(
           children: [
-            if (_step > 0)
+            if (currentStep > 0)...[
               TextButton(
-                onPressed: () => setState(() => _step--),
+                onPressed: () => setState(() => currentStep--),
                 child: Text(
                   l10n.dialogBack,
                   style: TextStyle(
@@ -228,6 +222,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                   ),
                 ),
               ),
+            ],
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: _handleStepButtonPressed,
@@ -240,7 +235,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                 ),
               ),
               child: Text(
-                _step == 0 ? l10n.dialogNext : l10n.buttonFinish,
+                currentStep == 0 ? l10n.dialogNext : l10n.buttonFinish,
                 style: const TextStyle(
                   color: Colors.white,
                   fontFamily: 'CascadiaCode',
@@ -256,22 +251,22 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
   }
 
   void _handleStepButtonPressed() async {
-    final currentTask = _taskTypePerTab[_selectedTab];
+    final currentTask = taskTypePerTab[selectedTab];
     final l10n = AppLocalizations.of(context)!;
 
-    if (_step == 0 && (currentTask == null || currentTask.isEmpty)) {
+    if (currentStep == 0 && (currentTask == null || currentTask.isEmpty)) {
       AlertErrorDialog.show(
         context,
         l10n.taskTypeRequiredTitle,
-        l10n.taskTypeRequiredMessage(_selectedTab),
-        tips: l10n.taskTypeRequiredTips(_selectedTab),
+        l10n.taskTypeRequiredMessage(selectedTab),
+        tips: l10n.taskTypeRequiredTips(selectedTab),
       );
       return;
     }
 
-    if (_step == 1) {
-      final isBinary = _selectedTaskType.toLowerCase() == 'binary classification';
-      if (isBinary && _createdLabels.length > 2) {
+    if (currentStep == 1) {
+      final isBinary = selectedTaskType.toLowerCase() == 'binary classification';
+      if (isBinary && labels.length > 2) {
         AlertErrorDialog.show(
           context,
           l10n.binaryLimitTitle,
@@ -282,15 +277,15 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
       }
     }
 
-    if (_step == 0) {
-      setState(() => _step++);
+    if (currentStep == 0) {
+      setState(() => currentStep++);
 
     } else {
       try {
         final currentUser = UserSession.instance.getUser();
         final newProject = Project(
-          name: _nameController.text.trim(),
-          type: _selectedTaskType,
+          name: nameController.text.trim(),
+          type: selectedTaskType,
           icon: "assets/images/default_project_image.svg",
           creationDate: DateTime.now(),
           lastUpdated: DateTime.now(),
@@ -299,7 +294,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         );
 
         final fullProject = await ProjectDatabase.instance.createProject(newProject);
-        final labelsWithNewProjectId = _createdLabels
+        final labelsWithNewProjectId = labels
           .map((label) => label.copyWith(projectId: fullProject.id!))
           .toList();
 
@@ -334,8 +329,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   void _setSelectedTabAndTask(String tab, String task) {
     setState(() {
-      _selectedTab = tab;
-      _taskTypePerTab[tab] = task;
+      selectedTab = tab;
+      taskTypePerTab[tab] = task;
     });
   }
 }

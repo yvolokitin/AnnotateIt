@@ -1,24 +1,24 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../gen_l10n/app_localizations.dart';
 
 import '../../models/label.dart';
-
+import '../../utils/color_utils.dart';
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
 import '../dialogs/edit_labels_list_dialog.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class CreateNewProjectStepLabels extends StatefulWidget {
   final int projectId;
   final String projectType;
-  final List<Map<String, dynamic>> createdLabels;
-  final void Function(List<Map<String, dynamic>>)? onLabelsChanged;
+  final List<Label> labels;
+
+  final Function(List<Label>) onLabelsUpdated;
 
   const CreateNewProjectStepLabels({
     required this.projectId,
     required this.projectType,
-    required this.createdLabels,
-    this.onLabelsChanged,
+    required this.labels,
+    required this.onLabelsUpdated,
     super.key,
   });
 
@@ -27,38 +27,33 @@ class CreateNewProjectStepLabels extends StatefulWidget {
 }
 
 class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels> {
-  final TextEditingController _labelController = TextEditingController();
-  final List<Label> _labels = [];
-  late final ScrollController _scrollController;
-  late String _labelColor;
+  final TextEditingController labelController = TextEditingController();
+  late final ScrollController scrollController;
+  late String newLabelColor;
 
   @override
   void initState() {
     super.initState();
-    _labelColor = _generateRandomColor();
-    _scrollController = ScrollController();
+
+    newLabelColor = generateColorByIndex(widget.labels.length);
+    scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _labelController.dispose();
-    _scrollController.dispose();
+    labelController.dispose();
+    scrollController.dispose();
     super.dispose();
-  }
-
-  String _generateRandomColor() {
-    Random random = Random();
-    return '#${(random.nextInt(0xFFFFFF) + 0x1000000).toRadixString(16).substring(1).toUpperCase()}';
   }
 
   void _showNewLabelColorPicker() {
     showDialog(
       context: context,
       builder: (context) => ColorPickerDialog(
-        initialColor: _labelColor,
+        initialColor: newLabelColor,
         onColorSelected: (newColor) {
           setState(() {
-            _labelColor = newColor;
+            newLabelColor = newColor;
           });
         },
       ),
@@ -69,22 +64,19 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     showDialog(
       context: context,
       builder: (context) => ColorPickerDialog(
-        initialColor: _labels[index].color,
-        onColorSelected: (newColor) {
-          setState(() {
-            _labels[index] = _labels[index].copyWith(color: newColor);
-          });
-          widget.onLabelsChanged?.call(
-            _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-          );
+        initialColor: widget.labels[index].color,
+        onColorSelected: (newColor) async {
+          final updatedLabel = widget.labels[index].copyWith(color: newColor);
+          final updated = List<Label>.from(widget.labels);
+          updated[index] = updatedLabel;
+          widget.onLabelsUpdated(updated);
         },
       ),
     );
   }
 
   void _addLabel() {
-    String newLabelName = _labelController.text.trim();
-
+    String newLabelName = labelController.text.trim();
     final l10n = AppLocalizations.of(context)!;
     if (newLabelName.isEmpty) {
       AlertErrorDialog.show(
@@ -96,7 +88,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
       return;
     }
 
-    if (_labels.any((label) => label.name.toLowerCase() == newLabelName.toLowerCase())) {
+    if (widget.labels.any((label) => label.name.toLowerCase() == newLabelName.toLowerCase())) {
       AlertErrorDialog.show(
         context,
         l10n.labelDuplicateTitle,
@@ -107,7 +99,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     }
 
     final isBinary = widget.projectType.toLowerCase() == 'binary classification';
-    if (isBinary && _labels.length >= 2) {
+    if (isBinary && widget.labels.length >= 2) {
       AlertErrorDialog.show(
         context,
         l10n.binaryLimitTitle,
@@ -117,20 +109,23 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
       return;
     }
 
-    setState(() {
-      _labels.add(Label(
-        labelOrder: 0,
-        projectId: 0,
-        name: newLabelName,
-        color: _labelColor,
-      ));
-      _labelController.clear();
-      _labelColor = _generateRandomColor();
-    });
-
-    widget.onLabelsChanged?.call(
-      _labels.map((e) => {'name': e.name, 'color': e.color}).toList(),
+    final newLabel = Label(
+      id: null, // will be set after DB insert
+      labelOrder: widget.labels.length,
+      projectId: widget.projectId,
+      name: newLabelName,
+      color: newLabelColor,
+      createdAt: DateTime.now(),
     );
+
+    final updated = List<Label>.from(widget.labels);
+    updated.add(newLabel);
+    widget.onLabelsUpdated.call(updated);
+
+    setState(() {
+      newLabelColor = generateColorByIndex(widget.labels.length+1);
+      labelController.clear();
+    });
   }
 
   String _getLabelCreationNote(String type) {
@@ -190,7 +185,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                     width: screenWidth > 1200 ? 28 : 22,
                     height: screenWidth > 1200 ? 28 : 22,
                     decoration: BoxDecoration(
-                      color: Color(int.parse(_labelColor.replaceFirst('#', '0xFF'))),
+                      color: Color(int.parse(newLabelColor.replaceFirst('#', '0xFF'))),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -201,7 +196,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
             SizedBox(width: screenWidth > 650 ? 20 : 5),
             Expanded(
               child: TextField(
-                controller: _labelController,
+                controller: labelController,
                 decoration: InputDecoration(
                   hintText: l10n.labelNameHint,
                   hintStyle: TextStyle(
@@ -276,23 +271,14 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
         Flexible(
           child: EditLabelsListDialog(
-            projectId: 0,
+            projectId: widget.projectId,
             projectType: widget.projectType,
-            labels: _labels,
-            scrollController: _scrollController,
+            labels: widget.labels,
+            scrollController: scrollController,
             onColorTap: _showColorPicker,
-
             onLabelsChanged: (updatedLabels) {
-              setState(() {
-                _labels
-                  ..clear()
-                  ..addAll(updatedLabels);
-              });
-              widget.onLabelsChanged?.call(
-                updatedLabels.map((e) => {'name': e.name, 'color': e.color}).toList(),
-              );
+              widget.onLabelsUpdated.call(updatedLabels);
             },
-
           ),
         ),
       ],

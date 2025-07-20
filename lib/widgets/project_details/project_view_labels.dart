@@ -32,21 +32,17 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
       context: context,
       builder: (context) => ColorPickerDialog(
         initialColor: widget.project.labels![index].color,
-        onColorSelected: (newColor) {
-          _handleLabelColorChange(index, newColor);
+        onColorSelected: (newColor) async {
+          final updatedLabel = widget.project.labels![index].copyWith(color: newColor);
+          await LabelsDatabase.instance.updateLabel(updatedLabel);
+
+          final updated = List<Label>.from(widget.project.labels!);
+          updated[index] = updatedLabel;
+
+          widget.onLabelsUpdated!(updated);
         },
       ),
     );
-  }
-
-  void _handleLabelColorChange(int index, String newColor) async {
-    final updatedLabel = widget.project.labels![index].copyWith(color: newColor);
-    await LabelsDatabase.instance.updateLabel(updatedLabel);
-
-    final updated = List<Label>.from(widget.project.labels!);
-    updated[index] = updatedLabel;
-
-    widget.onLabelsUpdated!(updated);
   }
 
   void _handleAddNewLabel(String name, String color) async {
