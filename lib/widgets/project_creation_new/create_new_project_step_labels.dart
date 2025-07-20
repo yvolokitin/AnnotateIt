@@ -276,7 +276,8 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
         Flexible(
           child: EditLabelsListDialog(
-            projectId: 0, // widget.projectId,
+            projectId: 0,
+            projectType: widget.projectType,
             labels: _labels,
             scrollController: _scrollController,
             onColorTap: _showColorPicker,

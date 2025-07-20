@@ -12,6 +12,7 @@ import 'no_labels_dialog.dart';
 
 class EditLabelsListDialog extends StatefulWidget {
   final int projectId;
+  final String projectType;
   final List<Label> labels;
   final ScrollController scrollController;
 
@@ -21,6 +22,7 @@ class EditLabelsListDialog extends StatefulWidget {
   const EditLabelsListDialog({
     super.key,
     required this.projectId,
+    required this.projectType,
     required this.labels,
     required this.scrollController,
     required this.onColorTap,
@@ -73,6 +75,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
     if (_labels.isEmpty) {
       return NoLabelsDialog(
         projectId: widget.projectId,
+        projectType: widget.projectType,
         onLabelsImported: (importedLabels) {
           setState(() {
             _labels = importedLabels;
@@ -98,9 +101,15 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                     controller: widget.scrollController,
                     itemCount: _labels.length,
                     itemBuilder: (context, index) {
+                      // Add bounds checking
+                      if (index >= _labels.length || index >= _controllers.length) {
+                        return const SizedBox.shrink();
+                      }
+
                       final label = _labels[index];
                       final controller = _controllers[index];
                       bool isEditing = false;
+                      
                       return StatefulBuilder(
                         builder: (context, setLocalState) {
                           return MouseRegion(

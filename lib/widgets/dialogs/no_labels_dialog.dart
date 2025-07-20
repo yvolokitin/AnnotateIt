@@ -10,10 +10,12 @@ import '../../gen_l10n/app_localizations.dart';
 
 class NoLabelsDialog extends StatelessWidget {
   final int projectId;
+  final String projectType;
   final void Function(List<Label>) onLabelsImported;
 
   const NoLabelsDialog({
     required this.projectId,
+    required this.projectType,
     required this.onLabelsImported,
     super.key,
   });
@@ -147,6 +149,10 @@ class NoLabelsDialog extends StatelessWidget {
     dynamic rawJson,
   ) async {
     final l10n = AppLocalizations.of(context)!;
+
+    final isBinary = projectType.toLowerCase().contains('binary');
+    final showWarning = isBinary && labels.length > 2;
+
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -155,13 +161,37 @@ class NoLabelsDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.lightGreenAccent, width: 1),
         ),
-        title: Text(
-          l10n.importLabelsPreviewTitle,
-          style: const TextStyle(
-            color: Colors.lightGreenAccent,
-            fontFamily: 'CascadiaCode',
-            fontWeight: FontWeight.bold,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.importLabelsPreviewTitle,
+              style: const TextStyle(
+                color: Colors.lightGreenAccent,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (showWarning) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red[900],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.redAccent, width: 1),
+                ),
+                child: const Text(
+                  'Only the first 2 labels will be imported for binary classification.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'CascadiaCode',
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         content: SizedBox(
           width: 600,
@@ -190,13 +220,15 @@ class NoLabelsDialog extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               try {
+                final labelsToImport = showWarning ? labels.take(2).toList() : labels;
+
                 // when projectId > 0: project already exists in the DB, and labels should be saved
                 if (projectId > 0) {
-                  await LabelsDatabase.instance.updateProjectLabels(projectId, labels);
+                  await LabelsDatabase.instance.updateProjectLabels(projectId, labelsToImport);
                 }
 
                 // always notify parent, regardless of projectId
-                onLabelsImported(labels);
+                onLabelsImported(labelsToImport);
                 
                 // close ONLY import labels preview dialog
                 Navigator.pop(context);
