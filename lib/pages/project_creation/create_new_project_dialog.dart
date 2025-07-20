@@ -300,13 +300,15 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
         await LabelsDatabase.instance.updateProjectLabels(fullProject.id!, labelsWithNewProjectId);
 
-        if (!mounted) return;
+        // fetch updated labels with correct IDs
+        final updatedLabels = await LabelsDatabase.instance.fetchLabelsByProject(fullProject.id!);
 
+        if (!mounted) return;
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ProjectDetailsPage(
-              fullProject.copyWith(labels: labelsWithNewProjectId),
+              fullProject.copyWith(labels: updatedLabels),
             ),
           ),
         );

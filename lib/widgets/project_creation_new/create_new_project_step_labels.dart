@@ -178,7 +178,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.orangeAccent, width: 1),
+                    border: Border.all(color: Colors.red, width: 1),
                   ),
                   alignment: Alignment.center,
                   child: Container(
@@ -278,6 +278,9 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
             onColorTap: _showColorPicker,
             onLabelsChanged: (updatedLabels) {
               widget.onLabelsUpdated.call(updatedLabels);
+              setState(() {
+                newLabelColor = generateColorByIndex(updatedLabels.length);
+              });
             },
           ),
         ),
