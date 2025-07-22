@@ -66,7 +66,7 @@ class StepDescriptionWidget extends StatelessWidget {
       );
     } else {
       return const Text(
-        "Edit your project labels",
+        "Select project type",
         style: TextStyle(
           fontSize: 22,
           color: Colors.white70,
