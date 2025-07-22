@@ -19,7 +19,6 @@ import '../models/label.dart';
 import '../models/project.dart';
 import '../models/archive.dart';
 import '../models/media_item.dart';
-// import '../models/media_folder.dart';
 
 typedef ProgressCallback = void Function(int current, int total);
 
@@ -269,12 +268,6 @@ class DatasetImportProjectCreation {
       if (current % 10 == 0 || current == total) {
         await Future.delayed(Duration.zero);
       }
-/*
-      if (current % 100 == 0 || current == total) {
-        onProgress(current, total);
-        print("Progress update: $current / $total files inserted");
-      }
-*/      
     }
 
     print("Finished inserting $total media files into dataset $datasetId");

@@ -244,6 +244,48 @@ abstract class AppLocalizations {
   /// **'Start your annotation journey today and build high-quality datasets for your computer vision models!'**
   String get aboutCallToAction;
 
+  /// No description provided for @accountUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get accountUser;
+
+  /// No description provided for @accountProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get accountProfile;
+
+  /// No description provided for @accountStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get accountStorage;
+
+  /// No description provided for @accountDeviceStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Storage'**
+  String get accountDeviceStorage;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get accountSettings;
+
+  /// No description provided for @accountApplicationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Settings'**
+  String get accountApplicationSettings;
+
+  /// No description provided for @accountLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading user data...'**
+  String get accountLoadingMessage;
+
   /// No description provided for @userProfileName.
   ///
   /// In en, this message translates to:

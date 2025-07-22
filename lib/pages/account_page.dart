@@ -9,6 +9,8 @@ import '../widgets/account/user_profile.dart';
 import '../widgets/account/account_storage.dart';
 import '../widgets/account/application_settings.dart';
 
+import '../../gen_l10n/app_localizations.dart';
+
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -69,6 +71,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
 
     if (_loading) {
@@ -111,8 +114,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.person_outline),
                               if (screenWidth > 700) ...[
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'User',
+                                Text(
+                                  l10n.accountUser,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
@@ -120,8 +123,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                                 ),
                               ],
                               if (screenWidth > 1500)
-                                const Text(
-                                  'Profile',
+                                Text(
+                                  l10n.accountProfile,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
@@ -137,8 +140,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.folder_open),
                               if (screenWidth > 700 && screenWidth <= 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Storage',
+                                Text(
+                                  l10n.accountStorage,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
@@ -147,8 +150,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               ],
                               if (screenWidth > 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Device Storage',
+                                Text(
+                                  l10n.accountDeviceStorage,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
@@ -165,8 +168,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               const Icon(Icons.settings),
                               if (screenWidth > 700 && screenWidth <= 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Settings',
+                                Text(
+                                  l10n.accountSettings,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
@@ -175,8 +178,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                               ],
                               if (screenWidth > 1500) ...[
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Application Settings',
+                                Text(
+                                  l10n.accountApplicationSettings,
                                   style: TextStyle(
                                     fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
