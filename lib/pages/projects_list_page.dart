@@ -16,6 +16,7 @@ import "project_details_page.dart";
 import "project_creation/create_from_dataset_dialog.dart";
 import "project_creation/create_new_project_dialog.dart";
 import "project_creation/change_project_type_dialog.dart";
+import "project_export/export_project_dialog.dart";
 
 class ProjectsListPage extends StatefulWidget {
 
@@ -79,6 +80,17 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
     if (result == 'refresh') {
       loadProjectsWithLabels(); // Refresh the list if new project was created
+    }
+  }
+  
+  void _handleExportProject(Project project) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => ExportProjectDialog(project: project),
+    );
+
+    if (result == 'refresh') {
+      loadProjectsWithLabels(); // Refresh the list after export
     }
   }
 
@@ -316,6 +328,27 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   onTap: () {
                     Navigator.pop(context);
                     _handleChangeProjectType(project);
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(
+                    Icons.upload_file,
+                    color: Colors.white70,
+                    size: 30,
+                  ),
+                  title: Text(
+                    'Export Project as Dataset',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white70,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _handleExportProject(project);
                   },
                 ),
 
