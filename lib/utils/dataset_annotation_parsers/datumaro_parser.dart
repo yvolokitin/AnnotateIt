@@ -126,6 +126,7 @@ class DatumaroParser {
         ));
         addedCount++;
         labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
+
       } else if (projectTypeLower.contains('segmentation') && type == 'polygon') {
         final data = ann['points'] ?? ann['data'] ?? ann;
         await annotationDb.insertAnnotation(Annotation(
@@ -141,6 +142,65 @@ class DatumaroParser {
         ));
         addedCount++;
         labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
+
+      } else if (projectTypeLower.contains('classification') && type == 'label') {
+        // For binary classification, only allow one of the first two labels
+        if (projectTypeLower.contains('binary')) {
+          if (labelIndex == 0 || labelIndex == 1) {
+            await annotationDb.insertAnnotation(Annotation(
+              id: null,
+              mediaItemId: mediaItem.id!,
+              labelId: label.id!,
+              annotationType: 'classification',
+              data: {}, // classification doesn't need geometry
+              confidence: (ann['confidence'] as num?)?.toDouble(),
+              annotatorId: annotatorId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            ));
+            addedCount++;
+          } else {
+            logAndSkip('Binary classification allows only first two labels. Skipping labelId $labelIndex in ${mediaItem.filePath}');
+          }
+
+        // Multi-class: only allow the first classification per image
+        } else if (projectTypeLower.contains('multi-class')) {
+          if ((labelCount[mediaItem.id!] ?? 0) == 0) {
+            await annotationDb.insertAnnotation(Annotation(
+              id: null,
+              mediaItemId: mediaItem.id!,
+              labelId: label.id!,
+              annotationType: 'classification',
+              data: {},
+              confidence: (ann['confidence'] as num?)?.toDouble(),
+              annotatorId: annotatorId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            ));
+            addedCount++;
+            labelCount[mediaItem.id!] = 1;
+          } else {
+            logAndSkip('Multi-class classification allows only one label per image. Skipping extra label in ${mediaItem.filePath}');
+          }
+
+        // Multi-label: allow multiple labels per image
+        } else if (projectTypeLower.contains('multi-label')) {
+          await annotationDb.insertAnnotation(Annotation(
+            id: null,
+            mediaItemId: mediaItem.id!,
+            labelId: label.id!,
+            annotationType: 'classification',
+            data: {},
+            confidence: (ann['confidence'] as num?)?.toDouble(),
+            annotatorId: annotatorId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          ));
+          addedCount++;
+        } else {
+          logAndSkip('Unrecognized classification type "$projectType" in ${mediaItem.filePath}');
+        }
+
       } else {
         logAndSkip('Skipped annotation of type "$type" in ${mediaItem.filePath} for projectType "$projectType"');
       }
