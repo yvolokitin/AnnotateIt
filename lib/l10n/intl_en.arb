@@ -28,6 +28,14 @@
   "aboutFeatures": "- Multiple Project Types: Create and manage projects tailored for different computer vision tasks.\n- Data Upload & Management: Easily upload and organize your datasets for seamless annotation.\n- Advanced Annotation Tools – Use bounding boxes, polygons, keypoints, and segmentation masks.\n- Export & Integration – Export labeled data in various formats compatible with AI/ML frameworks.",
   "aboutCallToAction": "Start your annotation journey today and build high-quality datasets for your computer vision models!",
 
+  "accountUser": "User",
+  "accountProfile": "Profile",
+  "accountStorage": "Storage",
+  "accountDeviceStorage": "Device Storage",
+  "accountSettings": "Settings",
+  "accountApplicationSettings": "Application Settings",
+  "accountLoadingMessage": "Loading user data...",
+
   "userProfileName": "Captain Annotator",
   "userProfileFeedbackButton": "Feedback",
   "userProfileEditProfileButton": "Edit Profile",

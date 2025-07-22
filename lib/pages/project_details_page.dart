@@ -62,8 +62,6 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       setState(() {
                         project = project.copyWith(labels: updatedLabels);
                       });
-                      //print('ProjectDetailsPage: names: ${updatedLabels.map((l) => l.name).join(', ')}');
-                      //print('ProjectDetailsPage: ids: ${updatedLabels.map((l) => l.id!).join(', ')}');
                     },  
                   ),
                 ],

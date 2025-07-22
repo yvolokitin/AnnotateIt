@@ -87,6 +87,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Start your annotation journey today and build high-quality datasets for your computer vision models!';
 
   @override
+  String get accountUser => 'User';
+
+  @override
+  String get accountProfile => 'Profile';
+
+  @override
+  String get accountStorage => 'Storage';
+
+  @override
+  String get accountDeviceStorage => 'Device Storage';
+
+  @override
+  String get accountSettings => 'Settings';
+
+  @override
+  String get accountApplicationSettings => 'Application Settings';
+
+  @override
+  String get accountLoadingMessage => 'Loading user data...';
+
+  @override
   String get userProfileName => 'Captain Annotator';
 
   @override
