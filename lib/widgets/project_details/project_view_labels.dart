@@ -47,7 +47,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
 
   void _handleAddNewLabel(String name, String color) async {
     final newLabel = Label(
-      id: null, // will be set after DB insert
+      id: -1, // will be set after DB insert
       labelOrder: widget.project.labels!.length,
       projectId: widget.project.id ?? 0,
       name: name,
@@ -84,7 +84,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           child: Row(
             children: [
               Text(
-                'Labels',
+                'Labels (${labels.length})',
                 style: const TextStyle(
                   fontSize: 24,
                   color: Colors.white,
@@ -105,6 +105,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           ),
           child: ProjectDetailsAddLabel(
             labels: labels,
+            projectId: widget.project.id ?? 0,
             projectType: widget.project.type,
             onAddNewLabel: _handleAddNewLabel,
           ),
@@ -122,22 +123,29 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
               onColorTap: _showColorPicker,
               onLabelsChanged: (updatedLabels) async {
                 final previousLabels = List<Label>.from(labels);
+                final List<Label> newLabels = [];
+
                 // 1. Handle updates
                 for (final label in updatedLabels) {
-                  if (label.id != null) {
+                  if (label.id > 0) {
                     await LabelsDatabase.instance.updateLabel(label);
+                    newLabels.add(label);
+                  } else if (label.id == -1) {
+                    // New label, insert it
+                    final insertedId = await LabelsDatabase.instance.insertLabel(label);
+                    newLabels.add(label.copyWith(id: insertedId));
                   }
                 }
+
                 // 2. Handle deletions
                 final deletedLabels = previousLabels.where((oldLabel) =>
                   !updatedLabels.any((newLabel) => newLabel.id == oldLabel.id)).toList();
                 for (final label in deletedLabels) {
-                  if (label.id != null) {
-                    await LabelsDatabase.instance.deleteLabel(label.id!);
-                  }
+                  await LabelsDatabase.instance.deleteLabel(label.id);
                 }
-                widget.onLabelsUpdated?.call(updatedLabels);
-                print('PROJECT VIEW: Labels updated: ${updatedLabels.map((l) => l.name).join(', ')}');
+
+                widget.onLabelsUpdated?.call(newLabels);
+                print('PROJECT VIEW: Labels updated: ${newLabels.map((l) => l.name).join(', ')}');
               },
             ),
           ),

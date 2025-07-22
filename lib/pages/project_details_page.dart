@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 
 import "../models/project.dart";
-import '../data/labels_database.dart';
 
 import '../widgets/project_details/project_details_app_bar.dart';
 import '../widgets/project_details/project_details_navigation.dart';
@@ -24,18 +23,7 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   void initState() {
     super.initState();
     project = widget.project;
-    _loadProjectLabels();
-  }
-
-  Future<void> _loadProjectLabels() async {
-    if (widget.project.labels == null || widget.project.labels!.isEmpty) {
-      if (widget.project.id != null) {
-        final loadedLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
-        setState(() {
-          project = project.copyWith(labels: loadedLabels);
-        });
-      }
-    }
+    print('ProjectDetailsPage: project: ${project.name} - ${project.labels!.length}');
   }
 
   void _onItemTapped(int index) {
@@ -69,6 +57,8 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       setState(() {
                         project = project.copyWith(labels: updatedLabels);
                       });
+                      print('ProjectDetailsPage: names: ${updatedLabels.map((l) => l.name).join(', ')}');
+                      print('ProjectDetailsPage: ids: ${updatedLabels.map((l) => l.id!).join(', ')}');
                     },  
                   ),
                 ],

@@ -14,14 +14,15 @@ class User {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  final bool autoSaveAnnotations;
-
-  final bool projectSkipDeleteConfirm;
   final bool projectShowNoLabels;
-  final bool projectShowImportWarning;
   final bool datasetEnableDuplicate;
   final bool datasetEnableDelete;
+  final bool labelsSetFirstAsDefault;
+  final bool labelsDeleteAnnotations;
+  final bool projectSkipDeleteConfirm;
+  final bool projectShowImportWarning;
   final bool annotationAllowImageCopy;
+  final bool autoSaveAnnotations;
   final double annotationOpacity;
 
   static final List<String> fields = [
@@ -40,6 +41,8 @@ class User {
     'createdAt',
     'updatedAt',
     'autoSaveAnnotations',
+    'labelsDeleteAnnotations',
+    'labelsSetFirstAsDefault',
     'projectSkipDeleteConfirm',
     'projectShowNoLabels',
     'projectShowImportWarning',
@@ -65,6 +68,8 @@ class User {
     required this.createdAt,
     required this.updatedAt,
     required this.autoSaveAnnotations,
+    required this.labelsDeleteAnnotations,
+    required this.labelsSetFirstAsDefault,
     required this.projectSkipDeleteConfirm,
     required this.projectShowNoLabels,
     required this.projectShowImportWarning,
@@ -90,6 +95,8 @@ class User {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? autoSaveAnnotations,
+    bool? labelsDeleteAnnotations,
+    bool? labelsSetFirstAsDefault,
     bool? projectSkipDeleteConfirm,
     bool? projectShowNoLabels,
     bool? projectShowImportWarning,
@@ -114,6 +121,8 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       autoSaveAnnotations: autoSaveAnnotations ?? this.autoSaveAnnotations,
+      labelsDeleteAnnotations: labelsDeleteAnnotations ?? this.labelsDeleteAnnotations,
+      labelsSetFirstAsDefault: labelsSetFirstAsDefault ?? this.labelsSetFirstAsDefault,
       projectSkipDeleteConfirm: projectSkipDeleteConfirm ?? this.projectSkipDeleteConfirm,
       projectShowNoLabels: projectShowNoLabels ?? this.projectShowNoLabels,
       projectShowImportWarning: projectShowImportWarning ?? this.projectShowImportWarning,
@@ -140,6 +149,8 @@ class User {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'autoSaveAnnotations': autoSaveAnnotations ? 1 : 0,
+        'labelsDeleteAnnotations': labelsDeleteAnnotations ? 1 : 0,
+        'labelsSetFirstAsDefault': labelsSetFirstAsDefault ? 1 : 0,
         'projectSkipDeleteConfirm': projectSkipDeleteConfirm ? 1 : 0,
         'projectShowNoLabels': projectShowNoLabels ? 1 : 0,
         'projectShowImportWarning': projectShowImportWarning ? 1 : 0,
@@ -165,6 +176,8 @@ class User {
         createdAt: DateTime.parse(map['createdAt']),
         updatedAt: DateTime.parse(map['updatedAt']),
         autoSaveAnnotations: map['autoSaveAnnotations'] == 1,
+        labelsDeleteAnnotations: map['labelsDeleteAnnotations'] == 1,
+        labelsSetFirstAsDefault: map['labelsSetFirstAsDefault'] == 1,
         projectSkipDeleteConfirm: map['projectSkipDeleteConfirm'] == 1,
         projectShowNoLabels: map['projectShowNoLabels'] == 1,
         projectShowImportWarning: map['projectShowImportWarning'] == 1,

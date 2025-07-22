@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
 import '../data/annotation_database.dart';
 
@@ -177,16 +178,38 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     });
   }
 
-  void _handleDefaultLabelSelected(Label? label) {
-    setState(() {
-      selectedLabel = label ?? Label(
-        id: -1,
-        projectId: -1,
-        name: 'Unknown',
-        color: '#808080',
-        labelOrder: -1,
-      );
-    });
+  void _handleDefaultLabelSelected(Label? defaultLabel) async {
+    final newDefaultLabel = defaultLabel ?? Label(
+      id: -1,
+      projectId: -1,
+      name: 'Unknown',
+      color: '#808080',
+      labelOrder: -1,
+    );
+
+    if (newDefaultLabel.id != -1) {
+      // persist default label in DB
+      await LabelsDatabase.instance.setLabelAsDefault(newDefaultLabel.id, widget.project.id!);
+    }
+
+    // update in-memory project labels
+    final updatedLabels = widget.project.labels?.map((label) {
+      if (label.id == newDefaultLabel.id) {
+        return label.copyWith(isDefault: true);
+      } else {
+        return label.copyWith(isDefault: false);
+      }
+    }).toList();
+
+    // update the UI
+    if (updatedLabels != null) {
+      setState(() {
+        selectedLabel = newDefaultLabel;
+        widget.project.labels
+          ?..clear()
+          ..addAll(updatedLabels);
+      });
+    }
   }
 
   void _handleLabelSelected(Label label) async {

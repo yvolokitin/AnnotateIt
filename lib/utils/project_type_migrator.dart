@@ -48,7 +48,10 @@ class ProjectTypeMigrator {
 
     } else {
       // Convert between detection <-> segmentation
-      newAnnotations = oldAnnotations.map((ann) {
+      newAnnotations = oldAnnotations
+          .where((ann) =>
+              ann.annotationType == 'bbox' || ann.annotationType == 'polygon')
+          .map((ann) {
         if (type.contains('segmentation') && ann.annotationType == 'bbox') {
           return ann.copyWith(
             annotationType: 'polygon',
@@ -65,9 +68,8 @@ class ProjectTypeMigrator {
       }).toList();
     }
 
-    // Apply changes in a transaction
-    await db.transaction((txn) async {
-      await txn.rawDelete('''
+    final deleted = await db.transaction((txn) async {
+      final deletedCount = await txn.rawDelete('''
         DELETE FROM annotations 
         WHERE media_item_id IN (
           SELECT id FROM media_items 
@@ -91,7 +93,11 @@ class ProjectTypeMigrator {
         where: 'id = ?',
         whereArgs: [project.id],
       );
+
+      return deletedCount;
     });
+
+    debugPrint('Deleted $deleted annotations');
   }
 
   /// Deletes all labels except the first two (by order), and removes annotations that refer to removed labels.

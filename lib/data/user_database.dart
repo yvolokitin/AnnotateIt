@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 
-import 'project_database.dart';
 import '../models/user.dart';
 
 class UserDatabase {
@@ -19,8 +18,6 @@ class UserDatabase {
     throw Exception("Database not set.");
   }
   
-  // Future<Database> get database async => await ProjectDatabase.instance.database;
-
   Future<User> create(User user) async {
     final db = await database;
     final id = await db.insert('users', user.toMap());

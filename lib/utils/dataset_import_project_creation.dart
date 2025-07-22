@@ -306,7 +306,7 @@ class DatasetImportProjectCreation {
     int counter = 0;
     for (final name in labelNames) {
       final label = Label(
-        id: null,
+        id: -1,
         labelOrder: counter,
         projectId: projectId,
         name: name.trim(),

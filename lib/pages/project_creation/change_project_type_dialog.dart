@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../gen_l10n/app_localizations.dart';
 
 import '../../models/project.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
@@ -7,6 +6,7 @@ import '../../widgets/project_type_change/project_type_change_step_1_task_select
 import '../../widgets/project_type_change/project_type_change_step_2_confirmation.dart';
 
 import '../../utils/project_type_migrator.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ChangeProjectTypeDialog extends StatefulWidget {
   final Project project;
@@ -149,51 +149,40 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
   }
 
   Widget _buildCurrentStep() {
+    final l10n = AppLocalizations.of(context)!;
     switch (currentStep) {
       case 1:
-        return _buildStepOne();
+        return StepProjectTypeSelection(
+          projectType: widget.project.type,
+          onSelectionChanged: (newProjectType) {
+            setState(() {
+              currentProjectType = newProjectType;
+            });
+          },
+        );
       case 2:
-        return _buildStepTwo();
+        return StepProjectTypeSelectionConfirmation(
+          currentProjectType: widget.project.type,
+          newProjectType: currentProjectType,
+        );
       case 3:
-        return _buildLoadingStep();
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.redAccent),
+              SizedBox(height: 20),
+              Text(
+                l10n.changeProjectTypeMigrating,
+                style: TextStyle(color: Colors.white70, fontSize: 18),
+              ),
+            ],
+          ),
+        );
       default:
         // Fallback for safety
         return const SizedBox.shrink();
     }
-  }
-
-  Widget _buildStepOne() {
-    return StepProjectTypeSelection(
-      projectType: widget.project.type,
-      onSelectionChanged: (newProjectType) {
-        setState(() {
-          currentProjectType = newProjectType;
-        });
-      },
-    );
-  }
-
-  Widget _buildStepTwo() {
-    return StepProjectTypeSelectionConfirmation(
-      currentProjectType: widget.project.type,
-      newProjectType: currentProjectType,
-    );
-  }
-
-  Widget _buildLoadingStep() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: Colors.redAccent),
-          SizedBox(height: 20),
-          Text(
-            'Migrating project type...',
-            style: TextStyle(color: Colors.white70, fontSize: 18),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildBottomButtons() {

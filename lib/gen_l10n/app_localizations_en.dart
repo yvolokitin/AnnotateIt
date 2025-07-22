@@ -125,6 +125,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'You’ll be warned if you try to create a project without any labels defined.';
 
   @override
+  String get settingsLabelsCreationDeletionTitle =>
+      'Labels Creation / Deletion';
+
+  @override
+  String get settingsLabelsDeletionWithAnnotations =>
+      'Delete annotations when label is removed';
+
+  @override
+  String get settingsLabelsDeletionWithAnnotationsNote =>
+      'When enabled, deleting a label will automatically remove all annotations assigned to that label across all media items.';
+
+  @override
+  String get settingsLabelsSetDefaultLabel => 'Set first label as default';
+
+  @override
+  String get settingsLabelsSetDefaultLabelNote =>
+      'When enabled, the first label you create in a project will automatically be marked as the default label. You can change the default later at any time.';
+
+  @override
   String get settingsDatasetViewTitle => 'Dataset View';
 
   @override
@@ -133,7 +152,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDatasetViewDuplicateWithAnnotationsNote =>
-      'When duplicating, annotations will be included unless you change settings.';
+      'When duplicating, annotations will be included unless you change settings';
 
   @override
   String get settingsDatasetViewDeleteFromOS =>
@@ -141,7 +160,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDatasetViewDeleteFromOSNote =>
-      'Deletes the file from disk too, not just from the dataset.';
+      'Deletes the file from disk too, not just from the dataset';
 
   @override
   String get settingsAnnotationTitle => 'Annotation Settings';
@@ -452,9 +471,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.';
 
   @override
-  String get changeProjectTypeTitle => 'Change project type';
-
-  @override
   String get deleteProjectTitle => 'Delete Project';
 
   @override
@@ -531,6 +547,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noMediaDialogSupportedVideoFormatsWarning =>
       'Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.';
+
+  @override
+  String get annotatorTopToolbarBackTooltip => 'Back to Project';
+
+  @override
+  String get annotatorTopToolbarSelectDefaultLabel => 'Select default label';
 
   @override
   String get toolbarNavigation => 'Navigation';
@@ -611,6 +633,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountStorage_helpTips =>
       'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n';
+
+  @override
+  String get changeProjectTypeTitle => 'Change project type';
+
+  @override
+  String get changeProjectTypeMigrating => 'Migrating project type...';
 
   @override
   String get changeProjectTypeStepOneSubtitle =>

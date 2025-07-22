@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../gen_l10n/app_localizations.dart';
 
 import '../../models/label.dart';
+import '../../utils/color_utils.dart';
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ProjectDetailsAddLabel extends StatefulWidget {
-  final List<Label> labels;
+  final int projectId;
   final String projectType;
+  final List<Label> labels;
+
   final void Function(String name, String color) onAddNewLabel;
 
   const ProjectDetailsAddLabel({
     super.key,
     required this.labels,
+    required this.projectId,
     required this.projectType,
     required this.onAddNewLabel,
   });
@@ -22,24 +26,18 @@ class ProjectDetailsAddLabel extends StatefulWidget {
 }
 
 class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
-  final TextEditingController _labelController = TextEditingController();
-  String _labelColor = '#FF0000'; // Default color
-  late List<Label> _labels;
+  final TextEditingController labelController = TextEditingController();
+  late String newLabelColor;
 
   @override
   void initState() {
     super.initState();
-    _labels = List.from(widget.labels); // Make a mutable local copy
-  }
-
-  String _generateRandomColor() {
-    final random = (0xFFFFFF & (DateTime.now().millisecondsSinceEpoch * 997)).toRadixString(16).padLeft(6, '0');
-    return '#$random';
+    newLabelColor = generateColorByIndex(widget.labels.length);
   }
 
   void _addLabel() {
     final l10n = AppLocalizations.of(context)!;
-    String newLabelName = _labelController.text.trim();
+    String newLabelName = labelController.text.trim();
 
     if (newLabelName.isEmpty) {
       AlertErrorDialog.show(
@@ -51,7 +49,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
       return;
     }
 
-    if (_labels.any((label) => label.name.toLowerCase() == newLabelName.toLowerCase())) {
+    if (widget.labels.any((label) => label.name.toLowerCase() == newLabelName.toLowerCase())) {
       AlertErrorDialog.show(
         context,
         l10n.labelDuplicateTitle,
@@ -62,7 +60,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
     }
 
     final isBinary = widget.projectType.toLowerCase() == 'binary classification';
-    if (isBinary && _labels.length >= 2) {
+    if (isBinary && widget.labels.length >= 2) {
       AlertErrorDialog.show(
         context,
         l10n.binaryLimitTitle,
@@ -72,28 +70,21 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
       return;
     }
 
+    widget.onAddNewLabel(newLabelName, newLabelColor);
     setState(() {
-      _labels.add(Label(
-        labelOrder: 0,
-        projectId: 0,
-        name: newLabelName,
-        color: _labelColor,
-      ));
-      _labelController.clear();
-      _labelColor = _generateRandomColor();
+      newLabelColor = generateColorByIndex(widget.labels.length+1);
+      labelController.clear();
     });
-
-    widget.onAddNewLabel(newLabelName, _labelColor);
   }
 
   void _showColorPicker() {
     showDialog(
       context: context,
       builder: (context) => ColorPickerDialog(
-        initialColor: _labelColor,
+        initialColor: newLabelColor,
         onColorSelected: (newColor) {
           setState(() {
-            _labelColor = newColor;
+            newLabelColor = newColor;
           });
         },
       ),
@@ -123,7 +114,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
                 width: screenWidth > 1200 ? 28 : 22,
                 height: screenWidth > 1200 ? 28 : 22,
                 decoration: BoxDecoration(
-                  color: Color(int.parse(_labelColor.replaceFirst('#', '0xFF'))),
+                  color: Color(int.parse(newLabelColor.replaceFirst('#', '0xFF'))),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -133,7 +124,7 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
         SizedBox(width: 20),
         Expanded(
           child: TextField(
-            controller: _labelController,
+            controller: labelController,
             decoration: InputDecoration(
               hintText: l10n.labelNameHint,
               hintStyle: TextStyle(

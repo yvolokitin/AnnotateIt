@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/label.dart';
 import '../../models/project.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 import 'annotator_labels.dart';
 
@@ -27,18 +28,24 @@ class AnnotatorTopToolbar extends StatefulWidget {
 }
 
 class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
-  // List<Label> labels = [];
-  Label? selectedLabel;
+  Label? selectedDefaultLabel;
 
-/*
   @override
   void initState() {
     super.initState();
-    labels = List<Label>.from(widget.project.labels ?? []);
+
+    // Automatically assign default label from project.labels
+    for (final label in widget.project.labels!) {
+      if (label.isDefault) {
+        selectedDefaultLabel = label;
+        break;
+      }
+    }
   }
-*/
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     double screenWidth = MediaQuery.of(context).size.width;
 
     bool detection = widget.project.type.toLowerCase().contains('detection');
@@ -70,7 +77,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: widget.onBack,
-              tooltip: 'Back to Project',
+              tooltip: l10n.annotatorTopToolbarBackTooltip,
               iconSize: 32,
               padding: EdgeInsets.zero,
               constraints: BoxConstraints(),
@@ -93,8 +100,8 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                         color: Colors.grey[850],
                       ),
                       child: DropdownButtonHideUnderline(
-                        child: DropdownButton<Label>(
-                          value: selectedLabel,
+                        child: DropdownButton<Label?>(
+                          value: selectedDefaultLabel,
                           dropdownColor: Colors.grey[850],
                           iconEnabledColor: Colors.white,
                           style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
@@ -102,10 +109,10 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                           borderRadius: BorderRadius.circular(6),
                           isExpanded: true, // ensures full width is used inside dropdown
                           items: [
-                            DropdownMenuItem<Label>(
+                            DropdownMenuItem<Label?>(
                               value: null,
                               child: Text(
-                                "Select default label",
+                                l10n.annotatorTopToolbarSelectDefaultLabel,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.normal,
@@ -146,7 +153,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                           ],
                           onChanged: (Label? newValue) {
                             setState(() {
-                              selectedLabel = newValue;
+                              selectedDefaultLabel = newValue;
                             });
 
                             if (widget.onDefaultLabelSelected != null) {
@@ -158,11 +165,11 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (selectedLabel != null)...[
+                  if (selectedDefaultLabel != null)...[
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedLabel = null;
+                          selectedDefaultLabel = null;
                         });
 
                         if (widget.onDefaultLabelSelected != null) {

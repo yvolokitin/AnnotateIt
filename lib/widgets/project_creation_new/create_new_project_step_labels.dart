@@ -110,7 +110,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
     }
 
     final newLabel = Label(
-      id: null, // will be set after DB insert
+      id: -1, // will be set after DB insert
       labelOrder: widget.labels.length,
       projectId: widget.projectId,
       name: newLabelName,

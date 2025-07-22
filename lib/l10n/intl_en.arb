@@ -41,11 +41,18 @@
   "settingsProjectCreationTitle": "Project Creation",
   "settingsProjectCreationConfirmNoLabels": "Always ask to confirm when create a project with no labels",
   "settingsProjectCreationConfirmNoLabelsNote": "You’ll be warned if you try to create a project without any labels defined.",
+
+  "settingsLabelsCreationDeletionTitle": "Labels Creation / Deletion",
+  "settingsLabelsDeletionWithAnnotations": "Delete annotations when label is removed",
+  "settingsLabelsDeletionWithAnnotationsNote": "When enabled, deleting a label will automatically remove all annotations assigned to that label across all media items.",
+  "settingsLabelsSetDefaultLabel": "Set first label as default",
+  "settingsLabelsSetDefaultLabelNote": "When enabled, the first label you create in a project will automatically be marked as the default label. You can change the default later at any time.",
+
   "settingsDatasetViewTitle": "Dataset View",
   "settingsDatasetViewDuplicateWithAnnotations": "Duplicate (make a copy) image always with annotations",
-  "settingsDatasetViewDuplicateWithAnnotationsNote": "When duplicating, annotations will be included unless you change settings.",
+  "settingsDatasetViewDuplicateWithAnnotationsNote": "When duplicating, annotations will be included unless you change settings",
   "settingsDatasetViewDeleteFromOS": "When delete image from Dataset, always delete it from OS / file system",
-  "settingsDatasetViewDeleteFromOSNote": "Deletes the file from disk too, not just from the dataset.",
+  "settingsDatasetViewDeleteFromOSNote": "Deletes the file from disk too, not just from the dataset",
   "settingsAnnotationTitle": "Annotation Settings",
   "settingsAnnotationOpacity": "Annotation opacity",
   "settingsAnnotationAutoSave": "Always Save or Submit annotation when move to the next image",
@@ -190,8 +197,6 @@
   "editProjectTitle": "Edit project name",
   "editProjectDescription": "Please, choose a clear, descriptive project name (3 - 86 characters). It's recommended to avoid special characters.",
   
-  "changeProjectTypeTitle": "Change project type",
-
   "deleteProjectTitle": "Delete Project",
   "deleteProjectInProgress": "Deleting project...",
   "deleteProjectOptionDeleteFromDisk": "Also delete all files from disk",
@@ -239,6 +244,9 @@
   "noMediaDialogSupportedVideoFormatsList": "Commonly Supported Formats:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browser-dependent)\n- MKV: Android (partial), Windows\n- AVI: Android/Windows only (partial)",
   "noMediaDialogSupportedVideoFormatsWarning": "Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.",
 
+  "annotatorTopToolbarBackTooltip": "Back to Project",
+  "annotatorTopToolbarSelectDefaultLabel": "Select default label",
+
   "toolbarNavigation": "Navigation",
   "toolbarBbox": "Bounding Box",
   "toolbarSegmentation": "Segmentation",
@@ -267,6 +275,8 @@
   "accountStorage_helpMessage": "You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.",
   "accountStorage_helpTips": "Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n",
 
+  "changeProjectTypeTitle": "Change project type",
+  "changeProjectTypeMigrating": "Migrating project type...",
   "changeProjectTypeStepOneSubtitle": "Please select a new project type from the list below",
   "changeProjectTypeStepTwoSubtitle": "Please confirm your choice",
 

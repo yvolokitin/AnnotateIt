@@ -38,21 +38,6 @@ class StepProjectTypeSelectionState extends State<StepProjectTypeSelection> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-/*            const Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "Select another Project type from below list",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),*/
             LayoutBuilder(
               builder: (context, constraints) {
                 const double minCardSize = 100;
@@ -120,6 +105,7 @@ class StepProjectTypeSelectionState extends State<StepProjectTypeSelection> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: Colors.white,
+                                            fontFamily: 'CascadiaCode',
                                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                           ),
                                         ),

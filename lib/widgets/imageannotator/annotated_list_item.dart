@@ -96,6 +96,7 @@ class AnnotatedListItem extends StatelessWidget {
                         currentLabel: availableLabels.firstWhere(
                           (label) => label.id == annotation.labelId,
                           orElse: () => Label(
+                            id: -1,
                             labelOrder: 0,
                             projectId: 0,
                             name: 'No label selected',

@@ -33,7 +33,7 @@ class ApplicationSettings extends StatelessWidget {
             _buildSection(l10n.settingsProjectCreationTitle, [
               _buildSwitchWithNote(
                 title: l10n.settingsProjectCreationConfirmNoLabels,
-                value: user.projectShowNoLabels ?? true,
+                value: user.projectShowNoLabels,
                 onChanged: (val) => onUserChange(user.copyWith(projectShowNoLabels: val)),
                 note: l10n.settingsProjectCreationConfirmNoLabelsNote,
               ),
@@ -42,15 +42,30 @@ class ApplicationSettings extends StatelessWidget {
             _buildSection(l10n.settingsDatasetViewTitle, [
               _buildSwitchWithNote(
                 title: l10n.settingsDatasetViewDuplicateWithAnnotations,
-                value: user.datasetEnableDuplicate ?? true,
+                value: user.datasetEnableDuplicate,
                 onChanged: (val) => onUserChange(user.copyWith(datasetEnableDuplicate: val)),
                 note: l10n.settingsDatasetViewDuplicateWithAnnotationsNote,
               ),
               _buildSwitchWithNote(
                 title: l10n.settingsDatasetViewDeleteFromOS,
-                value: user.datasetEnableDelete ?? true,
+                value: user.datasetEnableDelete,
                 onChanged: (val) => onUserChange(user.copyWith(datasetEnableDelete: val)),
                 note: l10n.settingsDatasetViewDeleteFromOSNote,
+              ),
+            ], isWide),
+
+            _buildSection(l10n.settingsLabelsCreationDeletionTitle, [
+              _buildSwitchWithNote(
+                title: l10n.settingsLabelsSetDefaultLabel,
+                value: user.labelsSetFirstAsDefault,
+                onChanged: (val) => onUserChange(user.copyWith(datasetEnableDelete: val)),
+                note: l10n.settingsLabelsSetDefaultLabelNote,
+              ),
+              _buildSwitchWithNote(
+                title: l10n.settingsLabelsDeletionWithAnnotations,
+                value: user.labelsDeleteAnnotations,
+                onChanged: (val) => onUserChange(user.copyWith(datasetEnableDuplicate: val)),
+                note: l10n.settingsLabelsDeletionWithAnnotationsNote,
               ),
             ], isWide),
 
@@ -58,12 +73,12 @@ class ApplicationSettings extends StatelessWidget {
               _buildSliderWithButtons(
                 context,
                 l10n.settingsAnnotationOpacity,
-                user.annotationOpacity ?? 0.35,
+                user.annotationOpacity,
                 (val) => onUserChange(user.copyWith(annotationOpacity: val)),
               ),
               _buildSwitch(
                 l10n.settingsAnnotationAutoSave,
-                user.annotationAllowImageCopy ?? true,
+                user.annotationAllowImageCopy,
                 (val) => onUserChange(user.copyWith(annotationAllowImageCopy: val)),
               ),
             ], isWide),
@@ -104,8 +119,8 @@ class ApplicationSettings extends StatelessWidget {
   }
 
   Widget _buildSwitch(String title, bool value, ValueChanged<bool> onChanged) {
-    const redThumb = Color(0xFFFF0000);
-    const redTrack = Color(0x3FFF0000);
+    const redThumb = Colors.amber; // Color(0xFFFF0000);
+    const redTrack = Color(0x33FFC107); // Color(0x3FFF0000);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -162,9 +177,9 @@ class ApplicationSettings extends StatelessWidget {
   }
 
 Widget _buildSliderWithButtons(BuildContext context, String label, double value, ValueChanged<double> onChanged) {
-  const redColor = Color(0xFFFF0000); // solid red
-  const redColor30 = Color(0x4DFF0000); // 30% opacity
-  const redColor20 = Color(0x33FF0000); // 20% opacity
+  const redColor = Colors.amber; // Color(0xFFFF0000); // solid red
+  const redColor30 = Color(0x4DFFC107); // Color(0x4DFF0000); // 30% opacity
+  const redColor20 = Color(0x33FFC107); // Color(0x33FF0000); // 20% opacity
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,9 +246,16 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
         const SizedBox(height: 8),
         Row(
           children: ['light', 'dark', 'system'].map((mode) {
+            /// only Dark mode is implemented across whole application
+            final isDisabled = mode != 'dark';
+            final isSelected = user.themeMode == mode;
+
             return Expanded(
               child: GestureDetector(
-                onTap: () => onUserChange(user.copyWith(themeMode: mode)),
+                //onTap: () => onUserChange(user.copyWith(themeMode: mode)),
+                onTap: isDisabled
+                  ? null // Prevent tap
+                  : () => onUserChange(user.copyWith(themeMode: mode)),
                 child: Card(
                   color: user.themeMode == mode ? Colors.amber : Colors.grey[900],
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

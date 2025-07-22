@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Label {
-  final int? id;
+  final int id;
   final int labelOrder;
   final int projectId;
   final String name;
@@ -11,7 +11,7 @@ class Label {
   final DateTime createdAt;
 
   Label({
-    this.id,
+    required this.id,
     required this.labelOrder,
     required this.projectId,
     required this.name,
@@ -45,7 +45,7 @@ class Label {
 
   factory Label.fromMap(Map<String, dynamic> map) {
     return Label(
-      id: map['id'] as int?,
+      id: map['id'] as int,
       labelOrder: map['label_order'] as int,
       projectId: map['project_id'] as int,
       name: map['name'] as String,
@@ -56,25 +56,27 @@ class Label {
     );
   }
 
-    /// Factory for safe import from user JSON (ignores id and forces projectId + labelOrder)
-    factory Label.fromJsonForImport(Map<String, dynamic> map, int projectId, int labelOrder) {
-      return Label(
-        id: null, // Always null for import
-        labelOrder: labelOrder,
-        projectId: projectId,
-        name: map['name'] as String,
-        color: map['color'] as String,
-        isDefault: map['is_default'] == true || map['is_default'] == 1,
-        description: map['description'] as String?,
-        createdAt: map['createdAt'] != null
-          ? DateTime.tryParse(map['createdAt']) ?? DateTime.now()
-          : DateTime.now(),
-      );
-    }
+  /// Factory for safe import from user JSON (ignores id and forces projectId + labelOrder)
+  factory Label.fromJsonForImport(Map<String, dynamic> map, int projectId, int labelOrder) {
+    return Label(
+      id: -1, // Always -1 for import
+      labelOrder: labelOrder,
+      projectId: projectId,
+      name: map['name'] as String,
+      color: map['color'] as String,
+      isDefault: map['is_default'] == true || map['is_default'] == 1,
+      description: map['description'] as String?,
+      createdAt: map['createdAt'] != null
+        ? DateTime.tryParse(map['createdAt']) ?? DateTime.now()
+        : DateTime.now(),
+    );
+  }
   
-    Map<String, dynamic> toMap() {
-    return {
-      if (id != null) 'id': id,
+  Map<String, dynamic> toMap() {
+    final map = {
+      //  Skip id from the toMap() if it's -1
+      // This allows the database to auto-generate the ID.
+      // 'id': id,
       'label_order': labelOrder,
       'project_id': projectId,
       'name': name,
@@ -83,6 +85,12 @@ class Label {
       if (description != null) 'description': description,
       'createdAt': createdAt.toIso8601String(),
     };
+
+    if (id != -1) {
+      map['id'] = id;
+    }
+
+    return map;
   }
 
   @override
@@ -90,6 +98,19 @@ class Label {
     return 'Label(id: $id, labelOrder: $labelOrder, projectId: $projectId, name: $name, color: $color, isDefault: $isDefault, description: $description)';
   }
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Label &&
+      runtimeType == other.runtimeType &&
+      name == other.name &&
+      projectId == other.projectId;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, projectId);
+
+/*
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -108,6 +129,7 @@ class Label {
       projectId.hashCode ^
       description.hashCode ^
       isDefault.hashCode;
+*/
 }
 
 extension LabelColorParser on Label {

@@ -1,11 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-// import 'package:flutter/foundation.dart';
 
 import '../../models/shape/shape.dart';
 import '../../models/annotation.dart';
-
-import 'constants.dart';
 
 class CanvasPainter extends CustomPainter {
   final ui.Image image;

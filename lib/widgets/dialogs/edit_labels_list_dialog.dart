@@ -241,7 +241,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                       IconButton(
                                         icon: const Icon(Icons.delete, color: Colors.white),
                                         iconSize: 30,
-                                        // onPressed: () => widget.onDelete(label),
                                         onPressed: () {
                                           try {
                                             setState(() {
@@ -280,13 +279,12 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                 ElevatedButton(
                   onPressed: () async {
                     // Convert labels to JSON
-                    // final json = jsonEncode(labels.map((l) => l.toMap()).toList());
                     final encoder = const JsonEncoder.withIndent('  ');
                     final json = encoder.convert(_labels.map((l) => l.toMap()).toList());
                     // Pick a location to save the file (using file_picker or similar)
                     // Example using file_picker:
                     final result = await FilePicker.platform.saveFile(
-                      dialogTitle: 'Save labels as JSON',
+                      dialogTitle: 'Save labels in JSON file',
                       fileName: 'labels.json',
                     );
                     if (result != null) {

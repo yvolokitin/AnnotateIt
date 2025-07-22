@@ -31,8 +31,9 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
               l10n.changeProjectTypeWarningTitle,
               style: const TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
                 color: Colors.redAccent,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
@@ -40,22 +41,28 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
               '$currentProjectType -> $newProjectType',
               style: const TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
                 color: Colors.white70,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.changeProjectTypeConversionIntro,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontFamily: 'CascadiaCode',
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.changeProjectTypeConversionDetails,
               style: const TextStyle(
+                height: 1.4,
                 fontSize: 16,
                 color: Colors.white70,
-                height: 1.4,
+                fontFamily: 'CascadiaCode',
               ),
             ),
           ],

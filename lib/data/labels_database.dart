@@ -72,10 +72,6 @@ class LabelsDatabase {
   /// Throws if projectId is null or project does not exist.
   Future<int> insertLabel(Label label) async {
     final db = await database;
-    if (label.projectId == null) {
-      throw ArgumentError('Label must be associated with a project (projectId cannot be null).');
-    }
-
     // Verify project exists
     final projectExists = Sqflite.firstIntValue(await db.rawQuery(
       'SELECT COUNT(*) FROM projects WHERE id = ?',
@@ -91,14 +87,6 @@ class LabelsDatabase {
 
   Future<int> updateLabel(Label label) async {
     final db = await database;
-    if (label.id == null) {
-      throw ArgumentError("Cannot update label without ID.");
-    }
-
-    if (label.projectId == null) {
-      throw ArgumentError('Label must be associated with a project (projectId cannot be null).');
-    }
-
     return db.update(
       'labels',
       label.toMap(),

@@ -316,6 +316,36 @@ abstract class AppLocalizations {
   /// **'You’ll be warned if you try to create a project without any labels defined.'**
   String get settingsProjectCreationConfirmNoLabelsNote;
 
+  /// No description provided for @settingsLabelsCreationDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels Creation / Deletion'**
+  String get settingsLabelsCreationDeletionTitle;
+
+  /// No description provided for @settingsLabelsDeletionWithAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete annotations when label is removed'**
+  String get settingsLabelsDeletionWithAnnotations;
+
+  /// No description provided for @settingsLabelsDeletionWithAnnotationsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, deleting a label will automatically remove all annotations assigned to that label across all media items.'**
+  String get settingsLabelsDeletionWithAnnotationsNote;
+
+  /// No description provided for @settingsLabelsSetDefaultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set first label as default'**
+  String get settingsLabelsSetDefaultLabel;
+
+  /// No description provided for @settingsLabelsSetDefaultLabelNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, the first label you create in a project will automatically be marked as the default label. You can change the default later at any time.'**
+  String get settingsLabelsSetDefaultLabelNote;
+
   /// No description provided for @settingsDatasetViewTitle.
   ///
   /// In en, this message translates to:
@@ -331,7 +361,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDatasetViewDuplicateWithAnnotationsNote.
   ///
   /// In en, this message translates to:
-  /// **'When duplicating, annotations will be included unless you change settings.'**
+  /// **'When duplicating, annotations will be included unless you change settings'**
   String get settingsDatasetViewDuplicateWithAnnotationsNote;
 
   /// No description provided for @settingsDatasetViewDeleteFromOS.
@@ -343,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDatasetViewDeleteFromOSNote.
   ///
   /// In en, this message translates to:
-  /// **'Deletes the file from disk too, not just from the dataset.'**
+  /// **'Deletes the file from disk too, not just from the dataset'**
   String get settingsDatasetViewDeleteFromOSNote;
 
   /// No description provided for @settingsAnnotationTitle.
@@ -886,12 +916,6 @@ abstract class AppLocalizations {
   /// **'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.'**
   String get editProjectDescription;
 
-  /// No description provided for @changeProjectTypeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Change project type'**
-  String get changeProjectTypeTitle;
-
   /// No description provided for @deleteProjectTitle.
   ///
   /// In en, this message translates to:
@@ -1015,6 +1039,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Support may vary depending on the platform and video codec.\nSome formats may not work in browsers or on iOS.'**
   String get noMediaDialogSupportedVideoFormatsWarning;
+
+  /// No description provided for @annotatorTopToolbarBackTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Project'**
+  String get annotatorTopToolbarBackTooltip;
+
+  /// No description provided for @annotatorTopToolbarSelectDefaultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select default label'**
+  String get annotatorTopToolbarSelectDefaultLabel;
 
   /// No description provided for @toolbarNavigation.
   ///
@@ -1165,6 +1201,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n'**
   String get accountStorage_helpTips;
+
+  /// No description provided for @changeProjectTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change project type'**
+  String get changeProjectTypeTitle;
+
+  /// No description provided for @changeProjectTypeMigrating.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrating project type...'**
+  String get changeProjectTypeMigrating;
 
   /// No description provided for @changeProjectTypeStepOneSubtitle.
   ///

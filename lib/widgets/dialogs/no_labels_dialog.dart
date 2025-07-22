@@ -221,15 +221,8 @@ class NoLabelsDialog extends StatelessWidget {
             onPressed: () async {
               try {
                 final labelsToImport = showWarning ? labels.take(2).toList() : labels;
-
-                // when projectId > 0: project already exists in the DB, and labels should be saved
-                if (projectId > 0) {
-                  await LabelsDatabase.instance.updateProjectLabels(projectId, labelsToImport);
-                }
-
                 // always notify parent, regardless of projectId
                 onLabelsImported(labelsToImport);
-                
                 // close ONLY import labels preview dialog
                 Navigator.pop(context);
 
