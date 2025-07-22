@@ -447,6 +447,9 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
                       onImageDuplicated: (media, withAnnotations) {
                         _handleDuplicateImage(media, withAnnotations);
                       },
+                      onRefreshNeeded: () {
+                        loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
+                      },
                     );
 
               _datasetTabCache[dataset.id] = widgetToRender;

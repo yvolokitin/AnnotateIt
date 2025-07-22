@@ -39,8 +39,13 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
         backgroundColor: Colors.grey[850],
         body: Column(
           children: [
+            // In ProjectDetailsPage
             ProjectDetailsAppBar(
-              onBackPressed: () => Navigator.pop(context, 'refresh'),
+              onBackPressed: () async {
+                setState(() {
+                });
+                Navigator.pop(context, 'refresh');
+              },
             ),
             Expanded(
               child: Row(
@@ -57,8 +62,8 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       setState(() {
                         project = project.copyWith(labels: updatedLabels);
                       });
-                      print('ProjectDetailsPage: names: ${updatedLabels.map((l) => l.name).join(', ')}');
-                      print('ProjectDetailsPage: ids: ${updatedLabels.map((l) => l.id!).join(', ')}');
+                      //print('ProjectDetailsPage: names: ${updatedLabels.map((l) => l.name).join(', ')}');
+                      //print('ProjectDetailsPage: ids: ${updatedLabels.map((l) => l.id!).join(', ')}');
                     },  
                   ),
                 ],

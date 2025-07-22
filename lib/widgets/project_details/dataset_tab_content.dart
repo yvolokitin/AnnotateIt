@@ -35,6 +35,9 @@ class DatasetTabContent extends StatefulWidget {
 
   // Callback to notify when media items changed, i.e. deleted
   final VoidCallback onMediaDeleted;
+  
+  // Callback to notify when annotations need to be refreshed
+  final VoidCallback? onRefreshNeeded;
 
   const DatasetTabContent({
     super.key,
@@ -56,6 +59,7 @@ class DatasetTabContent extends StatefulWidget {
     required this.onMediaDeleted,
     required this.onItemsPerPageChanged,
     this.onImageDuplicated,
+    this.onRefreshNeeded,
   });
 
   @override
@@ -160,6 +164,7 @@ class _DatasetTabContentState extends State<DatasetTabContent> {
                       onImageDuplicated: (media, withAnnotations) {
                         widget.onImageDuplicated?.call(media, withAnnotations);
                       },
+                      onRefreshNeeded: widget.onRefreshNeeded,
                     ),
         ),
       ],

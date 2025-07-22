@@ -23,6 +23,7 @@ class ImageTile extends StatefulWidget {
 
   final void Function(bool isSelected)? onSelectedChanged;
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
+  final VoidCallback? onRefreshNeeded;
 
   const ImageTile({
     required this.project,
@@ -34,6 +35,7 @@ class ImageTile extends StatefulWidget {
     required this.totalMediaCount,
     this.onSelectedChanged,
     this.onImageDuplicated,
+    this.onRefreshNeeded,
     super.key,
   });
 
@@ -88,20 +90,26 @@ class _ImageTileState extends State<ImageTile> {
               ImagePreview(
                 file: file,
                 hovered: _hovered,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AnnotatorPage(
-                      project: widget.project,
-                      mediaItem: widget.mediaItem,
-                      datasetId: widget.datasetId,
-                      pageIndex: widget.pageIndex,
-                      pageSize: widget.pageSize,
-                      localIndex: widget.localIndex,
-                      totalMediaCount: widget.totalMediaCount,
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AnnotatorPage(
+                        project: widget.project,
+                        mediaItem: widget.mediaItem,
+                        datasetId: widget.datasetId,
+                        pageIndex: widget.pageIndex,
+                        pageSize: widget.pageSize,
+                        localIndex: widget.localIndex,
+                        totalMediaCount: widget.totalMediaCount,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                  
+                  if (result == 'refresh' && widget.onRefreshNeeded != null) {
+                    widget.onRefreshNeeded!();
+                  }
+                },
               ),
 
               Positioned(

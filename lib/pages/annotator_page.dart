@@ -458,7 +458,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             children: [
               AnnotatorTopToolbar(
                 project: widget.project,
-                onBack: () => Navigator.pop(context),
+                onBack: () => Navigator.pop(context, 'refresh'),
                 onHelp: () {},
                 onAssignedLabel: _handleLabelSelected,
                 onDefaultLabelSelected: _handleDefaultLabelSelected,

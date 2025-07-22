@@ -13,6 +13,7 @@ class PaginatedImageGrid extends StatefulWidget {
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
   final void Function(List<AnnotatedLabeledMedia>)? onSelectionChanged;
   final void Function(int newPage) onPageChanged;
+  final VoidCallback? onRefreshNeeded;
 
   final Project project;
   final String datasetId;
@@ -32,6 +33,7 @@ class PaginatedImageGrid extends StatefulWidget {
     required this.onPageChanged,
     this.onSelectionChanged,
     this.onImageDuplicated,
+    this.onRefreshNeeded,
     super.key,
   });
 
@@ -107,6 +109,7 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   onImageDuplicated: (media, withAnnotations) {
                     widget.onImageDuplicated?.call(media, withAnnotations);
                   },
+                  onRefreshNeeded: widget.onRefreshNeeded,
                 );
               } else {
                 return MediaTile(media: media);
