@@ -503,7 +503,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                   cursor: _mouseInsideImage ? cursorIcon : SystemMouseCursors.basic,
                                   child: AnnotatorCanvas(
                                     image: image,
-                                    mediaItemId: widget.mediaItem.mediaItem.id!,
+                                    mediaItemId: media.mediaItem.id!,
                                     labels: widget.project.labels ?? [],
                                     annotations: media.annotations,
                                     resetZoomCount: _resetZoomCount,
