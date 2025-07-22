@@ -2,9 +2,8 @@ import "package:flutter/material.dart";
 import '../gen_l10n/app_localizations.dart';
 
 import '../session/user_session.dart';
-import "../models/project.dart";
 import "../data/project_database.dart";
-import "../data/labels_database.dart";
+import "../models/project.dart";
 
 import "../widgets/project_list/empty_project_placeholder.dart";
 import "../widgets/project_list/project_tile.dart";
@@ -42,24 +41,16 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   @override
   void initState() {
     super.initState();
-    _loadProjects();
+    loadProjectsWithLabels();
   }
 
   // preload labels and attach them to each project (as an extra field — not stored in DB, just in memory).
-  Future<void> _loadProjects() async {
+  Future<void> loadProjectsWithLabels() async {
     setState(() {
       _isLoading = true;
     });
-  
-    List<Project> projects = await ProjectDatabase.instance.fetchProjects();
-
+    final projects = await ProjectDatabase.instance.fetchProjectsWithLabels();
     if (!mounted) return;
-
-    for (final project in projects) {
-      final labels = await LabelsDatabase.instance.fetchLabelsByProject(project.id!);
-      project.labels = labels; // attach in-memory only
-    }
-  
     setState(() {
       _allProjects = projects;
       _filteredProjects = _applySearchAndSort(projects);
@@ -76,7 +67,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   
     if (updatedName != null) {
       // Refresh project list after saving
-      _loadProjects();
+      loadProjectsWithLabels();
     }
   }
 
@@ -87,7 +78,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
 
     if (result == 'refresh') {
-      _loadProjects(); // Refresh the list if new project was created
+      loadProjectsWithLabels(); // Refresh the list if new project was created
     }
   }
 
@@ -150,7 +141,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
 
     if (result == 'refresh') {
-      _loadProjects(); // Refresh the list if new project was created
+      loadProjectsWithLabels(); // Refresh the list if new project was created
     }
   }
 
@@ -161,7 +152,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
 
     if (result != null) {
-      final newProject = await ProjectDatabase.instance.fetchProjectById(result);
+      final newProject = await ProjectDatabase.instance.fetchProjectWithLabelsById(result);
       if (newProject != null) {
         if (!mounted) return;
         await Navigator.push(
@@ -169,8 +160,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
           MaterialPageRoute(
             builder: (context) => ProjectDetailsPage(newProject),
           ),
-        );  
-        _loadProjects(); // Refresh after returning from details
+        );
+        loadProjectsWithLabels(); // Refresh after returning from details
       }
     }
   }
@@ -254,13 +245,16 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       _showProjectOptions(context, project);
                     },
                     onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProjectDetailsPage(project),
-                        ),
-                      );
-                      _loadProjects();
+                      final projectWithLabels = await ProjectDatabase.instance.fetchProjectWithLabelsById(project.id!);
+                      if (projectWithLabels != null) {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetailsPage(projectWithLabels),
+                          ),
+                        );
+                        loadProjectsWithLabels();
+                      }
                     },
                   );
                 },
@@ -350,7 +344,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                             project: project,
                             onConfirmed: () {
                               // Refresh the list after deletion
-                              _loadProjects();
+                              loadProjectsWithLabels();
                             },
                             onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
                               if (dontAskAgain) {

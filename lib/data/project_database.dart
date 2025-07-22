@@ -1,13 +1,14 @@
-import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:logging/logging.dart';
 
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 import '../models/project.dart';
 import '../models/dataset.dart';
+import '../models/label.dart';
+
+import 'create_initial_schema.dart';
 
 const String kDatabaseFileName = 'projects.db';
 
@@ -30,198 +31,7 @@ class ProjectDatabase {
   Future<Database> _initDB(String fileName) async {
     final dbPath = await getDatabasesPath();
     final returnPath = path.join(dbPath, fileName);
-    return await openDatabase(returnPath, version: 1, onCreate: _createProjectDBTables);
-  }
-
-  Future<void> _createProjectDBTables(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        firstName TEXT NOT NULL,
-        lastName TEXT NOT NULL,
-        email TEXT NOT NULL,
-        iconPath TEXT,
-        datasetImportFolder TEXT,
-        datasetExportFolder TEXT,
-        thumbnailFolder TEXT,
-        themeMode TEXT NOT NULL,
-        language TEXT NOT NULL,
-        autoSave INTEGER NOT NULL,
-        showTips INTEGER NOT NULL,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL,
-        projectShowNoLabels INTEGER NOT NULL DEFAULT 1,
-        datasetEnableDuplicate INTEGER NOT NULL DEFAULT 1,
-        datasetEnableDelete INTEGER NOT NULL DEFAULT 1,
-        labelsDeleteAnnotations INTEGER NOT NULL DEFAULT 0,
-        labelsSetFirstAsDefault INTEGER NOT NULL DEFAULT 0,
-        autoSaveAnnotations INTEGER NOT NULL DEFAULT 1,
-        projectSkipDeleteConfirm INTEGER NOT NULL DEFAULT 0,
-        projectShowImportWarning INTEGER NOT NULL DEFAULT 1,
-        annotationAllowImageCopy INTEGER NOT NULL DEFAULT 1,
-        annotationOpacity REAL NOT NULL DEFAULT 0.35
-      )
-    ''');
-
-    final rootPath = await _getDefaultAnnotationRootPath();
-    final datasetImportPath = '$rootPath/datasets';
-    final datasetExportPath = '$rootPath/datasets';
-    final thumbnailPath = '$rootPath/thumbnails';
-
-    // Create folders if they don't exist
-    await Directory(datasetImportPath).create(recursive: true);
-    await Directory(datasetExportPath).create(recursive: true);
-    await Directory(thumbnailPath).create(recursive: true);
-
-    _log.info('_createProjectDBTables:: Created $datasetImportPath, $datasetExportPath, and $thumbnailPath folders');
-
-    final now = DateTime.now().toIso8601String();
-    await db.insert('users', {
-      'firstName': 'Captain',
-      'lastName': 'Annotator',
-      'email': 'captain@labelship.local',
-      'iconPath': '',
-      'datasetImportFolder': datasetImportPath,
-      'datasetExportFolder': datasetExportPath,
-      'thumbnailFolder': thumbnailPath,
-      'themeMode': 'dark',
-      'language': 'en',
-      'autoSave': 1,
-      'showTips': 1,
-      'createdAt': now,
-      'updatedAt': now,
-      'projectShowNoLabels': 0,
-      'datasetEnableDuplicate': 1,
-      'datasetEnableDelete': 1,
-      'labelsDeleteAnnotations': 0,
-      'labelsSetFirstAsDefault': 0,
-      'autoSaveAnnotations': 1,
-      'projectSkipDeleteConfirm': 0,
-      'projectShowImportWarning': 1,
-      'annotationAllowImageCopy': 1,
-      'annotationOpacity': 0.35,
-    });
-
-    await db.execute('''
-      CREATE TABLE projects (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT,
-        type TEXT NOT NULL,
-        icon TEXT NOT NULL,
-        creationDate TEXT NOT NULL,
-        lastUpdated TEXT NOT NULL,
-        defaultDatasetId TEXT,
-        ownerId INTEGER NOT NULL,
-        FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE datasets (
-        id TEXT PRIMARY KEY,
-        projectId INTEGER NOT NULL,
-        dataset_order INTEGER DEFAULT 0,
-        name TEXT NOT NULL,
-        description TEXT,
-        type TEXT NOT NULL,
-        source TEXT DEFAULT 'manual',
-        format TEXT DEFAULT 'custom',
-        version TEXT DEFAULT '1.0.0',
-        mediaCount INTEGER DEFAULT 0,
-        annotationCount INTEGER DEFAULT 0,
-        defaultDataset INTEGER DEFAULT 0 CHECK (defaultDataset IN (0, 1)),
-        license TEXT,
-        metadata TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT,
-        FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE CASCADE
-      );
-    ''');
-
-    await db.execute('''
-      CREATE TABLE media_folders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        path TEXT NOT NULL,
-        name TEXT NOT NULL,
-        createdAt TEXT NOT NULL
-      );
-    ''');
-
-    await db.execute('''
-      CREATE TABLE dataset_media_folders (
-        datasetId TEXT NOT NULL,
-        folderId INTEGER NOT NULL,
-        PRIMARY KEY (datasetId, folderId),
-        FOREIGN KEY (datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
-        FOREIGN KEY (folderId) REFERENCES media_folders(id) ON DELETE CASCADE
-      );
-    ''');
-
-    await db.execute('''
-      CREATE TABLE media_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Internal DB ID
-        uuid TEXT UNIQUE,                              -- Unique UUID for external reference
-        datasetId TEXT,                                -- Foreign key to datasets table
-        filePath TEXT,                                 -- Absolute or relative path to file
-        extension TEXT,                                -- File extension (e.g., .jpg, .mp4)
-        type TEXT,                                     -- "image" or "video"
-
-        width INTEGER,                                 -- Media width (in pixels)
-        height INTEGER,                                -- Media height (in pixels)
-        duration REAL,                                 -- Duration in seconds (only for videos)
-        fps REAL,                                      -- Frames per second (only for videos)
-        source TEXT,                                   -- Source of media: "uploaded", "imported", or "url"
-
-        uploadDate TEXT,                               -- ISO 8601 date-time string
-        owner_id INTEGER NOT NULL,                     -- Foreign key to users (owner of the media)
-
-        lastAnnotator TEXT,                            -- Name or ID of last annotator (nullable)
-        lastAnnotatedDate TEXT,                        -- ISO date-time string of last annotation
-        numberOfFrames INTEGER,                        -- Total frames (useful for videos)
-
-        FOREIGN KEY(datasetId) REFERENCES datasets(id) ON DELETE CASCADE,
-        FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-    ''');
-
-    // Labels table (per project)
-    await db.execute('''
-      CREATE TABLE labels (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        label_order INTEGER NOT NULL,
-        project_id INTEGER NOT NULL,
-        name TEXT NOT NULL,
-        color TEXT NOT NULL,
-        is_default INTEGER NOT NULL DEFAULT 0,
-        description TEXT,
-        createdAt TEXT NOT NULL,
-        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
-      );
-    ''');
-    
-    // Annotations table
-    // annotation_type TEXT NOT NULL,        -- "bbox", "classification", "segmentation", "keypoints", etc.
-    // data TEXT NOT NULL,                   -- JSON-string with coordinates, masks, or key poinrts etc.
-    await db.execute('''
-      CREATE TABLE annotations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        media_item_id INTEGER NOT NULL,
-        label_id INTEGER,
-        annotation_type TEXT NOT NULL,
-        data TEXT NOT NULL,
-        confidence REAL,
-        annotator_id INTEGER,
-        comment TEXT,
-        status TEXT,
-        version INTEGER DEFAULT 1,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE,
-        FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE,
-        FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL
-      );
-    ''');
+    return await openDatabase(returnPath, version: 1, onCreate: createInitialSchema);
   }
 
 Future<Project> createProject(Project project) async {
@@ -512,6 +322,46 @@ Future<Project> createProject(Project project) async {
     return result.map((map) => Project.fromMap(map)).toList();
   }
 
+  Future<List<Project>> fetchProjectsWithLabels() async {
+    final db = await database;
+    final projectMaps = await db.query('projects');
+    final projects = projectMaps.map((map) => Project.fromMap(map)).toList();
+
+    final labelMaps = await db.query('labels');
+
+    final labelsByProjectId = <int, List<Label>>{};
+    for (final labelMap in labelMaps) {
+      final label = Label.fromMap(labelMap);
+      final projectId = labelMap['project_id'] as int;
+      labelsByProjectId.putIfAbsent(projectId, () => []).add(label);
+    }
+
+    return projects.map((project) {
+      final labels = labelsByProjectId[project.id] ?? [];
+      return project.copyWith(labels: labels);
+    }).toList();
+  }
+
+  Future<Project?> fetchProjectWithLabelsById(int projectId) async {
+    final db = await database;
+    final result = await db.query(
+      'projects',
+      where: 'id = ?',
+      whereArgs: [projectId],
+    );
+
+    if (result.isEmpty) return null;
+    final project = Project.fromMap(result.first);
+    final labelMaps = await db.query(
+      'labels',
+      where: 'project_id = ?',
+      whereArgs: [projectId],
+    );
+    final labels = labelMaps.map((map) => Label.fromMap(map)).toList();
+
+    return project.copyWith(labels: labels);
+  }
+
   Future<List<Project>> fetchProjectsbyUser({required int userId}) async {
     final db = await database;
     final result = await db.query(
@@ -541,18 +391,6 @@ Future<Project> createProject(Project project) async {
     } else {
       return null;
     }
-  }
-
-  Future<String> _getDefaultAnnotationRootPath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final returnPath = path.join(directory.path, 'AnnotateItApp');
-
-    final dir = Directory(returnPath);
-    if (!(await dir.exists())) {
-      await dir.create(recursive: true);
-    }
-
-    return returnPath;
   }
 
   Future<int> getProjectCount() async {

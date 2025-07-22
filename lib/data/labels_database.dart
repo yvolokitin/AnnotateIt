@@ -82,11 +82,34 @@ class LabelsDatabase {
       throw Exception('Cannot insert label: project with ID ${label.projectId} does not exist.');
     }
 
+    // If a new label inserted -> update project's lastUpdated timestamp
+    await db.update(
+      'projects',
+      {
+        // Update project lastUpdated column with current time
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [label.projectId],
+    );
+
     return await db.insert('labels', label.toMap());
   }
 
   Future<int> updateLabel(Label label) async {
     final db = await database;
+
+    // If label upadted -> update project's lastUpdated timestamp
+    await db.update(
+      'projects',
+      {
+        // Update project lastUpdated column with current time
+        'lastUpdated': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [label.projectId],
+    );
+
     return db.update(
       'labels',
       label.toMap(),

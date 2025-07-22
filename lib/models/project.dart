@@ -12,7 +12,7 @@ class Project {
   final int ownerId;
 
   /// Labels are attached after fetching, not stored in DB
-  List<Label>? labels;
+  final List<Label> labels;
 
   Project({
     this.id,
@@ -24,7 +24,7 @@ class Project {
     required this.lastUpdated,
     this.defaultDatasetId,
     required this.ownerId,
-    this.labels, // optional field
+    this.labels = const [], // default to empty list
   });
 
   Map<String, dynamic> toMap() {
@@ -53,6 +53,7 @@ class Project {
       lastUpdated: DateTime.parse(map['lastUpdated']),
       defaultDatasetId: map['defaultDatasetId'],
       ownerId: map['ownerId'],
+      labels: const [], // always provide default empty list
     );
   }
 
@@ -84,7 +85,7 @@ class Project {
 
   @override
   String toString() {
-    final labelPreview = labels?.map((l) => l.name).join(', ') ?? 'None';
+    final labelPreview = labels.map((l) => l.name).join(', ');
     return '''
       Project(
         id: $id,
