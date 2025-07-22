@@ -74,6 +74,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   Offset? _drawingStart;
   Offset? _drawingCurrent;
 
+  // For polygon annotation
+  List<Offset> _polygonPoints = [];
+  Offset? _currentPolygonPoint;
+  bool _isPolygonComplete = false;
+
   int? _activeResizeHandle;
   List<Offset>? _originalCorners;
 
@@ -155,6 +160,16 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       setState(() => _lastMiddleButtonPosition = event.localPosition);
       return;
     }
+    
+    // Right-click to cancel polygon drawing
+    if (event.buttons == kSecondaryButton && widget.userAction == UserAction.polygon_annotation && _polygonPoints.isNotEmpty) {
+      setState(() {
+        _polygonPoints = [];
+        _currentPolygonPoint = null;
+        _isPolygonComplete = false;
+      });
+      return;
+    }
 
     if (event.buttons == kPrimaryButton && widget.userAction == UserAction.navigation) {
       inverse.copyInverse(matrix);
@@ -188,8 +203,75 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _drawingStart = transformed;
         _drawingCurrent = transformed;
       });
+    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.polygon_annotation) {
+      inverse.copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      
+      // If we have at least 3 points and clicked near the first point, complete the polygon
+      // Use a larger threshold to make it easier to close the polygon
+      if (_polygonPoints.length >= 3) {
+        final distanceToFirst = (_polygonPoints.first - transformed).distance;
+        final closeThreshold = 25.0 / matrix.getMaxScaleOnAxis(); // Increased from 20 to 25
+        
+        if (distanceToFirst < closeThreshold) {
+          // Use the exact position of the first point to ensure perfect closure
+          setState(() {
+            _isPolygonComplete = true;
+          });
+          _createPolygonAnnotation();
+          return; // Exit early to prevent adding another point
+        }
+      }
+      
+      // Add the point to the polygon
+      setState(() {
+        _polygonPoints.add(transformed);
+        _currentPolygonPoint = transformed;
+      });
     }
+  }
+  
+  void _createPolygonAnnotation() async {
+    if (_polygonPoints.length < 3) return;
+    
+    // Create a copy of the points list to ensure we don't modify the original
+    List<Offset> finalPoints = List<Offset>.from(_polygonPoints);
+    
+    // Ensure the polygon is properly closed by making the last point exactly match the first point
+    // This guarantees that all points are connected in the final polygon
+    if ((finalPoints.last - finalPoints.first).distance > 0.1) {
+      finalPoints.add(finalPoints.first);
+    }
+    
+    final newAnnotation = Annotation(
+      id: DateTime.now().millisecondsSinceEpoch,
+      mediaItemId: widget.mediaItemId,
+      labelId: widget.selectedLabel.id!,
+      annotationType: 'polygon',
+      data: {
+        'points': finalPoints.map((p) => [p.dx, p.dy]).toList(),
+      },
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    )
+    ..name = widget.selectedLabel.name
+    ..color = widget.selectedLabel.toColor();
 
+    setState(() {
+      _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
+      widget.onAnnotationSelected?.call(newAnnotation);
+      
+      // Reset polygon drawing state
+      _polygonPoints = [];
+      _currentPolygonPoint = null;
+      _isPolygonComplete = false;
+    });
+
+    widget.onAnnotationUpdated?.call(newAnnotation);
+
+    if (UserSession.instance.autoSaveAnnotations) {
+      await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+    }
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -264,6 +346,34 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       setState(() {
         _drawingCurrent = current;
       });
+    }
+    
+    // Update current point for polygon annotation
+    if (widget.userAction == UserAction.polygon_annotation && !_isPolygonComplete) {
+      inverse.copyInverse(matrix);
+      final current = MatrixUtils.transformPoint(inverse, event.localPosition);
+      
+      // Only update if the point has moved significantly to reduce unnecessary repaints
+      if (_currentPolygonPoint == null || 
+          (_currentPolygonPoint! - current).distance > 1.0) {
+        
+        // Check if we're near the first point for closing the polygon
+        bool nearFirstPoint = false;
+        if (_polygonPoints.length >= 3) {
+          final distanceToFirst = (_polygonPoints.first - current).distance;
+          final closeThreshold = 20.0 / matrix.getMaxScaleOnAxis();
+          nearFirstPoint = distanceToFirst < closeThreshold;
+        }
+        
+        // Use markNeedsPaint instead of setState for more efficient updates
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _currentPolygonPoint = current;
+            });
+          }
+        });
+      }
     }
 
   }
@@ -384,24 +494,31 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                   prevScale = d.scale;
                   scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale);
                 },
-                child: Transform(
-                  transform: matrix,
-                  child: CustomPaint(
-                    painter: CanvasPainter(
-                      image: widget.image,
-                      annotations: _localAnnotations,
-                      selectedAnnotation: widget.selectedAnnotation,
-                      scale: matrix.getMaxScaleOnAxis(),
-                      opacity: widget.opacity,
-                      strokeWidth: widget.strokeWidth,
-                      cornerSize: widget.cornerSize,
-                      showAnnotationNames: widget.showAnnotationNames,
-                      drawingRect: (_drawingStart != null && _drawingCurrent != null)
-                        ? Rect.fromPoints(_drawingStart!, _drawingCurrent!)
-                        : null,
-                      drawingRectColor: (_drawingStart != null)
-                        ? (widget.selectedLabel.toColor() ?? Colors.grey)
-                      : Colors.grey,
+                child: RepaintBoundary(
+                  child: Transform(
+                    transform: matrix,
+                    child: CustomPaint(
+                      isComplex: true, // Hint to the framework that this is a complex painting operation
+                      willChange: widget.userAction == UserAction.polygon_annotation, // Hint that this will change frequently during polygon drawing
+                      painter: CanvasPainter(
+                        image: widget.image,
+                        annotations: _localAnnotations,
+                        selectedAnnotation: widget.selectedAnnotation,
+                        scale: matrix.getMaxScaleOnAxis(),
+                        opacity: widget.opacity,
+                        strokeWidth: widget.strokeWidth,
+                        cornerSize: widget.cornerSize,
+                        showAnnotationNames: widget.showAnnotationNames,
+                        drawingRect: (_drawingStart != null && _drawingCurrent != null)
+                          ? Rect.fromPoints(_drawingStart!, _drawingCurrent!)
+                          : null,
+                        drawingRectColor: (_drawingStart != null)
+                          ? (widget.selectedLabel.toColor() ?? Colors.grey)
+                          : Colors.grey,
+                        polygonPoints: widget.userAction == UserAction.polygon_annotation ? _polygonPoints : null,
+                        currentPolygonPoint: widget.userAction == UserAction.polygon_annotation ? _currentPolygonPoint : null,
+                        polygonColor: widget.selectedLabel.toColor() ?? Colors.red,
+                      ),
                     ),
                   ),
                 ),

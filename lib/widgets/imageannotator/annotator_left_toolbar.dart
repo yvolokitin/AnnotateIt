@@ -118,6 +118,15 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               isActive: widget.selectedAction == UserAction.sam_annotation,
               tooltip: l10n.toolbarSegmentation,
             ),
+            
+            // Polygon Annotation Button
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: Icon(Icons.polyline_outlined),
+              onTap: () => _selectUserAction(UserAction.polygon_annotation),
+              isActive: widget.selectedAction == UserAction.polygon_annotation,
+              tooltip: 'Polygon',
+            ),
           ],
 
           // Reset Zoom Button

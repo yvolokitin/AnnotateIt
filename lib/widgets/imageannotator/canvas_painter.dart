@@ -16,6 +16,11 @@ class CanvasPainter extends CustomPainter {
   final bool show_classifications = false;
   final Rect? drawingRect;
   final Color? drawingRectColor;
+  
+  // For polygon annotation
+  final List<Offset>? polygonPoints;
+  final Offset? currentPolygonPoint;
+  final Color? polygonColor;
 
   CanvasPainter({
     required this.image,
@@ -28,6 +33,9 @@ class CanvasPainter extends CustomPainter {
     this.selectedAnnotation,
     this.drawingRect,
     this.drawingRectColor,
+    this.polygonPoints,
+    this.currentPolygonPoint,
+    this.polygonColor,
   });
 
   @override
@@ -106,6 +114,105 @@ class CanvasPainter extends CustomPainter {
         ..strokeWidth = 2.0 / scale;
 
       canvas.drawRect(drawingRect!, paint);
+    }
+    
+    // Draw polygon being created
+    if (polygonPoints != null && polygonPoints!.isNotEmpty) {
+      final paint = Paint()
+        ..color = (polygonColor ?? Colors.red)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0 / scale;
+      
+      final fillPaint = Paint()
+        ..color = (polygonColor ?? Colors.red).withOpacity(0.2)
+        ..style = PaintingStyle.fill;
+      
+      final path = Path();
+      
+      // Draw the polygon points
+      if (polygonPoints!.isNotEmpty) {
+        path.moveTo(polygonPoints![0].dx, polygonPoints![0].dy);
+        
+        for (int i = 1; i < polygonPoints!.length; i++) {
+          path.lineTo(polygonPoints![i].dx, polygonPoints![i].dy);
+        }
+        
+        // If we have a current point, draw a line to it
+        if (currentPolygonPoint != null) {
+          path.lineTo(currentPolygonPoint!.dx, currentPolygonPoint!.dy);
+          
+          // Check if we're near the first point and have at least 2 points
+          if (polygonPoints!.length >= 3) {
+            final distanceToFirst = (polygonPoints![0] - currentPolygonPoint!).distance;
+            final closeThreshold = 20.0 / scale;
+            
+            if (distanceToFirst < closeThreshold) {
+              // Draw a preview line to the first point to show polygon closure
+              final closingPath = Path();
+              closingPath.moveTo(currentPolygonPoint!.dx, currentPolygonPoint!.dy);
+              closingPath.lineTo(polygonPoints![0].dx, polygonPoints![0].dy);
+              
+              final closingPaint = Paint()
+                ..color = Colors.green
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0 / scale;
+              
+              canvas.drawPath(closingPath, closingPaint);
+            }
+          }
+        }
+        
+        // Draw the filled polygon
+        canvas.drawPath(path, fillPaint);
+        
+        // Draw the outline
+        canvas.drawPath(path, paint);
+        
+        // Draw points
+        final pointPaint = Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.fill;
+        
+        final pointStrokePaint = Paint()
+          ..color = (polygonColor ?? Colors.red)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0 / scale;
+        
+        // Draw all points except the first one
+        for (int i = 1; i < polygonPoints!.length; i++) {
+          canvas.drawCircle(polygonPoints![i], 4.0 / scale, pointPaint);
+          canvas.drawCircle(polygonPoints![i], 4.0 / scale, pointStrokePaint);
+        }
+        
+        // Draw the first point with a different color/size to make it stand out
+        final firstPointPaint = Paint()
+          ..color = Colors.yellow
+          ..style = PaintingStyle.fill;
+        
+        final firstPointStrokePaint = Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5 / scale;
+        
+        // Make the first point slightly larger
+        canvas.drawCircle(polygonPoints![0], 6.0 / scale, firstPointPaint);
+        canvas.drawCircle(polygonPoints![0], 6.0 / scale, firstPointStrokePaint);
+        
+        // If we're near the first point, highlight it even more
+        if (currentPolygonPoint != null && polygonPoints!.length >= 3) {
+          final distanceToFirst = (polygonPoints![0] - currentPolygonPoint!).distance;
+          final closeThreshold = 20.0 / scale;
+          
+          if (distanceToFirst < closeThreshold) {
+            final highlightPaint = Paint()
+              ..color = Colors.green
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3.0 / scale;
+            
+            canvas.drawCircle(polygonPoints![0], 8.0 / scale, highlightPaint);
+          }
+        }
+      }
     }
   }
 
@@ -297,11 +404,29 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
+    // Check for polygon-related changes
+    bool polygonChanged = false;
+    if (polygonPoints != oldDelegate.polygonPoints) {
+      polygonChanged = true;
+    } else if (polygonPoints != null && oldDelegate.polygonPoints != null) {
+      if (polygonPoints!.length != oldDelegate.polygonPoints!.length) {
+        polygonChanged = true;
+      }
+    }
+    
+    // Check if current polygon point changed
+    bool currentPointChanged = false;
+    if (currentPolygonPoint != oldDelegate.currentPolygonPoint) {
+      currentPointChanged = true;
+    }
+    
     return oldDelegate.annotations != annotations ||
       oldDelegate.selectedAnnotation?.id != selectedAnnotation?.id ||
       oldDelegate.opacity != opacity ||
       oldDelegate.scale != scale ||
-      oldDelegate.drawingRect != drawingRect;
+      oldDelegate.drawingRect != drawingRect ||
+      polygonChanged ||
+      currentPointChanged;
   }
 
   @override
