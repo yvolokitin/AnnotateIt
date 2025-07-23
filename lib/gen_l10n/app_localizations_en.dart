@@ -633,27 +633,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unnamedAnnotation => 'this annotation';
 
   @override
-  String get accountStorage_importFolderTitle => 'Datasets import Folder';
+  String get accountStorage_importFolderTitle => 'Datasets import folder';
 
   @override
-  String get accountStorage_thumbnailsFolderTitle => 'Thumbnails Folder';
+  String get accountStorage_thumbnailsFolderTitle => 'Thumbnails folder';
 
   @override
-  String get accountStorage_exportFolderTitle => 'Datasets export Folder';
+  String get accountStorage_exportFolderTitle => 'Datasets export folder';
 
   @override
   String get accountStorage_folderTooltip => 'Choose folder';
 
   @override
-  String get accountStorage_helpTitle => 'Storage Help';
+  String get accountStorage_helpTitle => 'Storage settings';
 
   @override
   String get accountStorage_helpMessage =>
-      'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.';
+      'You can configure your default folders here.';
 
   @override
   String get accountStorage_helpTips =>
-      'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n';
+      'Use consistent folder structure to keep things organized.';
+
+  @override
+  String get accountStorage_copySuccess => 'Path copied to clipboard';
+
+  @override
+  String get accountStorage_openError => 'Folder does not exist:\n';
+
+  @override
+  String get accountStorage_pathEmpty => 'Path is empty';
+
+  @override
+  String get accountStorage_openFailed => 'Failed to open folder:\n';
 
   @override
   String get changeProjectTypeTitle => 'Change project type';
@@ -690,6 +702,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get changeProjectTypeErrorTips =>
       'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.';
+
+  @override
+  String get exportProjectAsDataset => 'Export Project as Dataset';
 
   @override
   String get projectHelpTitle => 'How Projects Work';

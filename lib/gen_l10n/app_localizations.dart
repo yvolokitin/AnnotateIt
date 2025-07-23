@@ -1205,19 +1205,19 @@ abstract class AppLocalizations {
   /// No description provided for @accountStorage_importFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Datasets import Folder'**
+  /// **'Datasets import folder'**
   String get accountStorage_importFolderTitle;
 
   /// No description provided for @accountStorage_thumbnailsFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Thumbnails Folder'**
+  /// **'Thumbnails folder'**
   String get accountStorage_thumbnailsFolderTitle;
 
   /// No description provided for @accountStorage_exportFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Datasets export Folder'**
+  /// **'Datasets export folder'**
   String get accountStorage_exportFolderTitle;
 
   /// No description provided for @accountStorage_folderTooltip.
@@ -1229,20 +1229,44 @@ abstract class AppLocalizations {
   /// No description provided for @accountStorage_helpTitle.
   ///
   /// In en, this message translates to:
-  /// **'Storage Help'**
+  /// **'Storage settings'**
   String get accountStorage_helpTitle;
 
   /// No description provided for @accountStorage_helpMessage.
   ///
   /// In en, this message translates to:
-  /// **'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.'**
+  /// **'You can configure your default folders here.'**
   String get accountStorage_helpMessage;
 
   /// No description provided for @accountStorage_helpTips.
   ///
   /// In en, this message translates to:
-  /// **'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n'**
+  /// **'Use consistent folder structure to keep things organized.'**
   String get accountStorage_helpTips;
+
+  /// No description provided for @accountStorage_copySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Path copied to clipboard'**
+  String get accountStorage_copySuccess;
+
+  /// No description provided for @accountStorage_openError.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder does not exist:\n'**
+  String get accountStorage_openError;
+
+  /// No description provided for @accountStorage_pathEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Path is empty'**
+  String get accountStorage_pathEmpty;
+
+  /// No description provided for @accountStorage_openFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open folder:\n'**
+  String get accountStorage_openFailed;
 
   /// No description provided for @changeProjectTypeTitle.
   ///
@@ -1303,6 +1327,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.'**
   String get changeProjectTypeErrorTips;
+
+  /// No description provided for @exportProjectAsDataset.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Project as Dataset'**
+  String get exportProjectAsDataset;
 
   /// No description provided for @projectHelpTitle.
   ///

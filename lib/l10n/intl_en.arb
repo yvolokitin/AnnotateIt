@@ -283,6 +283,18 @@
   "accountStorage_helpMessage": "You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.",
   "accountStorage_helpTips": "Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n",
 
+  "accountStorage_folderTooltip": "Choose folder",
+  "accountStorage_importFolderTitle": "Datasets import folder",
+  "accountStorage_exportFolderTitle": "Datasets export folder",
+  "accountStorage_thumbnailsFolderTitle": "Thumbnails folder",
+  "accountStorage_helpTitle": "Storage settings",
+  "accountStorage_helpMessage": "You can configure your default folders here.",
+  "accountStorage_helpTips": "Use consistent folder structure to keep things organized.",
+  "accountStorage_copySuccess": "Path copied to clipboard",
+  "accountStorage_openError": "Folder does not exist:\n",
+  "accountStorage_pathEmpty": "Path is empty",
+  "accountStorage_openFailed": "Failed to open folder:\n",
+
   "changeProjectTypeTitle": "Change project type",
   "changeProjectTypeMigrating": "Migrating project type...",
   "changeProjectTypeStepOneSubtitle": "Please select a new project type from the list below",
@@ -294,6 +306,8 @@
   "changeProjectTypeErrorTitle": "Migration Failed",
   "changeProjectTypeErrorMessage": "An error occurred while changing the project type. The changes could not be applied.",
   "changeProjectTypeErrorTips": "Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.",
+
+  "exportProjectAsDataset": "Export Project as Dataset",
 
   "projectHelpTitle": "How Projects Work",
   "projectHelpMessage": "Projects allow you to organize datasets, media files, and annotations in one place. You can create new projects for different tasks like detection, classification, or segmentation.",

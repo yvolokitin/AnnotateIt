@@ -260,6 +260,9 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
           newProjectType: currentProjectType,
         );
 
+        // Add a short delay
+        await Future.delayed(const Duration(milliseconds: 1000));
+
         // Close dialog and maybe reopen the updated project or show success
         if (mounted) Navigator.of(context).pop('refresh');
 

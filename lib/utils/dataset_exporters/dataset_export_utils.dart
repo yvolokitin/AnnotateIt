@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'dart:ui';
+// import 'dart:ui';
 import 'package:logging/logging.dart';
-import 'package:archive/archive.dart';
+// import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
 
 import '../../models/project.dart';
-import '../../models/label.dart';
+// import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
-import '../../data/project_database.dart';
+// import '../../data/project_database.dart';
 import '../../data/labels_database.dart';
 import '../../data/dataset_database.dart';
 import '../../data/annotation_database.dart';
@@ -164,6 +164,9 @@ class DatasetExportUtils {
         // Create a ZIP file
         await createZipFile(tempDir.path, exportPath);
         
+        // Add a short delay to ensure all file handles are released (especially on Windows)
+        await Future.delayed(const Duration(milliseconds: 200));
+
         return exportPath;
       } finally {
         // Clean up the temporary directory

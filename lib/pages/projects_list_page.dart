@@ -333,12 +333,12 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
                 ListTile(
                   leading: Icon(
-                    Icons.upload_file,
+                    Icons.save_alt_rounded,
                     color: Colors.white70,
                     size: 30,
                   ),
                   title: Text(
-                    'Export Project as Dataset',
+                    l10n.exportProjectAsDataset, // 'Export Project as Dataset',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
