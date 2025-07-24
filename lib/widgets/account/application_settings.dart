@@ -58,13 +58,13 @@ class ApplicationSettings extends StatelessWidget {
               _buildSwitchWithNote(
                 title: l10n.settingsLabelsSetDefaultLabel,
                 value: user.labelsSetFirstAsDefault,
-                onChanged: (val) => onUserChange(user.copyWith(datasetEnableDelete: val)),
+                onChanged: (val) => onUserChange(user.copyWith(labelsSetFirstAsDefault: val)),
                 note: l10n.settingsLabelsSetDefaultLabelNote,
               ),
               _buildSwitchWithNote(
                 title: l10n.settingsLabelsDeletionWithAnnotations,
                 value: user.labelsDeleteAnnotations,
-                onChanged: (val) => onUserChange(user.copyWith(datasetEnableDuplicate: val)),
+                onChanged: (val) => onUserChange(user.copyWith(labelsDeleteAnnotations: val)),
                 note: l10n.settingsLabelsDeletionWithAnnotationsNote,
               ),
             ], isWide),

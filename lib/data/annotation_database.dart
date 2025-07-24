@@ -123,4 +123,10 @@ class AnnotationDatabase {
     final db = await database;
     await db.delete('annotations', where: 'media_item_id = ?', whereArgs: [mediaItemId]);
   }
+
+  // Delete all annotations for a specific label
+  Future<void> deleteAnnotationsByLabelId(int labelId) async {
+    final db = await database;
+    await db.delete('annotations', where: 'label_id = ?', whereArgs: [labelId]);
+  }
 }

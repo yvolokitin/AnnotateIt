@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../models/label.dart';
 import '../../models/project.dart';
 import '../../data/labels_database.dart';
+import '../../data/annotation_database.dart';
+import '../../session/user_session.dart';
 
 import '../dialogs/edit_labels_list_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
@@ -63,6 +65,15 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
       updated.add(finalLabel);
       widget.onLabelsUpdated?.call(updated);
       print('Added new label "$name" with color $color');
+
+      // Check if this is the first label and if we should set it as default
+      if (updated.length == 1) {
+        final shouldSetFirstLabelAsDefault = UserSession.instance.getUser().labelsSetFirstAsDefault;
+        if (shouldSetFirstLabelAsDefault) {
+          await LabelsDatabase.instance.setLabelAsDefault(insertedId, widget.project.id!);
+          print('Set first label "$name" as default');
+        }
+      }
 
     } catch (e) {
       print('Failed to insert label: $e');
@@ -141,6 +152,15 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                 final deletedLabels = previousLabels.where((oldLabel) =>
                   !updatedLabels.any((newLabel) => newLabel.id == oldLabel.id)).toList();
                 for (final label in deletedLabels) {
+                  // Check if we should delete annotations when label is removed
+                  final shouldDeleteAnnotations = UserSession.instance.getUser().labelsDeleteAnnotations;
+                  if (shouldDeleteAnnotations) {
+                    // Delete annotations associated with this label
+                    await AnnotationDatabase.instance.deleteAnnotationsByLabelId(label.id);
+                    print('Deleted annotations for label: ${label.name} (ID: ${label.id})');
+                  }
+                  
+                  // Delete the label
                   await LabelsDatabase.instance.deleteLabel(label.id);
                 }
 
