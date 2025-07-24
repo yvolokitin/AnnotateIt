@@ -11,6 +11,9 @@ class ImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final transform = hovered ? (Matrix4.identity()..scale(1.15)) : Matrix4.identity();
+    
+    // Get the last modified timestamp to use as a key
+    final lastModified = file.lastModifiedSync().millisecondsSinceEpoch;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -20,9 +23,14 @@ class ImagePreview extends StatelessWidget {
         onTap: onTap,
         child: Image.file(
           file,
+          // Use a key based on the last modified timestamp to force refresh when the file changes
+          key: ValueKey('image_${file.path}_$lastModified'),
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
+          // Disable caching to ensure the image is always loaded from disk
+          cacheWidth: null,
+          cacheHeight: null,
         ),
       ),
     );

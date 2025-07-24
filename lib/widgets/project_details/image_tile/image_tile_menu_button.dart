@@ -17,6 +17,7 @@ class ImageTileMenuButton extends StatelessWidget {
   final void Function(bool withAnnotations)? onDuplicate;
   final void Function()? onDeleted;
   final void Function(String thumbnailPath)? onProjectThumbnailUpdate;
+  final void Function()? onEditImage;
 
   const ImageTileMenuButton({
     required this.project,
@@ -24,6 +25,7 @@ class ImageTileMenuButton extends StatelessWidget {
     this.onDuplicate,
     this.onDeleted,
     this.onProjectThumbnailUpdate,
+    this.onEditImage,
     super.key,
   });
 
@@ -39,6 +41,10 @@ class ImageTileMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert, color: Colors.white),
       onSelected: (value) async {
         switch (value) {
+          case 'edit':
+            // Call the edit image callback
+            onEditImage?.call();
+            break;
           case 'details':
             await showDialog(
               context: context,
@@ -87,6 +93,7 @@ class ImageTileMenuButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
+        PopupMenuItem(value: 'edit', child: _MenuItemRow(Icons.edit, 'Edit image')),
         PopupMenuItem(value: 'details', child: _MenuItemRow(Icons.info_outline, l10n.menuImageDetails)),
         PopupMenuItem(value: 'duplicate', child: _MenuItemRow(Icons.copy, l10n.menuImageDuplicate)),
         PopupMenuItem(value: 'seticon', child: _MenuItemRow(Icons.image_outlined, l10n.menuImageSetAsIcon)),

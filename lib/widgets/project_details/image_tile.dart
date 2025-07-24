@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../pages/annotator_page.dart';
+import '../../pages/image_editor.dart';
 import '../project_list/labels_list.dart';
 
 import '../../models/label.dart';
@@ -134,7 +135,27 @@ class _ImageTileState extends State<ImageTile> {
                     onDuplicate: (withAnnotations) => widget.onImageDuplicated?.call(widget.mediaItem, withAnnotations),
                     onProjectThumbnailUpdate: (thumbnailPath) {
                       print('Thumbnail updated: $thumbnailPath');
-                    }
+                    },
+                    onEditImage: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ImageEditorPage(
+                            project: widget.project,
+                            mediaItem: widget.mediaItem,
+                            datasetId: widget.datasetId,
+                            pageIndex: widget.pageIndex,
+                            pageSize: widget.pageSize,
+                            localIndex: widget.localIndex,
+                            totalMediaCount: widget.totalMediaCount,
+                          ),
+                        ),
+                      );
+                      
+                      if (result == 'refresh' && widget.onRefreshNeeded != null) {
+                        widget.onRefreshNeeded!();
+                      }
+                    },
                   ),
                 ),
               ),
