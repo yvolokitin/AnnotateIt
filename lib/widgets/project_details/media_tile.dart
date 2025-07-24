@@ -14,21 +14,38 @@ class MediaTile extends StatefulWidget {
 }
 
 class _MediaTileState extends State<MediaTile> {
-  late VideoPlayerController? _videoController;
+  VideoPlayerController? _videoController;
   bool _initialized = false;
+  bool _videoSupported = true;
 
   @override
   void initState() {
     super.initState();
 
     if (widget.media.type == MediaType.video && File(widget.media.filePath).existsSync()) {
-      _videoController = VideoPlayerController.file(File(widget.media.filePath))
-        ..initialize().then((_) {
-          setState(() {
-            _initialized = true;
-            _videoController?.pause(); // we only want the first frame
-          });
+      try {
+        _videoController = VideoPlayerController.file(File(widget.media.filePath));
+        _videoController!.initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _initialized = true;
+              _videoController?.pause(); // we only want the first frame
+            });
+          }
+        }).catchError((error) {
+          // Handle initialization error
+          if (mounted) {
+            setState(() {
+              _videoController = null;
+              _videoSupported = false;
+            });
+          }
         });
+      } catch (e) {
+        // Handle platform not supported error
+        _videoController = null;
+        _videoSupported = false;
+      }
     } else {
       _videoController = null;
     }
@@ -56,23 +73,28 @@ class _MediaTileState extends State<MediaTile> {
       );
     }
 
-    if (widget.media.type == MediaType.video && _initialized) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Stack(
-          children: [
-            AspectRatio(
-              aspectRatio: _videoController!.value.aspectRatio,
-              child: VideoPlayer(_videoController!),
-            ),
-            Positioned(
-              right: 4,
-              bottom: 4,
-              child: Icon(Icons.play_circle_fill, color: Colors.white),
-            ),
-          ],
-        ),
-      );
+    if (widget.media.type == MediaType.video) {
+      if (_initialized && _videoController != null) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: _videoController!.value.aspectRatio,
+                child: VideoPlayer(_videoController!),
+              ),
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Icon(Icons.play_circle_fill, color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      } else if (!_videoSupported) {
+        // Video player not supported on this platform
+        return _buildVideoNotSupportedTile();
+      }
     }
 
     return _buildLoadingTile();
@@ -98,6 +120,38 @@ class _MediaTileState extends State<MediaTile> {
       ),
       child: Center(
         child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildVideoNotSupportedTile() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue.shade900,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.videocam_off, color: Colors.white, size: 40),
+            const SizedBox(height: 8),
+            Text(
+              'Video not supported',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                'Supported formats: MP4, WebM, MKV (platform dependent)',
+                style: TextStyle(color: Colors.white70, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
