@@ -441,7 +441,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
               final mediaItems = annotatedMediaByDataset[dataset.id];
 
-              Widget contentWidget = dataset.id == 'add_new_tab'
+              final widgetToRender = dataset.id == 'add_new_tab'
                   ? const Center(child: Text("Creating new dataset..."))
                   : DatasetTabContent(
                       project: widget.project,
@@ -473,15 +473,6 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
                       },
                     );
                     
-              // Wrap with Semantics to provide the tab role for accessibility
-              final widgetToRender = Semantics(
-                explicitChildNodes: true,
-                label: 'Tab ${dataset.name}',  // Provide a descriptive label
-                selected: _tabController!.index == datasets.indexOf(dataset),  // Indicate if this tab is selected
-                tagForChildren: const SemanticsTag('tab'),  // This is required for TabBarView children
-                child: contentWidget,
-              );
-
               _datasetTabCache[dataset.id] = widgetToRender;
               return widgetToRender;
             }).toList(),
