@@ -816,6 +816,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thumbnailGenerationInProgress => 'Generating thumbnail...';
 
   @override
+  String get menuImageAnnotate => 'Annotate';
+
+  @override
   String get menuImageDetails => 'Details';
 
   @override

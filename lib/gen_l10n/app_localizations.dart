@@ -1520,6 +1520,12 @@ abstract class AppLocalizations {
   /// **'Generating thumbnail...'**
   String get thumbnailGenerationInProgress;
 
+  /// No description provided for @menuImageAnnotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotate'**
+  String get menuImageAnnotate;
+
   /// No description provided for @menuImageDetails.
   ///
   /// In en, this message translates to:

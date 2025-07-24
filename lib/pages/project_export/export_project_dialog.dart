@@ -1,11 +1,12 @@
-// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
-import '../../gen_l10n/app_localizations.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
+
 import '../../session/user_session.dart';
 import '../../models/project.dart';
+import '../../gen_l10n/app_localizations.dart';
 import '../../utils/dataset_exporters/dataset_export_utils.dart';
 
 class ExportProjectDialog extends StatefulWidget {
@@ -347,11 +348,11 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
       Navigator.of(context).pop();
       
       // Show success message and return
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Project exported successfully to $result'),
-          backgroundColor: Colors.green,
-        ),
+      AppSnackbar.show(
+        context,
+        'Project exported successfully to $result',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
       );
       
       Navigator.of(context).pop('refresh');

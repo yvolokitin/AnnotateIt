@@ -349,6 +349,7 @@
   "thumbnailGenerationTryAgainLater": "Please try again later",
   "thumbnailGenerationInProgress": "Generating thumbnail...",
 
+  "menuImageAnnotate": "Annotate",
   "menuImageDetails": "Details",
   "menuImageDuplicate": "Duplicate",
   "menuImageSetAsIcon": "Set as Icon",

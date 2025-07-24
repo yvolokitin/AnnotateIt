@@ -136,6 +136,25 @@ class _ImageTileState extends State<ImageTile> {
                     onProjectThumbnailUpdate: (thumbnailPath) {
                       print('Thumbnail updated: $thumbnailPath');
                     },
+                    onAnnotate: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AnnotatorPage(
+                            project: widget.project,
+                            mediaItem: widget.mediaItem,
+                            datasetId: widget.datasetId,
+                            pageIndex: widget.pageIndex,
+                            pageSize: widget.pageSize,
+                            localIndex: widget.localIndex,
+                            totalMediaCount: widget.totalMediaCount,
+                          ),
+                        ),
+                      );
+                      if (result == 'refresh' && widget.onRefreshNeeded != null) {
+                        widget.onRefreshNeeded!();
+                      }
+                    },
                     onEditImage: () async {
                       final result = await Navigator.push(
                         context,

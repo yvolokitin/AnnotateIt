@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_selector/file_selector.dart';
 
+import '../app_snackbar.dart';
+import '../dialogs/alert_error_dialog.dart';
 import '../../models/user.dart';
 import '../../session/user_session.dart';
-import '../dialogs/alert_error_dialog.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 class AccountStorage extends StatefulWidget {
@@ -305,26 +306,5 @@ class _AccountStorageState extends State<AccountStorage> {
         ),
       );
     }
-  }
-}
-
-class AppSnackbar {
-  static void show(BuildContext context, String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(
-          color: Colors.black,
-          fontFamily: 'CascadiaCode',
-          fontSize: 16,
-        ),
-      ),
-      backgroundColor: Colors.orangeAccent,
-      behavior: SnackBarBehavior.floating,
-    );
-
-    ScaffoldMessenger.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(snackBar);
   }
 }
