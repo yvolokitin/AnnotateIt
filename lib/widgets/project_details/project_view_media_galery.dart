@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../dialogs/delete_image_dialog.dart';
 import '../dialogs/delete_dataset_dialog.dart';
 import '../dialogs/edit_dataset_name_dialog.dart';
+import '../dialogs/upload_progress_dialog.dart';
 
 import '../../utils/image_utils.dart' as image_utils;
 import '../../models/annotated_labeled_media.dart';
@@ -20,15 +21,17 @@ import 'dataset_tab_bar.dart';
 class ProjectViewMediaGalery extends StatefulWidget {
   final Project project;
   final String datasetId;
-  // final List<Label> labels;
 
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
+  
+  /// Callback to notify when upload status changes
+  final void Function(bool isUploading)? onUploadStatusChanged;
 
   const ProjectViewMediaGalery({
     required this.project,
     required this.datasetId,
-    // required this.labels,
     this.onImageDuplicated,
+    this.onUploadStatusChanged,
     super.key,
   });
 
@@ -63,6 +66,9 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   final MediaSortOption _sortOption = MediaSortOption.newestFirst;
 
   final Set<MediaItem> _selectedMediaItems = {};
+  
+  // Global key to access the UploadProgressManagerState
+  final GlobalKey<UploadProgressManagerState> _uploadProgressKey = GlobalKey<UploadProgressManagerState>();
 
   @override
   void initState() {
@@ -196,36 +202,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
     await loadMediaForDataset(currentDatasetId, itemsPerPage, _currentPage);
   }
-/*
-  void _handleDeleteSelectedMedia() async {
-    final deletedPaths = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => DeleteImageDialog(
-        mediaItems: _selectedMediaItems.toList(),
-        onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
-      ),
-    );
 
-    if (deletedPaths != null && deletedPaths.isNotEmpty) {
-      // Remove deleted items from the current view
-      setState(() {
-        final currentDatasetId = datasets[_tabController!.index].id;
-        final currentMediaList = annotatedMediaByDataset[currentDatasetId] ?? [];
-      
-        annotatedMediaByDataset[currentDatasetId] = currentMediaList.where((media) {
-          return !deletedPaths.contains(media.mediaItem.filePath);
-        }).toList();
-      
-        _selectedMediaItems.clear();
-        _fileCount -= deletedPaths.length;
-      });
-
-      // Refresh the dataset from database
-      final datasetId = datasets[_tabController!.index].id;
-      await loadMediaForDataset(datasetId, itemsPerPage, _currentPage);
-    }
-  }
-*/
   void _rebuildTabController() {
     _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
@@ -266,21 +243,56 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     }
   }
 
+  /// Handles changes in upload status
+  /// 
+  /// This method is called by DatasetTabContent when the upload status changes.
+  /// It updates the local state and notifies parent components about the change,
+  /// allowing them to show a confirmation dialog when the user tries to navigate
+  /// away during an active upload.
+  /// 
+  /// @param uploading Whether there's an active upload in progress
   void _handleUploadingChanged(bool uploading) {
     if (!mounted) return;
     setState(() {
       _isUploading = uploading;
       if (!uploading) _uploadingFile = null;
     });
+    
+    // Notify parent components about upload status change
+    widget.onUploadStatusChanged?.call(uploading);
   }
 
   void _handleFileUploadProgress(String filename, int index, int total) {
     if (!mounted) return;
+    
+    // If cancellation was requested, clear the files when the upload process detects it
+    if (_cancelUpload) {
+      // Clear the upload progress dialog after a short delay to show cancellation status
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (!mounted) return;
+        
+        // Clear the dialog and reset state
+        _uploadProgressKey.currentState?.clearFiles();
+        setState(() {
+          _uploadingFile = null;
+          _currentFileIndex = 0;
+          _uploadProgress = 0.0;
+          _isUploading = false;
+          _cancelUpload = false;
+        });
+      });
+      
+      return;
+    }
+    
     setState(() {
       _uploadingFile = filename;
       _currentFileIndex = index;
       _uploadProgress = index / total;
     });
+    
+    // Update the upload progress dialog
+    _uploadProgressKey.currentState?.updateFileProgress(filename, index, total);
   }
 
   void _handleUploadSuccess() {
@@ -292,6 +304,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       _uploadError = false;
     });
 
+    // Clear the upload progress dialog after a delay
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() {
@@ -299,6 +312,9 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
         _uploadProgress = 0.0;
         _currentFileIndex = 0;
       });
+      
+      // Clear the upload progress dialog
+      _uploadProgressKey.currentState?.clearFiles();
     });
 
     _resetCancelUpload();
@@ -316,6 +332,11 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     _resetCancelUpload();
   }
 
+  /// Resets the cancel upload flag
+  /// 
+  /// This method is called after a successful upload or an upload error.
+  /// It should not be called when the user explicitly cancels the upload,
+  /// as that is handled in _handleFileUploadProgress.
   void _resetCancelUpload() {
     if (!mounted) return;
     setState(() {
@@ -389,7 +410,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Column(
+    final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DatasetTabBar(
@@ -420,7 +441,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
               final mediaItems = annotatedMediaByDataset[dataset.id];
 
-              final widgetToRender = dataset.id == 'add_new_tab'
+              Widget contentWidget = dataset.id == 'add_new_tab'
                   ? const Center(child: Text("Creating new dataset..."))
                   : DatasetTabContent(
                       project: widget.project,
@@ -451,6 +472,15 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
                         loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
                       },
                     );
+                    
+              // Wrap with Semantics to provide the tab role for accessibility
+              final widgetToRender = Semantics(
+                explicitChildNodes: true,
+                label: 'Tab ${dataset.name}',  // Provide a descriptive label
+                selected: _tabController!.index == datasets.indexOf(dataset),  // Indicate if this tab is selected
+                tagForChildren: const SemanticsTag('tab'),  // This is required for TabBarView children
+                child: contentWidget,
+              );
 
               _datasetTabCache[dataset.id] = widgetToRender;
               return widgetToRender;
@@ -458,6 +488,17 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
           ),
         ),
       ],
+    );
+    
+    // Wrap the content with the UploadProgressManager
+    return UploadProgressManager(
+      key: _uploadProgressKey,
+      onCancelUpload: () {
+        setState(() {
+          _cancelUpload = true;
+        });
+      },
+      child: content,
     );
   }
 }
