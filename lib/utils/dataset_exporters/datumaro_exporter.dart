@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
+import 'package:archive/archive.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -15,45 +15,25 @@ import '../../models/shape/rotated_rect_shape.dart';
 
 import 'base_dataset_exporter.dart';
 
-/// Exporter for Datumaro format datasets
 class DatumaroExporter extends BaseDatasetExporter {
   static final Logger _logger = Logger('DatumaroExporter');
-  
+
   DatumaroExporter({
-    required Project project,
-    required bool exportLabels,
-    required bool exportAnnotations,
-  }) : super(
-    project: project,
-    exportLabels: exportLabels,
-    exportAnnotations: exportAnnotations,
-  );
-  
+    required super.project,
+    required super.exportLabels,
+    required super.exportAnnotations,
+  });
+
   @override
-  Future<void> prepareExportDirectory(String exportDir) async {
-    // Create the images directory
-    final imagesDir = Directory(path.join(exportDir, 'images'));
-    if (!await imagesDir.exists()) {
-      await imagesDir.create(recursive: true);
-    }
-    
-    // Create the annotations directory
-    final annotationsDir = Directory(path.join(exportDir, 'annotations'));
-    if (!await annotationsDir.exists()) {
-      await annotationsDir.create(recursive: true);
-    }
-  }
-  
-  @override
-  Future<void> exportDataset({
-    required String exportDir,
+  Future<Archive> buildArchive({
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
   }) async {
     _logger.info('Exporting dataset in Datumaro format');
-    
-    // Create the Datumaro dataset structure
+
+    final Archive archive = Archive();
+
     final Map<String, dynamic> datasetJson = {
       'info': {
         'description': 'Exported from AnnotateIt',
@@ -64,69 +44,64 @@ class DatumaroExporter extends BaseDatasetExporter {
       'categories': <String, dynamic>{},
       'items': <Map<String, dynamic>>[],
     };
-    
-    // Add categories (labels)
+
+    // Add categories
     if (exportLabels) {
       final Map<String, dynamic> labelCategories = {};
-      
-      // Determine the category type based on project type
       String categoryType = 'label';
+
       if (project.type.toLowerCase().contains('detection')) {
         categoryType = 'bbox';
       } else if (project.type.toLowerCase().contains('segmentation')) {
         categoryType = 'polygon';
       }
-      
-      // Add labels to the appropriate category type
+
       labelCategories[categoryType] = {
         'labels': labels.map((label) => label.name).toList(),
         'attributes': {},
       };
-      
+
       datasetJson['categories'] = labelCategories;
     }
-    
-    // Process each media item
+
+    // Add media and annotations
     for (final mediaItem in mediaItems) {
-      if (mediaItem.type != MediaType.image || mediaItem.id == null) {
-        continue; // Skip non-image media items or items without an ID
-      }
-      
-      // Copy image file to export directory
+      if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
+
       final sourceFile = File(mediaItem.filePath);
       final imageFileName = path.basename(mediaItem.filePath);
-      
+
       if (await sourceFile.exists()) {
-        final destFile = File(path.join(exportDir, 'images', imageFileName));
-        await sourceFile.copy(destFile.path);
+        try {
+          final bytes = await sourceFile.readAsBytes();
+          if (bytes.isNotEmpty) {
+            archive.addFile(ArchiveFile('images/$imageFileName', bytes.length, bytes));
+            _logger.fine('Added to ZIP: images/$imageFileName');
+          }
+        } catch (e) {
+          _logger.severe('Failed to read ${sourceFile.path}: $e');
+          continue;
+        }
       } else {
         _logger.warning('Image file not found: ${mediaItem.filePath}');
         continue;
       }
-      
-      // Create item entry
+
       final Map<String, dynamic> item = {
         'id': mediaItem.id,
         'image': {
           'path': 'images/$imageFileName',
-          'size': [
-            mediaItem.width ?? 0,
-            mediaItem.height ?? 0,
-          ],
+          'size': [mediaItem.width ?? 0, mediaItem.height ?? 0],
         },
         'annotations': <Map<String, dynamic>>[],
       };
-      
-      // Add annotations for this media item
+
       if (exportAnnotations) {
         final annotations = annotationsByMediaId[mediaItem.id!] ?? [];
-        
+
         for (final annotation in annotations) {
-          if (annotation.labelId == null) {
-            continue; // Skip annotations without a label
-          }
-          
-          // Find the label for this annotation
+          if (annotation.labelId == null) continue;
+
           final label = labels.firstWhere(
             (l) => l.id == annotation.labelId,
             orElse: () => Label(
@@ -137,27 +112,30 @@ class DatumaroExporter extends BaseDatasetExporter {
               color: '#000000',
             ),
           );
-          
-          // Convert annotation to Datumaro format
-          final Map<String, dynamic>? datumaroAnnotation = _convertAnnotationToDatumaro(
+
+          final datumaroAnnotation = _convertAnnotationToDatumaro(
             annotation: annotation,
             label: label,
           );
-          
+
           if (datumaroAnnotation != null) {
             item['annotations'].add(datumaroAnnotation);
           }
         }
       }
-      
+
       datasetJson['items'].add(item);
     }
-    
-    // Write Datumaro JSON to file
-    final datasetJsonFile = File(path.join(exportDir, 'annotations', 'default.json'));
-    await datasetJsonFile.writeAsString(jsonEncode(datasetJson));
-    
-    // Create a README.md file with information about the dataset
+
+    // Add annotations/default.json
+    final annotationJson = jsonEncode(datasetJson);
+    archive.addFile(ArchiveFile(
+      'annotations/default.json',
+      utf8.encode(annotationJson).length,
+      utf8.encode(annotationJson),
+    ));
+
+    // Add README.md
     final readmeContent = '''
 # Datumaro Dataset
 
@@ -173,61 +151,50 @@ This dataset was exported from AnnotateIt.
 - Number of Images: ${mediaItems.where((m) => m.type == MediaType.image).length}
 - Number of Labels: ${labels.length}
 ''';
-    
-    final readmeFile = File(path.join(exportDir, 'README.md'));
-    await readmeFile.writeAsString(readmeContent);
+
+    archive.addFile(ArchiveFile(
+      'README.md',
+      readmeContent.length,
+      utf8.encode(readmeContent),
+    ));
+
+    return archive;
   }
-  
-  /// Convert an annotation to Datumaro format
+
   Map<String, dynamic>? _convertAnnotationToDatumaro({
     required Annotation annotation,
     required Label label,
   }) {
     final projectTypeLower = project.type.toLowerCase();
-    
-    // Base annotation structure
+
     final Map<String, dynamic> datumaroAnnotation = {
       'id': annotation.id,
       'attributes': {},
     };
-    
+
     if (projectTypeLower.contains('detection') && annotation.annotationType == 'bbox') {
       final shape = annotation.shape;
       if (shape is RectShape) {
         datumaroAnnotation['type'] = 'bbox';
         datumaroAnnotation['label'] = label.name;
-        datumaroAnnotation['bbox'] = [
-          shape.x,
-          shape.y,
-          shape.width,
-          shape.height,
-        ];
-        
+        datumaroAnnotation['bbox'] = [shape.x, shape.y, shape.width, shape.height];
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
         }
-        
         return datumaroAnnotation;
       }
     } else if (projectTypeLower.contains('segmentation') && annotation.annotationType == 'polygon') {
       final shape = annotation.shape;
       if (shape is PolygonShape) {
-        final points = shape.points;
-        final List<List<double>> pointsList = [];
-        
-        // Convert points to list of [x, y] coordinates
-        for (final point in points) {
-          pointsList.add([point.dx, point.dy]);
-        }
-        
+        final points = shape.points
+            .map((p) => [p.dx, p.dy])
+            .toList();
         datumaroAnnotation['type'] = 'polygon';
         datumaroAnnotation['label'] = label.name;
-        datumaroAnnotation['points'] = pointsList;
-        
+        datumaroAnnotation['points'] = points;
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
         }
-        
         return datumaroAnnotation;
       }
     } else if (annotation.annotationType == 'circle') {
@@ -237,11 +204,9 @@ This dataset was exported from AnnotateIt.
         datumaroAnnotation['label'] = label.name;
         datumaroAnnotation['center'] = [shape.center.dx, shape.center.dy];
         datumaroAnnotation['radius'] = shape.radius;
-        
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
         }
-        
         return datumaroAnnotation;
       }
     } else if (annotation.annotationType == 'rotated_rect') {
@@ -249,30 +214,24 @@ This dataset was exported from AnnotateIt.
       if (shape is RotatedRectShape) {
         datumaroAnnotation['type'] = 'rotated_bbox';
         datumaroAnnotation['label'] = label.name;
-        // Use the correct property names from RotatedRectShape
         datumaroAnnotation['center'] = [shape.centerX, shape.centerY];
         datumaroAnnotation['width'] = shape.width;
         datumaroAnnotation['height'] = shape.height;
         datumaroAnnotation['rotation'] = shape.angle;
-        
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
         }
-        
         return datumaroAnnotation;
       }
     } else if (projectTypeLower.contains('classification')) {
-      // For classification, we just need the label
       datumaroAnnotation['type'] = 'label';
       datumaroAnnotation['label'] = label.name;
-      
       if (annotation.confidence != null) {
         datumaroAnnotation['attributes']['score'] = annotation.confidence;
       }
-      
       return datumaroAnnotation;
     }
-    
+
     return null;
   }
 }
