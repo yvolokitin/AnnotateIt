@@ -97,9 +97,31 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
             child: Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    controller: widget.scrollController,
+                  child: ReorderableListView.builder(
+                    scrollController: widget.scrollController,
                     itemCount: _labels.length,
+                    onReorder: (oldIndex, newIndex) {
+                      setState(() {
+                        // Adjust the newIndex if it's after the removal point
+                        if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
+                        
+                        // Move the item
+                        final Label item = _labels.removeAt(oldIndex);
+                        final TextEditingController controller = _controllers.removeAt(oldIndex);
+                        _labels.insert(newIndex, item);
+                        _controllers.insert(newIndex, controller);
+                        
+                        // Update labelOrder for all affected labels
+                        for (int i = 0; i < _labels.length; i++) {
+                          _labels[i] = _labels[i].copyWith(labelOrder: i);
+                        }
+                        
+                        // Notify parent about the change
+                        widget.onLabelsChanged(_labels);
+                      });
+                    },
                     itemBuilder: (context, index) {
                       // Add bounds checking
                       if (index >= _labels.length || index >= _controllers.length) {
@@ -110,7 +132,10 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                       final controller = _controllers[index];
                       bool isEditing = false;
                       
+                      // Create a unique key using a combination of label properties and index
+                      final uniqueKey = ValueKey('${label.name}_${label.color}_$index');
                       return StatefulBuilder(
+                        key: uniqueKey,
                         builder: (context, setLocalState) {
                           return MouseRegion(
                             cursor: SystemMouseCursors.click,
@@ -124,6 +149,23 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                   height: 60,
                                   child: Row(
                                     children: [
+                                      const SizedBox(width: 12),
+                                      // Drag handle
+                                      ReorderableDragStartListener(
+                                        index: index,
+                                        child: Container(
+                                          padding: EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white10,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Icon(
+                                            Icons.drag_handle,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ),
+                                      
                                       const SizedBox(width: 12),
                                       GestureDetector(
                                         onTap: () {
@@ -185,82 +227,151 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                       ),
 
                                       const SizedBox(width: 8),
-                                      IconButton(
+                                      // Three dots menu
+                                      PopupMenuButton<String>(
                                         icon: Icon(
-                                          isEditing ? Icons.save : Icons.edit,
+                                          Icons.more_vert,
                                           color: Colors.white,
                                         ),
                                         iconSize: 30,
-                                        onPressed: () {
-                                          if (isEditing) {
-                                            final newName = controller.text.trim();
-                                            final isDuplicate = _labels.any((l) =>
-                                                l.name.toLowerCase() == newName.toLowerCase() &&
-                                                l != label);
-                                            if (isDuplicate) {
-                                              final l10n = AppLocalizations.of(context)!;
-                                              AlertErrorDialog.show(
-                                                context,
-                                                l10n.labelDuplicateTitle,
-                                                l10n.labelDuplicateMessage(newName),
-                                                tips: l10n.labelDuplicateTips,
-                                              );
-                                              return;
-                                            }
-                                            setState(() {
-                                              _labels[index] = _labels[index].copyWith(name: newName);
-                                            });
-                                            widget.onLabelsChanged(_labels);
-                                          }
-                                          setLocalState(() => isEditing = !isEditing);
-                                        },
-                                      ),
-
-                                      // move down and up buttons
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.arrow_downward_sharp,
-                                          color: (index == (_labels.length - 1)) ? Colors.white24 : Colors.white,
-                                        ),
-                                        iconSize: 30,
-                                        onPressed: () { },
-                                      ),
-
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.arrow_upward_rounded,
-                                          color: (index == 0) ? Colors.white24 : Colors.white,
-                                        ),
-                                        iconSize: 30,
-                                        onPressed: () { },
-                                      ),
-
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.white),
-                                        iconSize: 30,
-                                        onPressed: () {
-                                          try {
-                                            setState(() {
-                                              final removedIndex = _labels.indexOf(label);
-                                              if (removedIndex != -1) {
-                                                _labels.removeAt(removedIndex);
-                                                _controllers[removedIndex].dispose();
-                                                _controllers.removeAt(removedIndex);
+                                        onSelected: (String value) {
+                                          switch (value) {
+                                            case 'edit':
+                                              setLocalState(() => isEditing = !isEditing);
+                                              if (isEditing) {
+                                                // Focus the text field
+                                                FocusScope.of(context).requestFocus(FocusNode());
+                                              } else if (controller.text != label.name) {
+                                                // Save the edit
+                                                final newName = controller.text.trim();
+                                                final isDuplicate = _labels.any((l) =>
+                                                    l.name.toLowerCase() == newName.toLowerCase() &&
+                                                    l != label);
+                                                if (isDuplicate) {
+                                                  final l10n = AppLocalizations.of(context)!;
+                                                  AlertErrorDialog.show(
+                                                    context,
+                                                    l10n.labelDuplicateTitle,
+                                                    l10n.labelDuplicateMessage(newName),
+                                                    tips: l10n.labelDuplicateTips,
+                                                  );
+                                                  return;
+                                                }
+                                                setState(() {
+                                                  _labels[index] = _labels[index].copyWith(name: newName);
+                                                });
+                                                widget.onLabelsChanged(_labels);
                                               }
-                                            });
-                                            widget.onLabelsChanged(_labels);
-                                          } catch (e) {
-                                            AlertErrorDialog.show(
-                                              context,
-                                              l10n.importLabelsFailedTitle,
-                                              'Failed to delete label: ${e.toString()}',
-                                              tips: 'Make sure the label still exists or is not used elsewhere.',
-                                            );
+                                              break;
+                                            case 'moveUp':
+                                              if (index > 0) {
+                                                setState(() {
+                                                  // Swap with the item above
+                                                  final Label item = _labels.removeAt(index);
+                                                  final TextEditingController ctrl = _controllers.removeAt(index);
+                                                  _labels.insert(index - 1, item);
+                                                  _controllers.insert(index - 1, ctrl);
+                                                  
+                                                  // Update labelOrder for all affected labels
+                                                  for (int i = 0; i < _labels.length; i++) {
+                                                    _labels[i] = _labels[i].copyWith(labelOrder: i);
+                                                  }
+                                                  
+                                                  // Notify parent about the change
+                                                  widget.onLabelsChanged(_labels);
+                                                });
+                                              }
+                                              break;
+                                            case 'moveDown':
+                                              if (index < _labels.length - 1) {
+                                                setState(() {
+                                                  // Swap with the item below
+                                                  final Label item = _labels.removeAt(index);
+                                                  final TextEditingController ctrl = _controllers.removeAt(index);
+                                                  _labels.insert(index + 1, item);
+                                                  _controllers.insert(index + 1, ctrl);
+                                                  
+                                                  // Update labelOrder for all affected labels
+                                                  for (int i = 0; i < _labels.length; i++) {
+                                                    _labels[i] = _labels[i].copyWith(labelOrder: i);
+                                                  }
+                                                  
+                                                  // Notify parent about the change
+                                                  widget.onLabelsChanged(_labels);
+                                                });
+                                              }
+                                              break;
+                                            case 'delete':
+                                              try {
+                                                setState(() {
+                                                  final removedIndex = _labels.indexOf(label);
+                                                  if (removedIndex != -1) {
+                                                    _labels.removeAt(removedIndex);
+                                                    _controllers[removedIndex].dispose();
+                                                    _controllers.removeAt(removedIndex);
+                                                    
+                                                    // Update labelOrder for all affected labels
+                                                    for (int i = 0; i < _labels.length; i++) {
+                                                      _labels[i] = _labels[i].copyWith(labelOrder: i);
+                                                    }
+                                                  }
+                                                });
+                                                widget.onLabelsChanged(_labels);
+                                              } catch (e) {
+                                                AlertErrorDialog.show(
+                                                  context,
+                                                  l10n.importLabelsFailedTitle,
+                                                  'Failed to delete label: ${e.toString()}',
+                                                  tips: 'Make sure the label still exists or is not used elsewhere.',
+                                                );
+                                              }
+                                              break;
                                           }
                                         },
+                                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                          PopupMenuItem<String>(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(isEditing ? Icons.save : Icons.edit),
+                                                SizedBox(width: 8),
+                                                Text(isEditing ? 'Save' : 'Edit'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<String>(
+                                            value: 'moveUp',
+                                            enabled: index > 0,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.arrow_upward_rounded),
+                                                SizedBox(width: 8),
+                                                Text('Move Up'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<String>(
+                                            value: 'moveDown',
+                                            enabled: index < _labels.length - 1,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.arrow_downward_sharp),
+                                                SizedBox(width: 8),
+                                                Text('Move Down'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<String>(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.delete, color: Colors.red),
+                                                SizedBox(width: 8),
+                                                Text('Delete', style: TextStyle(color: Colors.red)),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(width: 8),
                                     ],
