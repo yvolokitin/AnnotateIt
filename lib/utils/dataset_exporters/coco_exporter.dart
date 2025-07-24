@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:archive/archive.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -12,45 +13,25 @@ import '../../models/shape/polygon_shape.dart';
 
 import 'base_dataset_exporter.dart';
 
-/// Exporter for COCO format datasets
 class COCOExporter extends BaseDatasetExporter {
   static final Logger _logger = Logger('COCOExporter');
-  
+
   COCOExporter({
-    required Project project,
-    required bool exportLabels,
-    required bool exportAnnotations,
-  }) : super(
-    project: project,
-    exportLabels: exportLabels,
-    exportAnnotations: exportAnnotations,
-  );
-  
+    required super.project,
+    required super.exportLabels,
+    required super.exportAnnotations,
+  });
+
   @override
-  Future<void> prepareExportDirectory(String exportDir) async {
-    // Create the images directory
-    final imagesDir = Directory(path.join(exportDir, 'images'));
-    if (!await imagesDir.exists()) {
-      await imagesDir.create(recursive: true);
-    }
-    
-    // Create the annotations directory
-    final annotationsDir = Directory(path.join(exportDir, 'annotations'));
-    if (!await annotationsDir.exists()) {
-      await annotationsDir.create(recursive: true);
-    }
-  }
-  
-  @override
-  Future<void> exportDataset({
-    required String exportDir,
+  Future<Archive> buildArchive({
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
   }) async {
     _logger.info('Exporting dataset in COCO format');
-    
-    // Create the COCO JSON structure
+
+    final archive = Archive();
+
     final Map<String, dynamic> cocoJson = {
       'info': {
         'description': 'Exported from AnnotateIt',
@@ -71,90 +52,81 @@ class COCOExporter extends BaseDatasetExporter {
       'annotations': <Map<String, dynamic>>[],
       'categories': <Map<String, dynamic>>[],
     };
-    
-    // Add categories (labels)
+
+    // Add categories
+    final Map<int, int> labelIdToCategoryId = {};
     if (exportLabels) {
       for (int i = 0; i < labels.length; i++) {
         final label = labels[i];
         cocoJson['categories'].add({
-          'id': i + 1, // COCO uses 1-based indexing for categories
+          'id': i + 1,
           'name': label.name,
           'supercategory': 'none',
         });
+        labelIdToCategoryId[label.id] = i + 1;
       }
     }
-    
-    // Create a map of label ID to COCO category ID
-    final Map<int, int> labelIdToCategoryId = {};
-    for (int i = 0; i < labels.length; i++) {
-      labelIdToCategoryId[labels[i].id] = i + 1;
-    }
-    
-    // Add images and copy image files
+
     int imageId = 1;
     final Map<int, int> mediaIdToImageId = {};
-    
+
     for (final mediaItem in mediaItems) {
-      if (mediaItem.type != MediaType.image) {
-        continue; // Skip non-image media items
+      if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
+
+      final fileName = path.basename(mediaItem.filePath);
+      final file = File(mediaItem.filePath);
+      if (!await file.exists()) {
+        _logger.warning('Image file not found: ${mediaItem.filePath}');
+        continue;
       }
-      
-      // Add image to COCO JSON
+
+      try {
+        final bytes = await file.readAsBytes();
+        if (bytes.isNotEmpty) {
+          archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
+        }
+      } catch (e) {
+        _logger.severe('Failed to read ${mediaItem.filePath}: $e');
+        continue;
+      }
+
       cocoJson['images'].add({
         'id': imageId,
-        'width': mediaItem.width,
-        'height': mediaItem.height,
-        'file_name': path.basename(mediaItem.filePath),
+        'width': mediaItem.width ?? 0,
+        'height': mediaItem.height ?? 0,
+        'file_name': fileName,
         'license': 1,
         'flickr_url': '',
         'coco_url': '',
         'date_captured': mediaItem.uploadDate.toIso8601String(),
       });
-      
-      // Copy image file to export directory
-      final sourceFile = File(mediaItem.filePath);
-      if (await sourceFile.exists()) {
-        final destFile = File(path.join(exportDir, 'images', path.basename(mediaItem.filePath)));
-        await sourceFile.copy(destFile.path);
-      } else {
-        _logger.warning('Image file not found: ${mediaItem.filePath}');
-      }
-      
+
       mediaIdToImageId[mediaItem.id!] = imageId;
       imageId++;
     }
-    
-    // Add annotations
+
     if (exportAnnotations) {
       int annotationId = 1;
-      
+
       for (final mediaId in annotationsByMediaId.keys) {
         final annotations = annotationsByMediaId[mediaId]!;
-        final cocoImageId = mediaIdToImageId[mediaId];
-        
-        if (cocoImageId == null) {
-          continue; // Skip if media item was not included
-        }
-        
+        final imageId = mediaIdToImageId[mediaId];
+        if (imageId == null) continue;
+
         for (final annotation in annotations) {
           final labelId = annotation.labelId;
-          if (labelId == null) {
-            continue; // Skip annotations without a label
-          }
-          
+          if (labelId == null) continue;
+
           final categoryId = labelIdToCategoryId[labelId];
-          if (categoryId == null) {
-            continue; // Skip if label was not included
-          }
-          
-          // Convert annotation to COCO format based on annotation type
-          final Map<String, dynamic>? cocoAnnotation = _convertAnnotationToCOCO(
+          if (categoryId == null) continue;
+
+          final cocoAnnotation = _convertAnnotationToCOCO(
             annotation: annotation,
             annotationId: annotationId,
-            imageId: cocoImageId,
+            imageId: imageId,
             categoryId: categoryId,
           );
-          
+
           if (cocoAnnotation != null) {
             cocoJson['annotations'].add(cocoAnnotation);
             annotationId++;
@@ -162,56 +134,45 @@ class COCOExporter extends BaseDatasetExporter {
         }
       }
     }
-    
-    // Write COCO JSON to file
-    final cocoJsonFile = File(path.join(exportDir, 'annotations', 'instances_default.json'));
-    await cocoJsonFile.writeAsString(jsonEncode(cocoJson));
+
+    final jsonStr = jsonEncode(cocoJson);
+    archive.addFile(ArchiveFile('annotations/instances_default.json', jsonStr.length, utf8.encode(jsonStr)));
+
+    return archive;
   }
-  
-  /// Convert an annotation to COCO format
+
   Map<String, dynamic>? _convertAnnotationToCOCO({
     required Annotation annotation,
     required int annotationId,
     required int imageId,
     required int categoryId,
   }) {
-    final projectTypeLower = project.type.toLowerCase();
-    
-    if (projectTypeLower.contains('detection') && annotation.annotationType == 'bbox') {
-      // Get the bounding box data
+    final type = project.type.toLowerCase();
+
+    if (type.contains('detection') && annotation.annotationType == 'bbox') {
       final shape = annotation.shape;
       if (shape is RectShape) {
-        final bbox = [
-          shape.x,
-          shape.y,
-          shape.width,
-          shape.height,
-        ];
-        
         return {
           'id': annotationId,
           'image_id': imageId,
           'category_id': categoryId,
-          'bbox': bbox,
+          'bbox': [shape.x, shape.y, shape.width, shape.height],
           'area': shape.width * shape.height,
           'segmentation': [],
           'iscrowd': 0,
         };
       }
-    } else if (projectTypeLower.contains('segmentation') && annotation.annotationType == 'polygon') {
-      // Get the polygon data
+    } else if (type.contains('segmentation') && annotation.annotationType == 'polygon') {
       final shape = annotation.shape;
       if (shape is PolygonShape) {
         final points = shape.points;
-        final List<double> flatPoints = [];
-        
-        // Flatten the points into a single list [x1, y1, x2, y2, ...]
-        for (final point in points) {
-          flatPoints.add(point.dx);
-          flatPoints.add(point.dy);
+        final flatPoints = <double>[];
+        for (final p in points) {
+          flatPoints.add(p.dx);
+          flatPoints.add(p.dy);
         }
-        
-        // Calculate the area of the polygon
+
+        // area using shoelace formula
         double area = 0;
         for (int i = 0; i < points.length; i++) {
           final j = (i + 1) % points.length;
@@ -219,22 +180,17 @@ class COCOExporter extends BaseDatasetExporter {
           area -= points[j].dx * points[i].dy;
         }
         area = area.abs() / 2;
-        
-        // Calculate bounding box directly
-        double minX = double.infinity;
-        double minY = double.infinity;
-        double maxX = double.negativeInfinity;
-        double maxY = double.negativeInfinity;
-        
-        for (final point in points) {
-          if (point.dx < minX) minX = point.dx;
-          if (point.dy < minY) minY = point.dy;
-          if (point.dx > maxX) maxX = point.dx;
-          if (point.dy > maxY) maxY = point.dy;
-        }
-        
-        final bbox = [minX, minY, maxX - minX, maxY - minY];
-        
+
+        // bbox
+        final xs = points.map((p) => p.dx);
+        final ys = points.map((p) => p.dy);
+        final bbox = [
+          xs.reduce((a, b) => a < b ? a : b),
+          ys.reduce((a, b) => a < b ? a : b),
+          xs.reduce((a, b) => a > b ? a : b) - xs.reduce((a, b) => a < b ? a : b),
+          ys.reduce((a, b) => a > b ? a : b) - ys.reduce((a, b) => a < b ? a : b),
+        ];
+
         return {
           'id': annotationId,
           'image_id': imageId,
@@ -245,20 +201,18 @@ class COCOExporter extends BaseDatasetExporter {
           'iscrowd': 0,
         };
       }
-    } else if (projectTypeLower.contains('classification')) {
-      // For classification, we just need the category ID
+    } else if (type.contains('classification')) {
       return {
         'id': annotationId,
         'image_id': imageId,
         'category_id': categoryId,
-        'bbox': [0, 0, 0, 0], // Empty bbox
+        'bbox': [0, 0, 0, 0],
         'area': 0,
         'segmentation': [],
         'iscrowd': 0,
       };
     }
-    
+
     return null;
   }
-  
 }
