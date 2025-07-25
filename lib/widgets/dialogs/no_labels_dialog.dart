@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'alert_error_dialog.dart';
 import '../../models/label.dart';
-import '../../data/labels_database.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 class NoLabelsDialog extends StatelessWidget {
@@ -23,7 +22,9 @@ class NoLabelsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    double screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 700) || (screenHeight < 750);
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -33,18 +34,18 @@ class NoLabelsDialog extends StatelessWidget {
         ),
         child: IntrinsicHeight(
           child: Container(
-            padding: EdgeInsets.all(screenWidth > 1150 ? 24 : 12),
+            padding: EdgeInsets.all(smallScreen ? 12 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
+                SizedBox(height: smallScreen ? 7 : 24),
                 Text(
                   l10n.noLabelsTitle,
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
-                    fontSize: screenWidth > 1450 ? 24 : 20,
+                    fontSize: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -62,13 +63,13 @@ class NoLabelsDialog extends StatelessWidget {
                     l10n.buttonImportLabels,
                     style: TextStyle(
                       color: Colors.lightGreenAccent,
-                      fontSize: screenWidth > 1200 ? 22 : 20,
+                      fontSize: smallScreen ? 22 : 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'CascadiaCode',
                     ),
                   ),
                 ),
-                SizedBox(height: screenWidth > 1450 ? 40 : 10),
+                SizedBox(height: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20),
                 Text(
                   l10n.noLabelsExplain1,
                   style: TextStyle(
@@ -81,7 +82,7 @@ class NoLabelsDialog extends StatelessWidget {
                   l10n.noLabelsExplain2,
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: screenWidth > 640 ? 18 : 14,
+                    fontSize: smallScreen ? 14 : 18,
                     fontFamily: 'CascadiaCode',
                   ),
                 ),
@@ -89,18 +90,16 @@ class NoLabelsDialog extends StatelessWidget {
                   l10n.noLabelsExplain3,
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: screenWidth > 640 ? 18 : 14,
+                    fontSize: smallScreen ? 14 : 18,
                     fontFamily: 'CascadiaCode',
                   ),
                 ),
                 SizedBox(
-                  height: screenWidth > 1450 ? 300 : (screenWidth > 640) ? 200 : 140,
+                  height: screenWidth > 1450 ? 300 : smallScreen ? 140 : 200,
                   child: Padding(
-                    padding: EdgeInsets.all(screenWidth > 1450
-                        ? 45
-                        : (screenWidth > 640)
-                            ? 20
-                            : 6),
+                    padding: EdgeInsets.all(
+                      screenWidth > 1450 ? 45 : smallScreen ? 6 : 20,
+                    ),
                     child: Image.asset(
                       'assets/images/no_labels.png',
                       fit: BoxFit.contain,
@@ -108,7 +107,7 @@ class NoLabelsDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (screenWidth > 640) ...[
+                if (!smallScreen) ...[
                   const SizedBox(height: 24),
                   Text(
                     l10n.noLabelsExplain4,

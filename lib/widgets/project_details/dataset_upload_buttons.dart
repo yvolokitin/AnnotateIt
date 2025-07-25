@@ -273,10 +273,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 700) || (screenHeight < 750);
+
     final bool showDeleteButton = widget.allSelected || ((widget.selectedCount < widget.itemsPerPage) && (widget.allSelected == false));
 
     return Container(
-      height: screenWidth>1200 ? 120 : screenWidth>650 ? 80 : 60,
+      height: screenWidth>1300 ? 120 : smallScreen ? 45 : 80,
       width: double.infinity,
         child: Row(
         children: [
@@ -294,12 +297,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                 onPressed: widget.onToggleSelectAll,
               ),
             ),
-            SizedBox(width: screenWidth > 700 ? 20 : 10),
+            SizedBox(width: smallScreen ? 10 : 20),
             Text(
-              screenWidth > 1190 ? "${widget.totalCount} files" : "${widget.totalCount}",
+              screenWidth > 1300 ? "${widget.totalCount} files" : "${widget.totalCount}",
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: screenWidth > 900 ? 22 : 18,
+                fontSize: smallScreen ? 18 : 22,
                 fontFamily: 'CascadiaCode',
               ),
             ),
@@ -307,14 +310,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
           if (showDeleteButton && widget.selectedCount > 0) ...[
             Text(
-              screenWidth > 1190 ? " / ${widget.selectedCount} selected " : " / ${widget.selectedCount}",
+              screenWidth > 1300 ? " / ${widget.selectedCount} selected " : " / ${widget.selectedCount}",
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: screenWidth > 900 ? 22 : 18,
+                fontSize: smallScreen ? 18 : 22,
                 fontFamily: 'CascadiaCode',
               ),
             ),
-            SizedBox(width: screenWidth > 700 ? 20 : 10),
+            SizedBox(width: smallScreen ? 10 : 20),
             MouseRegion(
               onEnter: (_) => setState(() => _hoveringDelete = true),
               onExit: (_) => setState(() => _hoveringDelete = false),
@@ -377,37 +380,42 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             ),
           ],
 
-          SizedBox(width: screenWidth > 700 ? 20 : 10),
-          _buildButton(
-            context,
-            buttonName: l10n.importDataset,
-            buttonIcon: Icons.upload,
-            borderColor: Colors.white70,
-          ),
+          // disable dataset import button from proejct details page for now
+          /// SizedBox(width: screenWidth > 700 ? 20 : 10),
+          /// _buildButton(
+          ///  context,
+          ///  buttonName: l10n.importDataset,
+          ///  buttonIcon: Icons.upload,
+          ///  borderColor: Colors.white70,
+          ///),
 
-          SizedBox(width: screenWidth > 700 ? 20 : 10),
+          SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
             buttonName: l10n.uploadMedia,
             buttonIcon: Icons.add_to_photos,
             borderColor: Colors.red,
+            screenWidth: screenWidth,
+            smallScreen: smallScreen,
             onPressed: () async {
               await _uploadMedia(context);
             },
           ),
           
-          SizedBox(width: screenWidth > 700 ? 20 : 10),
+          SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
             buttonName: 'Camera',
             buttonIcon: Icons.camera_alt,
             borderColor: Colors.blue,
+            screenWidth: screenWidth,
+            smallScreen: smallScreen,
             onPressed: Platform.isLinux ? null : () async {
               await _openCamera(context);
             },
             tooltip: Platform.isLinux ? 'Camera not supported on Linux' : null,
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: smallScreen ? 10 : 5),
         ],
       ),
     );
@@ -418,10 +426,11 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     required String buttonName,
     required IconData buttonIcon,
     required Color borderColor,
+    required double screenWidth,
+    required bool smallScreen,
     VoidCallback? onPressed,
     String? tooltip,
   }) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final defaultOnPressed = () async {
       await _uploadMedia(context);
     };
@@ -447,7 +456,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           child: Icon(
             buttonIcon,
             color: buttonOnPressed == null ? Colors.grey : borderColor,
-            size: screenWidth > 700 ? 30 : 24),
+            size: smallScreen ? 24 : 30),
         ),
       );
 

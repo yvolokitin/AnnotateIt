@@ -147,13 +147,16 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 1200) || (screenHeight < 750);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (screenWidth > 1200)...[
+        if (!smallScreen)...[
           Text(
             _getLabelCreationNote(widget.projectType),
             style: const TextStyle(
@@ -163,7 +166,7 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
               color: Colors.white70,
             ),
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: screenWidth > 1600 ? 30 : 10),
         ],
 
         Row(
@@ -173,8 +176,8 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
               child: GestureDetector(
                 onTap: _showNewLabelColorPicker,
                 child: Container(
-                  width: screenWidth > 1200 ? 48 : 38,
-                  height: screenWidth > 1200 ? 48 : 38,
+                  width: smallScreen ? 38 : 48,
+                  height: smallScreen ? 38 : 48,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
@@ -182,55 +185,76 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                   ),
                   alignment: Alignment.center,
                   child: Container(
-                    width: screenWidth > 1200 ? 28 : 22,
-                    height: screenWidth > 1200 ? 28 : 22,
+                    width: smallScreen ? 20 : 28,
+                    height: smallScreen ? 20 : 28,
                     decoration: BoxDecoration(
                       color: Color(int.parse(newLabelColor.replaceFirst('#', '0xFF'))),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                   ),
                 ),
               ),
             ),
 
-            SizedBox(width: screenWidth > 650 ? 20 : 5),
+            SizedBox(width: smallScreen ? 10 : 20),
             Expanded(
-              child: TextField(
-                controller: labelController,
-                decoration: InputDecoration(
-                  hintText: l10n.labelNameHint,
-                  hintStyle: TextStyle(
-                    color: Colors.white54,
+              child: SizedBox(
+                height: smallScreen ? 38 : 48,
+                child: TextField(
+                  controller: labelController,
+                  cursorColor: Colors.redAccent,
+                  decoration: InputDecoration(
+                    hintText: l10n.labelNameHint,
+                    hintStyle: TextStyle(
+                      color: Colors.white54,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.normal,
+                      fontSize: smallScreen ? 18 : 22,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    filled: false,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                    ),
+                  ),
+                  style: TextStyle(
+                    fontSize: smallScreen ? 18 : 22,
+                    color: Colors.white,
                     fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
-                    fontSize: screenWidth > 1200 ? 22 : 18,
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  filled: false,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-                  ),
-                ),
-                style: TextStyle(
-                  fontSize: screenWidth > 1200 ? 22 : 18,
-                  color: Colors.white,
-                  fontFamily: 'CascadiaCode',
-                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
 
-            SizedBox(width: screenWidth > 650 ? 20 : 5),
-            
-            if (screenWidth >= 650)...[
+            SizedBox(width: smallScreen ? 10 : 20),
+            if (smallScreen)...[
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.redAccent, width: 2),
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.transparent,
+                ),
+                child: IconButton(
+                  onPressed: _addLabel,
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  iconSize: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+                  tooltip: l10n.createLabelButton,
+                ),
+              ),
+
+            ] else ...[
               SizedBox(
                 height: screenWidth > 1200 ? 46 : (screenWidth > 640) ? 36 : 24,
                 child: ElevatedButton(
@@ -255,15 +279,6 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
                 ),
               ),
             ],
-          
-          if (screenWidth < 650)...[
-            IconButton(
-              onPressed: _addLabel,
-              icon: const Icon(Icons.add_circle_outline, color: Colors.redAccent),
-              tooltip: l10n.createLabelButton,
-              iconSize: 28,
-            ),
-          ],
           ],
         ),
 

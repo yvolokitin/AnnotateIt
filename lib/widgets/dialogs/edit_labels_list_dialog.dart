@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/label.dart';
 
@@ -70,7 +69,10 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    double screenWidth = MediaQuery.of(context).size.width;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 1200) || (screenHeight < 750);
 
     if (_labels.isEmpty) {
       return NoLabelsDialog(
@@ -93,7 +95,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
           thickness: 8,
           trackVisibility: true,
           child: Padding(
-            padding: const EdgeInsets.only(right: 26, left: 18),
+            padding: const EdgeInsets.only(left: 18),
             child: Column(
               children: [
                 Expanded(
@@ -146,7 +148,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                   color: Colors.grey[800],
                                 ),
                                 child: SizedBox(
-                                  height: 60,
+                                  height: smallScreen ? 38 : 48,
                                   child: Row(
                                     children: [
                                       const SizedBox(width: 12),
@@ -172,11 +174,14 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           widget.onColorTap(index);
                                         },
                                         child: Container(
-                                          width: 30,
-                                          height: 30,
+                                          width: smallScreen ? 20 : 28,
+                                          height: smallScreen ? 20 : 28,
                                           decoration: BoxDecoration(
                                             color: label.toColor(),
-                                            shape: BoxShape.circle,
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: Colors.white24, width: 1),
+                                            // color: label.toColor(),
+                                            // shape: BoxShape.circle,
                                           ),
                                         ),
                                       ),
@@ -184,9 +189,10 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                       const SizedBox(width: 12),
                                       Flexible(
                                         child: SizedBox(
-                                          height: 46,
+                                          height: smallScreen ? 34 : 44,
                                           child: TextField(
                                             controller: controller,
+                                            cursorColor: Colors.redAccent,
                                             enabled: isEditing,
                                             onSubmitted: (value) {
                                               final newName = value.trim();
@@ -209,7 +215,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                               setLocalState(() => isEditing = false);
                                             },
                                             style: TextStyle(
-                                              fontSize: 20,
+                                              fontSize: smallScreen ? 18 : 22,
                                               color: Colors.white,
                                               fontFamily: 'CascadiaCode',
                                               fontWeight: FontWeight.normal,
@@ -219,7 +225,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                               fillColor: isEditing ? Colors.white10 : Colors.transparent,
                                               contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 15),
                                               border: const OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
                                               ),
                                             ),
                                           ),
