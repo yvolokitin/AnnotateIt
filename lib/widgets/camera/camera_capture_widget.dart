@@ -123,28 +123,137 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   }
   
   // Method to handle image capture on web or Windows platform
+  // On Windows, we use a special approach:
+  // 1. Launch the built-in Windows Camera app using Process.run
+  // 2. Guide the user to take a photo and save it
+  // 3. Use the gallery picker to select the saved photo
+  // This approach is necessary because the image_picker_windows plugin
+  // doesn't support direct camera access without a camera delegate
   Future<void> _captureImageWithPicker(ImageSource source) async {
     try {
-      // For Windows, use gallery picker instead of camera to avoid cameraDelegate error
-      final ImageSource actualSource = Platform.isWindows ? ImageSource.gallery : source;
-      
-      final XFile? pickedFile = await _imagePicker.pickImage(source: actualSource);
-      if (pickedFile != null) {
-        final File imageFile = File(pickedFile.path);
+      if (Platform.isWindows) {
+        // For Windows, launch the built-in Windows Camera app
+        try {
+          // Show a dialog explaining the process to the user
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Windows Camera'),
+              content: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('We will now open the Windows Camera app:'),
+                  SizedBox(height: 8),
+                  Text('1. Take a photo using the Camera app'),
+                  Text('2. Save the photo to a location you can find'),
+                  Text('3. Return here and select the saved photo'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Continue'),
+                ),
+              ],
+            ),
+          );
+          
+          // Launch the Windows Camera app
+          final result = await Process.run('explorer', ['microsoft.windows.camera:']);
+          
+          // Check if the process executed successfully
+          if (result.exitCode != 0) {
+            throw Exception('Windows Camera app failed to launch: ${result.stderr}');
+          }
+          
+          // Wait a moment to ensure the Camera app has time to launch
+          await Future.delayed(const Duration(seconds: 1));
+          
+          // Show a dialog to guide the user to select the captured image
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Select Your Photo'),
+              content: const Text('After taking and saving your photo with the Windows Camera app, click Continue to select the saved photo.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Continue'),
+                ),
+              ],
+            ),
+          );
+        } catch (e) {
+          print('Failed to launch Windows Camera app: $e');
+          
+          // Show an error dialog and offer to use gallery picker instead
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Camera Error'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Could not launch Windows Camera app: ${e.toString().split('\n')[0]}'),
+                  const SizedBox(height: 12),
+                  const Text('You can still select a photo from your gallery instead.'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Continue with Gallery'),
+                ),
+              ],
+            ),
+          );
+          
+          // Continue with gallery picker
+        }
         
-        // Generate a unique filename
-        final String filename = '${const Uuid().v4()}.jpg';
-        final Directory appDir = await getApplicationDocumentsDirectory();
-        final String filePath = path.join(appDir.path, filename);
-        
-        // Copy the file to the app directory
-        final File savedFile = await imageFile.copy(filePath);
-        
-        // Store the captured image and switch to preview mode
-        setState(() {
-          _capturedImage = savedFile;
-          _isPreviewMode = true;
-        });
+        // Use gallery picker to select the captured image
+        final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
+          
+          // Generate a unique filename
+          final String filename = '${const Uuid().v4()}.jpg';
+          final Directory appDir = await getApplicationDocumentsDirectory();
+          final String filePath = path.join(appDir.path, filename);
+          
+          // Copy the file to the app directory
+          final File savedFile = await imageFile.copy(filePath);
+          
+          // Store the captured image and switch to preview mode
+          setState(() {
+            _capturedImage = savedFile;
+            _isPreviewMode = true;
+          });
+        }
+      } else {
+        // For web and other platforms, use the standard image picker
+        final XFile? pickedFile = await _imagePicker.pickImage(source: source);
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
+          
+          // Generate a unique filename
+          final String filename = '${const Uuid().v4()}.jpg';
+          final Directory appDir = await getApplicationDocumentsDirectory();
+          final String filePath = path.join(appDir.path, filename);
+          
+          // Copy the file to the app directory
+          final File savedFile = await imageFile.copy(filePath);
+          
+          // Store the captured image and switch to preview mode
+          setState(() {
+            _capturedImage = savedFile;
+            _isPreviewMode = true;
+          });
+        }
       }
     } catch (e) {
       _showErrorDialog('Failed to capture image: $e');
@@ -177,7 +286,8 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   }
 
   Future<void> _takePicture() async {
-    // For web or Windows, use image_picker
+    // For web or Windows, use image_picker with special handling
+    // On Windows, this will launch the Windows Camera app via _captureImageWithPicker
     if (kIsWeb || Platform.isWindows) {
       await _captureImageWithPicker(ImageSource.camera);
       return;
@@ -309,7 +419,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
         );
       }
       
-      // Camera mode UI
+      // Camera mode UI for Windows
       return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -318,7 +428,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             icon: const Icon(Icons.close, color: Colors.white),
             onPressed: widget.onCancel,
           ),
-          title: Text(
+          title: const Text(
             'Camera Capture',
             style: TextStyle(color: Colors.white),
           ),
@@ -332,16 +442,60 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                 size: 80,
                 color: Colors.white70,
               ),
-              const SizedBox(height: 30),
-              Text(
-                'Choose capture option',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 20),
+              if (Platform.isWindows) ...[
+                const Text(
+                  'Take a photo with Windows Camera',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 50),
+                const SizedBox(height: 20),
+                Container(
+                  width: 400,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[850],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '1. Click the camera button below',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '2. Take a photo using Windows Camera app',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '3. Save the photo to a location you can find',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '4. Return here to select the saved photo',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                Text(
+                  'Choose capture option',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 40),
               // Circular capture button to match native UI
               GestureDetector(
                 onTap: () => _captureImageWithPicker(ImageSource.camera),
@@ -356,6 +510,13 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                   child: const Icon(Icons.camera_alt, size: 40, color: Colors.blue),
                 ),
               ),
+              if (Platform.isWindows) ...[
+                const SizedBox(height: 20),
+                const Text(
+                  'Click to launch Windows Camera',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
             ],
           ),
         ),

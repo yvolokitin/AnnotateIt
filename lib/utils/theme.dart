@@ -6,7 +6,7 @@ TextStyle getTextStyle({
   FontWeight fontWeight = FontWeight.w300,
 }) {
   return TextStyle(
-    fontFamily: "Roboto",
+    fontFamily: "CascadiaCode",
     fontStyle: FontStyle.normal,
     fontWeight: fontWeight,
     fontSize: fontSize,

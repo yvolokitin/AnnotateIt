@@ -100,7 +100,7 @@ class MainPageState extends State<MainPage> {
                                 context,
                                 MaterialPageRoute(builder: (context) => ProjectDetailsPage(newProject)),
                               );
-                              setState(() {}); // перерисовать ProjectsListPage
+                              setState(() {}); // update ProjectsListPage
                             }
                           }
                         },
