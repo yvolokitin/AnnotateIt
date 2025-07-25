@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
-import '../dialogs/annotations_settings_dialog.dart';
-import '../dialogs/alert_error_dialog.dart';
-
 import 'editor_action.dart';
 import '../imageannotator/toolbar_button.dart';
 import '../imageannotator/toolbar_divider.dart';

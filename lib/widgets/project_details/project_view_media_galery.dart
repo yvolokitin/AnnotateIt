@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../dialogs/delete_image_dialog.dart';
 import '../dialogs/delete_dataset_dialog.dart';
 import '../dialogs/edit_dataset_name_dialog.dart';
 import '../dialogs/upload_progress_dialog.dart';
@@ -9,7 +8,6 @@ import '../../utils/image_utils.dart' as image_utils;
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
 import '../../models/dataset.dart';
-import '../../models/label.dart';
 import '../../models/project.dart';
 
 import '../../data/dataset_database.dart';

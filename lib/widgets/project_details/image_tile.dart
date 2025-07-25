@@ -179,7 +179,7 @@ class _ImageTileState extends State<ImageTile> {
                 ),
               ),
 
-              if (uniqueLabels.length > 0)
+              if (uniqueLabels.isNotEmpty)
                 Positioned(
                   bottom: 6,
                   right: 6,

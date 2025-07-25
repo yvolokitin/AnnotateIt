@@ -5,9 +5,6 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
-import '../../session/user_session.dart';
-import '../../data/annotation_database.dart';
-
 import 'editor_painter.dart';
 import 'editor_action.dart';
 import 'adjustment_panel.dart';

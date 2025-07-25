@@ -33,7 +33,7 @@ class _EditorTopToolbarState extends State<EditorTopToolbar> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    double screenWidth = MediaQuery.of(context).size.width;
+    // double screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
       height: 62,
