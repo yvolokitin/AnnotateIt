@@ -1,5 +1,6 @@
-import 'dart:async';
 import 'dart:io';
+import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -38,12 +39,13 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   void initState() {
     super.initState();
     if (!kIsWeb) {
-      _initializeCamera();
-    } else {
-      // For web, we don't need to initialize the camera in advance
-      setState(() {
-        _isInitialized = true;
+      _requestCameraPermission().then((_) {
+        if (Platform.isAndroid || Platform.isIOS) {
+          _initializeCamera();
+        }
       });
+    } else {
+      setState(() => _isInitialized = true);
     }
   }
 
@@ -51,6 +53,13 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   void dispose() {
     _controller?.dispose();
     super.dispose();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (!status.isGranted) {
+      _showErrorDialog("Camera permission is required to take pictures.");
+    }
   }
 
   Future<void> _initializeCamera() async {
