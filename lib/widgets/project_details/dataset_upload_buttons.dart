@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/project.dart';
@@ -8,6 +9,7 @@ import '../../utils/image_utils.dart';
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 import '../../session/user_session.dart';
+import '../dialogs/camera_capture_dialog.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
   final Project project;
@@ -144,6 +146,106 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     } catch (e) {
       print("_uploadMedia: Upload error: $e");
       widget.onUploadError?.call();
+    }
+  }
+  
+  Future<void> _openCamera(BuildContext context) async {
+    try {
+      // Check if running on Linux
+      if (Platform.isLinux) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Camera functionality is not supported on Linux"),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+      
+      // Note: Windows platform is handled in camera_capture_widget.dart
+      // by using image_picker instead of direct camera access
+      
+      widget.onUploadingChanged(true);
+      
+      await CameraCaptureDialog.show(
+        context,
+        onMediaCaptured: (File file, String fileType) async {
+          final filename = path.basename(file.path);
+          final ext = fileType.toLowerCase();
+          
+          final currentUser = UserSession.instance.getUser();
+          if (currentUser.id == null) {
+            widget.onUploadError?.call();
+            return;
+          }
+          
+          int? width;
+          int? height;
+          double? duration;
+          double? fps;
+          final isVideo = ext == 'mp4';
+          
+          if (isVideo) {
+            final videoMeta = await getVideoMetadata(file.path);
+            width = videoMeta['width'];
+            height = videoMeta['height'];
+            duration = videoMeta['duration'];
+            fps = videoMeta['fps'];
+          } else {
+            final imageMeta = await getImageMetadata(file.path);
+            width = imageMeta['width'];
+            height = imageMeta['height'];
+          }
+          
+          await DatasetDatabase.instance.insertMediaItem(
+            widget.datasetId,
+            file.path,
+            ext,
+            ownerId: currentUser.id!,
+            width: width,
+            height: height,
+            duration: duration,
+            fps: fps,
+            source: 'camera',
+          );
+          
+          widget.onFileProgress?.call(filename, 1, 1);
+          
+          // Update project icon if needed
+          if (widget.project.icon.contains('default_project_image') ||
+              widget.project.icon.contains('folder')) {
+            if (!isVideo) {
+              final thumbnailFile = await generateThumbnailFromImage(
+                  file, widget.project.id.toString());
+              if (thumbnailFile != null) {
+                await ProjectDatabase.instance
+                    .updateProjectIcon(widget.project.id!, thumbnailFile.path);
+              }
+            }
+          }
+          
+          await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+          widget.onUploadingChanged(false);
+          widget.onUploadSuccess();
+        },
+      );
+      
+      // If we get here without capturing media, reset the uploading state
+      if (widget.isUploading) {
+        widget.onUploadingChanged(false);
+      }
+    } catch (e) {
+      print("_openCamera: Camera error: $e");
+      widget.onUploadingChanged(false);
+      widget.onUploadError?.call();
+      
+      // Show a user-friendly error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Camera Error: ${e.toString().split('\n')[0]}"),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -289,6 +391,21 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             buttonName: l10n.uploadMedia,
             buttonIcon: Icons.add_to_photos,
             borderColor: Colors.red,
+            onPressed: () async {
+              await _uploadMedia(context);
+            },
+          ),
+          
+          SizedBox(width: screenWidth > 700 ? 20 : 10),
+          _buildButton(
+            context,
+            buttonName: 'Camera',
+            buttonIcon: Icons.camera_alt,
+            borderColor: Colors.blue,
+            onPressed: Platform.isLinux ? null : () async {
+              await _openCamera(context);
+            },
+            tooltip: Platform.isLinux ? 'Camera not supported on Linux' : null,
           ),
           const SizedBox(width: 10),
         ],
@@ -301,49 +418,63 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     required String buttonName,
     required IconData buttonIcon,
     required Color borderColor,
+    VoidCallback? onPressed,
+    String? tooltip,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final defaultOnPressed = () async {
+      await _uploadMedia(context);
+    };
+    
+    final buttonOnPressed = widget.isUploading
+        ? null
+        : (onPressed ?? defaultOnPressed);
+    
     if (screenWidth < 1024) {
-      return ElevatedButton(
-        onPressed: widget.isUploading
-          ? null
-          : () async {
-            await _uploadMedia(context);
-          },
-        style: ElevatedButton.styleFrom(
-          shape: const CircleBorder(),
-          padding: const EdgeInsets.all(14),
-          backgroundColor: Colors.transparent,
-          side: BorderSide(color: borderColor, width: 1),
+      return Tooltip(
+        message: tooltip ?? buttonName,
+        child: ElevatedButton(
+          onPressed: buttonOnPressed,
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(14),
+            backgroundColor: Colors.transparent,
+            side: BorderSide(
+              color: buttonOnPressed == null ? Colors.grey : borderColor, 
+              width: 1
+            ),
+          ),
+          child: Icon(
+            buttonIcon,
+            color: buttonOnPressed == null ? Colors.grey : borderColor,
+            size: screenWidth > 700 ? 30 : 24),
         ),
-        child: Icon(
-          buttonIcon,
-          color: borderColor,
-          size: screenWidth > 700 ? 30 : 24),
       );
 
     } else {
-      return ElevatedButton(
-        onPressed: widget.isUploading
-            ? null
-            : () async {
-                await _uploadMedia(context);
-              },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: BorderSide(color: borderColor, width: 2),
+      return Tooltip(
+        message: tooltip ?? buttonName,
+        child: ElevatedButton(
+          onPressed: buttonOnPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+              side: BorderSide(
+                color: buttonOnPressed == null ? Colors.grey : borderColor, 
+                width: 2
+              ),
+            ),
           ),
-        ),
-        child: Text(
-          buttonName,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'CascadiaCode',
+          child: Text(
+            buttonName,
+            style: TextStyle(
+              color: buttonOnPressed == null ? Colors.grey : Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'CascadiaCode',
+            ),
           ),
         ),
       );
