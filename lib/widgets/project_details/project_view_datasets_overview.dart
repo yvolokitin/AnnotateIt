@@ -53,6 +53,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                   fontSize: 24,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ],
@@ -67,7 +68,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               ? const Center(
                 child: Text(
                   'No datasets found.',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode'),
                   ),
                 )
               : SingleChildScrollView(
@@ -128,7 +129,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               Expanded(
                 child: Text(
                   dataset.name,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.normal),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode'),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -152,7 +153,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
             children: [
               Icon(Icons.document_scanner),
               const SizedBox(width: 5),
-              Text(dataset.type, style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal)),
+              Text(dataset.type, style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode')),
               const Spacer(),
               Icon(Icons.watch_later_outlined),
               const SizedBox(width: 5),
@@ -160,7 +161,8 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                 formatDate(dataset.createdAt),
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.normal
+                  fontWeight: FontWeight.normal,
+                  fontFamily: 'CascadiaCode'
                   ),
                 ),
             ],
@@ -172,12 +174,12 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
             children: [
               Icon(Icons.source_outlined),
               const SizedBox(width: 5),
-              Text('Source ${dataset.source}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal)),
+              Text('Source ${dataset.source}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode')),
             ],
           ),
 
           const SizedBox(height: 25),
-          const Text('Labels:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Labels:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'CascadiaCode')),
           const SizedBox(height: 20),
 
           LabelList(
@@ -233,8 +235,8 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(title, style: TextStyle(fontSize: 18)),
-                Text(value, style: TextStyle(fontSize: 18, color: Colors.grey)),
+                Text(title, style: TextStyle(fontSize: 18, fontFamily: 'CascadiaCode')),
+                Text(value, style: TextStyle(fontSize: 18, color: Colors.grey, fontFamily: 'CascadiaCode')),
               ],
             ),
           ],

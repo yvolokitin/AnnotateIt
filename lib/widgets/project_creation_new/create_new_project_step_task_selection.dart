@@ -67,7 +67,7 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
           ),
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.projectNameLabel,
-            labelStyle: const TextStyle(color: Colors.white24),
+            labelStyle: const TextStyle(color: Colors.white24, fontFamily: 'CascadiaCode'),
             filled: true,
             fillColor: Colors.grey[850],
             contentPadding: EdgeInsets.symmetric(

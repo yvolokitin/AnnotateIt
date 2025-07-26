@@ -64,7 +64,7 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
                 icon: const Icon(Icons.remove, color: Colors.white70, size: 32),                
               ),
               const SizedBox(width: 8),
-              Text(percent, style: const TextStyle(color: Colors.white70, fontSize: 20)),
+              Text(percent, style: const TextStyle(color: Colors.white70, fontSize: 20, fontFamily: 'CascadiaCode')),
               const SizedBox(width: 8),
               AnnotatorIconButton(
                 onPressed: widget.onZoomIn,
@@ -82,7 +82,7 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
                 children: [
                   Text(
                     fileName,
-                    style: const TextStyle(color: Colors.white70, fontSize: 20),
+                    style: const TextStyle(color: Colors.white70, fontSize: 20, fontFamily: 'CascadiaCode'),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -92,7 +92,7 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
             const SizedBox(width: 4),
           ],
           if (!isMinimal)
-            Text(widthHeight, style: const TextStyle(color: Colors.white70, fontSize: 20)),
+            Text(widthHeight, style: const TextStyle(color: Colors.white70, fontSize: 20, fontFamily: 'CascadiaCode')),
 
           const Spacer(),
           Row(

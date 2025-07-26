@@ -104,8 +104,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                       indicatorWeight: 3.0,
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.grey,
-                      labelStyle: const TextStyle(fontSize: 22),
-                      unselectedLabelStyle: const TextStyle(fontSize: 22),
+                      labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                      unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
                       tabs: [
                         Tab(
                           child: Row(

@@ -31,9 +31,9 @@ class MainMenuNavigationRailMenu extends StatelessWidget {
               backgroundColor: Colors.grey[850],
               onDestinationSelected: onItemSelected,
               selectedIconTheme: const IconThemeData(color: Colors.red),
-              selectedLabelTextStyle: const TextStyle(color: Colors.red),
+              selectedLabelTextStyle: const TextStyle(color: Colors.red, fontFamily: 'CascadiaCode'),
               unselectedIconTheme: const IconThemeData(color: Colors.white70),
-              unselectedLabelTextStyle: const TextStyle(color: Colors.white54),
+              unselectedLabelTextStyle: const TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode'),
               destinations: [
                 _buildDestination(0, Icons.cases_outlined, l10n.menuProjects, screenWidth),
                 _buildDestination(1, Icons.account_circle_outlined, l10n.menuProjects, screenWidth),
@@ -110,7 +110,12 @@ class MainMenuNavigationRailMenu extends StatelessWidget {
         ),
         child: Icon(size: 28, icon),
       ),
-      label: Text(label),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontFamily: 'CascadiaCode',
+        ),
+      ),
     );
   }
 }
