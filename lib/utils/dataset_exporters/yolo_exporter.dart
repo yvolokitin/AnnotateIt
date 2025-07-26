@@ -111,6 +111,11 @@ nc: ${labels.length}
 names: ${jsonEncode(labels.map((l) => l.name).toList())}
 ''';
     archive.addFile(ArchiveFile('data.yaml', yaml.length, utf8.encode(yaml)));
+    
+    // Add format.txt to clearly identify this as standard YOLO format
+    // This helps distinguish from roboflow_yolo format
+    final formatContent = 'yolo';
+    archive.addFile(ArchiveFile('format.txt', formatContent.length, utf8.encode(formatContent)));
 
     return archive;
   }

@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:logging/logging.dart';
 
 import '../app_snackbar.dart';
 import '../dialogs/alert_error_dialog.dart';
@@ -25,6 +27,7 @@ class AccountStorage extends StatefulWidget {
 }
 
 class _AccountStorageState extends State<AccountStorage> {
+  final _logger = Logger('AccountStorage');
   late TextEditingController _datasetImportController;
   late TextEditingController _datasetExportController;
   late TextEditingController _thumbnailController;
@@ -227,27 +230,66 @@ class _AccountStorageState extends State<AccountStorage> {
                   AppSnackbar.show(context, l10n.accountStorage_pathEmpty);
                   return;
                 }
-                if (!await Directory(folder).exists()) {
+                
+                // Check if directory exists with improved error handling
+                try {
+                  if (!await Directory(folder).exists()) {
+                    final errorMessage = 'Directory does not exist: $folder';
+                    _logger.warning(errorMessage);
+                    AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder));
+                    return;
+                  }
+                } catch (e, stack) {
+                  final errorMessage = 'Failed to check if directory exists: $folder';
+                  _logger.severe(errorMessage, e, stack);
                   AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder));
                   return;
                 }
-                try {
-                  if (Platform.isWindows) {
-                    await Process.run('explorer', [folder]);
-                  } else if (Platform.isMacOS) {
-                    await Process.run('open', [folder]);
-                  } else if (Platform.isLinux) {
-                    await Process.run('xdg-open', [folder]);
-                  } else {
-                    final uri = Uri.file(folder);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
+                
+                // Implement retry mechanism for opening folder
+                const maxRetries = 3;
+                int retryCount = 0;
+                bool success = false;
+                
+                while (retryCount < maxRetries && !success) {
+                  try {
+                    if (Platform.isWindows) {
+                      await Process.run('explorer', [folder]);
+                    } else if (Platform.isMacOS) {
+                      await Process.run('open', [folder]);
+                    } else if (Platform.isLinux) {
+                      await Process.run('xdg-open', [folder]);
                     } else {
-                      throw Exception('Unsupported platform or URI cannot be launched');
+                      final uri = Uri.file(folder);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        throw Exception('Unsupported platform or URI cannot be launched');
+                      }
+                    }
+                    success = true;
+                    _logger.info('Successfully opened folder: $folder');
+                  } catch (e, stack) {
+                    retryCount++;
+                    final errorMessage = 'Failed to open folder (attempt $retryCount/$maxRetries): $folder';
+                    _logger.warning(errorMessage, e, stack);
+                    
+                    if (retryCount >= maxRetries) {
+                      _logger.severe('All attempts to open folder failed: $folder', e, stack);
+                      AppSnackbar.show(context, l10n.accountStorage_openFailed.replaceFirst('{error}', e.toString()));
+                      
+                      // Show more detailed error dialog for persistent failures
+                      AlertErrorDialog.show(
+                        context,
+                        'Failed to Open Folder',
+                        'Multiple attempts to open the folder failed. Please check if the folder exists and you have permission to access it.',
+                        tips: 'Error details: ${e.toString()}',
+                      );
+                    } else {
+                      // Wait before retrying
+                      await Future.delayed(Duration(milliseconds: 500 * retryCount));
                     }
                   }
-                } catch (e) {
-                  AppSnackbar.show(context, l10n.accountStorage_openFailed.replaceFirst('{error}', e.toString()));
                 }
               },
             ),

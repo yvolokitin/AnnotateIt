@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:archive/archive_io.dart';
+import 'package:logging/logging.dart';
 
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
@@ -29,6 +31,7 @@ class ExportProjectDialog extends StatefulWidget {
 }
 
 class ExportProjectDialogState extends State<ExportProjectDialog> {
+  final _logger = Logger('ExportProjectDialog');
   String selectedDatasetType = 'COCO';
   bool exportLabels = true;
   bool exportAnnotations = true;
@@ -156,6 +159,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
               _buildDatasetTypeCard('COCO', 'Common Objects in Context', Icons.photo_library),
               _buildDatasetTypeCard('YOLO', 'You Only Look Once', Icons.view_in_ar),
               _buildDatasetTypeCard('Datumaro', 'Universal Dataset Format', Icons.data_object),
+              _buildDatasetTypeCard('ZIP', 'Simple ZIP Archive', Icons.folder_zip),
             ],
           ),
           const SizedBox(height: 32),
@@ -324,15 +328,38 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     setState(() => _isExporting = true);
 
     try {
+      _logger.info('Starting project export: ${widget.project.name} as $selectedDatasetType');
+      
+      // Validate export folder exists
       final currentUser = UserSession.instance.getUser();
       final exportFolder = currentUser.datasetExportFolder;
+      
+      try {
+        final directory = Directory(exportFolder);
+        if (!await directory.exists()) {
+          final errorMessage = 'Export directory does not exist: $exportFolder';
+          _logger.severe(errorMessage);
+          throw Exception(errorMessage);
+        }
+      } catch (e, stack) {
+        final errorMessage = 'Failed to check if export directory exists: $exportFolder';
+        _logger.severe(errorMessage, e, stack);
+        throw Exception('$errorMessage: ${e.toString()}');
+      }
+      
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final filename = '${widget.project.name.replaceAll(' ', '_')}_${selectedDatasetType.toLowerCase()}_$timestamp.zip';
       final exportPath = path.join(exportFolder, filename);
-
+      
+      _logger.info('Fetching media items for project: ${widget.project.id}');
       final mediaItems = await _fetchMediaItems();
+      _logger.info('Fetched ${mediaItems.length} media items');
+      
+      _logger.info('Fetching annotations');
       final annotationsByMediaId = await _fetchAnnotations(mediaItems);
+      _logger.info('Fetched annotations for ${annotationsByMediaId.length} media items');
 
+      _logger.info('Creating exporter for $selectedDatasetType');
       final exporter = ExporterFactory.createExporter(
         datasetType: selectedDatasetType,
         project: widget.project,
@@ -340,38 +367,93 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         exportAnnotations: exportAnnotations,
       );
 
+      _logger.info('Building archive');
       final archive = await exporter.buildArchive(
         labels: widget.project.labels,
         mediaItems: mediaItems,
         annotationsByMediaId: annotationsByMediaId,
       );
 
-      // Create zip file
-      final zipEncoder = ZipEncoder();
-      final zipData = zipEncoder.encode(archive);
-      final zipFile = File(exportPath);
-      await zipFile.writeAsBytes(zipData!);
+      // Create zip file with retry mechanism
+      const maxRetries = 3;
+      int retryCount = 0;
+      bool success = false;
+      Exception? lastException;
+      StackTrace? lastStack;
+      
+      while (retryCount < maxRetries && !success) {
+        try {
+          _logger.info('Creating zip file (attempt ${retryCount + 1}/$maxRetries): $exportPath');
+          final zipEncoder = ZipEncoder();
+          final zipData = zipEncoder.encode(archive);
+          
+          if (zipData == null) {
+            throw Exception('Failed to encode archive: zip data is null');
+          }
+          
+          final zipFile = File(exportPath);
+          await zipFile.writeAsBytes(zipData);
+          
+          success = true;
+          _logger.info('Successfully created zip file: $exportPath');
+          
+          if (!mounted) return;
 
-      if (!mounted) return;
+          AppSnackbar.show(
+            context,
+            'Project exported successfully to ${path.basename(zipFile.path)}',
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
 
-      AppSnackbar.show(
-        context,
-        'Project exported successfully to ${path.basename(zipFile.path)}',
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-
-      Navigator.of(context).pop('refresh');
+          Navigator.of(context).pop('refresh');
+        } catch (e, stack) {
+          retryCount++;
+          lastException = e is Exception ? e : Exception(e.toString());
+          lastStack = stack;
+          
+          final errorMessage = 'Failed to create zip file (attempt $retryCount/$maxRetries): $exportPath';
+          _logger.warning(errorMessage, e, stack);
+          
+          if (retryCount < maxRetries) {
+            // Wait before retrying with exponential backoff
+            await Future.delayed(Duration(milliseconds: 500 * (1 << retryCount)));
+          }
+        }
+      }
+      
+      // If all retries failed, throw the last exception
+      if (!success) {
+        _logger.severe('All attempts to create zip file failed: $exportPath', lastException, lastStack);
+        throw lastException!;
+      }
     } catch (e, stack) {
-      debugPrint('Error while exporting project: $e\n$stack');
+      _logger.severe('Error while exporting project', e, stack);
 
       if (!mounted) return;
+
+      // Provide more detailed error message based on the exception type
+      String errorTitle = 'Export Failed';
+      String errorMessage = 'Something went wrong while exporting your project.';
+      String errorTips = '';
+      
+      if (e is FileSystemException) {
+        errorTitle = 'File System Error';
+        errorMessage = 'Failed to access the file system during export.';
+        errorTips = 'Please check if you have write permissions to the export folder and sufficient disk space.\n\nError details: ${e.toString()}';
+      } else if (e.toString().contains('directory does not exist')) {
+        errorTitle = 'Directory Not Found';
+        errorMessage = 'The export directory does not exist.';
+        errorTips = 'Please set a valid export directory in your account settings.\n\nError details: ${e.toString()}';
+      } else {
+        errorTips = 'Please try again or contact support.\n\nError details: ${e.toString()}';
+      }
 
       AlertErrorDialog.show(
         context,
-        'Export Failed',
-        'Something went wrong while exporting your project. Please try again or contact support.',
-        tips: e.toString(),
+        errorTitle,
+        errorMessage,
+        tips: errorTips,
       );
     } finally {
       if (mounted) {

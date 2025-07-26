@@ -65,6 +65,7 @@ class DatumaroExporter extends BaseDatasetExporter {
     }
 
     // Add media and annotations
+    int itemId = 1; // Initialize sequential item ID counter
     for (final mediaItem in mediaItems) {
       if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
 
@@ -88,7 +89,7 @@ class DatumaroExporter extends BaseDatasetExporter {
       }
 
       final Map<String, dynamic> item = {
-        'id': mediaItem.id,
+        'id': itemId++, // Use sequential number for item ID
         'image': {
           'path': 'images/$imageFileName',
           'size': [mediaItem.width ?? 0, mediaItem.height ?? 0],
@@ -175,9 +176,13 @@ This dataset was exported from AnnotateIt.
     if (projectTypeLower.contains('detection') && annotation.annotationType == 'bbox') {
       final shape = annotation.shape;
       if (shape is RectShape) {
+        // Ensure coordinates are non-negative
+        double x = shape.x < 0 ? 0 : shape.x;
+        double y = shape.y < 0 ? 0 : shape.y;
+        
         datumaroAnnotation['type'] = 'bbox';
         datumaroAnnotation['label'] = label.name;
-        datumaroAnnotation['bbox'] = [shape.x, shape.y, shape.width, shape.height];
+        datumaroAnnotation['bbox'] = [x, y, shape.width, shape.height];
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
         }
@@ -186,8 +191,9 @@ This dataset was exported from AnnotateIt.
     } else if (projectTypeLower.contains('segmentation') && annotation.annotationType == 'polygon') {
       final shape = annotation.shape;
       if (shape is PolygonShape) {
+        // Ensure all polygon points have non-negative coordinates
         final points = shape.points
-            .map((p) => [p.dx, p.dy])
+            .map((p) => [p.dx < 0 ? 0 : p.dx, p.dy < 0 ? 0 : p.dy])
             .toList();
         datumaroAnnotation['type'] = 'polygon';
         datumaroAnnotation['label'] = label.name;
@@ -200,9 +206,13 @@ This dataset was exported from AnnotateIt.
     } else if (annotation.annotationType == 'circle') {
       final shape = annotation.shape;
       if (shape is CircleShape) {
+        // Ensure center coordinates are non-negative
+        double centerX = shape.center.dx < 0 ? 0 : shape.center.dx;
+        double centerY = shape.center.dy < 0 ? 0 : shape.center.dy;
+        
         datumaroAnnotation['type'] = 'circle';
         datumaroAnnotation['label'] = label.name;
-        datumaroAnnotation['center'] = [shape.center.dx, shape.center.dy];
+        datumaroAnnotation['center'] = [centerX, centerY];
         datumaroAnnotation['radius'] = shape.radius;
         if (annotation.confidence != null) {
           datumaroAnnotation['attributes']['score'] = annotation.confidence;
@@ -212,9 +222,14 @@ This dataset was exported from AnnotateIt.
     } else if (annotation.annotationType == 'rotated_rect') {
       final shape = annotation.shape;
       if (shape is RotatedRectShape) {
-        datumaroAnnotation['type'] = 'rotated_bbox';
+        // Ensure center coordinates are non-negative
+        double centerX = shape.centerX < 0 ? 0 : shape.centerX;
+        double centerY = shape.centerY < 0 ? 0 : shape.centerY;
+        
+        // Use 'oriented_bbox' instead of 'rotated_bbox' to match Datumaro format
+        datumaroAnnotation['type'] = 'oriented_bbox';
         datumaroAnnotation['label'] = label.name;
-        datumaroAnnotation['center'] = [shape.centerX, shape.centerY];
+        datumaroAnnotation['center'] = [centerX, centerY];
         datumaroAnnotation['width'] = shape.width;
         datumaroAnnotation['height'] = shape.height;
         datumaroAnnotation['rotation'] = shape.angle;
