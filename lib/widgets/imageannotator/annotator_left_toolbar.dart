@@ -111,13 +111,14 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Segmentation Button (conditionally shown)
           if (annotationSegment) ...[
-            ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
-              icon: Icon(Icons.auto_awesome_outlined),
-              onTap: () => _selectUserAction(UserAction.sam_annotation),
-              isActive: widget.selectedAction == UserAction.sam_annotation,
-              tooltip: l10n.toolbarSegmentation,
-            ),
+            /// disabled since SAM is not supported yet
+            /// ToolbarDivider(isCompact: isCompact),
+            /// ToolbarButton(
+            ///  icon: Icon(Icons.auto_awesome_outlined),
+            ///  onTap: () => _selectUserAction(UserAction.sam_annotation),
+            ///  isActive: widget.selectedAction == UserAction.sam_annotation,
+            ///  tooltip: l10n.toolbarSAM,
+            ///),
             
             // Polygon Annotation Button
             ToolbarDivider(isCompact: isCompact),
@@ -125,7 +126,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               icon: Icon(Icons.polyline_outlined),
               onTap: () => _selectUserAction(UserAction.polygon_annotation),
               isActive: widget.selectedAction == UserAction.polygon_annotation,
-              tooltip: 'Polygon',
+              tooltip: l10n.toolbarPolygon,
             ),
           ],
 

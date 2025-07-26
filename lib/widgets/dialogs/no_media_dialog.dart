@@ -22,10 +22,13 @@ class NoMediaDialogState extends State<NoMediaDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    double screenWidth = MediaQuery.of(context).size.width;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 700) || (screenHeight < 750);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(smallScreen ? 5 : 24),
       child: Column(
         children: [
           Expanded(
@@ -33,7 +36,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(height: screenWidth >= 700 ? 40 : 0),
+                  SizedBox(height: smallScreen ? 5 : 40),
 
                   Text(
                     screenWidth>600 ? l10n.noMediaDialogUploadPrompt : l10n.noMediaDialogUploadPromptShort,
@@ -41,7 +44,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'CascadiaCode',
-                      fontSize: screenWidth >= 1200 ? 24 : 20
+                      fontSize: smallScreen ? 20 : 24,
                     ),
                   ),
 
@@ -61,7 +64,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                     style: TextStyle(
                       color: Colors.grey,
                       fontFamily: 'CascadiaCode',
-                      fontSize: screenWidth >= 700 ? 20 : 16,
+                      fontSize: smallScreen ? 16 : 20,
                     ),
                   ),
                   Text(
@@ -69,7 +72,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                     style: TextStyle(
                       color: Colors.grey,
                       fontFamily: 'CascadiaCode',
-                      fontSize: screenWidth >= 700 ? 20 : 16,
+                      fontSize: smallScreen ? 16 : 20,
                     ),
                   ),
 
@@ -84,7 +87,7 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                         color: Colors.white54,
                         decoration: TextDecoration.underline,
                         fontFamily: 'CascadiaCode',
-                        fontSize: screenWidth >= 700 ? 20 : 16,
+                        fontSize: smallScreen ? 16 : 20,
                       ),
                     ),
                   ),

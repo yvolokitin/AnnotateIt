@@ -6,6 +6,7 @@ import '../../data/labels_database.dart';
 import '../../data/annotation_database.dart';
 import '../../session/user_session.dart';
 
+import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/edit_labels_list_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
 
@@ -64,40 +65,43 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
       final updated = List<Label>.from(widget.project.labels!);
       updated.add(finalLabel);
       widget.onLabelsUpdated?.call(updated);
-      print('Added new label "$name" with color $color');
 
       // Check if this is the first label and if we should set it as default
       if (updated.length == 1) {
         final shouldSetFirstLabelAsDefault = UserSession.instance.getUser().labelsSetFirstAsDefault;
         if (shouldSetFirstLabelAsDefault) {
           await LabelsDatabase.instance.setLabelAsDefault(insertedId, widget.project.id!);
-          print('Set first label "$name" as default');
         }
       }
 
     } catch (e) {
-      print('Failed to insert label: $e');
+      AlertErrorDialog.show(
+        context,
+        'Failed to insert label',
+        'Failed to insert label: $e',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    /// Ensure that labels are not null
-    assert(widget.project.labels != null, 'Error: Project labels must not be null!');
-    
-    final labels = widget.project.labels!;
-    double screenWidth = MediaQuery.of(context).size.width;
+    final labels = widget.project.labels;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 700) || (screenHeight < 750);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(smallScreen ? 7 : 20),
           child: Row(
             children: [
               Text(
                 'Labels (${labels.length})',
-                style: const TextStyle(
-                  fontSize: 24,
+                style: TextStyle(
+                  fontSize: smallScreen ? 18 : 22,
                   color: Colors.white,
                   fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
@@ -157,7 +161,6 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                   if (shouldDeleteAnnotations) {
                     // Delete annotations associated with this label
                     await AnnotationDatabase.instance.deleteAnnotationsByLabelId(label.id);
-                    print('Deleted annotations for label: ${label.name} (ID: ${label.id})');
                   }
                   
                   // Delete the label
@@ -165,7 +168,6 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                 }
 
                 widget.onLabelsUpdated?.call(newLabels);
-                print('PROJECT VIEW: Labels updated: ${newLabels.map((l) => l.name).join(', ')}');
               },
             ),
           ),

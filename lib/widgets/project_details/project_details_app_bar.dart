@@ -34,6 +34,8 @@ class ProjectDetailsAppBar extends StatelessWidget {
             margin: EdgeInsets.only(left: screenWidth > 550 ? 16 : 10),
             onPressed: onBackPressed,
           ),
+          /// disabled help button for now
+/*
           HoverIconButton(
             icon: Icons.help_outline,
             margin: EdgeInsets.only(right: screenWidth > 550 ? 16 : 10),
@@ -47,6 +49,7 @@ class ProjectDetailsAppBar extends StatelessWidget {
               );
             }
           ),
+*/          
         ],
       ),
     );

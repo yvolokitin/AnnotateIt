@@ -93,8 +93,12 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final smallScreen = (screenWidth < 1200) || (screenHeight < 750);
+
     return Row(
       children: [
         MouseRegion(
@@ -102,8 +106,8 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
           child: GestureDetector(
             onTap: _showColorPicker,
             child: Container(
-              width: screenWidth > 1200 ? 48 : 38,
-              height: screenWidth > 1200 ? 48 : 38,
+              width: smallScreen ? 38 : 48,
+              height: smallScreen ? 38 : 48,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
@@ -111,70 +115,100 @@ class _ProjectDetailsAddLabelState extends State<ProjectDetailsAddLabel> {
               ),
               alignment: Alignment.center,
               child: Container(
-                width: screenWidth > 1200 ? 28 : 22,
-                height: screenWidth > 1200 ? 28 : 22,
+                width: smallScreen ? 20 : 28,
+                height: smallScreen ? 20 : 28,
                 decoration: BoxDecoration(
                   color: Color(int.parse(newLabelColor.replaceFirst('#', '0xFF'))),
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(7),
                 ),
               ),
             ),
           ),
         ),
-        SizedBox(width: 20),
+
+        SizedBox(width: smallScreen ? 10 : 20),
         Expanded(
-          child: TextField(
-            controller: labelController,
-            decoration: InputDecoration(
-              hintText: l10n.labelNameHint,
-              hintStyle: TextStyle(
-                color: Colors.white54,
-                fontSize: screenWidth > 1200 ? 22 : 18,
+          child: SizedBox(
+            height: smallScreen ? 38 : 48,
+            child: TextField(
+              controller: labelController,
+              cursorColor: Colors.redAccent,
+              decoration: InputDecoration(
+                hintText: l10n.labelNameHint,
+                hintStyle: TextStyle(
+                  color: Colors.white54,
+                  fontSize: smallScreen ? 18 : 22,
+                  fontWeight: FontWeight.normal,
+                  fontFamily: 'CascadiaCode',
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 7,
+                ),
+                filled: false,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.white70, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.white70, width: 1),
+                ),
+              ),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: smallScreen ? 18 : 22,
                 fontWeight: FontWeight.normal,
                 fontFamily: 'CascadiaCode',
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              filled: false,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.white70, width: 1),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.white70, width: 1),
-              ),
             ),
-            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode',),
           ),
         ),
-        SizedBox(width: 20),
 
-        SizedBox(
-          height: screenWidth > 1200 ? 46 : 36,
-          child: ElevatedButton(
-            onPressed: _addLabel,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-                side: BorderSide(color: Colors.redAccent, width: 2),
-              ),
+        SizedBox(width: smallScreen ? 10 : 20),
+        if (smallScreen)...[
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.redAccent, width: 2),
+              borderRadius: BorderRadius.circular(30),
+              color: Colors.transparent,
             ),
-            child: Text(
-              l10n.createLabelButton,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: screenWidth > 1200 ? 22 : 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'CascadiaCode',
+            child: IconButton(
+              onPressed: _addLabel,
+              icon: const Icon(Icons.add, color: Colors.white),
+              iconSize: 24,
+              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+              tooltip: l10n.createLabelButton, // Optional for accessibility
+            ),
+          ),
+
+        ] else ...[
+          SizedBox(
+            height: smallScreen ? 36 : 46,
+            child: ElevatedButton(
+              onPressed: _addLabel,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  side: BorderSide(color: Colors.redAccent, width: 2),
+                ),
+              ),
+              child: Text(
+                l10n.createLabelButton,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: smallScreen ? 20 : 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'CascadiaCode',
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
