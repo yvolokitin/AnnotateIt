@@ -579,10 +579,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolbarNavigation => 'Navigation';
 
   @override
-  String get toolbarBbox => 'Bounding Box';
+  String get toolbarBbox => 'Draw Bounding Box';
 
   @override
-  String get toolbarSegmentation => 'Segmentation';
+  String get toolbarPolygon => 'Draw Polygon';
+
+  @override
+  String get toolbarSAM => 'Segment Anything Model';
 
   @override
   String get toolbarResetZoom => 'Reset Zoom';
@@ -613,7 +616,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogHelpContent =>
-      '• **Navigation** – Use to select and move around the canvas.\n• **Bounding Box** – (Visible in Detection projects) Draw rectangular bounding boxes.\n• **Segmentation** – (Visible in Segmentation projects) Use SAM-based segmentation tools.\n• **Reset Zoom** – Resets the zoom level to fit the image on screen.\n• **Toggle Grid** – Show or hide the dataset thumbnail grid.\n• **Opacity Settings** – Adjust the fill opacity of annotations.\n• **Toggle Annotation Names** – Show or hide text labels on annotations.\n• **Rotate Left / Right** – (Coming Soon) Rotate the image view.';
+      '• Navigation – Use to select and move around the canvas.\n• Bounding Box – (Visible in Detection projects) Draw rectangular bounding boxes.\n• Reset Zoom – Resets the zoom level to fit the image on screen.\n• Toggle Grid – Show or hide the dataset thumbnail grid.\n• Settings – Adjust the fill opacity of annotations, annotations border line and the size of corners.\n• Toggle Annotation Names – Show or hide text labels on annotations.';
 
   @override
   String get dialogHelpTips =>
