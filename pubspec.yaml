@@ -146,9 +146,13 @@ flutter_launcher_icons:
   image_path: "assets/logo/annotateit_white_red.png"
   min_sdk_android: 21
   android: true
-  windows: true
-  macos: true
   ios: true
+  windows:
+    generate: true
+    image_path: "assets/logo/annotateit_white_red.png"
+  macos:
+    generate: true
+    image_path: "assets/logo/annotateit_white_red.png"
 
 msix_config:
   display_name: AnnotateIt
