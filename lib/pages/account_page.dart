@@ -8,6 +8,7 @@ import '../session/user_session.dart';
 import '../widgets/account/user_profile.dart';
 import '../widgets/account/account_storage.dart';
 import '../widgets/account/application_settings.dart';
+import '../widgets/responsive/responsive_layout.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 
@@ -72,7 +73,6 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     if (_loading) {
       return const Scaffold(
@@ -80,145 +80,123 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (screenWidth >= 1600)
-              Container(
-                height: 95,
-                width: double.infinity,
-                color: const Color(0xFF11191F),
-                child: const Text(""),
-              ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: (screenWidth >= 1600) ? 60.0 : 10.0,
-                ),
-                child: Column(
-                  children: [
-                    TabBar(
-                      controller: _tabController,
-                      indicatorColor: Colors.red,
-                      indicatorWeight: 3.0,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.grey,
-                      labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
-                      unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
-                      tabs: [
-                        Tab(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.person_outline),
-                              if (screenWidth > 700) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.accountUser,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                              if (screenWidth > 1500)
-                                Text(
-                                  l10n.accountProfile,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                            ],
-                          ),
+    return ResponsiveLayout.builder(
+      builder: (context, constraints, screenSize) {
+        return Scaffold(
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Header container only for large desktop
+                if (screenSize == ScreenSize.largeDesktop)
+                  Container(
+                    height: 95,
+                    width: double.infinity,
+                    color: const Color(0xFF11191F),
+                    child: const Text(""),
+                  ),
+                Expanded(
+                  child: Padding(
+                    padding: ResponsiveLayout.getHorizontalPadding(context),
+                    child: Column(
+                      children: [
+                        TabBar(
+                          controller: _tabController,
+                          indicatorColor: Colors.red,
+                          indicatorWeight: 3.0,
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.grey,
+                          labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                          unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                          tabs: [
+                            _buildResponsiveTab(
+                              icon: Icons.person_outline,
+                              shortLabel: l10n.accountUser,
+                              fullLabel: l10n.accountProfile,
+                              screenSize: screenSize,
+                            ),
+                            _buildResponsiveTab(
+                              icon: Icons.folder_open,
+                              shortLabel: l10n.accountStorage,
+                              fullLabel: l10n.accountDeviceStorage,
+                              screenSize: screenSize,
+                            ),
+                            _buildResponsiveTab(
+                              icon: Icons.settings,
+                              shortLabel: l10n.accountSettings,
+                              fullLabel: l10n.accountApplicationSettings,
+                              screenSize: screenSize,
+                            ),
+                          ],
                         ),
-                        Tab(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
                             children: [
-                              const Icon(Icons.folder_open),
-                              if (screenWidth > 700 && screenWidth <= 1500) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.accountStorage,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                              if (screenWidth > 1500) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.accountDeviceStorage,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        Tab(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.settings),
-                              if (screenWidth > 700 && screenWidth <= 1500) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.accountSettings,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                              if (screenWidth > 1500) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.accountApplicationSettings,
-                                  style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
+                              const UserProfile(),
+                              AccountStorage(
+                                user: _user!,
+                                onUserChange: (updated) => setState(() {
+                                  _user = updated;
+                                  _updateUser();
+                                }),
+                              ),
+                              ApplicationSettings(
+                                user: _user!,
+                                onUserChange: (updated) => setState(() {
+                                  _user = updated;
+                                  _updateUser();
+                                }),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          const UserProfile(),
-                          AccountStorage(
-                            user: _user!,
-                            onUserChange: (updated) => setState(() {
-                              _user = updated;
-                              _updateUser();
-                            }),
-                          ),
-                          ApplicationSettings(
-                            user: _user!,
-                            onUserChange: (updated) => setState(() {
-                              _user = updated;
-                              _updateUser();
-                            }),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  /// Helper method to build responsive tabs
+  Widget _buildResponsiveTab({
+    required IconData icon,
+    required String shortLabel,
+    required String fullLabel,
+    required ScreenSize screenSize,
+  }) {
+    return Tab(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon),
+          // Show short label for tablet and desktop
+          if (screenSize == ScreenSize.tablet || screenSize == ScreenSize.desktop) ...[
+            const SizedBox(width: 8),
+            Text(
+              shortLabel,
+              style: const TextStyle(
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.normal,
               ),
             ),
           ],
-        ),
+          // Show full label for large desktop
+          if (screenSize == ScreenSize.largeDesktop) ...[
+            const SizedBox(width: 8),
+            Text(
+              fullLabel,
+              style: const TextStyle(
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
