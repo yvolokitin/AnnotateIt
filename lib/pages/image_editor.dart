@@ -59,6 +59,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   final Map<int, AnnotatedLabeledMedia> _mediaCache = {};
   final Map<int, ui.Image> _imageCache = {};
+  // Track invalid media items (like videos) that can't be loaded as images
+  final Map<int, String> _invalidMediaCache = {};
+  // Common video file extensions
+  final List<String> _videoExtensions = [
+    '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.webm', '.m4v', '.3gp', '.mpg', '.mpeg'
+  ];
 
   final FocusNode _focusNode = FocusNode();
 
@@ -78,6 +84,20 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       image.dispose();
     }
     super.dispose();
+  }
+  
+  /// Limits the image cache size by removing oldest entries when the cache exceeds maxSize.
+  /// This helps prevent memory issues with large datasets.
+  /// 
+  /// @param maxSize The maximum number of images to keep in the cache
+  void _limitCacheSize(int maxSize) {
+    if (_imageCache.length > maxSize) {
+      final keysToRemove = _imageCache.keys.toList().sublist(0, _imageCache.length - maxSize);
+      for (final key in keysToRemove) {
+        _imageCache[key]?.dispose();
+        _imageCache.remove(key);
+      }
+    }
   }
 
   void _preloadInitialMedia() {
@@ -103,14 +123,33 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Future<void> _loadImage(int index, String filePath) async {
-    if (_imageCache.containsKey(index)) return;
+    if (_imageCache.containsKey(index) || _invalidMediaCache.containsKey(index)) return;
+    
     final file = File(filePath);
     if (!file.existsSync()) return;
+    
+    // Check if the file is a video based on its extension
+    final fileExtension = filePath.toLowerCase().substring(filePath.lastIndexOf('.'));
+    if (_videoExtensions.contains(fileExtension)) {
+      // Mark this as an invalid media item (video)
+      _invalidMediaCache[index] = 'Video files are not supported for editing';
+      if (mounted) setState(() {});
+      return;
+    }
 
-    final bytes = await file.readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    _imageCache[index] = frame.image;
+    try {
+      final bytes = await file.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      _imageCache[index] = frame.image;
+      
+      // Limit cache size to prevent memory issues with large datasets
+      _limitCacheSize(5);
+    } catch (e) {
+      // Handle other invalid image formats or corrupted files
+      _invalidMediaCache[index] = 'Invalid image data: ${e.toString()}';
+    }
+    
     if (mounted) setState(() {});
   }
 
@@ -182,8 +221,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           // Write the bytes to the file
           await file.writeAsBytes(pngBytes);
           
-          // Reload the image in the cache
+          // Properly dispose of the old image before removing it from the cache
+          final oldImage = _imageCache[_currentIndex];
+          if (oldImage != null) {
+            oldImage.dispose();
+          }
           _imageCache.remove(_currentIndex);
+          
+          // Reload the image in the cache
           await _loadImage(_currentIndex, filePath);
           
           // Reset the modified state
@@ -270,9 +315,44 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                   itemBuilder: (context, index) {
                     final media = _mediaCache[index];
                     final image = _imageCache[index];
-                    if (media == null || image == null) {
+                    final errorMessage = _invalidMediaCache[index];
+                    
+                    // Show loading indicator if media is not loaded yet
+                    if (media == null) {
                       return const Center(child: CircularProgressIndicator());
                     }
+                    
+                    // Show error message for invalid media (like videos)
+                    if (errorMessage != null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline, size: 64, color: Colors.red),
+                            const SizedBox(height: 16),
+                            Text(
+                              errorMessage,
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                final newPage = _currentIndex + 1;
+                                _pageController.jumpToPage(newPage < widget.totalMediaCount ? newPage : 0);
+                              },
+                              child: const Text('Next Media Item'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    
+                    // Show loading indicator if image is not loaded yet
+                    if (image == null) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
                     return Row(
                       children: [
                         EditorLeftToolbar(
