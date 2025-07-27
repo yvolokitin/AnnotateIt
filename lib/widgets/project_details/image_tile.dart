@@ -9,6 +9,7 @@ import '../../models/label.dart';
 import '../../models/project.dart';
 import '../../models/annotation.dart';
 import '../../models/annotated_labeled_media.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 import 'image_tile/image_preview.dart';
 import 'image_tile/image_tile_menu_button.dart';
@@ -71,7 +72,8 @@ class _ImageTileState extends State<ImageTile> {
     final uniqueLabels = extractLabelsFromAnnotations(widget.mediaItem.annotations ?? []);
 
     if (!file.existsSync()) {
-      return const ErrorImageTile(message: "File not found");
+      final l10n = AppLocalizations.of(context)!;
+      return ErrorImageTile(message: l10n.fileNotFound);
     }
 
     final isSelected = widget.mediaItem.isSelected;

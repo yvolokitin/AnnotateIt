@@ -36,12 +36,21 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   String _searchQuery = "";
   
   // Default sort option
-  String _sortOption = "Last Updated";
+  late String _sortOption;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with localized default sort option
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        setState(() {
+          _sortOption = l10n.menuSortLastUpdated;
+        });
+      }
+    });
     loadProjectsWithLabels();
   }
 
@@ -121,25 +130,32 @@ class ProjectsListPageState extends State<ProjectsListPage> {
       return nameMatches && matchesFilter;
     }).toList();
 
+    // Get localized strings for comparison
+    final l10n = AppLocalizations.of(context)!;
+    
     // Sort options
     switch (_sortOption) {
-      case "Last Updated":
+      case String option when option == l10n.menuSortLastUpdated:
         filtered.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
         break;
-      case "Newest-Oldest":
+      case String option when option == l10n.menuSortNewestOldest:
         filtered.sort((a, b) => b.creationDate.compareTo(a.creationDate));
         break;
-      case "Oldest-Newest":
+      case String option when option == l10n.menuSortOldestNewest:
         filtered.sort((a, b) => a.creationDate.compareTo(b.creationDate));
         break;
-      case "A-Z":
+      case String option when option == l10n.menuSortAZ:
         filtered.sort((a, b) => a.name.compareTo(b.name));
         break;
-      case "Z-A":
+      case String option when option == l10n.menuSortZA:
         filtered.sort((a, b) => b.name.compareTo(a.name));
         break;
-      case "Project Type":
+      case String option when option == l10n.menuSortProjectType:
         filtered.sort((a, b) => a.type.compareTo(b.type));
+        break;
+      default:
+        // Default to Last Updated if no match
+        filtered.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
         break;
     }
 

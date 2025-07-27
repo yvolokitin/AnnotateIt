@@ -57,24 +57,24 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
     // If there's no active upload, allow navigation without confirmation
     if (!_isUploading) return true;
     
+    // Get localized strings
+    final l10n = AppLocalizations.of(context)!;
+    
     // Show a confirmation dialog
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Upload in Progress'),
-        content: const Text(
-          'You have an active upload in progress. If you leave now, the upload will be canceled and you will need to start over.\n\n'
-          'Do you want to leave anyway?'
-        ),
+        title: Text(l10n.uploadInProgressTitle),
+        content: Text(l10n.uploadInProgressMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Stay'),
+            child: Text(l10n.uploadInProgressStay),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Leave'),
+            child: Text(l10n.uploadInProgressLeave),
           ),
         ],
       ),

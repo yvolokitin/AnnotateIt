@@ -390,6 +390,35 @@
   "importLabelsDatabaseError": "Failed to save labels to database",
   "importLabelsDatabaseErrorTips": "Please check your database connection and try again. If the problem persists, contact support.",
   "importLabelsNameMissingOrEmpty": "One of the labels is missing a valid name.",
-  "importLabelsNameMissingOrEmptyTips": "Ensure every label in the JSON includes a non-empty 'name' field."
+  "importLabelsNameMissingOrEmptyTips": "Ensure every label in the JSON includes a non-empty 'name' field.",
 
+  "menuSortLastUpdated": "Last Updated",
+  "menuSortNewestOldest": "Newest-Oldest",
+  "menuSortOldestNewest": "Oldest-Newest",
+  "menuSortAZ": "A-Z",
+  "menuSortZA": "Z-A",
+  "menuSortProjectType": "Project Type",
+
+  "uploadInProgressTitle": "Upload in Progress",
+  "uploadInProgressMessage": "You have an active upload in progress. If you leave now, the upload will be canceled and you will need to start over.\n\nDo you want to leave anyway?",
+  "uploadInProgressStay": "Stay",
+  "uploadInProgressLeave": "Leave",
+
+  "fileNotFound": "File not found",
+
+  "labelEditSave": "Save",
+  "labelEditEdit": "Edit",
+  "labelEditMoveUp": "Move Up",
+  "labelEditMoveDown": "Move Down",
+  "labelEditDelete": "Delete",
+  "labelExportLabels": "Export Labels",
+  "labelSaveDialogTitle": "Save labels in JSON file",
+  "labelSaveDefaultFilename": "labels.json",
+  "labelDeleteError": "Failed to delete label: {error}",
+  "@labelDeleteError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "labelDeleteErrorTips": "Make sure the label still exists or is not used elsewhere."
 }
