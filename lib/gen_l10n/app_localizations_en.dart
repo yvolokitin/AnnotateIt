@@ -299,7 +299,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuImportDataset => 'Create project from Dataset Import';
 
   @override
-  String get menuSortLastUpdated => 'Last updated';
+  String get menuSortLastUpdated => 'Last Updated';
 
   @override
   String get menuSortNewestOldest => 'Newest-Oldest';
@@ -924,4 +924,62 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get importLabelsNameMissingOrEmptyTips =>
       'Ensure every label in the JSON includes a non-empty \'name\' field.';
+
+  @override
+  String get menuSortAZ => 'A-Z';
+
+  @override
+  String get menuSortZA => 'Z-A';
+
+  @override
+  String get menuSortProjectType => 'Project Type';
+
+  @override
+  String get uploadInProgressTitle => 'Upload in Progress';
+
+  @override
+  String get uploadInProgressMessage =>
+      'You have an active upload in progress. If you leave now, the upload will be canceled and you will need to start over.\n\nDo you want to leave anyway?';
+
+  @override
+  String get uploadInProgressStay => 'Stay';
+
+  @override
+  String get uploadInProgressLeave => 'Leave';
+
+  @override
+  String get fileNotFound => 'File not found';
+
+  @override
+  String get labelEditSave => 'Save';
+
+  @override
+  String get labelEditEdit => 'Edit';
+
+  @override
+  String get labelEditMoveUp => 'Move Up';
+
+  @override
+  String get labelEditMoveDown => 'Move Down';
+
+  @override
+  String get labelEditDelete => 'Delete';
+
+  @override
+  String get labelExportLabels => 'Export Labels';
+
+  @override
+  String get labelSaveDialogTitle => 'Save labels in JSON file';
+
+  @override
+  String get labelSaveDefaultFilename => 'labels.json';
+
+  @override
+  String labelDeleteError(Object error) {
+    return 'Failed to delete label: $error';
+  }
+
+  @override
+  String get labelDeleteErrorTips =>
+      'Make sure the label still exists or is not used elsewhere.';
 }

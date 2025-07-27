@@ -1,0 +1,417 @@
+{
+  "@@locale": "pt",
+
+  "buttonKeep": "Manter",
+  "buttonSave": "Salvar",
+  "buttonHelp": "Ajuda",
+  "buttonEdit": "Editar",
+  "buttonNext": "Próximo",
+  "buttonBack": "Voltar",
+  "buttonApply": "Aplicar",
+  "buttonClose": "Fechar",
+  "buttonImport": "Importar",
+  "buttonCancel": "Cancelar",
+  "buttonFinish": "Finalizar",
+  "buttonDelete": "Excluir",
+  "buttonDuplicate": "Duplicar",
+  "buttonConfirm": "Confirmar",
+  "buttonDiscard": "Descartar",
+  "buttonFeedbackShort": "Fdbck",
+  "buttonImportLabels": "Importar Etiquetas",
+  "buttonExportLabels": "Exportar Etiquetas",
+  "buttonNextConfirmTask": "Próximo: Confirmar Tarefa",
+  "buttonCreateProject": "Criar Projeto",
+
+  "aboutTitle": "Sobre o Annot@It",
+  "aboutDescription": "Annot@It é um aplicativo de anotação projetado para simplificar o processo de anotação para projetos de visão computacional. Seja trabalhando em classificação de imagens, detecção de objetos, segmentação ou outras tarefas de visão, o Annot@It oferece a flexibilidade e precisão necessárias para rotulagem de dados de alta qualidade.",
+  "aboutFeaturesTitle": "Recursos principais:",
+  "aboutFeatures": "- Múltiplos Tipos de Projeto: Crie e gerencie projetos adaptados para diferentes tarefas de visão computacional.\n- Upload e Gerenciamento de Dados: Faça upload e organize facilmente seus conjuntos de dados para anotação perfeita.\n- Ferramentas Avançadas de Anotação: Use caixas delimitadoras, polígonos, pontos-chave e máscaras de segmentação.\n- Exportação e Integração: Exporte dados rotulados em vários formatos compatíveis com frameworks de IA/ML.",
+  "aboutCallToAction": "Comece sua jornada de anotação hoje e construa conjuntos de dados de alta qualidade para seus modelos de visão computacional!",
+
+  "accountUser": "Usuário",
+  "accountProfile": "Perfil",
+  "accountStorage": "Armazenamento",
+  "accountDeviceStorage": "Armazenamento do Dispositivo",
+  "accountSettings": "Configurações",
+  "accountApplicationSettings": "Configurações do Aplicativo",
+  "accountLoadingMessage": "Carregando dados do usuário...",
+
+  "userProfileName": "Capitão Anotador",
+  "userProfileFeedbackButton": "Feedback",
+  "userProfileEditProfileButton": "Editar Perfil",
+  "userProfileProjects": "Projetos",
+  "userProfileLabels": "Etiquetas",
+  "userProfileMedia": "Mídia",
+  "userProfileOverview": "Visão Geral",
+  "userProfileAnnotations": "Anotações",
+
+  "settingsGeneralTitle": "Configurações Gerais",
+  "settingsProjectCreationTitle": "Criação de Projeto",
+  "settingsProjectCreationConfirmNoLabels": "Sempre perguntar para confirmar ao criar um projeto sem etiquetas",
+  "settingsProjectCreationConfirmNoLabelsNote": "Você será avisado se tentar criar um projeto sem nenhuma etiqueta definida.",
+
+  "settingsLabelsCreationDeletionTitle": "Criação / Exclusão de Etiquetas",
+  "settingsLabelsDeletionWithAnnotations": "Excluir anotações quando a etiqueta for removida",
+  "settingsLabelsDeletionWithAnnotationsNote": "Quando ativado, excluir uma etiqueta removerá automaticamente todas as anotações atribuídas a essa etiqueta em todos os itens de mídia.",
+  "settingsLabelsSetDefaultLabel": "Definir primeira etiqueta como padrão",
+  "settingsLabelsSetDefaultLabelNote": "Quando ativado, a primeira etiqueta que você criar em um projeto será automaticamente marcada como a etiqueta padrão. Você pode alterar o padrão posteriormente a qualquer momento.",
+
+  "settingsDatasetViewTitle": "Visualização do Conjunto de Dados",
+  "settingsDatasetViewDuplicateWithAnnotations": "Duplicar (fazer uma cópia) imagem sempre com anotações",
+  "settingsDatasetViewDuplicateWithAnnotationsNote": "Ao duplicar, as anotações serão incluídas a menos que você altere as configurações",
+  "settingsDatasetViewDeleteFromOS": "Ao excluir imagem do Conjunto de Dados, sempre excluí-la do sistema operacional / sistema de arquivos",
+  "settingsDatasetViewDeleteFromOSNote": "Exclui o arquivo do disco também, não apenas do conjunto de dados",
+  "settingsAnnotationTitle": "Configurações de Anotação",
+  "settingsAnnotationOpacity": "Opacidade da anotação",
+  "settingsAnnotationAutoSave": "Sempre salvar ou enviar anotação ao passar para a próxima imagem",
+  "settingsThemeTitle": "Seleção de tema",
+  "settingsLanguageTitle": "País / Idioma",
+
+  "colorPickerTitle": "Escolher uma cor",
+  "colorPickerBasicColors": "Cores básicas",
+
+  "loadingProjects": "Carregando projetos...",
+  "importDataset": "Importar conjunto de dados",
+  "uploadMedia": "Carregar mídia",
+  "createProjectTitle": "Criar um Novo Projeto",
+  "createProjectStepOneSubtitle": "Por favor, insira o nome do seu novo projeto e selecione o tipo de Projeto",
+  "createProjectStepTwoSubtitle": "Por favor, crie etiquetas para um Novo projeto",
+
+  "emptyProjectTitle": "Inicie seu primeiro projeto",
+  "emptyProjectDescription": "Crie um projeto para começar a organizar conjuntos de dados, anotar mídia e aplicar IA às suas tarefas de visão — tudo em um espaço de trabalho otimizado projetado para acelerar seu pipeline de visão computacional.",
+  "emptyProjectCreateNew": "Criar Novo Projeto",
+  "emptyProjectCreateNewShort": "Novo Projeto",
+  "emptyProjectImportDataset": "Criar Projeto a partir da importação de Conjunto de Dados",
+  "emptyProjectImportDatasetShort": "Importar Conjunto de Dados",
+
+  "dialogBack": "<- Voltar",
+  "dialogNext": "Próximo ->",
+
+  "rename": "Renomear",
+  "delete": "Excluir",
+  "setAsDefault": "Definir como Padrão",
+
+  "paginationPageFromTotal": "Página {current} de {total}",
+  "@paginationPageFromTotal": {
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+
+  "taskTypeRequiredTitle": "Tipo de Tarefa Necessário",
+  "taskTypeRequiredMessage": "Você precisa selecionar um tipo de tarefa antes de continuar. A aba atual '{tab}' não tem um tipo de tarefa selecionado. Cada projeto deve estar associado a uma tarefa (por exemplo, detecção de objetos, classificação ou segmentação) para que o sistema saiba como processar seus dados.",
+  "@taskTypeRequiredMessage": {
+    "description": "Mensagem de erro quando o tipo de tarefa não é selecionado",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "taskTypeRequiredTips": "Clique em uma das opções de tipo de tarefa disponíveis abaixo da aba '{tab}'. Se você não tem certeza de qual tarefa escolher, passe o mouse sobre o ícone de informação ao lado de cada tipo para ver uma breve descrição.",
+  "@taskTypeRequiredTips": {
+    "description": "Dicas úteis para selecionar o tipo de tarefa",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "menuProjects": "Projetos",
+  "menuAccount": "Conta",
+  "menuLearn": "Aprender",
+  "menuAbout": "Sobre",
+
+  "menuCreateNewProject": "Criar novo projeto",
+  "menuCreateFromDataset": "Criar a partir de Conjunto de Dados",
+  "menuImportDataset": "Criar projeto a partir da Importação de Conjunto de Dados",
+  "menuSortLastUpdated": "Última atualização",
+  "menuSortNewestOldest": "Mais recente-Mais antigo",
+  "menuSortOldestNewest": "Mais antigo-Mais recente",
+  "menuSortType": "Tipo de Projeto",
+  "menuSortAz": "A-Z",
+  "menuSortZa": "Z-A",
+
+  "projectNameLabel": "Nome do Projeto",
+  "tabDetection": "Detecção",
+  "tabClassification": "Classificação",
+  "tabSegmentation": "Segmentação",
+  "labelRequiredTitle": "Pelo Menos Uma Etiqueta Necessária",
+  "labelRequiredMessage": "Você deve criar pelo menos uma etiqueta para continuar. As etiquetas são essenciais para definir as categorias de anotação que serão usadas durante a preparação do conjunto de dados.",
+  "labelRequiredTips": "Dica: Clique no botão vermelho rotulado Criar Etiqueta após inserir um nome de etiqueta para adicionar sua primeira etiqueta.",
+  "createLabelButton": "Criar Etiqueta",
+  "labelNameHint": "Digite um novo nome de Etiqueta aqui",
+  "createdLabelsTitle": "Etiquetas Criadas",
+  "labelEmptyTitle": "O nome da etiqueta não pode estar vazio!",
+  "labelEmptyMessage": "Por favor, insira um nome de etiqueta. As etiquetas ajudam a identificar os objetos ou categorias em seu projeto. É recomendável usar nomes curtos, claros e descritivos, como \"Carro\", \"Pessoa\" ou \"Árvore\". Evite caracteres especiais ou espaços.",
+  "labelEmptyTips": "Dicas para Nomear Etiquetas:\n• Use nomes curtos e descritivos\n• Mantenha-se com letras, dígitos, sublinhados (por exemplo, gato, placa_de_trânsito, fundo)\n• Evite espaços e símbolos (por exemplo, Pessoa 1 → pessoa_1)",
+  "labelDuplicateTitle": "Nome de Etiqueta Duplicado",
+  "labelDuplicateMessage": "A etiqueta '{label}' já existe neste projeto. Cada etiqueta deve ter um nome único para evitar confusão durante a anotação e o treinamento.",
+  "@labelDuplicateMessage": {
+    "description": "Mensagem de erro quando a etiqueta já existe",
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "labelDuplicateTips": "Por que etiquetas únicas?\n• Reutilizar o mesmo nome pode causar problemas durante a exportação do conjunto de dados e o treinamento do modelo.\n• Nomes de etiquetas únicos ajudam a manter anotações claras e estruturadas.\n\nDica: Tente adicionar uma variação ou número para diferenciar (por exemplo, 'Carro', 'Carro_2').",
+  "binaryLimitTitle": "Limite de Classificação Binária",
+  "binaryLimitMessage": "Você não pode criar mais de duas etiquetas para um projeto de Classificação Binária.\n\nA Classificação Binária é projetada para distinguir entre exatamente duas classes, como 'Sim' vs 'Não', ou 'Spam' vs 'Não Spam'.",
+  "binaryLimitTips": "Precisa de mais de duas etiquetas?\nConsidere mudar o tipo do seu projeto para Classificação Multi-Classe ou outra tarefa adequada para suportar três ou mais categorias.",
+  "noteBinaryClassification": "Este tipo de projeto permite exatamente 2 etiquetas. A Classificação Binária é usada quando seu modelo precisa distinguir entre duas classes possíveis, como \"Sim\" vs \"Não\", ou \"Cachorro\" vs \"Não Cachorro\". Por favor, crie apenas duas etiquetas distintas.",
+  "noteMultiClassClassification": "Este tipo de projeto suporta múltiplas etiquetas. A Classificação Multi-Classe é adequada quando seu modelo precisa escolher entre três ou mais categorias, como \"Gato\", \"Cachorro\", \"Coelho\". Você pode adicionar quantas etiquetas forem necessárias.",
+  "noteDetectionOrSegmentation": "Este tipo de projeto suporta múltiplas etiquetas. Para Detecção de Objetos ou Segmentação, cada etiqueta normalmente representa uma classe diferente de objeto (por exemplo, \"Carro\", \"Pedestre\", \"Bicicleta\"). Você pode criar quantas etiquetas forem necessárias para seu conjunto de dados.",
+  "noteDefault": "Você pode criar uma ou mais etiquetas dependendo do tipo do seu projeto. Cada etiqueta ajuda a definir uma categoria que seu modelo aprenderá a reconhecer. Consulte a documentação para melhores práticas.",
+  "discardDatasetImportTitle": "Descartar Importação de Conjunto de Dados?",
+  "discardDatasetImportMessage": "Você já extraiu um conjunto de dados. Cancelar agora excluirá os arquivos extraídos e os detalhes do conjunto de dados detectados. Tem certeza de que deseja continuar?",
+  "projectTypeHelpTitle": "Ajuda para Seleção de Tipo de Projeto",
+  "projectTypeWhyDisabledTitle": "Por que alguns tipos de projeto estão desativados?",
+  "projectTypeWhyDisabledBody": "Quando você importa um conjunto de dados, o sistema analisa as anotações fornecidas e tenta detectar automaticamente o tipo de projeto mais adequado para você.\n\nPor exemplo, se seu conjunto de dados contém anotações de caixas delimitadoras, o tipo de projeto sugerido será \"Detecção\". Se contém máscaras, \"Segmentação\" será sugerido, e assim por diante.\n\nPara proteger seus dados, apenas tipos de projeto compatíveis são habilitados por padrão.",
+  "projectTypeAllowChangeTitle": "O que acontece se eu habilitar a mudança de tipo de projeto?",
+  "projectTypeAllowChangeBody": "Se você ativar \"Permitir Mudança de Tipo de Projeto\", poderá selecionar manualmente QUALQUER tipo de projeto, mesmo que não corresponda às anotações detectadas.\n\n⚠️ AVISO: Todas as anotações existentes da importação serão excluídas ao mudar para um tipo de projeto incompatível.\nVocê precisará reannotar ou importar um conjunto de dados adequado para o tipo de projeto recém-selecionado.",
+  "projectTypeWhenUseTitle": "Quando devo usar esta opção?",
+  "projectTypeWhenUseBody": "Você só deve habilitar esta opção se:\n\n- Você importou acidentalmente o conjunto de dados errado.\n- Você deseja iniciar um novo projeto de anotação com um tipo diferente.\n- A estrutura do seu conjunto de dados mudou após a importação.\n\nSe você não tem certeza, recomendamos fortemente manter a seleção padrão para evitar perda de dados.",
+
+  "allLabels": "Todas as Etiquetas",
+  "setAsProjectIcon": "Definir como Ícone do Projeto",
+  "setAsProjectIconConfirm": "Deseja usar '{filePath}' como ícone para este projeto?\n\nIsso substituirá qualquer ícone definido anteriormente.",
+  "@setAsProjectIconConfirm": {
+    "placeholders": {
+      "filePath": {}
+    }
+  },
+
+  "removeFilesFromDatasetInProgress": "Excluindo arquivos...",
+  "removeFilesFromDataset": "Remover arquivos do Conjunto de Dados?",
+  "removeFilesFromDatasetConfirm": "Tem certeza de que deseja excluir os seguintes arquivos ('{amount}')?\n\nTodas as anotações correspondentes também serão removidas.",
+  "@removeFilesFromDatasetConfirm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "removeFilesFailedTitle": "Falha na Exclusão",
+  "removeFilesFailedMessage": "Alguns arquivos não puderam ser excluídos",
+  "removeFilesFailedTips": "Verifique as permissões de arquivo e tente novamente",
+
+  "duplicateImage": "Duplicar Imagem",
+  "duplicateWithAnnotations": "Duplicar imagem com anotações",
+  "duplicateWithAnnotationsHint": "Uma cópia da imagem será criada junto com todos os dados de anotação.",
+  "duplicateImageOnly": "Duplicar apenas a imagem",
+  "duplicateImageOnlyHint": "Apenas a imagem será copiada, sem anotações.",
+  "saveDuplicateChoiceAsDefault": "Salvar esta resposta como resposta padrão e não perguntar novamente\n(Você pode alterar isso em Conta -> Configurações do aplicativo -> Navegação do conjunto de dados)",
+
+  "editProjectTitle": "Editar nome do projeto",
+  "editProjectDescription": "Por favor, escolha um nome de projeto claro e descritivo (3 - 86 caracteres). É recomendável evitar caracteres especiais.",
+  
+  "deleteProjectTitle": "Excluir Projeto",
+  "deleteProjectInProgress": "Excluindo projeto...",
+  "deleteProjectOptionDeleteFromDisk": "Também excluir todos os arquivos do disco",
+  "deleteProjectOptionDontAskAgain": "Não me pergunte novamente",
+  "deleteProjectConfirm": "Tem certeza de que deseja excluir o projeto \"{projectName}\"?",
+  "@deleteProjectConfirm": {
+    "placeholders": {
+      "projectName": {}
+    }
+  },
+  "deleteProjectInfoLine": "O projeto foi criado em {creationDate}\nNúmero de Etiquetas: {labelCount}",
+  "@deleteProjectInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "labelCount": {}
+    }
+  },
+
+  "deleteDatasetTitle": "Excluir Conjunto de Dados",
+  "deleteDatasetInProgress": "Excluindo conjunto de dados... Por favor, aguarde.",
+  "deleteDatasetConfirm": "Tem certeza de que deseja excluir \"{datasetName}\"?",
+  "@deleteDatasetConfirm": {
+    "placeholders": {
+      "datasetName": {}
+    }
+  },
+  "deleteDatasetInfoLine": "Este conjunto de dados foi criado em {creationDate} e contém {mediaCount} itens de mídia e {annotationCount} anotações.",
+  "@deleteDatasetInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "mediaCount": {},
+      "annotationCount": {}
+    }
+  },
+
+  "editDatasetTitle": "Renomear Conjunto de Dados",
+  "editDatasetDescription": "Digite um novo nome para este conjunto de dados:",
+
+  "noMediaDialogUploadPrompt": "Você precisa carregar imagens ou vídeos",
+  "noMediaDialogUploadPromptShort": "Carregar mídia",
+  "noMediaDialogSupportedImageTypesTitle": "Tipos de imagens suportados:",
+  "noMediaDialogSupportedImageTypesList": "jpg, jpeg, png, bmp, jfif, webp",
+  "noMediaDialogSupportedVideoFormatsLink": "Clique aqui para ver quais formatos de vídeo são suportados em sua plataforma",
+  "noMediaDialogSupportedVideoFormatsTitle": "Formatos de Vídeo Suportados",
+  "noMediaDialogSupportedVideoFormatsList": "Formatos Comumente Suportados:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (dependente do navegador)\n- MKV: Android (parcial), Windows\n- AVI: Apenas Android/Windows (parcial)",
+  "noMediaDialogSupportedVideoFormatsWarning": "O suporte pode variar dependendo da plataforma e do codec de vídeo.\nAlguns formatos podem não funcionar em navegadores ou no iOS.",
+
+  "annotatorTopToolbarBackTooltip": "Voltar ao Projeto",
+  "annotatorTopToolbarSelectDefaultLabel": "Selecionar etiqueta padrão",
+
+  "toolbarNavigation": "Navegação",
+  "toolbarBbox": "Desenhar Caixa Delimitadora",
+  "toolbarPolygon": "Desenhar Polígono",
+  "toolbarSAM": "Modelo de Segmentação Automática",
+  "toolbarResetZoom": "Redefinir Zoom",
+  "toolbarToggleGrid": "Alternar Grade",
+  "toolbarAnnotationSettings": "Configurações de Anotação",
+  "toolbarToggleAnnotationNames": "Alternar Nomes de Anotação",
+  "toolbarRotateLeft": "Girar à Esquerda (Em Breve)",
+  "toolbarRotateRight": "Girar à Direita (Em Breve)",
+  "toolbarHelp": "Ajuda",
+  "dialogOpacityTitle": "Opacidade de Preenchimento da Anotação",
+  "dialogHelpTitle": "Ajuda da Barra de Ferramentas do Anotador",
+  "dialogHelpContent": "• Navegação – Use para selecionar e mover pelo canvas.\n• Caixa Delimitadora – (Visível em projetos de Detecção) Desenhe caixas delimitadoras retangulares.\n• Redefinir Zoom – Redefine o nível de zoom para ajustar a imagem na tela.\n• Alternar Grade – Mostrar ou ocultar a grade de miniaturas do conjunto de dados.\n• Configurações – Ajuste a opacidade de preenchimento das anotações, a borda das anotações e o tamanho dos cantos.\n• Alternar Nomes de Anotação – Mostrar ou ocultar etiquetas de texto nas anotações.",
+  "dialogHelpTips": "Dica: Use o modo de Navegação para selecionar e editar anotações.\nMais atalhos e recursos em breve!",
+  "dialogOpacityExplanation": "Ajuste o nível de opacidade para tornar o conteúdo mais ou menos transparente.",
+
+  "deleteAnnotationTitle": "Excluir Anotação",
+  "deleteAnnotationMessage": "Tem certeza de que deseja excluir",
+  "unnamedAnnotation": "esta anotação",
+
+  "accountStorage_importFolderTitle": "Pasta de importação de Conjuntos de Dados",
+  "accountStorage_thumbnailsFolderTitle": "Pasta de Miniaturas",
+  "accountStorage_exportFolderTitle": "Pasta de exportação de Conjuntos de Dados",
+  "accountStorage_folderTooltip": "Escolher pasta",
+  "accountStorage_helpTitle": "Ajuda de Armazenamento",
+  "accountStorage_helpMessage": "Você pode alterar a pasta onde os conjuntos de dados importados, os arquivos ZIP exportados e as miniaturas são armazenados.\nToque no ícone \"Pasta\" ao lado do campo de caminho para selecionar ou alterar o diretório.\n\nEsta pasta será usada como local padrão para:\n- Arquivos de conjuntos de dados importados (por exemplo, COCO, YOLO, VOC, Datumaro, etc.)\n- Arquivos Zip de conjuntos de dados exportados\n- Miniaturas de projetos\n\nCertifique-se de que a pasta selecionada seja gravável e tenha espaço suficiente.\nNo Android ou iOS, você pode precisar conceder permissões de armazenamento.\nAs pastas recomendadas variam por plataforma — veja abaixo dicas específicas da plataforma.",
+  "accountStorage_helpTips": "Pastas recomendadas por plataforma:\n\nWindows:\n  C:\\Users\\<você>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<você>/.annotateit/datasets\n\nmacOS:\n  /Users/<você>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <Caminho sandbox do app>/Documents/AnnotateIt/datasets\n",
+
+  "accountStorage_copySuccess": "Caminho copiado para a área de transferência",
+  "accountStorage_openError": "A pasta não existe:\n",
+  "accountStorage_pathEmpty": "O caminho está vazio",
+  "accountStorage_openFailed": "Falha ao abrir a pasta:\n",
+
+  "changeProjectTypeTitle": "Alterar tipo de projeto",
+  "changeProjectTypeMigrating": "Migrando tipo de projeto...",
+  "changeProjectTypeStepOneSubtitle": "Por favor, selecione um novo tipo de projeto da lista abaixo",
+  "changeProjectTypeStepTwoSubtitle": "Por favor, confirme sua escolha",
+
+  "changeProjectTypeWarningTitle": "Aviso: Você está prestes a alterar o tipo de projeto.",
+  "changeProjectTypeConversionIntro": "Todas as anotações existentes serão convertidas da seguinte forma:",
+  "changeProjectTypeConversionDetails": "- Caixas delimitadoras (Detecção) -> convertidas em polígonos retangulares.\n- Polígonos (Segmentação) -> convertidos em caixas delimitadoras ajustadas.\n\nNota: Essas conversões podem reduzir a precisão, especialmente ao converter polígonos em caixas, pois informações detalhadas de forma serão perdidas.\n\n- Detecção / Segmentação → Classificação:\n  As imagens serão classificadas com base na etiqueta mais frequente nas anotações:\n     -> Se a imagem tiver 5 objetos rotulados como \"Cachorro\" e 10 rotulados como \"Gato\", será classificada como \"Gato\".\n     -> Se as contagens forem iguais, a primeira etiqueta encontrada será usada.\n\n- Classificação -> Detecção / Segmentação:\n  Nenhuma anotação será transferida. Você precisará reannotar todos os itens de mídia manualmente, pois os projetos de classificação não contêm dados em nível de região.",
+  "changeProjectTypeErrorTitle": "Falha na Migração",
+  "changeProjectTypeErrorMessage": "Ocorreu um erro ao alterar o tipo de projeto. As alterações não puderam ser aplicadas.",
+  "changeProjectTypeErrorTips": "Verifique se o projeto tem anotações válidas e tente novamente. Se o problema persistir, reinicie o aplicativo ou entre em contato com o suporte.",
+
+  "exportProjectAsDataset": "Exportar Projeto como Conjunto de Dados",
+
+  "projectHelpTitle": "Como os Projetos Funcionam",
+  "projectHelpMessage": "Os projetos permitem que você organize conjuntos de dados, arquivos de mídia e anotações em um só lugar. Você pode criar novos projetos para diferentes tarefas como detecção, classificação ou segmentação.",
+  "projectHelpTips": "Dica: Você pode importar conjuntos de dados nos formatos COCO, YOLO, VOC, Labelme e Datumaro para criar um projeto automaticamente.",
+
+  "datasetDialogTitle": "Importar Conjunto de Dados para Criar Projeto",
+  "datasetDialogProcessing": "Processando...",
+  "datasetDialogProcessingProgress": "Processando... {percent}%",
+  "datasetDialogModeIsolate": "Modo de Isolamento Ativado",
+  "datasetDialogModeNormal": "Modo Normal",
+  "datasetDialogNoDatasetLoaded": "Nenhum conjunto de dados carregado.",
+
+  "datasetDialogImportFailedTitle": "Falha na Importação",
+  "datasetDialogImportFailedMessage": "O arquivo ZIP não pôde ser processado. Ele pode estar corrompido, incompleto ou não ser um arquivo de conjunto de dados válido.",
+  "datasetDialogImportFailedTips": "Tente exportar ou compactar novamente seu conjunto de dados.\nCertifique-se de que esteja no formato COCO, YOLO, VOC ou suportado.\n\nErro: ",
+
+  "datasetDialogNoProjectTypeTitle": "Nenhum Tipo de Projeto Selecionado",
+  "datasetDialogNoProjectTypeMessage": "Por favor, selecione um Tipo de Projeto com base nos tipos de anotação detectados em seu conjunto de dados.",
+  "datasetDialogNoProjectTypeTips": "Verifique o formato do seu conjunto de dados e certifique-se de que as anotações seguem uma estrutura suportada como COCO, YOLO, VOC ou Datumaro.",
+
+  "datasetDialogProcessingDatasetTitle": "Processando Conjunto de Dados",
+  "datasetDialogProcessingDatasetMessage": "Estamos atualmente extraindo seu arquivo ZIP, analisando seu conteúdo e detectando o formato do conjunto de dados e o tipo de anotação. Isso pode levar de alguns segundos a alguns minutos, dependendo do tamanho e da estrutura do conjunto de dados. Por favor, não feche esta janela ou navegue para longe durante o processo.",
+  "datasetDialogProcessingDatasetTips": "Arquivos grandes com muitas imagens ou arquivos de anotação podem levar mais tempo para processar.",
+
+  "datasetDialogCreatingProjectTitle": "Criando Projeto",
+  "datasetDialogCreatingProjectMessage": "Estamos configurando seu projeto, inicializando seus metadados e salvando todas as configurações. Isso inclui atribuir etiquetas, criar conjuntos de dados e vincular arquivos de mídia associados. Por favor, aguarde um momento e evite fechar esta janela até que o processo seja concluído.",
+  "datasetDialogCreatingProjectTips": "Projetos com muitas etiquetas ou arquivos de mídia podem levar um pouco mais de tempo.",
+
+  "datasetDialogAnalyzingDatasetTitle": "Analisando Conjunto de Dados",
+  "datasetDialogAnalyzingDatasetMessage": "Estamos atualmente analisando seu arquivo de conjunto de dados. Isso inclui extrair arquivos, detectar a estrutura do conjunto de dados, identificar formatos de anotação e coletar informações de mídia e etiquetas. Por favor, aguarde até que o processo seja concluído. Fechar a janela ou navegar para longe pode interromper a operação.",
+  "datasetDialogAnalyzingDatasetTips": "Conjuntos de dados grandes com muitos arquivos ou anotações complexas podem levar tempo adicional.",
+
+  "datasetDialogFilePickErrorTitle": "Erro de Seleção de Arquivo",
+  "datasetDialogFilePickErrorMessage": "Falha ao selecionar o arquivo. Por favor, tente novamente.",
+  "datasetDialogGenericErrorTips": "Por favor, verifique seu arquivo e tente novamente. Se o problema persistir, entre em contato com o suporte.",
+
+  "thumbnailGenerationTitle": "Erro",
+  "thumbnailGenerationFailed": "Falha ao gerar miniatura",
+  "thumbnailGenerationTryAgainLater": "Por favor, tente novamente mais tarde",
+  "thumbnailGenerationInProgress": "Gerando miniatura...",
+
+  "menuImageAnnotate": "Anotar",
+  "menuImageDetails": "Detalhes",
+  "menuImageDuplicate": "Duplicar",
+  "menuImageSetAsIcon": "Definir como Ícone",
+  "menuImageDelete": "Excluir",
+
+  "noLabelsTitle": "Você não tem Etiquetas no Projeto",
+  "noLabelsExplain1": "Você não pode anotar sem etiquetas porque as etiquetas dão significado ao que você está marcando",
+  "noLabelsExplain2": "Você pode adicionar etiquetas manualmente ou importá-las de um arquivo JSON.",
+  "noLabelsExplain3": "Uma anotação sem etiqueta é apenas uma caixa vazia.",
+  "noLabelsExplain4": "As etiquetas definem as categorias ou classes que você está anotando em seu conjunto de dados.",
+  "noLabelsExplain5": "Seja você rotulando objetos em imagens, classificando ou segmentando regiões,",
+  "noLabelsExplain6": "as etiquetas são essenciais para organizar suas anotações de forma clara e consistente.",
+
+  "importLabelsPreviewTitle": "Visualização da Importação de Etiquetas",
+  "importLabelsFailedTitle": "Falha na Importação de Etiquetas",
+  "importLabelsNoLabelsTitle": "Nenhuma etiqueta encontrada neste projeto",
+  "importLabelsJsonParseError": "Falha na análise do JSON.\n",
+  "importLabelsJsonParseTips": "Certifique-se de que o arquivo seja JSON válido. Você pode validá-lo em https://jsonlint.com/",
+  "importLabelsJsonNotList": "Era esperada uma lista de etiquetas (array), mas foi obtido: {type}.",
+  "@importLabelsJsonNotList": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonNotListTips": "Seu arquivo JSON deve começar com [ e conter vários objetos de etiqueta. Cada etiqueta deve incluir campos de nome, cor e ordemEtiqueta.",
+  "importLabelsJsonItemNotMap": "Uma das entradas na lista não é um objeto válido: {type}",
+  "@importLabelsJsonItemNotMap": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonItemNotMapTips": "Cada item na lista deve ser um objeto válido com campos: nome, cor e ordemEtiqueta.",
+  "importLabelsJsonLabelParseError": "Falha ao analisar uma das etiquetas.\n",
+  "importLabelsJsonLabelParseTips": "Verifique se cada etiqueta tem os campos necessários como nome e cor, e se os valores são dos tipos corretos.",
+  "importLabelsUnexpectedError": "Ocorreu um erro inesperado durante a importação do arquivo JSON.\n",
+  "importLabelsUnexpectedErrorTip": "Por favor, certifique-se de que seu arquivo seja legível e formatado corretamente.",
+  "importLabelsDatabaseError": "Falha ao salvar etiquetas no banco de dados",
+  "importLabelsDatabaseErrorTips": "Por favor, verifique sua conexão com o banco de dados e tente novamente. Se o problema persistir, entre em contato com o suporte.",
+  "importLabelsNameMissingOrEmpty": "Uma das etiquetas não tem um nome válido.",
+  "importLabelsNameMissingOrEmptyTips": "Certifique-se de que cada etiqueta no JSON inclua um campo 'nome' não vazio.",
+
+  "menuSortLastUpdated": "Última Atualização",
+  "menuSortNewestOldest": "Mais Recente-Mais Antigo",
+  "menuSortOldestNewest": "Mais Antigo-Mais Recente",
+  "menuSortAZ": "A-Z",
+  "menuSortZA": "Z-A",
+  "menuSortProjectType": "Tipo de Projeto",
+
+  "uploadInProgressTitle": "Upload em Andamento",
+  "uploadInProgressMessage": "Você tem um upload ativo em andamento. Se sair agora, o upload será cancelado e você precisará começar de novo.\n\nDeseja sair mesmo assim?",
+  "uploadInProgressStay": "Ficar",
+  "uploadInProgressLeave": "Sair",
+
+  "fileNotFound": "Arquivo não encontrado",
+
+  "labelEditSave": "Salvar",
+  "labelEditEdit": "Editar",
+  "labelEditMoveUp": "Mover para Cima",
+  "labelEditMoveDown": "Mover para Baixo",
+  "labelEditDelete": "Excluir",
+  "labelExportLabels": "Exportar Etiquetas",
+  "labelSaveDialogTitle": "Salvar etiquetas em arquivo JSON",
+  "labelSaveDefaultFilename": "etiquetas.json",
+  "labelDeleteError": "Falha ao excluir etiqueta: {error}",
+  "@labelDeleteError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "labelDeleteErrorTips": "Certifique-se de que a etiqueta ainda existe ou não está sendo usada em outro lugar."
+}

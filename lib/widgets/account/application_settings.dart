@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/user.dart';
+import '../../main.dart';
 
 class ApplicationSettings extends StatelessWidget {
   final User user;
@@ -319,7 +320,16 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             return SizedBox(
               width: isWide ? 160 : (isTablet ? 130 : double.infinity),
               child: GestureDetector(
-                onTap: () => onUserChange(user.copyWith(language: code)),
+                onTap: () {
+                  // Update the user's language preference
+                  onUserChange(user.copyWith(language: code));
+                  
+                  // Update the app's locale to reflect the language change
+                  // This will trigger a rebuild of the MaterialApp with the new locale
+                  if (AnnotateItApp.instance != null) {
+                    AnnotateItApp.instance!.updateLocale();
+                  }
+                },
                 child: Card(
                   color: isSelected ? Colors.amber : Colors.grey[900],
                   shape: RoundedRectangleBorder(

@@ -62,18 +62,62 @@ void main() async {
 class AnnotateItApp extends StatefulWidget {
   const AnnotateItApp({super.key});
 
+  // Static method to access the app state from anywhere
+  static AnnotateItAppState? of(BuildContext context) {
+    return context.findAncestorStateOfType<AnnotateItAppState>();
+  }
+
+  // Static reference to the app state
+  static AnnotateItAppState? instance;
+
   @override
   AnnotateItAppState createState() => AnnotateItAppState();
 }
 
 class AnnotateItAppState extends State<AnnotateItApp> {
   ThemeData theme = getSystemTheme();
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    AnnotateItApp.instance = this;
+  }
+
+  @override
+  void dispose() {
+    if (AnnotateItApp.instance == this) {
+      AnnotateItApp.instance = null;
+    }
+    super.dispose();
+  }
 
   void updateTheme(ThemeData theme) {
     setState(() {
       this.theme = theme;
     });
     themeData = theme;
+  }
+  
+  // Method to update the app's locale
+  void updateLocale() {
+    final userLanguage = UserSession.instance.isInitialized 
+        ? UserSession.instance.getUser().language 
+        : null;
+        
+    if (userLanguage != null && userLanguage.isNotEmpty) {
+      setState(() {
+        // Explicitly set the locale to the user's language preference
+        _locale = Locale(userLanguage);
+      });
+      print('App locale updated to: $userLanguage');
+    } else {
+      setState(() {
+        // If no language preference, reset locale to use system default
+        _locale = null;
+      });
+      print('App locale reset to system default');
+    }
   }
 
   @override
@@ -92,12 +136,26 @@ class AnnotateItAppState extends State<AnnotateItApp> {
       // Localization setup
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      
+      // Use explicit locale if set, otherwise use resolution callback
+      locale: _locale,
 
-      // temporary solution: Hardcode to English
-      locale: const Locale('en'),
-
-      // Optional: Use system locale with fallback to English
+      // Use user's preferred language if available, otherwise use system locale with fallback to English
       localeResolutionCallback: (locale, supportedLocales) {
+        // First try to use the user's preferred language from settings
+        final userLanguage = UserSession.instance.isInitialized 
+            ? UserSession.instance.getUser().language 
+            : null;
+            
+        if (userLanguage != null && userLanguage.isNotEmpty) {
+          for (final supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == userLanguage) {
+              return supportedLocale;
+            }
+          }
+        }
+        
+        // If user language preference is not set or not supported, try system locale
         if (locale != null) {
           for (final supportedLocale in supportedLocales) {
             if (supportedLocale.languageCode == locale.languageCode) {
@@ -105,6 +163,8 @@ class AnnotateItAppState extends State<AnnotateItApp> {
             }
           }
         }
+        
+        // Default to English
         return const Locale('en');
       },
     );

@@ -5,7 +5,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_nl.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +98,15 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('it'),
+    Locale('nl'),
+    Locale('pt'),
+  ];
 
   /// No description provided for @buttonKeep.
   ///
@@ -631,7 +645,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuSortLastUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last updated'**
+  /// **'Last Updated'**
   String get menuSortLastUpdated;
 
   /// No description provided for @menuSortNewestOldest.
@@ -1699,6 +1713,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ensure every label in the JSON includes a non-empty \'name\' field.'**
   String get importLabelsNameMissingOrEmptyTips;
+
+  /// No description provided for @menuSortAZ.
+  ///
+  /// In en, this message translates to:
+  /// **'A-Z'**
+  String get menuSortAZ;
+
+  /// No description provided for @menuSortZA.
+  ///
+  /// In en, this message translates to:
+  /// **'Z-A'**
+  String get menuSortZA;
+
+  /// No description provided for @menuSortProjectType.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Type'**
+  String get menuSortProjectType;
+
+  /// No description provided for @uploadInProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload in Progress'**
+  String get uploadInProgressTitle;
+
+  /// No description provided for @uploadInProgressMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an active upload in progress. If you leave now, the upload will be canceled and you will need to start over.\n\nDo you want to leave anyway?'**
+  String get uploadInProgressMessage;
+
+  /// No description provided for @uploadInProgressStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get uploadInProgressStay;
+
+  /// No description provided for @uploadInProgressLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get uploadInProgressLeave;
+
+  /// No description provided for @fileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'File not found'**
+  String get fileNotFound;
+
+  /// No description provided for @labelEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get labelEditSave;
+
+  /// No description provided for @labelEditEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get labelEditEdit;
+
+  /// No description provided for @labelEditMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Up'**
+  String get labelEditMoveUp;
+
+  /// No description provided for @labelEditMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Down'**
+  String get labelEditMoveDown;
+
+  /// No description provided for @labelEditDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get labelEditDelete;
+
+  /// No description provided for @labelExportLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Labels'**
+  String get labelExportLabels;
+
+  /// No description provided for @labelSaveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save labels in JSON file'**
+  String get labelSaveDialogTitle;
+
+  /// No description provided for @labelSaveDefaultFilename.
+  ///
+  /// In en, this message translates to:
+  /// **'labels.json'**
+  String get labelSaveDefaultFilename;
+
+  /// No description provided for @labelDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete label: {error}'**
+  String labelDeleteError(Object error);
+
+  /// No description provided for @labelDeleteErrorTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure the label still exists or is not used elsewhere.'**
+  String get labelDeleteErrorTips;
 }
 
 class _AppLocalizationsDelegate
@@ -1711,8 +1833,15 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'it',
+    'nl',
+    'pt',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1721,8 +1850,20 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

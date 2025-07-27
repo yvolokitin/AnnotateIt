@@ -1,0 +1,417 @@
+{
+  "@@locale": "de",
+
+  "buttonKeep": "Behalten",
+  "buttonSave": "Speichern",
+  "buttonHelp": "Hilfe",
+  "buttonEdit": "Bearbeiten",
+  "buttonNext": "Weiter",
+  "buttonBack": "Zurück",
+  "buttonApply": "Anwenden",
+  "buttonClose": "Schließen",
+  "buttonImport": "Importieren",
+  "buttonCancel": "Abbrechen",
+  "buttonFinish": "Fertigstellen",
+  "buttonDelete": "Löschen",
+  "buttonDuplicate": "Duplizieren",
+  "buttonConfirm": "Bestätigen",
+  "buttonDiscard": "Verwerfen",
+  "buttonFeedbackShort": "Fdbck",
+  "buttonImportLabels": "Labels importieren",
+  "buttonExportLabels": "Labels exportieren",
+  "buttonNextConfirmTask": "Weiter: Aufgabe bestätigen",
+  "buttonCreateProject": "Projekt erstellen",
+
+  "aboutTitle": "Über Annot@It",
+  "aboutDescription": "Annot@It ist eine Annotationsanwendung, die den Annotationsprozess für Computer-Vision-Projekte vereinfacht. Ob Sie an Bildklassifizierung, Objekterkennung, Segmentierung oder anderen Vision-Aufgaben arbeiten, Annot@It bietet die Flexibilität und Präzision, die für hochwertige Datenkennzeichnung erforderlich ist.",
+  "aboutFeaturesTitle": "Hauptfunktionen:",
+  "aboutFeatures": "- Mehrere Projekttypen: Erstellen und verwalten Sie Projekte für verschiedene Computer-Vision-Aufgaben.\n- Daten-Upload & -Verwaltung: Laden Sie Ihre Datensätze einfach hoch und organisieren Sie sie für eine nahtlose Annotation.\n- Erweiterte Annotationswerkzeuge: Verwenden Sie Begrenzungsrahmen, Polygone, Schlüsselpunkte und Segmentierungsmasken.\n- Export & Integration: Exportieren Sie gekennzeichnete Daten in verschiedenen Formaten, die mit KI/ML-Frameworks kompatibel sind.",
+  "aboutCallToAction": "Beginnen Sie noch heute mit Ihrer Annotationsreise und erstellen Sie hochwertige Datensätze für Ihre Computer-Vision-Modelle!",
+
+  "accountUser": "Benutzer",
+  "accountProfile": "Profil",
+  "accountStorage": "Speicher",
+  "accountDeviceStorage": "Gerätespeicher",
+  "accountSettings": "Einstellungen",
+  "accountApplicationSettings": "Anwendungseinstellungen",
+  "accountLoadingMessage": "Benutzerdaten werden geladen...",
+
+  "userProfileName": "Kapitän Annotator",
+  "userProfileFeedbackButton": "Feedback",
+  "userProfileEditProfileButton": "Profil bearbeiten",
+  "userProfileProjects": "Projekte",
+  "userProfileLabels": "Labels",
+  "userProfileMedia": "Medien",
+  "userProfileOverview": "Übersicht",
+  "userProfileAnnotations": "Annotationen",
+
+  "settingsGeneralTitle": "Allgemeine Einstellungen",
+  "settingsProjectCreationTitle": "Projekterstellung",
+  "settingsProjectCreationConfirmNoLabels": "Immer nachfragen, wenn ein Projekt ohne Labels erstellt wird",
+  "settingsProjectCreationConfirmNoLabelsNote": "Sie werden gewarnt, wenn Sie versuchen, ein Projekt ohne definierte Labels zu erstellen.",
+
+  "settingsLabelsCreationDeletionTitle": "Label-Erstellung / -Löschung",
+  "settingsLabelsDeletionWithAnnotations": "Annotationen löschen, wenn Label entfernt wird",
+  "settingsLabelsDeletionWithAnnotationsNote": "Wenn aktiviert, werden beim Löschen eines Labels automatisch alle diesem Label zugewiesenen Annotationen in allen Medienelementen entfernt.",
+  "settingsLabelsSetDefaultLabel": "Erstes Label als Standard festlegen",
+  "settingsLabelsSetDefaultLabelNote": "Wenn aktiviert, wird das erste Label, das Sie in einem Projekt erstellen, automatisch als Standardlabel markiert. Sie können den Standard später jederzeit ändern.",
+
+  "settingsDatasetViewTitle": "Datensatz-Ansicht",
+  "settingsDatasetViewDuplicateWithAnnotations": "Bild immer mit Annotationen duplizieren (kopieren)",
+  "settingsDatasetViewDuplicateWithAnnotationsNote": "Beim Duplizieren werden Annotationen eingeschlossen, es sei denn, Sie ändern die Einstellungen",
+  "settingsDatasetViewDeleteFromOS": "Beim Löschen eines Bildes aus dem Datensatz immer auch aus dem Betriebssystem / Dateisystem löschen",
+  "settingsDatasetViewDeleteFromOSNote": "Löscht die Datei auch von der Festplatte, nicht nur aus dem Datensatz",
+  "settingsAnnotationTitle": "Annotations-Einstellungen",
+  "settingsAnnotationOpacity": "Annotations-Transparenz",
+  "settingsAnnotationAutoSave": "Annotation immer speichern oder übermitteln, wenn zum nächsten Bild gewechselt wird",
+  "settingsThemeTitle": "Themenauswahl",
+  "settingsLanguageTitle": "Land / Sprache",
+
+  "colorPickerTitle": "Farbe auswählen",
+  "colorPickerBasicColors": "Grundfarben",
+
+  "loadingProjects": "Projekte werden geladen...",
+  "importDataset": "Datensatz importieren",
+  "uploadMedia": "Medien hochladen",
+  "createProjectTitle": "Neues Projekt erstellen",
+  "createProjectStepOneSubtitle": "Bitte geben Sie Ihren neuen Projektnamen ein und wählen Sie den Projekttyp",
+  "createProjectStepTwoSubtitle": "Bitte erstellen Sie Labels für ein neues Projekt",
+
+  "emptyProjectTitle": "Starten Sie Ihr erstes Projekt",
+  "emptyProjectDescription": "Erstellen Sie ein Projekt, um Datensätze zu organisieren, Medien zu annotieren und KI auf Ihre Vision-Aufgaben anzuwenden — alles in einem optimierten Arbeitsbereich, der Ihre Computer-Vision-Pipeline beschleunigt.",
+  "emptyProjectCreateNew": "Neues Projekt erstellen",
+  "emptyProjectCreateNewShort": "Neues Projekt",
+  "emptyProjectImportDataset": "Projekt aus Datensatz-Import erstellen",
+  "emptyProjectImportDatasetShort": "Datensatz importieren",
+
+  "dialogBack": "<- Zurück",
+  "dialogNext": "Weiter ->",
+
+  "rename": "Umbenennen",
+  "delete": "Löschen",
+  "setAsDefault": "Als Standard festlegen",
+
+  "paginationPageFromTotal": "Seite {current} von {total}",
+  "@paginationPageFromTotal": {
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+
+  "taskTypeRequiredTitle": "Aufgabentyp erforderlich",
+  "taskTypeRequiredMessage": "Sie müssen einen Aufgabentyp auswählen, bevor Sie fortfahren können. Der aktuelle Tab '{tab}' hat keinen Aufgabentyp ausgewählt. Jedes Projekt muss mit einer Aufgabe (z.B. Objekterkennung, Klassifizierung oder Segmentierung) verknüpft sein, damit das System weiß, wie Ihre Daten zu verarbeiten sind.",
+  "@taskTypeRequiredMessage": {
+    "description": "Fehlermeldung, wenn kein Aufgabentyp ausgewählt ist",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "taskTypeRequiredTips": "Klicken Sie auf eine der verfügbaren Aufgabentyp-Optionen unter dem Tab '{tab}'. Wenn Sie sich nicht sicher sind, welche Aufgabe Sie wählen sollen, fahren Sie mit der Maus über das Info-Symbol neben jedem Typ, um eine kurze Beschreibung zu sehen.",
+  "@taskTypeRequiredTips": {
+    "description": "Hilfreiche Tipps zur Auswahl des Aufgabentyps",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "menuProjects": "Projekte",
+  "menuAccount": "Konto",
+  "menuLearn": "Lernen",
+  "menuAbout": "Über",
+
+  "menuCreateNewProject": "Neues Projekt erstellen",
+  "menuCreateFromDataset": "Aus Datensatz erstellen",
+  "menuImportDataset": "Projekt aus Datensatz-Import erstellen",
+  "menuSortLastUpdated": "Zuletzt aktualisiert",
+  "menuSortNewestOldest": "Neueste-Älteste",
+  "menuSortOldestNewest": "Älteste-Neueste",
+  "menuSortType": "Projekttyp",
+  "menuSortAz": "A-Z",
+  "menuSortZa": "Z-A",
+
+  "projectNameLabel": "Projektname",
+  "tabDetection": "Erkennung",
+  "tabClassification": "Klassifizierung",
+  "tabSegmentation": "Segmentierung",
+  "labelRequiredTitle": "Mindestens ein Label erforderlich",
+  "labelRequiredMessage": "Sie müssen mindestens ein Label erstellen, um fortzufahren. Labels sind wesentlich für die Definition der Annotationskategorien, die während der Datensatzvorbereitung verwendet werden.",
+  "labelRequiredTips": "Tipp: Klicken Sie auf die rote Schaltfläche mit der Bezeichnung Label erstellen, nachdem Sie einen Labelnamen eingegeben haben, um Ihr erstes Label hinzuzufügen.",
+  "createLabelButton": "Label erstellen",
+  "labelNameHint": "Geben Sie hier einen neuen Labelnamen ein",
+  "createdLabelsTitle": "Erstellte Labels",
+  "labelEmptyTitle": "Labelname darf nicht leer sein!",
+  "labelEmptyMessage": "Bitte geben Sie einen Labelnamen ein. Labels helfen, die Objekte oder Kategorien in Ihrem Projekt zu identifizieren. Es wird empfohlen, kurze, klare und beschreibende Namen zu verwenden, wie \"Auto\", \"Person\" oder \"Baum\". Vermeiden Sie Sonderzeichen oder Leerzeichen.",
+  "labelEmptyTips": "Tipps zur Labelbenennung:\n• Verwenden Sie kurze und beschreibende Namen\n• Halten Sie sich an Buchstaben, Ziffern, Unterstriche (z.B. katze, verkehrsschild, hintergrund)\n• Vermeiden Sie Leerzeichen und Symbole (z.B. Person 1 → person_1)",
+  "labelDuplicateTitle": "Doppelter Labelname",
+  "labelDuplicateMessage": "Das Label '{label}' existiert bereits in diesem Projekt. Jedes Label muss einen eindeutigen Namen haben, um Verwirrung während der Annotation und des Trainings zu vermeiden.",
+  "@labelDuplicateMessage": {
+    "description": "Fehlermeldung, wenn Label bereits existiert",
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "labelDuplicateTips": "Warum eindeutige Labels?\n• Die Wiederverwendung desselben Namens kann Probleme beim Datensatzexport und Modelltraining verursachen.\n• Eindeutige Labelnamen helfen, klare, strukturierte Annotationen zu erhalten.\n\nTipp: Versuchen Sie, eine Variation oder Nummer hinzuzufügen, um zu unterscheiden (z.B. 'Auto', 'Auto_2').",
+  "binaryLimitTitle": "Binäre Klassifizierungsbegrenzung",
+  "binaryLimitMessage": "Sie können nicht mehr als zwei Labels für ein Binäres Klassifizierungsprojekt erstellen.\n\nBinäre Klassifizierung ist darauf ausgelegt, zwischen genau zwei Klassen zu unterscheiden, wie 'Ja' vs 'Nein' oder 'Spam' vs 'Kein Spam'.",
+  "binaryLimitTips": "Benötigen Sie mehr als zwei Labels?\nErwägen Sie, Ihren Projekttyp auf Multi-Klassen-Klassifizierung oder eine andere geeignete Aufgabe umzustellen, um drei oder mehr Kategorien zu unterstützen.",
+  "noteBinaryClassification": "Dieser Projekttyp erlaubt genau 2 Labels. Binäre Klassifizierung wird verwendet, wenn Ihr Modell zwischen zwei möglichen Klassen unterscheiden muss, wie \"Ja\" vs \"Nein\" oder \"Hund\" vs \"Nicht Hund\". Bitte erstellen Sie nur zwei unterschiedliche Labels.",
+  "noteMultiClassClassification": "Dieser Projekttyp unterstützt mehrere Labels. Multi-Klassen-Klassifizierung ist geeignet, wenn Ihr Modell aus drei oder mehr Kategorien wählen muss, wie \"Katze\", \"Hund\", \"Kaninchen\". Sie können so viele Labels hinzufügen, wie benötigt.",
+  "noteDetectionOrSegmentation": "Dieser Projekttyp unterstützt mehrere Labels. Für Objekterkennung oder Segmentierung repräsentiert jedes Label typischerweise eine andere Objektklasse (z.B. \"Auto\", \"Fußgänger\", \"Fahrrad\"). Sie können so viele Labels erstellen, wie für Ihren Datensatz erforderlich.",
+  "noteDefault": "Sie können ein oder mehrere Labels abhängig von Ihrem Projekttyp erstellen. Jedes Label hilft, eine Kategorie zu definieren, die Ihr Modell erkennen lernen wird. Bitte beachten Sie die Dokumentation für bewährte Praktiken.",
+  "discardDatasetImportTitle": "Datensatz-Import verwerfen?",
+  "discardDatasetImportMessage": "Sie haben bereits einen Datensatz extrahiert. Wenn Sie jetzt abbrechen, werden die extrahierten Dateien und erkannten Datensatzdetails gelöscht. Sind Sie sicher, dass Sie fortfahren möchten?",
+  "projectTypeHelpTitle": "Hilfe zur Projekttyp-Auswahl",
+  "projectTypeWhyDisabledTitle": "Warum sind einige Projekttypen deaktiviert?",
+  "projectTypeWhyDisabledBody": "Wenn Sie einen Datensatz importieren, analysiert das System die bereitgestellten Annotationen und versucht, den am besten geeigneten Projekttyp für Sie automatisch zu erkennen.\n\nZum Beispiel, wenn Ihr Datensatz Begrenzungsrahmen-Annotationen enthält, wird der vorgeschlagene Projekttyp \"Erkennung\" sein. Wenn er Masken enthält, wird \"Segmentierung\" vorgeschlagen, und so weiter.\n\nUm Ihre Daten zu schützen, sind standardmäßig nur kompatible Projekttypen aktiviert.",
+  "projectTypeAllowChangeTitle": "Was passiert, wenn ich die Projekttyp-Änderung aktiviere?",
+  "projectTypeAllowChangeBody": "Wenn Sie \"Projekttyp-Änderung erlauben\" aktivieren, können Sie manuell JEDEN Projekttyp auswählen, auch wenn er nicht mit den erkannten Annotationen übereinstimmt.\n\n⚠️ WARNUNG: Alle vorhandenen Annotationen aus dem Import werden beim Wechsel zu einem inkompatiblen Projekttyp gelöscht.\nSie müssen alle Medienelemente neu annotieren oder einen für den neu ausgewählten Projekttyp geeigneten Datensatz importieren.",
+  "projectTypeWhenUseTitle": "Wann sollte ich diese Option verwenden?",
+  "projectTypeWhenUseBody": "Sie sollten diese Option nur aktivieren, wenn:\n\n- Sie versehentlich den falschen Datensatz importiert haben.\n- Sie ein neues Annotationsprojekt mit einem anderen Typ starten möchten.\n- Ihre Datensatzstruktur sich nach dem Import geändert hat.\n\nWenn Sie unsicher sind, empfehlen wir dringend, die Standardauswahl beizubehalten, um Datenverlust zu vermeiden.",
+
+  "allLabels": "Alle Labels",
+  "setAsProjectIcon": "Als Projektsymbol festlegen",
+  "setAsProjectIconConfirm": "Möchten Sie '{filePath}' als Symbol für dieses Projekt verwenden?\n\nDies ersetzt jedes zuvor festgelegte Symbol.",
+  "@setAsProjectIconConfirm": {
+    "placeholders": {
+      "filePath": {}
+    }
+  },
+
+  "removeFilesFromDatasetInProgress": "Dateien werden gelöscht...",
+  "removeFilesFromDataset": "Dateien aus Datensatz entfernen?",
+  "removeFilesFromDatasetConfirm": "Sind Sie sicher, dass Sie die folgenden Dateien ('{amount}') löschen möchten?\n\nAlle entsprechenden Annotationen werden ebenfalls entfernt.",
+  "@removeFilesFromDatasetConfirm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "removeFilesFailedTitle": "Löschen fehlgeschlagen",
+  "removeFilesFailedMessage": "Einige Dateien konnten nicht gelöscht werden",
+  "removeFilesFailedTips": "Bitte überprüfen Sie die Dateiberechtigungen und versuchen Sie es erneut",
+
+  "duplicateImage": "Bild duplizieren",
+  "duplicateWithAnnotations": "Bild mit Annotationen duplizieren",
+  "duplicateWithAnnotationsHint": "Eine Kopie des Bildes wird zusammen mit allen Annotationsdaten erstellt.",
+  "duplicateImageOnly": "Nur Bild duplizieren",
+  "duplicateImageOnlyHint": "Nur das Bild wird kopiert, ohne Annotationen.",
+  "saveDuplicateChoiceAsDefault": "Diese Antwort als Standardantwort speichern und nicht mehr fragen\n(Sie können dies in Konto -> Anwendungseinstellungen -> Datensatznavigation ändern)",
+
+  "editProjectTitle": "Projektnamen bearbeiten",
+  "editProjectDescription": "Bitte wählen Sie einen klaren, beschreibenden Projektnamen (3 - 86 Zeichen). Es wird empfohlen, Sonderzeichen zu vermeiden.",
+  
+  "deleteProjectTitle": "Projekt löschen",
+  "deleteProjectInProgress": "Projekt wird gelöscht...",
+  "deleteProjectOptionDeleteFromDisk": "Auch alle Dateien von der Festplatte löschen",
+  "deleteProjectOptionDontAskAgain": "Nicht mehr nachfragen",
+  "deleteProjectConfirm": "Sind Sie sicher, dass Sie das Projekt \"{projectName}\" löschen möchten?",
+  "@deleteProjectConfirm": {
+    "placeholders": {
+      "projectName": {}
+    }
+  },
+  "deleteProjectInfoLine": "Projekt wurde erstellt am {creationDate}\nAnzahl der Labels: {labelCount}",
+  "@deleteProjectInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "labelCount": {}
+    }
+  },
+
+  "deleteDatasetTitle": "Datensatz löschen",
+  "deleteDatasetInProgress": "Datensatz wird gelöscht... Bitte warten.",
+  "deleteDatasetConfirm": "Sind Sie sicher, dass Sie \"{datasetName}\" löschen möchten?",
+  "@deleteDatasetConfirm": {
+    "placeholders": {
+      "datasetName": {}
+    }
+  },
+  "deleteDatasetInfoLine": "Dieser Datensatz wurde am {creationDate} erstellt und enthält {mediaCount} Medienelemente und {annotationCount} Annotationen.",
+  "@deleteDatasetInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "mediaCount": {},
+      "annotationCount": {}
+    }
+  },
+
+  "editDatasetTitle": "Datensatz umbenennen",
+  "editDatasetDescription": "Geben Sie einen neuen Namen für diesen Datensatz ein:",
+
+  "noMediaDialogUploadPrompt": "Sie müssen Bilder oder Videos hochladen",
+  "noMediaDialogUploadPromptShort": "Medien hochladen",
+  "noMediaDialogSupportedImageTypesTitle": "Unterstützte Bildtypen:",
+  "noMediaDialogSupportedImageTypesList": "jpg, jpeg, png, bmp, jfif, webp",
+  "noMediaDialogSupportedVideoFormatsLink": "Klicken Sie hier, um zu sehen, welche Videoformate auf Ihrer Plattform unterstützt werden",
+  "noMediaDialogSupportedVideoFormatsTitle": "Unterstützte Videoformate",
+  "noMediaDialogSupportedVideoFormatsList": "Häufig unterstützte Formate:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browserabhängig)\n- MKV: Android (teilweise), Windows\n- AVI: Nur Android/Windows (teilweise)",
+  "noMediaDialogSupportedVideoFormatsWarning": "Die Unterstützung kann je nach Plattform und Videocodec variieren.\nEinige Formate funktionieren möglicherweise nicht in Browsern oder auf iOS.",
+
+  "annotatorTopToolbarBackTooltip": "Zurück zum Projekt",
+  "annotatorTopToolbarSelectDefaultLabel": "Standardlabel auswählen",
+
+  "toolbarNavigation": "Navigation",
+  "toolbarBbox": "Begrenzungsrahmen zeichnen",
+  "toolbarPolygon": "Polygon zeichnen",
+  "toolbarSAM": "Segment Anything Model",
+  "toolbarResetZoom": "Zoom zurücksetzen",
+  "toolbarToggleGrid": "Raster umschalten",
+  "toolbarAnnotationSettings": "Annotationseinstellungen",
+  "toolbarToggleAnnotationNames": "Annotationsnamen umschalten",
+  "toolbarRotateLeft": "Nach links drehen (Demnächst verfügbar)",
+  "toolbarRotateRight": "Nach rechts drehen (Demnächst verfügbar)",
+  "toolbarHelp": "Hilfe",
+  "dialogOpacityTitle": "Annotations-Fülldeckkraft",
+  "dialogHelpTitle": "Hilfe zur Annotator-Werkzeugleiste",
+  "dialogHelpContent": "• Navigation – Verwenden Sie dies, um auf der Leinwand auszuwählen und sich zu bewegen.\n• Begrenzungsrahmen – (Sichtbar in Erkennungsprojekten) Zeichnen Sie rechteckige Begrenzungsrahmen.\n• Zoom zurücksetzen – Setzt die Zoomstufe zurück, um das Bild auf dem Bildschirm anzupassen.\n• Raster umschalten – Zeigen oder verbergen Sie das Datensatz-Miniaturansichtsraster.\n• Einstellungen – Passen Sie die Fülldeckkraft von Annotationen, den Annotationsrahmen und die Größe der Ecken an.\n• Annotationsnamen umschalten – Zeigen oder verbergen Sie Textlabels auf Annotationen.",
+  "dialogHelpTips": "Tipp: Verwenden Sie den Navigationsmodus, um Annotationen auszuwählen und zu bearbeiten.\nWeitere Shortcuts und Funktionen kommen bald!",
+  "dialogOpacityExplanation": "Passen Sie die Deckkraftstufe an, um den Inhalt mehr oder weniger transparent zu machen.",
+
+  "deleteAnnotationTitle": "Annotation löschen",
+  "deleteAnnotationMessage": "Sind Sie sicher, dass Sie löschen möchten",
+  "unnamedAnnotation": "diese Annotation",
+
+  "accountStorage_importFolderTitle": "Datensatz-Importordner",
+  "accountStorage_thumbnailsFolderTitle": "Miniaturansichtenordner",
+  "accountStorage_exportFolderTitle": "Datensatz-Exportordner",
+  "accountStorage_folderTooltip": "Ordner auswählen",
+  "accountStorage_helpTitle": "Speicherhilfe",
+  "accountStorage_helpMessage": "Sie können den Ordner ändern, in dem importierte Datensätze, exportierte ZIP-Archive und Miniaturansichten gespeichert werden.\nTippen Sie auf das \"Ordner\"-Symbol neben dem Pfadfeld, um das Verzeichnis auszuwählen oder zu ändern.\n\nDieser Ordner wird als Standardspeicherort verwendet für:\n- Importierte Datensatzdateien (z.B. COCO, YOLO, VOC, Datumaro, etc.)\n- Exportierte Datensatz-Zip-Archive\n- Projekt-Miniaturansichten\n\nStellen Sie sicher, dass der ausgewählte Ordner beschreibbar ist und genügend Platz hat.\nAuf Android oder iOS müssen Sie möglicherweise Speicherberechtigungen gewähren.\nEmpfohlene Ordner variieren je nach Plattform — siehe unten plattformspezifische Tipps.",
+  "accountStorage_helpTips": "Empfohlene Ordner nach Plattform:\n\nWindows:\n  C:\\Users\\<Sie>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<Sie>/.annotateit/datasets\n\nmacOS:\n  /Users/<Sie>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App-Sandbox-Pfad>/Documents/AnnotateIt/datasets\n",
+
+  "accountStorage_copySuccess": "Pfad in die Zwischenablage kopiert",
+  "accountStorage_openError": "Ordner existiert nicht:\n",
+  "accountStorage_pathEmpty": "Pfad ist leer",
+  "accountStorage_openFailed": "Ordner konnte nicht geöffnet werden:\n",
+
+  "changeProjectTypeTitle": "Projekttyp ändern",
+  "changeProjectTypeMigrating": "Projekttyp wird migriert...",
+  "changeProjectTypeStepOneSubtitle": "Bitte wählen Sie einen neuen Projekttyp aus der Liste unten",
+  "changeProjectTypeStepTwoSubtitle": "Bitte bestätigen Sie Ihre Auswahl",
+
+  "changeProjectTypeWarningTitle": "Warnung: Sie sind dabei, den Projekttyp zu ändern.",
+  "changeProjectTypeConversionIntro": "Alle vorhandenen Annotationen werden wie folgt konvertiert:",
+  "changeProjectTypeConversionDetails": "- Begrenzungsrahmen (Erkennung) -> in rechteckige Polygone umgewandelt.\n- Polygone (Segmentierung) -> in eng anliegende Begrenzungsrahmen umgewandelt.\n\nHinweis: Diese Konvertierungen können die Präzision reduzieren, besonders beim Umwandeln von Polygonen in Rahmen, da detaillierte Forminformationen verloren gehen.\n\n- Erkennung / Segmentierung → Klassifizierung:\n  Bilder werden basierend auf dem häufigsten Label in den Annotationen klassifiziert:\n     -> Wenn ein Bild 5 Objekte mit dem Label \"Hund\" und 10 mit dem Label \"Katze\" hat, wird es als \"Katze\" klassifiziert.\n     -> Wenn die Anzahl gleich ist, wird das erste gefundene Label verwendet.\n\n- Klassifizierung -> Erkennung / Segmentierung:\n  Es werden keine Annotationen übertragen. Sie müssen alle Medienelemente manuell neu annotieren, da Klassifizierungsprojekte keine Daten auf Regionsebene enthalten.",
+  "changeProjectTypeErrorTitle": "Migration fehlgeschlagen",
+  "changeProjectTypeErrorMessage": "Beim Ändern des Projekttyps ist ein Fehler aufgetreten. Die Änderungen konnten nicht angewendet werden.",
+  "changeProjectTypeErrorTips": "Bitte überprüfen Sie, ob das Projekt gültige Annotationen hat und versuchen Sie es erneut. Wenn das Problem weiterhin besteht, starten Sie die App neu oder kontaktieren Sie den Support.",
+
+  "exportProjectAsDataset": "Projekt als Datensatz exportieren",
+
+  "projectHelpTitle": "Wie Projekte funktionieren",
+  "projectHelpMessage": "Projekte ermöglichen es Ihnen, Datensätze, Mediendateien und Annotationen an einem Ort zu organisieren. Sie können neue Projekte für verschiedene Aufgaben wie Erkennung, Klassifizierung oder Segmentierung erstellen.",
+  "projectHelpTips": "Tipp: Sie können Datensätze im COCO-, YOLO-, VOC-, Labelme- und Datumaro-Format importieren, um automatisch ein Projekt zu erstellen.",
+
+  "datasetDialogTitle": "Datensatz importieren, um Projekt zu erstellen",
+  "datasetDialogProcessing": "Verarbeitung...",
+  "datasetDialogProcessingProgress": "Verarbeitung... {percent}%",
+  "datasetDialogModeIsolate": "Isolationsmodus aktiviert",
+  "datasetDialogModeNormal": "Normaler Modus",
+  "datasetDialogNoDatasetLoaded": "Kein Datensatz geladen.",
+
+  "datasetDialogImportFailedTitle": "Import fehlgeschlagen",
+  "datasetDialogImportFailedMessage": "Die ZIP-Datei konnte nicht verarbeitet werden. Sie könnte beschädigt, unvollständig oder kein gültiges Datensatzarchiv sein.",
+  "datasetDialogImportFailedTips": "Versuchen Sie, Ihren Datensatz erneut zu exportieren oder zu zippen.\nStellen Sie sicher, dass er im COCO-, YOLO-, VOC- oder unterstützten Format vorliegt.\n\nFehler: ",
+
+  "datasetDialogNoProjectTypeTitle": "Kein Projekttyp ausgewählt",
+  "datasetDialogNoProjectTypeMessage": "Bitte wählen Sie einen Projekttyp basierend auf den erkannten Annotationstypen in Ihrem Datensatz.",
+  "datasetDialogNoProjectTypeTips": "Überprüfen Sie Ihr Datensatzformat und stellen Sie sicher, dass Annotationen einer unterstützten Struktur wie COCO, YOLO, VOC oder Datumaro folgen.",
+
+  "datasetDialogProcessingDatasetTitle": "Datensatz wird verarbeitet",
+  "datasetDialogProcessingDatasetMessage": "Wir extrahieren derzeit Ihr ZIP-Archiv, analysieren seinen Inhalt und erkennen das Datensatzformat und den Annotationstyp. Dies kann je nach Größe und Struktur des Datensatzes einige Sekunden bis zu einigen Minuten dauern. Bitte schließen Sie dieses Fenster nicht und navigieren Sie während des Prozesses nicht weg.",
+  "datasetDialogProcessingDatasetTips": "Große Archive mit vielen Bildern oder Annotationsdateien können länger zur Verarbeitung benötigen.",
+
+  "datasetDialogCreatingProjectTitle": "Projekt wird erstellt",
+  "datasetDialogCreatingProjectMessage": "Wir richten Ihr Projekt ein, initialisieren seine Metadaten und speichern alle Konfigurationen. Dies umfasst das Zuweisen von Labels, das Erstellen von Datensätzen und das Verknüpfen zugehöriger Mediendateien. Bitte warten Sie einen Moment und vermeiden Sie es, dieses Fenster zu schließen, bis der Prozess abgeschlossen ist.",
+  "datasetDialogCreatingProjectTips": "Projekte mit vielen Labels oder Mediendateien könnten etwas länger dauern.",
+
+  "datasetDialogAnalyzingDatasetTitle": "Datensatz wird analysiert",
+  "datasetDialogAnalyzingDatasetMessage": "Wir analysieren derzeit Ihr Datensatzarchiv. Dies umfasst das Extrahieren von Dateien, das Erkennen der Datensatzstruktur, das Identifizieren von Annotationsformaten und das Sammeln von Medien- und Labelinformationen. Bitte warten Sie, bis der Prozess abgeschlossen ist. Das Schließen des Fensters oder Wegnavigieren kann den Vorgang unterbrechen.",
+  "datasetDialogAnalyzingDatasetTips": "Große Datensätze mit vielen Dateien oder komplexen Annotationen können zusätzliche Zeit benötigen.",
+
+  "datasetDialogFilePickErrorTitle": "Dateiauswahlfehler",
+  "datasetDialogFilePickErrorMessage": "Datei konnte nicht ausgewählt werden. Bitte versuchen Sie es erneut.",
+  "datasetDialogGenericErrorTips": "Bitte überprüfen Sie Ihre Datei und versuchen Sie es erneut. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support.",
+
+  "thumbnailGenerationTitle": "Fehler",
+  "thumbnailGenerationFailed": "Miniaturansicht konnte nicht generiert werden",
+  "thumbnailGenerationTryAgainLater": "Bitte versuchen Sie es später erneut",
+  "thumbnailGenerationInProgress": "Miniaturansicht wird generiert...",
+
+  "menuImageAnnotate": "Annotieren",
+  "menuImageDetails": "Details",
+  "menuImageDuplicate": "Duplizieren",
+  "menuImageSetAsIcon": "Als Symbol festlegen",
+  "menuImageDelete": "Löschen",
+
+  "noLabelsTitle": "Sie haben keine Labels im Projekt",
+  "noLabelsExplain1": "Sie können nicht ohne Labels annotieren, da Labels dem, was Sie markieren, Bedeutung geben",
+  "noLabelsExplain2": "Sie können Labels manuell hinzufügen oder aus einer JSON-Datei importieren.",
+  "noLabelsExplain3": "Eine Annotation ohne Label ist nur eine leere Box.",
+  "noLabelsExplain4": "Labels definieren die Kategorien oder Klassen, die Sie in Ihrem Datensatz annotieren.",
+  "noLabelsExplain5": "Ob Sie Objekte in Bildern taggen, klassifizieren oder Regionen segmentieren,",
+  "noLabelsExplain6": "Labels sind wesentlich, um Ihre Annotationen klar und konsistent zu organisieren.",
+
+  "importLabelsPreviewTitle": "Label-Import-Vorschau",
+  "importLabelsFailedTitle": "Label-Import fehlgeschlagen",
+  "importLabelsNoLabelsTitle": "Keine Labels in diesem Projekt gefunden",
+  "importLabelsJsonParseError": "JSON-Parsing fehlgeschlagen.\n",
+  "importLabelsJsonParseTips": "Stellen Sie sicher, dass die Datei gültiges JSON ist. Sie können es unter https://jsonlint.com/ validieren",
+  "importLabelsJsonNotList": "Eine Liste von Labels (Array) wurde erwartet, aber erhalten: {type}.",
+  "@importLabelsJsonNotList": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonNotListTips": "Ihre JSON-Datei muss mit [ beginnen und mehrere Label-Objekte enthalten. Jedes Label sollte die Felder name, color und labelOrder enthalten.",
+  "importLabelsJsonItemNotMap": "Einer der Einträge in der Liste ist kein gültiges Objekt: {type}",
+  "@importLabelsJsonItemNotMap": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonItemNotMapTips": "Jedes Element in der Liste muss ein gültiges Objekt mit den Feldern sein: name, color und labelOrder.",
+  "importLabelsJsonLabelParseError": "Fehler beim Parsen eines der Labels.\n",
+  "importLabelsJsonLabelParseTips": "Überprüfen Sie, ob jedes Label die erforderlichen Felder wie name und color hat und die Werte die richtigen Typen sind.",
+  "importLabelsUnexpectedError": "Unerwarteter Fehler beim Importieren der JSON-Datei.\n",
+  "importLabelsUnexpectedErrorTip": "Bitte stellen Sie sicher, dass Ihre Datei lesbar und korrekt formatiert ist.",
+  "importLabelsDatabaseError": "Fehler beim Speichern von Labels in der Datenbank",
+  "importLabelsDatabaseErrorTips": "Bitte überprüfen Sie Ihre Datenbankverbindung und versuchen Sie es erneut. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support.",
+  "importLabelsNameMissingOrEmpty": "Eines der Labels hat keinen gültigen Namen.",
+  "importLabelsNameMissingOrEmptyTips": "Stellen Sie sicher, dass jedes Label im JSON ein nicht-leeres 'name'-Feld enthält.",
+
+  "menuSortLastUpdated": "Zuletzt aktualisiert",
+  "menuSortNewestOldest": "Neueste-Älteste",
+  "menuSortOldestNewest": "Älteste-Neueste",
+  "menuSortAZ": "A-Z",
+  "menuSortZA": "Z-A",
+  "menuSortProjectType": "Projekttyp",
+
+  "uploadInProgressTitle": "Upload läuft",
+  "uploadInProgressMessage": "Sie haben einen aktiven Upload im Gange. Wenn Sie jetzt gehen, wird der Upload abgebrochen und Sie müssen von vorne beginnen.\n\nMöchten Sie trotzdem gehen?",
+  "uploadInProgressStay": "Bleiben",
+  "uploadInProgressLeave": "Verlassen",
+
+  "fileNotFound": "Datei nicht gefunden",
+
+  "labelEditSave": "Speichern",
+  "labelEditEdit": "Bearbeiten",
+  "labelEditMoveUp": "Nach oben verschieben",
+  "labelEditMoveDown": "Nach unten verschieben",
+  "labelEditDelete": "Löschen",
+  "labelExportLabels": "Labels exportieren",
+  "labelSaveDialogTitle": "Labels in JSON-Datei speichern",
+  "labelSaveDefaultFilename": "labels.json",
+  "labelDeleteError": "Fehler beim Löschen des Labels: {error}",
+  "@labelDeleteError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "labelDeleteErrorTips": "Stellen Sie sicher, dass das Label noch existiert oder nicht anderswo verwendet wird."
+}

@@ -138,6 +138,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                                 onUserChange: (updated) => setState(() {
                                   _user = updated;
                                   _updateUser();
+                                  // Update the UserSession with the updated user
+                                  UserSession.instance.setUser(updated);
                                 }),
                               ),
                               ApplicationSettings(
@@ -145,6 +147,8 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                                 onUserChange: (updated) => setState(() {
                                   _user = updated;
                                   _updateUser();
+                                  // Update the UserSession with the updated user
+                                  UserSession.instance.setUser(updated);
                                 }),
                               ),
                             ],

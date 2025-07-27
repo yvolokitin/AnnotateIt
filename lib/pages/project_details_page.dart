@@ -6,6 +6,8 @@ import '../widgets/project_details/project_details_app_bar.dart';
 import '../widgets/project_details/project_details_navigation.dart';
 import '../widgets/project_details/project_details_content_switcher.dart';
 
+import '../../gen_l10n/app_localizations.dart';
+
 class ProjectDetailsPage extends StatefulWidget {
   final Project project;
 

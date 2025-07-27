@@ -1,0 +1,417 @@
+{
+  "@@locale": "nl",
+
+  "buttonKeep": "Behouden",
+  "buttonSave": "Opslaan",
+  "buttonHelp": "Help",
+  "buttonEdit": "Bewerken",
+  "buttonNext": "Volgende",
+  "buttonBack": "Terug",
+  "buttonApply": "Toepassen",
+  "buttonClose": "Sluiten",
+  "buttonImport": "Importeren",
+  "buttonCancel": "Annuleren",
+  "buttonFinish": "Voltooien",
+  "buttonDelete": "Verwijderen",
+  "buttonDuplicate": "Dupliceren",
+  "buttonConfirm": "Bevestigen",
+  "buttonDiscard": "Weggooien",
+  "buttonFeedbackShort": "Fdbck",
+  "buttonImportLabels": "Labels Importeren",
+  "buttonExportLabels": "Labels Exporteren",
+  "buttonNextConfirmTask": "Volgende: Taak Bevestigen",
+  "buttonCreateProject": "Project Aanmaken",
+
+  "aboutTitle": "Over Annot@It",
+  "aboutDescription": "Annot@It is een annotatie-applicatie ontworpen om het annotatieproces voor computervisieprojecten te stroomlijnen. Of je nu werkt aan beeldclassificatie, objectdetectie, segmentatie of andere visietaken, Annot@It biedt de flexibiliteit en precisie die nodig zijn voor hoogwaardige gegevenslabeling.",
+  "aboutFeaturesTitle": "Belangrijkste functies:",
+  "aboutFeatures": "- Meerdere projecttypen: Maak en beheer projecten op maat voor verschillende computervisietaken.\n- Gegevens uploaden & beheren: Upload en organiseer eenvoudig je datasets voor naadloze annotatie.\n- Geavanceerde annotatiehulpmiddelen: Gebruik begrenzingsvakken, polygonen, sleutelpunten en segmentatiemaskers.\n- Exporteren & integratie: Exporteer gelabelde gegevens in verschillende formaten die compatibel zijn met AI/ML-frameworks.",
+  "aboutCallToAction": "Begin vandaag nog met je annotatiereis en bouw hoogwaardige datasets voor je computervisiemodellen!",
+
+  "accountUser": "Gebruiker",
+  "accountProfile": "Profiel",
+  "accountStorage": "Opslag",
+  "accountDeviceStorage": "Apparaatopslag",
+  "accountSettings": "Instellingen",
+  "accountApplicationSettings": "Applicatie-instellingen",
+  "accountLoadingMessage": "Gebruikersgegevens laden...",
+
+  "userProfileName": "Kapitein Annotator",
+  "userProfileFeedbackButton": "Feedback",
+  "userProfileEditProfileButton": "Profiel Bewerken",
+  "userProfileProjects": "Projecten",
+  "userProfileLabels": "Labels",
+  "userProfileMedia": "Media",
+  "userProfileOverview": "Overzicht",
+  "userProfileAnnotations": "Annotaties",
+
+  "settingsGeneralTitle": "Algemene Instellingen",
+  "settingsProjectCreationTitle": "Project Aanmaken",
+  "settingsProjectCreationConfirmNoLabels": "Altijd vragen om te bevestigen bij het maken van een project zonder labels",
+  "settingsProjectCreationConfirmNoLabelsNote": "Je wordt gewaarschuwd als je probeert een project aan te maken zonder gedefinieerde labels.",
+
+  "settingsLabelsCreationDeletionTitle": "Labels Aanmaken / Verwijderen",
+  "settingsLabelsDeletionWithAnnotations": "Annotaties verwijderen wanneer label wordt verwijderd",
+  "settingsLabelsDeletionWithAnnotationsNote": "Wanneer ingeschakeld, zal het verwijderen van een label automatisch alle annotaties verwijderen die aan dat label zijn toegewezen in alle media-items.",
+  "settingsLabelsSetDefaultLabel": "Eerste label als standaard instellen",
+  "settingsLabelsSetDefaultLabelNote": "Wanneer ingeschakeld, wordt het eerste label dat je in een project maakt automatisch gemarkeerd als het standaardlabel. Je kunt de standaard later op elk moment wijzigen.",
+
+  "settingsDatasetViewTitle": "Dataset Weergave",
+  "settingsDatasetViewDuplicateWithAnnotations": "Afbeelding altijd met annotaties dupliceren (kopiëren)",
+  "settingsDatasetViewDuplicateWithAnnotationsNote": "Bij dupliceren worden annotaties meegenomen, tenzij je de instellingen wijzigt",
+  "settingsDatasetViewDeleteFromOS": "Bij het verwijderen van een afbeelding uit de Dataset, deze altijd verwijderen uit het besturingssysteem / bestandssysteem",
+  "settingsDatasetViewDeleteFromOSNote": "Verwijdert het bestand ook van de schijf, niet alleen uit de dataset",
+  "settingsAnnotationTitle": "Annotatie-instellingen",
+  "settingsAnnotationOpacity": "Annotatie-transparantie",
+  "settingsAnnotationAutoSave": "Annotatie altijd opslaan of verzenden bij het overgaan naar de volgende afbeelding",
+  "settingsThemeTitle": "Themaselectie",
+  "settingsLanguageTitle": "Land / Taal",
+
+  "colorPickerTitle": "Kies een kleur",
+  "colorPickerBasicColors": "Basiskleuren",
+
+  "loadingProjects": "Projecten laden...",
+  "importDataset": "Dataset importeren",
+  "uploadMedia": "Media uploaden",
+  "createProjectTitle": "Nieuw Project Aanmaken",
+  "createProjectStepOneSubtitle": "Voer je nieuwe projectnaam in en selecteer het Projecttype",
+  "createProjectStepTwoSubtitle": "Maak labels aan voor een Nieuw project",
+
+  "emptyProjectTitle": "Begin je eerste project",
+  "emptyProjectDescription": "Maak een project aan om datasets te organiseren, media te annoteren en AI toe te passen op je visietaken — allemaal in één gestroomlijnde werkruimte ontworpen om je computervisie-pipeline te versnellen.",
+  "emptyProjectCreateNew": "Nieuw Project Aanmaken",
+  "emptyProjectCreateNewShort": "Nieuw Project",
+  "emptyProjectImportDataset": "Project aanmaken vanuit Dataset-import",
+  "emptyProjectImportDatasetShort": "Dataset Importeren",
+
+  "dialogBack": "<- Terug",
+  "dialogNext": "Volgende ->",
+
+  "rename": "Hernoemen",
+  "delete": "Verwijderen",
+  "setAsDefault": "Als Standaard Instellen",
+
+  "paginationPageFromTotal": "Pagina {current} van {total}",
+  "@paginationPageFromTotal": {
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+
+  "taskTypeRequiredTitle": "Taaktype Vereist",
+  "taskTypeRequiredMessage": "Je moet een taaktype selecteren voordat je verder kunt gaan. Het huidige tabblad '{tab}' heeft geen taaktype geselecteerd. Elk project moet gekoppeld zijn aan een taak (bijv. objectdetectie, classificatie of segmentatie) zodat het systeem weet hoe je gegevens te verwerken.",
+  "@taskTypeRequiredMessage": {
+    "description": "Foutmelding wanneer taaktype niet is geselecteerd",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "taskTypeRequiredTips": "Klik op een van de beschikbare taaktype-opties onder het tabblad '{tab}'. Als je niet zeker weet welke taak je moet kiezen, beweeg dan met de muis over het informatiepictogram naast elk type om een korte beschrijving te zien.",
+  "@taskTypeRequiredTips": {
+    "description": "Handige tips voor het selecteren van taaktype",
+    "placeholders": {
+      "tab": {}
+    }
+  },
+  "menuProjects": "Projecten",
+  "menuAccount": "Account",
+  "menuLearn": "Leren",
+  "menuAbout": "Over",
+
+  "menuCreateNewProject": "Nieuw project aanmaken",
+  "menuCreateFromDataset": "Aanmaken vanuit Dataset",
+  "menuImportDataset": "Project aanmaken vanuit Dataset-import",
+  "menuSortLastUpdated": "Laatst bijgewerkt",
+  "menuSortNewestOldest": "Nieuwste-Oudste",
+  "menuSortOldestNewest": "Oudste-Nieuwste",
+  "menuSortType": "Projecttype",
+  "menuSortAz": "A-Z",
+  "menuSortZa": "Z-A",
+
+  "projectNameLabel": "Projectnaam",
+  "tabDetection": "Detectie",
+  "tabClassification": "Classificatie",
+  "tabSegmentation": "Segmentatie",
+  "labelRequiredTitle": "Minstens Één Label Vereist",
+  "labelRequiredMessage": "Je moet minstens één label aanmaken om verder te gaan. Labels zijn essentieel voor het definiëren van de annotatiecategorieën die tijdens de datasetvoorbereiding zullen worden gebruikt.",
+  "labelRequiredTips": "Tip: Klik op de rode knop met de tekst Label Aanmaken nadat je een labelnaam hebt ingevoerd om je eerste label toe te voegen.",
+  "createLabelButton": "Label Aanmaken",
+  "labelNameHint": "Voer hier een nieuwe Labelnaam in",
+  "createdLabelsTitle": "Aangemaakte Labels",
+  "labelEmptyTitle": "Labelnaam kan niet leeg zijn!",
+  "labelEmptyMessage": "Voer een labelnaam in. Labels helpen bij het identificeren van objecten of categorieën in je project. Het wordt aanbevolen om korte, duidelijke en beschrijvende namen te gebruiken, zoals \"Auto\", \"Persoon\" of \"Boom\". Vermijd speciale tekens of spaties.",
+  "labelEmptyTips": "Tips voor Labelnaamgeving:\n• Gebruik korte en beschrijvende namen\n• Houd je aan letters, cijfers, onderstreepjes (bijv. kat, verkeersbord, achtergrond)\n• Vermijd spaties en symbolen (bijv. Persoon 1 → persoon_1)",
+  "labelDuplicateTitle": "Dubbele Labelnaam",
+  "labelDuplicateMessage": "Het label '{label}' bestaat al in dit project. Elk label moet een unieke naam hebben om verwarring tijdens annotatie en training te voorkomen.",
+  "@labelDuplicateMessage": {
+    "description": "Foutmelding wanneer label al bestaat",
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "labelDuplicateTips": "Waarom unieke labels?\n• Het hergebruiken van dezelfde naam kan problemen veroorzaken tijdens dataset-export en modeltraining.\n• Unieke labelnamen helpen bij het behouden van duidelijke, gestructureerde annotaties.\n\nTip: Probeer een variatie of nummer toe te voegen om te onderscheiden (bijv. 'Auto', 'Auto_2').",
+  "binaryLimitTitle": "Binaire Classificatielimiet",
+  "binaryLimitMessage": "Je kunt niet meer dan twee labels aanmaken voor een Binair Classificatieproject.\n\nBinaire Classificatie is ontworpen om onderscheid te maken tussen precies twee klassen, zoals 'Ja' vs 'Nee', of 'Spam' vs 'Geen Spam'.",
+  "binaryLimitTips": "Heb je meer dan twee labels nodig?\nOverweeg om je projecttype te wijzigen naar Multi-Class Classificatie of een andere geschikte taak om drie of meer categorieën te ondersteunen.",
+  "noteBinaryClassification": "Dit projecttype staat precies 2 labels toe. Binaire Classificatie wordt gebruikt wanneer je model onderscheid moet maken tussen twee mogelijke klassen, zoals \"Ja\" vs \"Nee\", of \"Hond\" vs \"Geen Hond\". Maak alsjeblieft slechts twee verschillende labels aan.",
+  "noteMultiClassClassification": "Dit projecttype ondersteunt meerdere labels. Multi-Class Classificatie is geschikt wanneer je model moet kiezen uit drie of meer categorieën, zoals \"Kat\", \"Hond\", \"Konijn\". Je kunt zoveel labels toevoegen als nodig.",
+  "noteDetectionOrSegmentation": "Dit projecttype ondersteunt meerdere labels. Voor Objectdetectie of Segmentatie vertegenwoordigt elk label typisch een verschillende klasse van object (bijv. \"Auto\", \"Voetganger\", \"Fiets\"). Je kunt zoveel labels aanmaken als nodig voor je dataset.",
+  "noteDefault": "Je kunt één of meer labels aanmaken afhankelijk van je projecttype. Elk label helpt bij het definiëren van een categorie die je model zal leren herkennen. Raadpleeg de documentatie voor best practices.",
+  "discardDatasetImportTitle": "Dataset-import Weggooien?",
+  "discardDatasetImportMessage": "Je hebt al een dataset geëxtraheerd. Nu annuleren zal de geëxtraheerde bestanden en gedetecteerde datasetdetails verwijderen. Weet je zeker dat je wilt doorgaan?",
+  "projectTypeHelpTitle": "Hulp bij Projecttypeselectie",
+  "projectTypeWhyDisabledTitle": "Waarom zijn sommige projecttypen uitgeschakeld?",
+  "projectTypeWhyDisabledBody": "Wanneer je een dataset importeert, analyseert het systeem de geleverde annotaties en probeert automatisch het meest geschikte projecttype voor je te detecteren.\n\nBijvoorbeeld, als je dataset begrenzingsvak-annotaties bevat, zal het voorgestelde projecttype \"Detectie\" zijn. Als het maskers bevat, zal \"Segmentatie\" worden voorgesteld, enzovoort.\n\nOm je gegevens te beschermen, zijn standaard alleen compatibele projecttypen ingeschakeld.",
+  "projectTypeAllowChangeTitle": "Wat gebeurt er als ik projecttypewijziging inschakelen?",
+  "projectTypeAllowChangeBody": "Als je \"Projecttypewijziging Toestaan\" inschakelt, kun je handmatig ELK projecttype selecteren, zelfs als het niet overeenkomt met de gedetecteerde annotaties.\n\n⚠️ WAARSCHUWING: Alle bestaande annotaties van de import zullen worden verwijderd bij het overschakelen naar een incompatibel projecttype.\nJe zult alle media-items opnieuw moeten annoteren of een dataset moeten importeren die geschikt is voor het nieuw geselecteerde projecttype.",
+  "projectTypeWhenUseTitle": "Wanneer moet ik deze optie gebruiken?",
+  "projectTypeWhenUseBody": "Je zou deze optie alleen moeten inschakelen als:\n\n- Je per ongeluk de verkeerde dataset hebt geïmporteerd.\n- Je een nieuw annotatieproject wilt starten met een ander type.\n- Je datasetstructuur is veranderd na import.\n\nAls je niet zeker bent, raden we sterk aan om de standaardselectie te behouden om gegevensverlies te voorkomen.",
+
+  "allLabels": "Alle Labels",
+  "setAsProjectIcon": "Als Projecticoon Instellen",
+  "setAsProjectIconConfirm": "Wil je '{filePath}' gebruiken als icoon voor dit project?\n\nDit zal elk eerder ingesteld icoon vervangen.",
+  "@setAsProjectIconConfirm": {
+    "placeholders": {
+      "filePath": {}
+    }
+  },
+
+  "removeFilesFromDatasetInProgress": "Bestanden verwijderen...",
+  "removeFilesFromDataset": "Bestanden verwijderen uit Dataset?",
+  "removeFilesFromDatasetConfirm": "Weet je zeker dat je de volgende bestanden wilt verwijderen ('{amount}')?\n\nAlle bijbehorende annotaties zullen ook worden verwijderd.",
+  "@removeFilesFromDatasetConfirm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "removeFilesFailedTitle": "Verwijderen Mislukt",
+  "removeFilesFailedMessage": "Sommige bestanden konden niet worden verwijderd",
+  "removeFilesFailedTips": "Controleer bestandsrechten en probeer het opnieuw",
+
+  "duplicateImage": "Afbeelding Dupliceren",
+  "duplicateWithAnnotations": "Afbeelding dupliceren met annotaties",
+  "duplicateWithAnnotationsHint": "Er wordt een kopie van de afbeelding gemaakt samen met alle annotatiegegevens.",
+  "duplicateImageOnly": "Alleen afbeelding dupliceren",
+  "duplicateImageOnlyHint": "Alleen de afbeelding wordt gekopieerd, zonder annotaties.",
+  "saveDuplicateChoiceAsDefault": "Dit antwoord opslaan als standaardantwoord en niet meer vragen\n(Je kunt dit wijzigen in Account -> Applicatie-instellingen -> Dataset-navigatie)",
+
+  "editProjectTitle": "Projectnaam bewerken",
+  "editProjectDescription": "Kies een duidelijke, beschrijvende projectnaam (3 - 86 tekens). Het wordt aanbevolen om speciale tekens te vermijden.",
+  
+  "deleteProjectTitle": "Project Verwijderen",
+  "deleteProjectInProgress": "Project verwijderen...",
+  "deleteProjectOptionDeleteFromDisk": "Ook alle bestanden van schijf verwijderen",
+  "deleteProjectOptionDontAskAgain": "Vraag me niet opnieuw",
+  "deleteProjectConfirm": "Weet je zeker dat je het project \"{projectName}\" wilt verwijderen?",
+  "@deleteProjectConfirm": {
+    "placeholders": {
+      "projectName": {}
+    }
+  },
+  "deleteProjectInfoLine": "Project werd aangemaakt op {creationDate}\nAantal Labels: {labelCount}",
+  "@deleteProjectInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "labelCount": {}
+    }
+  },
+
+  "deleteDatasetTitle": "Dataset Verwijderen",
+  "deleteDatasetInProgress": "Dataset verwijderen... Even geduld.",
+  "deleteDatasetConfirm": "Weet je zeker dat je \"{datasetName}\" wilt verwijderen?",
+  "@deleteDatasetConfirm": {
+    "placeholders": {
+      "datasetName": {}
+    }
+  },
+  "deleteDatasetInfoLine": "Deze dataset werd aangemaakt op {creationDate} en bevat {mediaCount} media-items en {annotationCount} annotaties.",
+  "@deleteDatasetInfoLine": {
+    "placeholders": {
+      "creationDate": {},
+      "mediaCount": {},
+      "annotationCount": {}
+    }
+  },
+
+  "editDatasetTitle": "Dataset Hernoemen",
+  "editDatasetDescription": "Voer een nieuwe naam in voor deze dataset:",
+
+  "noMediaDialogUploadPrompt": "Je moet afbeeldingen of video's uploaden",
+  "noMediaDialogUploadPromptShort": "Media uploaden",
+  "noMediaDialogSupportedImageTypesTitle": "Ondersteunde afbeeldingstypen:",
+  "noMediaDialogSupportedImageTypesList": "jpg, jpeg, png, bmp, jfif, webp",
+  "noMediaDialogSupportedVideoFormatsLink": "Klik hier om te zien welke videoformaten worden ondersteund op jouw platform",
+  "noMediaDialogSupportedVideoFormatsTitle": "Ondersteunde Videoformaten",
+  "noMediaDialogSupportedVideoFormatsList": "Veelvoorkomende Ondersteunde Formaten:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (browserafhankelijk)\n- MKV: Android (gedeeltelijk), Windows\n- AVI: Alleen Android/Windows (gedeeltelijk)",
+  "noMediaDialogSupportedVideoFormatsWarning": "Ondersteuning kan variëren afhankelijk van het platform en de videocodec.\nSommige formaten werken mogelijk niet in browsers of op iOS.",
+
+  "annotatorTopToolbarBackTooltip": "Terug naar Project",
+  "annotatorTopToolbarSelectDefaultLabel": "Standaardlabel selecteren",
+
+  "toolbarNavigation": "Navigatie",
+  "toolbarBbox": "Begrenzingsvak Tekenen",
+  "toolbarPolygon": "Polygoon Tekenen",
+  "toolbarSAM": "Segment Anything Model",
+  "toolbarResetZoom": "Zoom Resetten",
+  "toolbarToggleGrid": "Raster Schakelen",
+  "toolbarAnnotationSettings": "Annotatie-instellingen",
+  "toolbarToggleAnnotationNames": "Annotatienamen Schakelen",
+  "toolbarRotateLeft": "Linksom Draaien (Binnenkort Beschikbaar)",
+  "toolbarRotateRight": "Rechtsom Draaien (Binnenkort Beschikbaar)",
+  "toolbarHelp": "Help",
+  "dialogOpacityTitle": "Annotatie Vulling Transparantie",
+  "dialogHelpTitle": "Annotator Werkbalk Help",
+  "dialogHelpContent": "• Navigatie – Gebruik om te selecteren en rond het canvas te bewegen.\n• Begrenzingsvak – (Zichtbaar in Detectieprojecten) Teken rechthoekige begrenzingsvakken.\n• Zoom Resetten – Reset het zoomniveau om de afbeelding op het scherm te passen.\n• Raster Schakelen – Toon of verberg het dataset-miniatuurrooster.\n• Instellingen – Pas de vultransparantie van annotaties, de annotatiegrens en de grootte van hoeken aan.\n• Annotatienamen Schakelen – Toon of verberg tekstlabels op annotaties.",
+  "dialogHelpTips": "Tip: Gebruik de Navigatiemodus om annotaties te selecteren en te bewerken.\nMeer sneltoetsen en functies komen binnenkort!",
+  "dialogOpacityExplanation": "Pas het transparantieniveau aan om de inhoud meer of minder doorzichtig te maken.",
+
+  "deleteAnnotationTitle": "Annotatie Verwijderen",
+  "deleteAnnotationMessage": "Weet je zeker dat je wilt verwijderen",
+  "unnamedAnnotation": "deze annotatie",
+
+  "accountStorage_importFolderTitle": "Datasets importmap",
+  "accountStorage_thumbnailsFolderTitle": "Miniatuurmap",
+  "accountStorage_exportFolderTitle": "Datasets exportmap",
+  "accountStorage_folderTooltip": "Map kiezen",
+  "accountStorage_helpTitle": "Opslaghulp",
+  "accountStorage_helpMessage": "Je kunt de map wijzigen waar geïmporteerde datasets, geëxporteerde ZIP-archieven en miniaturen worden opgeslagen.\nTik op het \"Map\"-pictogram naast het padveld om de directory te selecteren of te wijzigen.\n\nDeze map zal worden gebruikt als standaardlocatie voor:\n- Geïmporteerde datasetbestanden (bijv. COCO, YOLO, VOC, Datumaro, etc.)\n- Geëxporteerde dataset Zip-archieven\n- Projectminiaturen\n\nZorg ervoor dat de geselecteerde map beschrijfbaar is en voldoende ruimte heeft.\nOp Android of iOS moet je mogelijk opslagrechten verlenen.\nAanbevolen mappen variëren per platform — zie hieronder platformspecifieke tips.",
+  "accountStorage_helpTips": "Aanbevolen mappen per platform:\n\nWindows:\n  C:\\Users\\<jij>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<jij>/.annotateit/datasets\n\nmacOS:\n  /Users/<jij>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox pad>/Documents/AnnotateIt/datasets\n",
+
+  "accountStorage_copySuccess": "Pad gekopieerd naar klembord",
+  "accountStorage_openError": "Map bestaat niet:\n",
+  "accountStorage_pathEmpty": "Pad is leeg",
+  "accountStorage_openFailed": "Kan map niet openen:\n",
+
+  "changeProjectTypeTitle": "Projecttype wijzigen",
+  "changeProjectTypeMigrating": "Projecttype migreren...",
+  "changeProjectTypeStepOneSubtitle": "Selecteer een nieuw projecttype uit de onderstaande lijst",
+  "changeProjectTypeStepTwoSubtitle": "Bevestig je keuze",
+
+  "changeProjectTypeWarningTitle": "Waarschuwing: Je staat op het punt het projecttype te wijzigen.",
+  "changeProjectTypeConversionIntro": "Alle bestaande annotaties zullen als volgt worden geconverteerd:",
+  "changeProjectTypeConversionDetails": "- Begrenzingsvakken (Detectie) -> omgezet naar rechthoekige polygonen.\n- Polygonen (Segmentatie) -> omgezet naar strak passende begrenzingsvakken.\n\nOpmerking: Deze conversies kunnen de precisie verminderen, vooral bij het converteren van polygonen naar vakken, aangezien gedetailleerde vorminformatie verloren gaat.\n\n- Detectie / Segmentatie → Classificatie:\n  Afbeeldingen worden geclassificeerd op basis van het meest voorkomende label in de annotaties:\n     -> Als een afbeelding 5 objecten heeft gelabeld als \"Hond\" en 10 als \"Kat\", zal het worden geclassificeerd als \"Kat\".\n     -> Als de aantallen gelijk zijn, zal het eerste gevonden label worden gebruikt.\n\n- Classificatie -> Detectie / Segmentatie:\n  Er worden geen annotaties overgedragen. Je zult alle media-items handmatig opnieuw moeten annoteren, aangezien classificatieprojecten geen gegevens op regioniveau bevatten.",
+  "changeProjectTypeErrorTitle": "Migratie Mislukt",
+  "changeProjectTypeErrorMessage": "Er is een fout opgetreden bij het wijzigen van het projecttype. De wijzigingen konden niet worden toegepast.",
+  "changeProjectTypeErrorTips": "Controleer of het project geldige annotaties heeft en probeer het opnieuw. Als het probleem aanhoudt, herstart de app of neem contact op met ondersteuning.",
+
+  "exportProjectAsDataset": "Project Exporteren als Dataset",
+
+  "projectHelpTitle": "Hoe Projecten Werken",
+  "projectHelpMessage": "Met projecten kun je datasets, mediabestanden en annotaties op één plek organiseren. Je kunt nieuwe projecten maken voor verschillende taken zoals detectie, classificatie of segmentatie.",
+  "projectHelpTips": "Tip: Je kunt datasets in COCO-, YOLO-, VOC-, Labelme- en Datumaro-formaat importeren om automatisch een project te maken.",
+
+  "datasetDialogTitle": "Dataset Importeren om Project te Maken",
+  "datasetDialogProcessing": "Verwerken...",
+  "datasetDialogProcessingProgress": "Verwerken... {percent}%",
+  "datasetDialogModeIsolate": "Isolatiemodus Ingeschakeld",
+  "datasetDialogModeNormal": "Normale Modus",
+  "datasetDialogNoDatasetLoaded": "Geen dataset geladen.",
+
+  "datasetDialogImportFailedTitle": "Import Mislukt",
+  "datasetDialogImportFailedMessage": "Het ZIP-bestand kon niet worden verwerkt. Het is mogelijk beschadigd, onvolledig of geen geldig dataset-archief.",
+  "datasetDialogImportFailedTips": "Probeer je dataset opnieuw te exporteren of te zippen.\nZorg ervoor dat het in COCO-, YOLO-, VOC- of ondersteund formaat is.\n\nFout: ",
+
+  "datasetDialogNoProjectTypeTitle": "Geen Projecttype Geselecteerd",
+  "datasetDialogNoProjectTypeMessage": "Selecteer een Projecttype op basis van de gedetecteerde annotatietypen in je dataset.",
+  "datasetDialogNoProjectTypeTips": "Controleer je datasetformaat en zorg ervoor dat annotaties een ondersteunde structuur volgen zoals COCO, YOLO, VOC of Datumaro.",
+
+  "datasetDialogProcessingDatasetTitle": "Dataset Verwerken",
+  "datasetDialogProcessingDatasetMessage": "We zijn momenteel bezig met het uitpakken van je ZIP-archief, het analyseren van de inhoud en het detecteren van het datasetformaat en annotatietype. Dit kan enkele seconden tot enkele minuten duren, afhankelijk van de grootte en structuur van de dataset. Sluit dit venster niet en navigeer niet weg tijdens het proces.",
+  "datasetDialogProcessingDatasetTips": "Grote archieven met veel afbeeldingen of annotatiebestanden kunnen langer duren om te verwerken.",
+
+  "datasetDialogCreatingProjectTitle": "Project Aanmaken",
+  "datasetDialogCreatingProjectMessage": "We zijn bezig met het opzetten van je project, het initialiseren van de metadata en het opslaan van alle configuraties. Dit omvat het toewijzen van labels, het aanmaken van datasets en het koppelen van bijbehorende mediabestanden. Wacht even en vermijd het sluiten van dit venster totdat het proces is voltooid.",
+  "datasetDialogCreatingProjectTips": "Projecten met veel labels of mediabestanden kunnen iets langer duren.",
+
+  "datasetDialogAnalyzingDatasetTitle": "Dataset Analyseren",
+  "datasetDialogAnalyzingDatasetMessage": "We zijn momenteel bezig met het analyseren van je dataset-archief. Dit omvat het uitpakken van bestanden, het detecteren van de datasetstructuur, het identificeren van annotatieformaten en het verzamelen van media- en labelinformatie. Wacht tot het proces is voltooid. Het sluiten van het venster of wegnavigeren kan de operatie onderbreken.",
+  "datasetDialogAnalyzingDatasetTips": "Grote datasets met veel bestanden of complexe annotaties kunnen extra tijd kosten.",
+
+  "datasetDialogFilePickErrorTitle": "Bestandsselectiefout",
+  "datasetDialogFilePickErrorMessage": "Kon het bestand niet selecteren. Probeer het opnieuw.",
+  "datasetDialogGenericErrorTips": "Controleer je bestand en probeer het opnieuw. Als het probleem aanhoudt, neem contact op met ondersteuning.",
+
+  "thumbnailGenerationTitle": "Fout",
+  "thumbnailGenerationFailed": "Kon miniatuur niet genereren",
+  "thumbnailGenerationTryAgainLater": "Probeer het later opnieuw",
+  "thumbnailGenerationInProgress": "Miniatuur genereren...",
+
+  "menuImageAnnotate": "Annoteren",
+  "menuImageDetails": "Details",
+  "menuImageDuplicate": "Dupliceren",
+  "menuImageSetAsIcon": "Als Icoon Instellen",
+  "menuImageDelete": "Verwijderen",
+
+  "noLabelsTitle": "Je hebt geen Labels in het Project",
+  "noLabelsExplain1": "Je kunt niet annoteren zonder labels omdat labels betekenis geven aan wat je markeert",
+  "noLabelsExplain2": "Je kunt handmatig labels toevoegen of ze importeren uit een JSON-bestand.",
+  "noLabelsExplain3": "Een annotatie zonder label is slechts een lege doos.",
+  "noLabelsExplain4": "Labels definiëren de categorieën of klassen die je annoteert in je dataset.",
+  "noLabelsExplain5": "Of je nu objecten in afbeeldingen tagt, classificeert of regio's segmenteert,",
+  "noLabelsExplain6": "labels zijn essentieel voor het duidelijk en consistent organiseren van je annotaties.",
+
+  "importLabelsPreviewTitle": "Labelimport Voorbeeld",
+  "importLabelsFailedTitle": "Labelimport Mislukt",
+  "importLabelsNoLabelsTitle": "Geen labels gevonden in dit project",
+  "importLabelsJsonParseError": "JSON-parsing mislukt.\n",
+  "importLabelsJsonParseTips": "Zorg ervoor dat het bestand geldige JSON is. Je kunt het valideren op https://jsonlint.com/",
+  "importLabelsJsonNotList": "Een lijst van labels (array) werd verwacht, maar kreeg: {type}.",
+  "@importLabelsJsonNotList": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonNotListTips": "Je JSON-bestand moet beginnen met [ en meerdere labelobjecten bevatten. Elk label moet naam-, kleur- en labelVolgorde-velden bevatten.",
+  "importLabelsJsonItemNotMap": "Een van de items in de lijst is geen geldig object: {type}",
+  "@importLabelsJsonItemNotMap": {
+    "placeholders": {
+      "type": {}
+    }
+  },  
+  "importLabelsJsonItemNotMapTips": "Elk item in de lijst moet een geldig object zijn met velden: naam, kleur en labelVolgorde.",
+  "importLabelsJsonLabelParseError": "Kon een van de labels niet parsen.\n",
+  "importLabelsJsonLabelParseTips": "Controleer of elk label de vereiste velden heeft zoals naam en kleur, en of de waarden de juiste types zijn.",
+  "importLabelsUnexpectedError": "Er is een onverwachte fout opgetreden tijdens het importeren van het JSON-bestand.\n",
+  "importLabelsUnexpectedErrorTip": "Zorg ervoor dat je bestand leesbaar is en correct geformatteerd.",
+  "importLabelsDatabaseError": "Kon labels niet opslaan in database",
+  "importLabelsDatabaseErrorTips": "Controleer je databaseverbinding en probeer het opnieuw. Als het probleem aanhoudt, neem contact op met ondersteuning.",
+  "importLabelsNameMissingOrEmpty": "Een van de labels heeft geen geldige naam.",
+  "importLabelsNameMissingOrEmptyTips": "Zorg ervoor dat elk label in de JSON een niet-leeg 'naam'-veld bevat.",
+
+  "menuSortLastUpdated": "Laatst Bijgewerkt",
+  "menuSortNewestOldest": "Nieuwste-Oudste",
+  "menuSortOldestNewest": "Oudste-Nieuwste",
+  "menuSortAZ": "A-Z",
+  "menuSortZA": "Z-A",
+  "menuSortProjectType": "Projecttype",
+
+  "uploadInProgressTitle": "Upload Bezig",
+  "uploadInProgressMessage": "Je hebt een actieve upload bezig. Als je nu weggaat, wordt de upload geannuleerd en moet je opnieuw beginnen.\n\nWil je toch weggaan?",
+  "uploadInProgressStay": "Blijven",
+  "uploadInProgressLeave": "Weggaan",
+
+  "fileNotFound": "Bestand niet gevonden",
+
+  "labelEditSave": "Opslaan",
+  "labelEditEdit": "Bewerken",
+  "labelEditMoveUp": "Omhoog Verplaatsen",
+  "labelEditMoveDown": "Omlaag Verplaatsen",
+  "labelEditDelete": "Verwijderen",
+  "labelExportLabels": "Labels Exporteren",
+  "labelSaveDialogTitle": "Labels opslaan in JSON-bestand",
+  "labelSaveDefaultFilename": "labels.json",
+  "labelDeleteError": "Kon label niet verwijderen: {error}",
+  "@labelDeleteError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "labelDeleteErrorTips": "Zorg ervoor dat het label nog bestaat of niet elders wordt gebruikt."
+}
