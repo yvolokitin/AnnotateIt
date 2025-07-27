@@ -12,6 +12,7 @@ import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_nl.dart';
 import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
 
@@ -106,6 +107,7 @@ abstract class AppLocalizations {
     Locale('it'),
     Locale('nl'),
     Locale('pt'),
+    Locale('ru'),
   ];
 
   /// No description provided for @buttonKeep.
@@ -1841,6 +1843,7 @@ class _AppLocalizationsDelegate
     'it',
     'nl',
     'pt',
+    'ru',
   ].contains(locale.languageCode);
 
   @override
@@ -1864,6 +1867,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsNl();
     case 'pt':
       return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
   }
 
   throw FlutterError(

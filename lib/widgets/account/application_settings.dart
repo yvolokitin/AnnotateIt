@@ -292,6 +292,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
       'it': 'Italian',
       'pt': 'Portuguese',
       'nl': 'Dutch',
+      'ru': 'Russian',
     };
 
     return Column(
