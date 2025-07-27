@@ -27,7 +27,8 @@ class ApplicationSettings extends StatelessWidget {
           children: [
             _buildSection(l10n.settingsGeneralTitle, [
               _buildCountrySelection(context, isWide, isTablet),
-              _buildThemeSelection(context),
+              /// theme selection does not work yet
+              /// _buildThemeSelection(context),
             ], isWide),
 
             _buildSection(l10n.settingsProjectCreationTitle, [
