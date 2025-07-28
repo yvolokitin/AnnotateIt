@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../gen_l10n/app_localizations.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
   // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project
@@ -8,17 +9,18 @@ class DatasetStepProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        _buildStep("Dataset Selection", 1),
+        _buildStep(l10n.datasetStepProgressSelection, 1),
         _buildLine(),
-        _buildStep("Extract ZIP", 2),
+        _buildStep(l10n.datasetStepProgressExtract, 2),
         _buildLine(),
-        _buildStep("Dataset Overview", 3),
+        _buildStep(l10n.datasetStepProgressOverview, 3),
         _buildLine(),
-        _buildStep("Task Confirmation", 4),
+        _buildStep(l10n.datasetStepProgressTaskConfirmation, 4),
         _buildLine(),
-        _buildStep("Project Creation", 5),
+        _buildStep(l10n.datasetStepProgressProjectCreation, 5),
       ],
     );
   }

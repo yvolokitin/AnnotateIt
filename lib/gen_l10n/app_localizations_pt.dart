@@ -758,6 +758,24 @@ class AppLocalizationsPt extends AppLocalizations {
       'Nenhum conjunto de dados carregado.';
 
   @override
+  String get datasetDialogSelectZipFile =>
+      'Selecione seu arquivo ZIP de conjunto de dados';
+
+  @override
+  String get datasetDialogChooseFile => 'Escolher um arquivo';
+
+  @override
+  String get datasetDialogSupportedFormats =>
+      'Formatos de conjunto de dados suportados:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT, ou apenas mídia (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Falha na Importação';
 
   @override
@@ -1006,4 +1024,100 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Certifique-se de que a etiqueta ainda existe ou não está sendo usada em outro lugar.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Faça upload de um arquivo ZIP com formato COCO, YOLO, VOC, LabelMe, CVAT, Datumaro ou apenas mídia';
+
+  @override
+  String get datasetStepExtractingZip =>
+      'Extraindo ZIP no armazenamento local ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Conjunto de dados extraído em: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Tipo de tarefa detectado: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Selecionar tipo de projeto';
+
+  @override
+  String get datasetStepProgressSelection => 'Seleção de Conjunto de Dados';
+
+  @override
+  String get datasetStepProgressExtract => 'Extrair ZIP';
+
+  @override
+  String get datasetStepProgressOverview => 'Visão Geral do Conjunto de Dados';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Confirmação de Tarefa';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Criação de Projeto';
+
+  @override
+  String get projectTypeDetectionBoundingBox =>
+      'Detecção com caixa delimitadora';
+
+  @override
+  String get projectTypeDetectionOriented => 'Detecção orientada';
+
+  @override
+  String get projectTypeBinaryClassification => 'Classificação Binária';
+
+  @override
+  String get projectTypeMultiClassClassification =>
+      'Classificação Multi-classe';
+
+  @override
+  String get projectTypeMultiLabelClassification =>
+      'Classificação Multi-etiqueta';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Segmentação de Instâncias';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Segmentação Semântica';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Escolha seu tipo de Projeto com base nas anotações detectadas';
+
+  @override
+  String get datasetStepAllowProjectTypeChange =>
+      'Permitir Alteração de Tipo de Projeto';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Atribuir uma de duas etiquetas possíveis a cada entrada (por exemplo, spam ou não spam, positivo ou negativo).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Atribuir exatamente uma etiqueta de um conjunto de classes mutuamente exclusivas (por exemplo, gato, cachorro ou pássaro).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Atribuir uma ou mais etiquetas de um conjunto de classes — várias etiquetas podem ser aplicadas ao mesmo tempo (por exemplo, uma imagem etiquetada como \"gato\" e \"cachorro\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Desenhar um retângulo ao redor de um objeto em uma imagem.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Desenhar e envolver um objeto dentro de um retângulo mínimo.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Detectar e distinguir cada objeto individual com base em suas características únicas.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Detectar e classificar todos os objetos semelhantes como uma única entidade.';
 }

@@ -279,6 +279,11 @@
   "datasetDialogModeIsolate": "Режим изоляции включён",
   "datasetDialogModeNormal": "Обычный режим",
   "datasetDialogNoDatasetLoaded": "Датасет не загружен.",
+  "datasetDialogSelectZipFile": "Выберите ZIP-файл датасета",
+  "datasetDialogChooseFile": "Выбрать файл",
+  "datasetDialogSupportedFormats": "Поддерживаемые форматы датасетов:",
+  "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
+  "datasetDialogSupportedFormatsList2": "LabelMe, CVAT или только медиа (.zip)",
   "datasetDialogImportFailedTitle": "Ошибка импорта",
   "datasetDialogImportFailedMessage": "ZIP-файл не удалось обработать. Возможно, он повреждён, неполный или не является допустимым архивом датасета.",
   "datasetDialogImportFailedTips": "Попробуйте заново экспортировать или упаковать ваш датасет.\nУбедитесь, что он соответствует форматам COCO, YOLO, VOC и т.п.\n\nОшибка: ",
@@ -362,5 +367,48 @@
       "error": {}
     }
   },
-  "labelDeleteErrorTips": "Убедитесь, что метка существует и не используется в других местах."
+  "labelDeleteErrorTips": "Убедитесь, что метка существует и не используется в других местах.",
+
+  "datasetStepUploadZip": "Загрузите ZIP-файл с форматом COCO, YOLO, VOC, LabelMe, CVAT, Datumaro или только медиа",
+  "datasetStepExtractingZip": "Извлечение ZIP в локальное хранилище ...",
+  "datasetStepExtractedPath": "Датасет извлечен в: {path}",
+  "@datasetStepExtractedPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "datasetStepDetectedTaskType": "Обнаруженный тип задачи: {format}",
+  "@datasetStepDetectedTaskType": {
+    "placeholders": {
+      "format": {}
+    }
+  },
+  "datasetStepSelectProjectType": "Выберите тип проекта",
+
+  "datasetStepProgressSelection": "Выбор датасета",
+  "datasetStepProgressExtract": "Извлечение ZIP",
+  "datasetStepProgressOverview": "Обзор датасета",
+  "datasetStepProgressTaskConfirmation": "Подтверждение задачи",
+  "datasetStepProgressProjectCreation": "Создание проекта",
+
+  "projectTypeDetectionBoundingBox": "Обнаружение (ограничивающие рамки)",
+  "projectTypeDetectionOriented": "Обнаружение (ориентированные рамки)",
+  "projectTypeBinaryClassification": "Бинарная классификация",
+  "projectTypeMultiClassClassification": "Многоклассовая классификация",
+  "projectTypeMultiLabelClassification": "Многометочная классификация",
+  "projectTypeInstanceSegmentation": "Сегментация экземпляров",
+  "projectTypeSemanticSegmentation": "Семантическая сегментация",
+  
+  "datasetStepChooseProjectType": "Выберите тип проекта на основе обнаруженных аннотаций",
+  "datasetStepAllowProjectTypeChange": "Разрешить изменение типа проекта",
+
+  "projectTypeBinaryClassificationDescription": "Присвоение одной из двух возможных меток каждому входному изображению (например, спам или не спам, положительный или отрицательный).",
+  "projectTypeMultiClassClassificationDescription": "Присвоение ровно одной метки из набора взаимоисключающих классов (например, кошка, собака или птица).",
+  "projectTypeMultiLabelClassificationDescription": "Присвоение одной или нескольких меток из набора классов — несколько меток могут применяться одновременно (например, изображение с метками \"кошка\" и \"собака\")",
+  
+  "projectTypeDetectionBoundingBoxDescription": "Нарисуйте прямоугольник вокруг объекта на изображении.",
+  "projectTypeDetectionOrientedDescription": "Нарисуйте и заключите объект в минимальный прямоугольник.",
+  
+  "projectTypeInstanceSegmentationDescription": "Обнаружение и различение каждого отдельного объекта на основе его уникальных особенностей.",
+  "projectTypeSemanticSegmentationDescription": "Обнаружение и классификация всех похожих объектов как единого целого."
 }

@@ -1,0 +1,55 @@
+Missing translations from the files mentioned in the issue description:
+
+1. dataset_step_description_widget.dart:
+- "Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format"
+- "Extracting ZIP in local storage ..."
+- "Dataset extracted in: $extractedPath"
+- "Detected task type: $datasetFormat"
+- "Select project type"
+
+2. dataset_step_progress_bar.dart:
+- "Dataset Selection"
+- "Extract ZIP"
+- "Dataset Overview"
+- "Task Confirmation"
+- "Project Creation"
+
+3. dataset_step_4_task_confirmation.dart:
+- "Detection bounding box"
+- "Detection oriented"
+- "Binary Classification"
+- "Multi-class Classification"
+- "Multi-label Classification"
+- "Instance Segmentation"
+- "Semantic Segmentation"
+- "Choose your Project type based on detected annotations"
+- "Allow Project Type Change"
+
+4. project_type_change_step_1_task_selection.dart:
+- "Detection bounding box"
+- "Detection oriented"
+- "Binary Classification"
+- "Multi-class Classification"
+- "Multi-label Classification"
+- "Instance Segmentation"
+- "Semantic Segmentation"
+
+5. classification_tab.dart:
+- "Binary Classification"
+- "Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative)."
+- "Multi-class Classification"
+- "Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird)."
+- "Multi-label Classification"
+- "Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both "cat" and "dog")"
+
+6. detection_tab.dart:
+- "Detection bounding box"
+- "Draw a rectangle around an object in an image."
+- "Detection oriented"
+- "Draw and enclose an object within a minimal rectangle."
+
+7. segmentation_tab.dart:
+- "Instance Segmentation"
+- "Detect and distinguish each individual object based on its unique features."
+- "Semantic Segmentation"
+- "Detect and classify all similar objects as a single entity."

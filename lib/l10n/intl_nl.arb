@@ -313,6 +313,11 @@
   "datasetDialogModeIsolate": "Isolatiemodus Ingeschakeld",
   "datasetDialogModeNormal": "Normale Modus",
   "datasetDialogNoDatasetLoaded": "Geen dataset geladen.",
+  "datasetDialogSelectZipFile": "Selecteer uw Dataset ZIP-bestand",
+  "datasetDialogChooseFile": "Kies een bestand",
+  "datasetDialogSupportedFormats": "Ondersteunde Dataset formaten:",
+  "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
+  "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, of alleen media (.zip)",
 
   "datasetDialogImportFailedTitle": "Import Mislukt",
   "datasetDialogImportFailedMessage": "Het ZIP-bestand kon niet worden verwerkt. Het is mogelijk beschadigd, onvolledig of geen geldig dataset-archief.",
@@ -413,5 +418,48 @@
       "error": {}
     }
   },
-  "labelDeleteErrorTips": "Zorg ervoor dat het label nog bestaat of niet elders wordt gebruikt."
+  "labelDeleteErrorTips": "Zorg ervoor dat het label nog bestaat of niet elders wordt gebruikt.",
+
+  "datasetStepUploadZip": "Upload een .ZIP bestand met COCO, YOLO, VOC, LabelMe, CVAT, Datumaro of alleen-media formaat",
+  "datasetStepExtractingZip": "ZIP uitpakken in lokale opslag ...",
+  "datasetStepExtractedPath": "Dataset uitgepakt in: {path}",
+  "@datasetStepExtractedPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "datasetStepDetectedTaskType": "Gedetecteerd taaktype: {format}",
+  "@datasetStepDetectedTaskType": {
+    "placeholders": {
+      "format": {}
+    }
+  },
+  "datasetStepSelectProjectType": "Selecteer projecttype",
+
+  "datasetStepProgressSelection": "Dataset Selectie",
+  "datasetStepProgressExtract": "ZIP Uitpakken",
+  "datasetStepProgressOverview": "Dataset Overzicht",
+  "datasetStepProgressTaskConfirmation": "Taakbevestiging",
+  "datasetStepProgressProjectCreation": "Project Aanmaken",
+
+  "projectTypeDetectionBoundingBox": "Detectie met begrenzingsvak",
+  "projectTypeDetectionOriented": "Georiënteerde detectie",
+  "projectTypeBinaryClassification": "Binaire Classificatie",
+  "projectTypeMultiClassClassification": "Multi-class Classificatie",
+  "projectTypeMultiLabelClassification": "Multi-label Classificatie",
+  "projectTypeInstanceSegmentation": "Instantie Segmentatie",
+  "projectTypeSemanticSegmentation": "Semantische Segmentatie",
+  
+  "datasetStepChooseProjectType": "Kies je Projecttype op basis van gedetecteerde annotaties",
+  "datasetStepAllowProjectTypeChange": "Projecttypewijziging Toestaan",
+
+  "projectTypeBinaryClassificationDescription": "Wijs één van twee mogelijke labels toe aan elke invoer (bijv. spam of geen spam, positief of negatief).",
+  "projectTypeMultiClassClassificationDescription": "Wijs precies één label toe uit een set van wederzijds uitsluitende klassen (bijv. kat, hond of vogel).",
+  "projectTypeMultiLabelClassificationDescription": "Wijs één of meer labels toe uit een set van klassen — meerdere labels kunnen tegelijkertijd van toepassing zijn (bijv. een afbeelding getagd als zowel \"kat\" als \"hond\")",
+  
+  "projectTypeDetectionBoundingBoxDescription": "Teken een rechthoek rond een object in een afbeelding.",
+  "projectTypeDetectionOrientedDescription": "Teken en omsluit een object binnen een minimale rechthoek.",
+  
+  "projectTypeInstanceSegmentationDescription": "Detecteer en onderscheid elk individueel object op basis van zijn unieke kenmerken.",
+  "projectTypeSemanticSegmentationDescription": "Detecteer en classificeer alle vergelijkbare objecten als één entiteit."
 }

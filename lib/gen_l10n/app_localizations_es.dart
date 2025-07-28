@@ -759,6 +759,24 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se ha cargado ningún conjunto de datos.';
 
   @override
+  String get datasetDialogSelectZipFile =>
+      'Seleccione su archivo ZIP de conjunto de datos';
+
+  @override
+  String get datasetDialogChooseFile => 'Elegir un archivo';
+
+  @override
+  String get datasetDialogSupportedFormats =>
+      'Formatos de conjunto de datos compatibles:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT o solo medios (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Error en la Importación';
 
   @override
@@ -1007,4 +1025,99 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Asegúrese de que la etiqueta aún existe o no se está utilizando en otro lugar.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Suba un archivo ZIP con formato COCO, YOLO, VOC, LabelMe, CVAT, Datumaro o solo medios';
+
+  @override
+  String get datasetStepExtractingZip =>
+      'Extrayendo ZIP en almacenamiento local ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Conjunto de datos extraído en: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Tipo de tarea detectado: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Seleccionar tipo de proyecto';
+
+  @override
+  String get datasetStepProgressSelection => 'Selección de Conjunto de Datos';
+
+  @override
+  String get datasetStepProgressExtract => 'Extraer ZIP';
+
+  @override
+  String get datasetStepProgressOverview => 'Resumen del Conjunto de Datos';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Confirmación de Tarea';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Creación de Proyecto';
+
+  @override
+  String get projectTypeDetectionBoundingBox =>
+      'Detección con cuadro delimitador';
+
+  @override
+  String get projectTypeDetectionOriented => 'Detección orientada';
+
+  @override
+  String get projectTypeBinaryClassification => 'Clasificación Binaria';
+
+  @override
+  String get projectTypeMultiClassClassification => 'Clasificación Multi-clase';
+
+  @override
+  String get projectTypeMultiLabelClassification =>
+      'Clasificación Multi-etiqueta';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Segmentación de Instancias';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Segmentación Semántica';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Elija su tipo de Proyecto basado en las anotaciones detectadas';
+
+  @override
+  String get datasetStepAllowProjectTypeChange =>
+      'Permitir Cambio de Tipo de Proyecto';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Asignar una de dos etiquetas posibles a cada entrada (por ejemplo, spam o no spam, positivo o negativo).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Asignar exactamente una etiqueta de un conjunto de clases mutuamente excluyentes (por ejemplo, gato, perro o pájaro).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Asignar una o más etiquetas de un conjunto de clases — múltiples etiquetas pueden aplicarse al mismo tiempo (por ejemplo, una imagen etiquetada como \"gato\" y \"perro\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Dibujar un rectángulo alrededor de un objeto en una imagen.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Dibujar y encerrar un objeto dentro de un rectángulo mínimo.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Detectar y distinguir cada objeto individual basado en sus características únicas.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Detectar y clasificar todos los objetos similares como una sola entidad.';
 }

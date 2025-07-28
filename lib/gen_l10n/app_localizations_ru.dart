@@ -745,6 +745,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get datasetDialogNoDatasetLoaded => 'Датасет не загружен.';
 
   @override
+  String get datasetDialogSelectZipFile => 'Выберите ZIP-файл датасета';
+
+  @override
+  String get datasetDialogChooseFile => 'Выбрать файл';
+
+  @override
+  String get datasetDialogSupportedFormats =>
+      'Поддерживаемые форматы датасетов:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT или только медиа (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Ошибка импорта';
 
   @override
@@ -987,4 +1004,101 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Убедитесь, что метка существует и не используется в других местах.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Загрузите ZIP-файл с форматом COCO, YOLO, VOC, LabelMe, CVAT, Datumaro или только медиа';
+
+  @override
+  String get datasetStepExtractingZip =>
+      'Извлечение ZIP в локальное хранилище ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Датасет извлечен в: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Обнаруженный тип задачи: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Выберите тип проекта';
+
+  @override
+  String get datasetStepProgressSelection => 'Выбор датасета';
+
+  @override
+  String get datasetStepProgressExtract => 'Извлечение ZIP';
+
+  @override
+  String get datasetStepProgressOverview => 'Обзор датасета';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Подтверждение задачи';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Создание проекта';
+
+  @override
+  String get projectTypeDetectionBoundingBox =>
+      'Обнаружение (ограничивающие рамки)';
+
+  @override
+  String get projectTypeDetectionOriented =>
+      'Обнаружение (ориентированные рамки)';
+
+  @override
+  String get projectTypeBinaryClassification => 'Бинарная классификация';
+
+  @override
+  String get projectTypeMultiClassClassification =>
+      'Многоклассовая классификация';
+
+  @override
+  String get projectTypeMultiLabelClassification =>
+      'Многометочная классификация';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Сегментация экземпляров';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Семантическая сегментация';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Выберите тип проекта на основе обнаруженных аннотаций';
+
+  @override
+  String get datasetStepAllowProjectTypeChange =>
+      'Разрешить изменение типа проекта';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Присвоение одной из двух возможных меток каждому входному изображению (например, спам или не спам, положительный или отрицательный).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Присвоение ровно одной метки из набора взаимоисключающих классов (например, кошка, собака или птица).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Присвоение одной или нескольких меток из набора классов — несколько меток могут применяться одновременно (например, изображение с метками \"кошка\" и \"собака\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Нарисуйте прямоугольник вокруг объекта на изображении.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Нарисуйте и заключите объект в минимальный прямоугольник.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Обнаружение и различение каждого отдельного объекта на основе его уникальных особенностей.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Обнаружение и классификация всех похожих объектов как единого целого.';
 }

@@ -741,6 +741,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get datasetDialogNoDatasetLoaded => 'No dataset loaded.';
 
   @override
+  String get datasetDialogSelectZipFile => 'Select your Dataset ZIP file';
+
+  @override
+  String get datasetDialogChooseFile => 'Choose a file';
+
+  @override
+  String get datasetDialogSupportedFormats => 'Supported Dataset formats:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT, or media-only (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Import Failed';
 
   @override
@@ -982,4 +998,97 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Make sure the label still exists or is not used elsewhere.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format';
+
+  @override
+  String get datasetStepExtractingZip => 'Extracting ZIP in local storage ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Dataset extracted in: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Detected task type: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Select project type';
+
+  @override
+  String get datasetStepProgressSelection => 'Dataset Selection';
+
+  @override
+  String get datasetStepProgressExtract => 'Extract ZIP';
+
+  @override
+  String get datasetStepProgressOverview => 'Dataset Overview';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Task Confirmation';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Project Creation';
+
+  @override
+  String get projectTypeDetectionBoundingBox => 'Detection bounding box';
+
+  @override
+  String get projectTypeDetectionOriented => 'Detection oriented';
+
+  @override
+  String get projectTypeBinaryClassification => 'Binary Classification';
+
+  @override
+  String get projectTypeMultiClassClassification =>
+      'Multi-class Classification';
+
+  @override
+  String get projectTypeMultiLabelClassification =>
+      'Multi-label Classification';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Instance Segmentation';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Semantic Segmentation';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Choose your Project type based on detected annotations';
+
+  @override
+  String get datasetStepAllowProjectTypeChange => 'Allow Project Type Change';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both \"cat\" and \"dog\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Draw a rectangle around an object in an image.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Draw and enclose an object within a minimal rectangle.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Detect and distinguish each individual object based on its unique features.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Detect and classify all similar objects as a single entity.';
 }

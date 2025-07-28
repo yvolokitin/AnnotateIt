@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class UploadPrompt extends StatelessWidget {
   final VoidCallback onPickFile;
@@ -7,6 +8,7 @@ class UploadPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1200;
     final isTablet = screenWidth >= 600 && screenWidth < 1200;
@@ -26,7 +28,7 @@ class UploadPrompt extends StatelessWidget {
                 Icon(Icons.upload_file, size: iconSize, color: Colors.white70),
                 SizedBox(height: spacing),
                 Text(
-                  "Select your Dataset ZIP file",
+                  l10n.datasetDialogSelectZipFile,
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: fontSize,
@@ -43,7 +45,7 @@ class UploadPrompt extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
-                    "Choose a file",
+                    l10n.datasetDialogChooseFile,
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -53,7 +55,7 @@ class UploadPrompt extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: spacing),
-                Text("Supported Dataset formats:",
+                Text(l10n.datasetDialogSupportedFormats,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white54,
@@ -62,7 +64,7 @@ class UploadPrompt extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: spacing / 2),
-                Text("COCO, YOLO, VOC, Datumaro,",
+                Text(l10n.datasetDialogSupportedFormatsList1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white54,
@@ -71,7 +73,7 @@ class UploadPrompt extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: spacing / 2),
-                Text("LabelMe, CVAT, or media-only (.zip)",
+                Text(l10n.datasetDialogSupportedFormatsList2,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white54,

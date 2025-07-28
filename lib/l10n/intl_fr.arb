@@ -313,6 +313,11 @@
   "datasetDialogModeIsolate": "Mode Isolé Activé",
   "datasetDialogModeNormal": "Mode Normal",
   "datasetDialogNoDatasetLoaded": "Aucun ensemble de données chargé.",
+  "datasetDialogSelectZipFile": "Sélectionnez votre fichier ZIP d'ensemble de données",
+  "datasetDialogChooseFile": "Choisir un fichier",
+  "datasetDialogSupportedFormats": "Formats d'ensemble de données pris en charge :",
+  "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
+  "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, ou médias uniquement (.zip)",
 
   "datasetDialogImportFailedTitle": "Échec de l'Importation",
   "datasetDialogImportFailedMessage": "Le fichier ZIP n'a pas pu être traité. Il peut être corrompu, incomplet ou ne pas être une archive d'ensemble de données valide.",
@@ -413,5 +418,48 @@
       "error": {}
     }
   },
-  "labelDeleteErrorTips": "Assurez-vous que l'étiquette existe toujours ou n'est pas utilisée ailleurs."
+  "labelDeleteErrorTips": "Assurez-vous que l'étiquette existe toujours ou n'est pas utilisée ailleurs.",
+
+  "datasetStepUploadZip": "Téléchargez un fichier ZIP au format COCO, YOLO, VOC, LabelMe, CVAT, Datumaro ou médias uniquement",
+  "datasetStepExtractingZip": "Extraction du ZIP dans le stockage local ...",
+  "datasetStepExtractedPath": "Ensemble de données extrait dans: {path}",
+  "@datasetStepExtractedPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "datasetStepDetectedTaskType": "Type de tâche détecté: {format}",
+  "@datasetStepDetectedTaskType": {
+    "placeholders": {
+      "format": {}
+    }
+  },
+  "datasetStepSelectProjectType": "Sélectionner le type de projet",
+
+  "datasetStepProgressSelection": "Sélection de l'Ensemble de Données",
+  "datasetStepProgressExtract": "Extraire le ZIP",
+  "datasetStepProgressOverview": "Aperçu de l'Ensemble de Données",
+  "datasetStepProgressTaskConfirmation": "Confirmation de la Tâche",
+  "datasetStepProgressProjectCreation": "Création du Projet",
+
+  "projectTypeDetectionBoundingBox": "Détection avec boîte englobante",
+  "projectTypeDetectionOriented": "Détection orientée",
+  "projectTypeBinaryClassification": "Classification Binaire",
+  "projectTypeMultiClassClassification": "Classification Multi-classes",
+  "projectTypeMultiLabelClassification": "Classification Multi-étiquettes",
+  "projectTypeInstanceSegmentation": "Segmentation d'Instances",
+  "projectTypeSemanticSegmentation": "Segmentation Sémantique",
+  
+  "datasetStepChooseProjectType": "Choisissez votre type de Projet en fonction des annotations détectées",
+  "datasetStepAllowProjectTypeChange": "Autoriser le Changement de Type de Projet",
+
+  "projectTypeBinaryClassificationDescription": "Attribuer une des deux étiquettes possibles à chaque entrée (par exemple, spam ou non spam, positif ou négatif).",
+  "projectTypeMultiClassClassificationDescription": "Attribuer exactement une étiquette parmi un ensemble de classes mutuellement exclusives (par exemple, chat, chien ou oiseau).",
+  "projectTypeMultiLabelClassificationDescription": "Attribuer une ou plusieurs étiquettes parmi un ensemble de classes — plusieurs étiquettes peuvent s'appliquer en même temps (par exemple, une image étiquetée à la fois \"chat\" et \"chien\")",
+  
+  "projectTypeDetectionBoundingBoxDescription": "Dessiner un rectangle autour d'un objet dans une image.",
+  "projectTypeDetectionOrientedDescription": "Dessiner et enfermer un objet dans un rectangle minimal.",
+  
+  "projectTypeInstanceSegmentationDescription": "Détecter et distinguer chaque objet individuel en fonction de ses caractéristiques uniques.",
+  "projectTypeSemanticSegmentationDescription": "Détecter et classifier tous les objets similaires comme une seule entité."
 }

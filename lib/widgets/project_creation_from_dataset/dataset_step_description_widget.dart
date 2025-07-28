@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../gen_l10n/app_localizations.dart';
 
 class StepDescriptionWidget extends StatelessWidget {
   final int currentStep;
@@ -15,19 +16,21 @@ class StepDescriptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (currentStep == 1) {
-      return const Text(
-        "Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format",
-        style: TextStyle(
+      return Text(
+        l10n.datasetStepUploadZip,
+        style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
           fontFamily: 'CascadiaCode',
         ),
       );
     } else if (currentStep == 2) {
-      return const Text(
-        "Extracting ZIP in local storage ...",
-        style: TextStyle(
+      return Text(
+        l10n.datasetStepExtractingZip,
+        style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
           fontFamily: 'CascadiaCode',
@@ -44,7 +47,7 @@ class StepDescriptionWidget extends StatelessWidget {
               }
             },
             child: Text(
-              "Dataset extracted in: $extractedPath",
+              l10n.datasetStepExtractedPath(extractedPath ?? ''),
               style: const TextStyle(
                 color: Colors.blueAccent,
                 fontSize: 18,
@@ -55,7 +58,7 @@ class StepDescriptionWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Detected task type: $datasetFormat",
+            l10n.datasetStepDetectedTaskType(datasetFormat ?? ''),
             style: const TextStyle(
               fontSize: 22,
               color: Colors.white70,
@@ -65,9 +68,9 @@ class StepDescriptionWidget extends StatelessWidget {
         ],
       );
     } else {
-      return const Text(
-        "Select project type",
-        style: TextStyle(
+      return Text(
+        l10n.datasetStepSelectProjectType,
+        style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
           fontFamily: 'CascadiaCode',

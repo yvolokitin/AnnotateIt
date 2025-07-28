@@ -752,6 +752,23 @@ class AppLocalizationsIt extends AppLocalizations {
   String get datasetDialogNoDatasetLoaded => 'Nessun dataset caricato.';
 
   @override
+  String get datasetDialogSelectZipFile =>
+      'Seleziona il tuo file ZIP del dataset';
+
+  @override
+  String get datasetDialogChooseFile => 'Scegli un file';
+
+  @override
+  String get datasetDialogSupportedFormats => 'Formati di dataset supportati:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT, o solo media (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Importazione Fallita';
 
   @override
@@ -996,4 +1013,100 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Assicurati che l\'etichetta esista ancora o non sia utilizzata altrove.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Carica un file .ZIP con formato COCO, YOLO, VOC, LabelMe, CVAT, Datumaro o solo media';
+
+  @override
+  String get datasetStepExtractingZip =>
+      'Estrazione ZIP nell\'archiviazione locale ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Dataset estratto in: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Tipo di attività rilevato: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Seleziona tipo di progetto';
+
+  @override
+  String get datasetStepProgressSelection => 'Selezione Dataset';
+
+  @override
+  String get datasetStepProgressExtract => 'Estrai ZIP';
+
+  @override
+  String get datasetStepProgressOverview => 'Panoramica Dataset';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Conferma Attività';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Creazione Progetto';
+
+  @override
+  String get projectTypeDetectionBoundingBox =>
+      'Rilevamento con riquadro di delimitazione';
+
+  @override
+  String get projectTypeDetectionOriented => 'Rilevamento orientato';
+
+  @override
+  String get projectTypeBinaryClassification => 'Classificazione Binaria';
+
+  @override
+  String get projectTypeMultiClassClassification =>
+      'Classificazione Multi-classe';
+
+  @override
+  String get projectTypeMultiLabelClassification =>
+      'Classificazione Multi-etichetta';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Segmentazione di Istanze';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Segmentazione Semantica';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Scegli il tuo tipo di Progetto in base alle annotazioni rilevate';
+
+  @override
+  String get datasetStepAllowProjectTypeChange =>
+      'Consenti Cambio Tipo di Progetto';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Assegna una delle due possibili etichette a ciascun input (ad esempio, spam o non spam, positivo o negativo).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Assegna esattamente un\'etichetta da un insieme di classi mutuamente esclusive (ad esempio, gatto, cane o uccello).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Assegna una o più etichette da un insieme di classi — più etichette possono essere applicate contemporaneamente (ad esempio, un\'immagine etichettata sia come \"gatto\" che come \"cane\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Disegna un rettangolo attorno a un oggetto in un\'immagine.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Disegna e racchiudi un oggetto all\'interno di un rettangolo minimo.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Rileva e distingui ogni singolo oggetto in base alle sue caratteristiche uniche.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Rileva e classifica tutti gli oggetti simili come un\'unica entità.';
 }

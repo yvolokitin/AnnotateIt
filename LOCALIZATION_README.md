@@ -13,6 +13,7 @@ The application supports the following languages:
 - Italian (it)
 - Portuguese (pt)
 - Dutch (nl)
+- Russian (ru)
 
 ## Localization Files
 
@@ -25,6 +26,7 @@ The localization files are located in the `lib/l10n` directory. Each language ha
 - `intl_it.arb` - Italian
 - `intl_pt.arb` - Portuguese
 - `intl_nl.arb` - Dutch
+- `intl_ru.arb` - Russian
 
 The English ARB file (`intl_en.arb`) serves as the template for other languages. All ARB files contain translations for all UI strings used in the application.
 
@@ -114,6 +116,7 @@ Widget _buildCountrySelection(BuildContext context, bool isWide, bool isTablet) 
     'it': 'Italian',
     'pt': 'Portuguese',
     'nl': 'Dutch',
+    'ru': 'Russian',
   };
 
   // ... widget structure ...

@@ -320,6 +320,11 @@
   "datasetDialogModeIsolate": "Isolate Mode Enabled",
   "datasetDialogModeNormal": "Normal Mode",
   "datasetDialogNoDatasetLoaded": "No dataset loaded.",
+  "datasetDialogSelectZipFile": "Select your Dataset ZIP file",
+  "datasetDialogChooseFile": "Choose a file",
+  "datasetDialogSupportedFormats": "Supported Dataset formats:",
+  "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
+  "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, or media-only (.zip)",
 
   "datasetDialogImportFailedTitle": "Import Failed",
   "datasetDialogImportFailedMessage": "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
@@ -420,5 +425,48 @@
       "error": {}
     }
   },
-  "labelDeleteErrorTips": "Make sure the label still exists or is not used elsewhere."
+  "labelDeleteErrorTips": "Make sure the label still exists or is not used elsewhere.",
+
+  "datasetStepUploadZip": "Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format",
+  "datasetStepExtractingZip": "Extracting ZIP in local storage ...",
+  "datasetStepExtractedPath": "Dataset extracted in: {path}",
+  "@datasetStepExtractedPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "datasetStepDetectedTaskType": "Detected task type: {format}",
+  "@datasetStepDetectedTaskType": {
+    "placeholders": {
+      "format": {}
+    }
+  },
+  "datasetStepSelectProjectType": "Select project type",
+
+  "datasetStepProgressSelection": "Dataset Selection",
+  "datasetStepProgressExtract": "Extract ZIP",
+  "datasetStepProgressOverview": "Dataset Overview",
+  "datasetStepProgressTaskConfirmation": "Task Confirmation",
+  "datasetStepProgressProjectCreation": "Project Creation",
+
+  "projectTypeDetectionBoundingBox": "Detection bounding box",
+  "projectTypeDetectionOriented": "Detection oriented",
+  "projectTypeBinaryClassification": "Binary Classification",
+  "projectTypeMultiClassClassification": "Multi-class Classification",
+  "projectTypeMultiLabelClassification": "Multi-label Classification",
+  "projectTypeInstanceSegmentation": "Instance Segmentation",
+  "projectTypeSemanticSegmentation": "Semantic Segmentation",
+  
+  "datasetStepChooseProjectType": "Choose your Project type based on detected annotations",
+  "datasetStepAllowProjectTypeChange": "Allow Project Type Change",
+
+  "projectTypeBinaryClassificationDescription": "Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative).",
+  "projectTypeMultiClassClassificationDescription": "Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird).",
+  "projectTypeMultiLabelClassificationDescription": "Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both \"cat\" and \"dog\")",
+  
+  "projectTypeDetectionBoundingBoxDescription": "Draw a rectangle around an object in an image.",
+  "projectTypeDetectionOrientedDescription": "Draw and enclose an object within a minimal rectangle.",
+  
+  "projectTypeInstanceSegmentationDescription": "Detect and distinguish each individual object based on its unique features.",
+  "projectTypeSemanticSegmentationDescription": "Detect and classify all similar objects as a single entity."
 }

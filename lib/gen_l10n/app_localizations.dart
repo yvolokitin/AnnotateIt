@@ -1410,6 +1410,36 @@ abstract class AppLocalizations {
   /// **'No dataset loaded.'**
   String get datasetDialogNoDatasetLoaded;
 
+  /// No description provided for @datasetDialogSelectZipFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your Dataset ZIP file'**
+  String get datasetDialogSelectZipFile;
+
+  /// No description provided for @datasetDialogChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file'**
+  String get datasetDialogChooseFile;
+
+  /// No description provided for @datasetDialogSupportedFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Dataset formats:'**
+  String get datasetDialogSupportedFormats;
+
+  /// No description provided for @datasetDialogSupportedFormatsList1.
+  ///
+  /// In en, this message translates to:
+  /// **'COCO, YOLO, VOC, Datumaro,'**
+  String get datasetDialogSupportedFormatsList1;
+
+  /// No description provided for @datasetDialogSupportedFormatsList2.
+  ///
+  /// In en, this message translates to:
+  /// **'LabelMe, CVAT, or media-only (.zip)'**
+  String get datasetDialogSupportedFormatsList2;
+
   /// No description provided for @datasetDialogImportFailedTitle.
   ///
   /// In en, this message translates to:
@@ -1823,6 +1853,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Make sure the label still exists or is not used elsewhere.'**
   String get labelDeleteErrorTips;
+
+  /// No description provided for @datasetStepUploadZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a .ZIP file with COCO, YOLO, VOC, LabelMe, CVAT, Datumaro or media-only format'**
+  String get datasetStepUploadZip;
+
+  /// No description provided for @datasetStepExtractingZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting ZIP in local storage ...'**
+  String get datasetStepExtractingZip;
+
+  /// No description provided for @datasetStepExtractedPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Dataset extracted in: {path}'**
+  String datasetStepExtractedPath(Object path);
+
+  /// No description provided for @datasetStepDetectedTaskType.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected task type: {format}'**
+  String datasetStepDetectedTaskType(Object format);
+
+  /// No description provided for @datasetStepSelectProjectType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select project type'**
+  String get datasetStepSelectProjectType;
+
+  /// No description provided for @datasetStepProgressSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Dataset Selection'**
+  String get datasetStepProgressSelection;
+
+  /// No description provided for @datasetStepProgressExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract ZIP'**
+  String get datasetStepProgressExtract;
+
+  /// No description provided for @datasetStepProgressOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Dataset Overview'**
+  String get datasetStepProgressOverview;
+
+  /// No description provided for @datasetStepProgressTaskConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Confirmation'**
+  String get datasetStepProgressTaskConfirmation;
+
+  /// No description provided for @datasetStepProgressProjectCreation.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Creation'**
+  String get datasetStepProgressProjectCreation;
+
+  /// No description provided for @projectTypeDetectionBoundingBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection bounding box'**
+  String get projectTypeDetectionBoundingBox;
+
+  /// No description provided for @projectTypeDetectionOriented.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection oriented'**
+  String get projectTypeDetectionOriented;
+
+  /// No description provided for @projectTypeBinaryClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'Binary Classification'**
+  String get projectTypeBinaryClassification;
+
+  /// No description provided for @projectTypeMultiClassClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-class Classification'**
+  String get projectTypeMultiClassClassification;
+
+  /// No description provided for @projectTypeMultiLabelClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-label Classification'**
+  String get projectTypeMultiLabelClassification;
+
+  /// No description provided for @projectTypeInstanceSegmentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Instance Segmentation'**
+  String get projectTypeInstanceSegmentation;
+
+  /// No description provided for @projectTypeSemanticSegmentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic Segmentation'**
+  String get projectTypeSemanticSegmentation;
+
+  /// No description provided for @datasetStepChooseProjectType.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Project type based on detected annotations'**
+  String get datasetStepChooseProjectType;
+
+  /// No description provided for @datasetStepAllowProjectTypeChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Project Type Change'**
+  String get datasetStepAllowProjectTypeChange;
+
+  /// No description provided for @projectTypeBinaryClassificationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative).'**
+  String get projectTypeBinaryClassificationDescription;
+
+  /// No description provided for @projectTypeMultiClassClassificationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird).'**
+  String get projectTypeMultiClassClassificationDescription;
+
+  /// No description provided for @projectTypeMultiLabelClassificationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both \"cat\" and \"dog\")'**
+  String get projectTypeMultiLabelClassificationDescription;
+
+  /// No description provided for @projectTypeDetectionBoundingBoxDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw a rectangle around an object in an image.'**
+  String get projectTypeDetectionBoundingBoxDescription;
+
+  /// No description provided for @projectTypeDetectionOrientedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw and enclose an object within a minimal rectangle.'**
+  String get projectTypeDetectionOrientedDescription;
+
+  /// No description provided for @projectTypeInstanceSegmentationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect and distinguish each individual object based on its unique features.'**
+  String get projectTypeInstanceSegmentationDescription;
+
+  /// No description provided for @projectTypeSemanticSegmentationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect and classify all similar objects as a single entity.'**
+  String get projectTypeSemanticSegmentationDescription;
 }
 
 class _AppLocalizationsDelegate

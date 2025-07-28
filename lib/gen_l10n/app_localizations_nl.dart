@@ -748,6 +748,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String get datasetDialogNoDatasetLoaded => 'Geen dataset geladen.';
 
   @override
+  String get datasetDialogSelectZipFile => 'Selecteer uw Dataset ZIP-bestand';
+
+  @override
+  String get datasetDialogChooseFile => 'Kies een bestand';
+
+  @override
+  String get datasetDialogSupportedFormats => 'Ondersteunde Dataset formaten:';
+
+  @override
+  String get datasetDialogSupportedFormatsList1 => 'COCO, YOLO, VOC, Datumaro,';
+
+  @override
+  String get datasetDialogSupportedFormatsList2 =>
+      'LabelMe, CVAT, of alleen media (.zip)';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Import Mislukt';
 
   @override
@@ -989,4 +1005,96 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get labelDeleteErrorTips =>
       'Zorg ervoor dat het label nog bestaat of niet elders wordt gebruikt.';
+
+  @override
+  String get datasetStepUploadZip =>
+      'Upload een .ZIP bestand met COCO, YOLO, VOC, LabelMe, CVAT, Datumaro of alleen-media formaat';
+
+  @override
+  String get datasetStepExtractingZip => 'ZIP uitpakken in lokale opslag ...';
+
+  @override
+  String datasetStepExtractedPath(Object path) {
+    return 'Dataset uitgepakt in: $path';
+  }
+
+  @override
+  String datasetStepDetectedTaskType(Object format) {
+    return 'Gedetecteerd taaktype: $format';
+  }
+
+  @override
+  String get datasetStepSelectProjectType => 'Selecteer projecttype';
+
+  @override
+  String get datasetStepProgressSelection => 'Dataset Selectie';
+
+  @override
+  String get datasetStepProgressExtract => 'ZIP Uitpakken';
+
+  @override
+  String get datasetStepProgressOverview => 'Dataset Overzicht';
+
+  @override
+  String get datasetStepProgressTaskConfirmation => 'Taakbevestiging';
+
+  @override
+  String get datasetStepProgressProjectCreation => 'Project Aanmaken';
+
+  @override
+  String get projectTypeDetectionBoundingBox => 'Detectie met begrenzingsvak';
+
+  @override
+  String get projectTypeDetectionOriented => 'Georiënteerde detectie';
+
+  @override
+  String get projectTypeBinaryClassification => 'Binaire Classificatie';
+
+  @override
+  String get projectTypeMultiClassClassification => 'Multi-class Classificatie';
+
+  @override
+  String get projectTypeMultiLabelClassification => 'Multi-label Classificatie';
+
+  @override
+  String get projectTypeInstanceSegmentation => 'Instantie Segmentatie';
+
+  @override
+  String get projectTypeSemanticSegmentation => 'Semantische Segmentatie';
+
+  @override
+  String get datasetStepChooseProjectType =>
+      'Kies je Projecttype op basis van gedetecteerde annotaties';
+
+  @override
+  String get datasetStepAllowProjectTypeChange =>
+      'Projecttypewijziging Toestaan';
+
+  @override
+  String get projectTypeBinaryClassificationDescription =>
+      'Wijs één van twee mogelijke labels toe aan elke invoer (bijv. spam of geen spam, positief of negatief).';
+
+  @override
+  String get projectTypeMultiClassClassificationDescription =>
+      'Wijs precies één label toe uit een set van wederzijds uitsluitende klassen (bijv. kat, hond of vogel).';
+
+  @override
+  String get projectTypeMultiLabelClassificationDescription =>
+      'Wijs één of meer labels toe uit een set van klassen — meerdere labels kunnen tegelijkertijd van toepassing zijn (bijv. een afbeelding getagd als zowel \"kat\" als \"hond\")';
+
+  @override
+  String get projectTypeDetectionBoundingBoxDescription =>
+      'Teken een rechthoek rond een object in een afbeelding.';
+
+  @override
+  String get projectTypeDetectionOrientedDescription =>
+      'Teken en omsluit een object binnen een minimale rechthoek.';
+
+  @override
+  String get projectTypeInstanceSegmentationDescription =>
+      'Detecteer en onderscheid elk individueel object op basis van zijn unieke kenmerken.';
+
+  @override
+  String get projectTypeSemanticSegmentationDescription =>
+      'Detecteer en classificeer alle vergelijkbare objecten als één entiteit.';
 }
