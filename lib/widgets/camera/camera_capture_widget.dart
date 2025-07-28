@@ -70,8 +70,8 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
         return;
       }
       
-      // For Windows, use image_picker instead of direct camera access
-      if (Platform.isWindows) {
+      // For Windows and macOS, use image_picker instead of direct camera access
+      if (Platform.isWindows || Platform.isMacOS) {
         // Don't show error dialog immediately, just set initialized to true
         // so we can use image_picker when the user tries to take a photo
         setState(() {
@@ -211,7 +211,27 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
               ],
             ),
           );
-          
+        }
+      } else if (Platform.isMacOS) {
+        // For macOS, use the image_picker directly without showing camera UI first
+        // macOS doesn't have a built-in camera app that we can launch like Windows
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('Select Photo'),
+            content: const Text('Please select a photo from your gallery.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
+        );
+            ),
+          );
+
           // Continue with gallery picker
         }
         
@@ -286,9 +306,10 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   }
 
   Future<void> _takePicture() async {
-    // For web or Windows, use image_picker with special handling
+    // For web, Windows, or macOS, use image_picker with special handling
     // On Windows, this will launch the Windows Camera app via _captureImageWithPicker
-    if (kIsWeb || Platform.isWindows) {
+    // On macOS, this will use the gallery picker directly
+    if (kIsWeb || Platform.isWindows || Platform.isMacOS) {
       await _captureImageWithPicker(ImageSource.camera);
       return;
     }
