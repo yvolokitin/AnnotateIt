@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
 import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
@@ -154,13 +156,25 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       
       if (annotations.isEmpty) {
         _logger.info('No matching project labels found for ML Kit labels');
+        
+        // Get all detected labels from ML Kit
+        final detectedLabels = _mlKitService.getDetectedLabels(labels);
+        
+        if (detectedLabels.isEmpty) {
+          if (mounted) {
+            await AlertErrorDialog.show(
+              context,
+              'No Labels Detected',
+              'ML Kit did not detect any labels in this image.',
+              tips: 'Try a different image or adjust the confidence threshold.',
+            );
+          }
+          return;
+        }
+        
+        // Show dialog with detected labels and option to add them to the project
         if (mounted) {
-          await AlertErrorDialog.show(
-            context,
-            'No Matching Labels',
-            'ML Kit detected labels, but none match your project labels.',
-            tips: 'Add labels to your project that match common objects ML Kit can detect.',
-          );
+          await _showDetectedLabelsDialog(detectedLabels);
         }
         return;
       }
@@ -623,6 +637,139 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             tips: 'Please try again or contact support if the problem persists.',
           );
         }
+      }
+    }
+  }
+
+  /// Show a dialog with detected labels and option to add them to the project
+  Future<void> _showDetectedLabelsDialog(List<ml_kit.ImageLabel> detectedLabels) async {
+    if (!mounted) return;
+    
+    // Sort labels by confidence (highest first)
+    final sortedLabels = List<ml_kit.ImageLabel>.from(detectedLabels)
+      ..sort((a, b) => b.confidence.compareTo(a.confidence));
+    
+    // Show dialog with detected labels
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ML Kit Detected Objects'),
+          content: SizedBox(
+            width: 400,
+            height: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'ML Kit detected the following objects in this image:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'None of these match your project labels. You can add these labels to your project.',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: sortedLabels.length,
+                    itemBuilder: (context, index) {
+                      final label = sortedLabels[index];
+                      final confidence = (label.confidence * 100).toStringAsFixed(1);
+                      
+                      return ListTile(
+                        title: Text(label.label),
+                        subtitle: Text('Confidence: $confidence%'),
+                        trailing: ElevatedButton(
+                          onPressed: () => _addLabelToProject(label.label),
+                          child: const Text('Add to Project'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  /// Add a new label to the project
+  Future<void> _addLabelToProject(String labelName) async {
+    try {
+      // Generate a random color for the new label
+      final random = Random();
+      final r = random.nextInt(200) + 55; // Avoid too dark colors
+      final g = random.nextInt(200) + 55;
+      final b = random.nextInt(200) + 55;
+      final color = '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+      
+      // Create a new label
+      final newLabel = Label(
+        id: -1, // Will be assigned by the database
+        projectId: widget.project.id!,
+        name: labelName,
+        color: color,
+        labelOrder: (widget.project.labels?.length ?? 0) + 1,
+      );
+      
+      // Save the label to the database
+      final labelDb = LabelsDatabase.instance;
+      final labelId = await labelDb.insertLabel(newLabel);
+      
+      if (labelId != -1) {
+        // Create a complete label with the assigned ID
+        final completeLabel = Label(
+          id: labelId,
+          projectId: newLabel.projectId,
+          name: newLabel.name,
+          color: newLabel.color,
+          labelOrder: newLabel.labelOrder,
+          isDefault: false,
+          description: null,
+          createdAt: DateTime.now(),
+        );
+        
+        // Update the project's labels in memory
+        setState(() {
+          final updatedLabels = List<Label>.from(widget.project.labels ?? []);
+          updatedLabels.add(completeLabel);
+          widget.project.labels?.clear();
+          widget.project.labels?.addAll(updatedLabels);
+        });
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Added label "$labelName" to project'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      _logger.severe('Error adding label to project', e);
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'Failed to Add Label',
+          'An error occurred while adding the label: ${e.toString()}',
+        );
       }
     }
   }
