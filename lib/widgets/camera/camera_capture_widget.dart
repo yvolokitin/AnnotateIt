@@ -1,11 +1,16 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
+
+import '../../gen_l10n/app_localizations.dart';
 
 class CameraCaptureWidget extends StatefulWidget {
   final Function(File file, String fileType) onMediaCaptured;
@@ -22,44 +27,49 @@ class CameraCaptureWidget extends StatefulWidget {
 }
 
 class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
-  final ImagePicker _picker = ImagePicker();
-  File? _capturedImage;
+  CameraController? _controller;
+  List<CameraDescription>? _cameras;
+  bool _isInitialized = false;
+  bool _isFrontCamera = false;
   bool _isPreviewMode = false;
+  File? _capturedImage;
+  final ImagePicker _imagePicker = ImagePicker();
+  
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) {
+      _requestCameraPermission().then((_) {
+        if (Platform.isAndroid || Platform.isIOS) {
+          _initializeCamera();
+        }
+      });
+    } else {
+      setState(() => _isInitialized = true);
+    }
+  }
 
-  Future<void> _pickImage() async {
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (!status.isGranted) {
+      _showErrorDialog("Camera permission is required to take pictures.");
+    }
+  }
+
+  Future<void> _initializeCamera() async {
     try {
-      String dialogTitle = 'Select Photo';
-      String dialogContent = 'Please select a photo from your gallery.';
-      
-      if (Platform.isWindows) {
-        dialogTitle = 'Windows Camera';
-        dialogContent = 'We will help you take a photo using Windows Camera app.';
+      // Check if running on unsupported platforms
+      if (Platform.isLinux) {
+        _showErrorDialog('Camera functionality is not supported on Linux');
+        return;
       }
       
-<<<<<<< HEAD
-      // Show appropriate dialog based on platform
-      if (Platform.isWindows || Platform.isMacOS) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: Text(dialogTitle),
-            content: Text(dialogContent),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Continue'),
-              ),
-            ],
-          ),
-        );
-      }
-      
-      // Use gallery picker
-      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        final File imageFile = File(pickedFile.path);
-=======
       // For Windows, use image_picker instead of direct camera access
       if (Platform.isWindows) {
         // Don't show error dialog immediately, just set initialized to true
@@ -204,44 +214,52 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
           
           // Continue with gallery picker
         }
->>>>>>> parent of ef8a04a (fixes for ios)
         
-        // Generate a unique filename
-        final String filename = '${const Uuid().v4()}.jpg';
-        final Directory appDir = await getApplicationDocumentsDirectory();
-        final String filePath = path.join(appDir.path, filename);
-        
-        // Copy the file to the app directory
-        final File savedFile = await imageFile.copy(filePath);
-        
-        setState(() {
-          _capturedImage = savedFile;
-          _isPreviewMode = true;
-        });
+        // Use gallery picker to select the captured image
+        final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
+          
+          // Generate a unique filename
+          final String filename = '${const Uuid().v4()}.jpg';
+          final Directory appDir = await getApplicationDocumentsDirectory();
+          final String filePath = path.join(appDir.path, filename);
+          
+          // Copy the file to the app directory
+          final File savedFile = await imageFile.copy(filePath);
+          
+          // Store the captured image and switch to preview mode
+          setState(() {
+            _capturedImage = savedFile;
+            _isPreviewMode = true;
+          });
+        }
+      } else {
+        // For web and other platforms, use the standard image picker
+        final XFile? pickedFile = await _imagePicker.pickImage(source: source);
+        if (pickedFile != null) {
+          final File imageFile = File(pickedFile.path);
+          
+          // Generate a unique filename
+          final String filename = '${const Uuid().v4()}.jpg';
+          final Directory appDir = await getApplicationDocumentsDirectory();
+          final String filePath = path.join(appDir.path, filename);
+          
+          // Copy the file to the app directory
+          final File savedFile = await imageFile.copy(filePath);
+          
+          // Store the captured image and switch to preview mode
+          setState(() {
+            _capturedImage = savedFile;
+            _isPreviewMode = true;
+          });
+        }
       }
     } catch (e) {
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: Text('Failed to capture image: $e'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                widget.onCancel();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog('Failed to capture image: $e');
     }
   }
   
-<<<<<<< HEAD
-=======
   // This method is no longer used as we're disabling video capture functionality
   // per user's request to only allow photo capture
   Future<void> _captureVideoWithPicker(ImageSource source) async {
@@ -321,7 +339,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
     await _initializeCameraController(_cameras![cameraIndex]);
   }
   
->>>>>>> parent of ef8a04a (fixes for ios)
   void _acceptImage() {
     if (_capturedImage != null) {
       widget.onMediaCaptured(_capturedImage!, 'jpg');
@@ -335,58 +352,243 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    // Preview mode UI
-    if (_isPreviewMode && _capturedImage != null) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Web or Windows platform UI
+    if (kIsWeb || Platform.isWindows) {
+      // Preview mode UI
+      if (_isPreviewMode && _capturedImage != null) {
+        return Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: _rejectImage,
+            ),
+            title: Text(
+              'Preview',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          body: Column(
+            children: [
+              // Image preview
+              Expanded(
+                child: Center(
+                  child: Image.file(
+                    _capturedImage!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              // Accept/Reject buttons
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Reject button
+                    ElevatedButton.icon(
+                      onPressed: _rejectImage,
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      label: const Text('Retake'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      ),
+                    ),
+                    // Accept button
+                    ElevatedButton.icon(
+                      onPressed: _acceptImage,
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: const Text('Use Photo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      
+      // Camera mode UI for Windows
       return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
           backgroundColor: Colors.black,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: _rejectImage,
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: widget.onCancel,
           ),
           title: const Text(
-            'Preview',
+            'Camera Capture',
             style: TextStyle(color: Colors.white),
           ),
         ),
-        body: Column(
-          children: [
-            // Image preview
-            Expanded(
-              child: Center(
-                child: Image.file(
-                  _capturedImage!,
-                  fit: BoxFit.contain,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.camera_alt,
+                size: 80,
+                color: Colors.white70,
+              ),
+              const SizedBox(height: 20),
+              if (Platform.isWindows) ...[
+                const Text(
+                  'Take a photo with Windows Camera',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: 400,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[850],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '1. Click the camera button below',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '2. Take a photo using Windows Camera app',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '3. Save the photo to a location you can find',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '4. Return here to select the saved photo',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                Text(
+                  'Choose capture option',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 40),
+              // Circular capture button to match native UI
+              GestureDetector(
+                onTap: () => _captureImageWithPicker(ImageSource.camera),
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.blue, width: 3),
+                  ),
+                  child: const Icon(Icons.camera_alt, size: 40, color: Colors.blue),
                 ),
               ),
+              if (Platform.isWindows) ...[
+                const SizedBox(height: 20),
+                const Text(
+                  'Click to launch Windows Camera',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Native platform UI
+    if (!_isInitialized || _controller == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // Preview mode UI for native platforms
+    if (_isPreviewMode && _capturedImage != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // Image preview
+            Positioned.fill(
+              child: Image.file(
+                _capturedImage!,
+                fit: BoxFit.contain,
+              ),
             ),
-            // Accept/Reject buttons
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            
+            // Top bar with back button
+            Positioned(
+              top: 40,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                onPressed: _rejectImage,
+              ),
+            ),
+            
+            // Bottom controls - Accept/Reject buttons
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // Reject button
-                  ElevatedButton.icon(
-                    onPressed: _rejectImage,
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    label: const Text('Retake'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  GestureDetector(
+                    onTap: _rejectImage,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 40),
                     ),
                   ),
+                  
                   // Accept button
-                  ElevatedButton.icon(
-                    onPressed: _acceptImage,
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    label: const Text('Use Photo'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  GestureDetector(
+                    onTap: _acceptImage,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(Icons.check, color: Colors.white, size: 40),
                     ),
                   ),
                 ],
@@ -396,69 +598,65 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
         ),
       );
     }
-    
-    // Camera selection UI for all platforms
+
+    // Camera mode UI for native platforms
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: widget.onCancel,
-        ),
-        title: const Text(
-          'Camera Capture',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.camera_alt,
-              size: 80,
-              color: Colors.white70,
+      body: Stack(
+        children: [
+          // Camera preview
+          Positioned.fill(
+            child: AspectRatio(
+              aspectRatio: _controller!.value.aspectRatio,
+              child: CameraPreview(_controller!),
             ),
-            const SizedBox(height: 20),
-            Text(
-              Platform.isWindows 
-                  ? 'Take a photo with Windows Camera'
-                  : Platform.isMacOS
-                      ? 'Select a photo from your gallery'
-                      : 'Choose capture option',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+          ),
+          
+          // Top bar with close button
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              onPressed: widget.onCancel,
+            ),
+          ),
+          
+          // Switch camera button
+          if (_cameras != null && _cameras!.length > 1)
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                icon: const Icon(Icons.flip_camera_ios, color: Colors.white, size: 30),
+                onPressed: _switchCamera,
               ),
             ),
-            const SizedBox(height: 40),
-            // Capture button
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.blue, width: 3),
+          
+          // Recording timer removed as we've disabled video recording functionality
+          
+          // Bottom controls - Only photo capture button as per user's request
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: _takePicture,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: const Icon(Icons.camera_alt, size: 40),
                 ),
-                child: const Icon(Icons.camera_alt, size: 40, color: Colors.blue),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              Platform.isWindows
-                  ? 'Click to launch Windows Camera'
-                  : Platform.isMacOS
-                      ? 'Click to select from gallery'
-                      : 'Click to capture',
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
