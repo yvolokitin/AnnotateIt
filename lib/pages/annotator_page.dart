@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
@@ -11,6 +12,8 @@ import '../models/label.dart';
 import '../models/project.dart';
 import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
+
+import '../services/ml_kit_image_labeling_service.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
@@ -45,6 +48,7 @@ class AnnotatorPage extends StatefulWidget {
 }
 
 class _AnnotatorPageState extends State<AnnotatorPage> {
+  static final _logger = Logger('AnnotatorPage');
   late PageController _pageController;
   late double _currentZoom = 1.0;
   late int _resetZoomCount = 0;
@@ -73,6 +77,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.webm', '.m4v', '.3gp', '.mpg', '.mpeg'
   ];
 
+  // ML Kit image labeling service
+  final MLKitImageLabelingService _mlKitService = MLKitImageLabelingService();
+  bool _isProcessingMlKit = false;
+
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -81,6 +89,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     _currentIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
     _pageController = PageController(initialPage: _currentIndex);
     _preloadInitialMedia();
+    
+    // Initialize ML Kit image labeler
+    _mlKitService.initialize(confidenceThreshold: 0.6);
   }
 
   @override
@@ -90,7 +101,132 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     for (final image in _imageCache.values) {
       image.dispose();
     }
+    _mlKitService.close();
     super.dispose();
+  }
+  
+  /// Process the current image with ML Kit and create annotations from the results
+  Future<void> _processImageWithMlKit() async {
+    if (_isProcessingMlKit) return;
+    
+    final currentMedia = _mediaCache[_currentIndex];
+    final currentImage = _imageCache[_currentIndex];
+    
+    if (currentMedia == null || currentImage == null) {
+      await AlertErrorDialog.show(
+        context,
+        'ML Kit Processing Failed',
+        'No image available to process.',
+      );
+      return;
+    }
+    
+    setState(() => _isProcessingMlKit = true);
+    
+    try {
+      _logger.info('Starting ML Kit image labeling for media ID: ${currentMedia.mediaItem.id}');
+      
+      // Process the image with ML Kit
+      final labels = await _mlKitService.processImage(currentImage);
+      
+      if (labels.isEmpty) {
+        _logger.info('No labels detected by ML Kit');
+        if (mounted) {
+          await AlertErrorDialog.show(
+            context,
+            'No Labels Detected',
+            'ML Kit did not detect any labels in this image.',
+            tips: 'Try a different image or adjust the confidence threshold.',
+          );
+        }
+        return;
+      }
+      
+      _logger.info('ML Kit detected ${labels.length} labels');
+      
+      // Convert ML Kit labels to annotations
+      final annotations = _mlKitService.convertLabelsToAnnotations(
+        labels: labels,
+        mediaItemId: currentMedia.mediaItem.id!,
+        projectLabels: widget.project.labels ?? [],
+        annotatorId: 1, // Default annotator ID
+      );
+      
+      if (annotations.isEmpty) {
+        _logger.info('No matching project labels found for ML Kit labels');
+        if (mounted) {
+          await AlertErrorDialog.show(
+            context,
+            'No Matching Labels',
+            'ML Kit detected labels, but none match your project labels.',
+            tips: 'Add labels to your project that match common objects ML Kit can detect.',
+          );
+        }
+        return;
+      }
+      
+      _logger.info('Created ${annotations.length} annotations from ML Kit labels');
+      
+      // Save annotations to database
+      final annotationDb = AnnotationDatabase.instance;
+      final savedAnnotations = <Annotation>[];
+      
+      for (final annotation in annotations) {
+        final insertedId = await annotationDb.insertAnnotation(annotation);
+        
+        final savedAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: annotation.mediaItemId,
+          labelId: annotation.labelId,
+          annotationType: annotation.annotationType,
+          data: annotation.data,
+          confidence: annotation.confidence,
+          annotatorId: annotation.annotatorId,
+          comment: annotation.comment,
+          status: annotation.status,
+          version: annotation.version,
+          createdAt: annotation.createdAt,
+          updatedAt: annotation.updatedAt,
+        )
+        ..name = annotation.name
+        ..color = annotation.color;
+        
+        savedAnnotations.add(savedAnnotation);
+      }
+      
+      // Update UI
+      if (mounted) {
+        setState(() {
+          final existingAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+          final newAnnotations = [...existingAnnotations, ...savedAnnotations];
+          
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+          
+          // Switch back to navigation mode
+          userAction = UserAction.navigation;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added ${savedAnnotations.length} labels from ML Kit'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      _logger.severe('Error processing image with ML Kit', e);
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'ML Kit Processing Failed',
+          'An error occurred while processing the image: ${e.toString()}',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingMlKit = false);
+      }
+    }
   }
   
   /// Limits the image cache size by removing oldest entries when the cache exceeds maxSize.
@@ -371,6 +507,12 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   void _handleActionSelected(UserAction action) {
+    if (action == UserAction.ml_kit_labeling) {
+      // Process the current image with ML Kit
+      _processImageWithMlKit();
+      return;
+    }
+    
     setState(() {
       userAction = action;
       cursorIcon = action == UserAction.navigation

@@ -159,6 +159,15 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             tooltip: l10n.toolbarAnnotationSettings,
           ),
 
+          // ML Kit Image Labeling Button
+          ToolbarDivider(isCompact: isCompact),
+          ToolbarButton(
+            icon: Icon(Icons.auto_awesome),
+            onTap: () => _selectUserAction(UserAction.ml_kit_labeling),
+            isActive: widget.selectedAction == UserAction.ml_kit_labeling,
+            tooltip: 'Google ML Kit Image Labeling',
+          ),
+
           // Annotation Names Toggle
           ToolbarDivider(isCompact: isCompact),
           ToolbarButton(
