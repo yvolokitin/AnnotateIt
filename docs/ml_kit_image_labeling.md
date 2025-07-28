@@ -8,6 +8,7 @@ Google ML Kit image labeling is a machine learning-based feature that can automa
 
 ## Requirements
 
+- **Platform Support**: The ML Kit image labeling feature is **only available on Android and iOS devices**. It is not supported on Windows, macOS, or Linux platforms.
 - The ML Kit image labeling feature requires an internet connection for the first use to download the ML model.
 - For best results, use clear images with well-defined subjects.
 - The feature works best with common objects, scenes, and activities that the ML model has been trained on.
@@ -40,6 +41,7 @@ Google ML Kit image labeling is a machine learning-based feature that can automa
 
 ## Troubleshooting
 
+- **Platform not supported**: The ML Kit button will only appear on Android and iOS devices. If you don't see the ML Kit button in the toolbar, you may be using an unsupported platform (Windows, macOS, or Linux).
 - **No labels detected**: If ML Kit doesn't detect any labels, try using a clearer image or one with more common objects.
 - **No matching labels**: If ML Kit detects objects but none match your project labels, add more common labels to your project.
 - **Processing errors**: If you encounter errors during processing, check your internet connection and try again.
@@ -49,3 +51,7 @@ Google ML Kit image labeling is a machine learning-based feature that can automa
 The ML Kit image labeling feature uses Google's on-device ML Kit API to process images. The model can recognize over 400 different categories including objects, activities, animals, plants, and places.
 
 The integration in AnnotateIt converts ML Kit's detections into classification annotations that are compatible with the existing annotation system.
+
+### Platform Limitations
+
+Google ML Kit is only available on Android and iOS platforms. The feature is not available on desktop platforms (Windows, macOS, Linux) due to limitations in the underlying ML Kit library. When running AnnotateIt on desktop platforms, the ML Kit button will not be displayed in the toolbar.

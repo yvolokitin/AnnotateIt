@@ -114,6 +114,11 @@ class MLKitImageLabelingService {
     return annotations;
   }
   
+  /// Get all detected labels from ML Kit, regardless of whether they match project labels
+  List<ml_kit.ImageLabel> getDetectedLabels(List<ml_kit.ImageLabel> labels) {
+    return labels;
+  }
+  
   /// Close the image labeler when it's no longer needed
   void close() {
     _imageLabeler.close();

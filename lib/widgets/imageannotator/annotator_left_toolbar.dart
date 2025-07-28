@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
@@ -159,14 +160,16 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             tooltip: l10n.toolbarAnnotationSettings,
           ),
 
-          // ML Kit Image Labeling Button
-          ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
-            icon: Icon(Icons.auto_awesome),
-            onTap: () => _selectUserAction(UserAction.ml_kit_labeling),
-            isActive: widget.selectedAction == UserAction.ml_kit_labeling,
-            tooltip: 'Google ML Kit Image Labeling',
-          ),
+          // ML Kit Image Labeling Button - only shown on Android/iOS
+          if (Platform.isAndroid || Platform.isIOS) ...[
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: Icon(Icons.auto_awesome),
+              onTap: () => _selectUserAction(UserAction.ml_kit_labeling),
+              isActive: widget.selectedAction == UserAction.ml_kit_labeling,
+              tooltip: 'Google ML Kit Image Labeling',
+            ),
+          ],
 
           // Annotation Names Toggle
           ToolbarDivider(isCompact: isCompact),
