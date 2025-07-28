@@ -128,8 +128,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     try {
       _logger.info('Starting ML Kit image labeling for media ID: ${currentMedia.mediaItem.id}');
       
-      // Process the image with ML Kit
-      final labels = await _mlKitService.processImage(currentImage);
+      // Process the image with ML Kit based on project type
+      final labels = await _mlKitService.processImage(
+        currentImage,
+        projectType: widget.project.type,
+      );
       
       if (labels.isEmpty) {
         _logger.info('No labels detected by ML Kit');
@@ -146,12 +149,13 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       
       _logger.info('ML Kit detected ${labels.length} labels');
       
-      // Convert ML Kit labels to annotations
+      // Convert ML Kit labels to annotations based on project type
       final annotations = _mlKitService.convertLabelsToAnnotations(
         labels: labels,
         mediaItemId: currentMedia.mediaItem.id!,
         projectLabels: widget.project.labels ?? [],
         annotatorId: 1, // Default annotator ID
+        projectType: widget.project.type,
       );
       
       if (annotations.isEmpty) {

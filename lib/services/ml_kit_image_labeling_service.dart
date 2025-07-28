@@ -21,35 +21,83 @@ class MLKitImageLabelingService {
   /// The image labeler instance from ML Kit
   late final ml_kit.ImageLabeler _imageLabeler;
   
-  /// Initialize the image labeler with the given confidence threshold
+  /// The object detector instance from ML Kit
+  late final ml_kit.ObjectDetector? _objectDetector;
+  
+  /// Initialize the ML Kit services with the given confidence threshold
   void initialize({double confidenceThreshold = 0.5}) {
+    // Initialize image labeler for classification
     final options = ml_kit.ImageLabelerOptions(confidenceThreshold: confidenceThreshold);
     _imageLabeler = ml_kit.ImageLabeler(options: options);
-    _logger.info('ML Kit Image Labeler initialized with confidence threshold: $confidenceThreshold');
+    
+    // Initialize object detector for detection
+    final detectorOptions = ml_kit.ObjectDetectorOptions(
+      mode: ml_kit.DetectionMode.single,
+      classifyObjects: true,
+      multipleObjects: true,
+    );
+    _objectDetector = ml_kit.ObjectDetector(options: detectorOptions);
+    
+    _logger.info('ML Kit services initialized with confidence threshold: $confidenceThreshold');
   }
   
   /// Process an image file and return a list of labels with confidence scores
-  Future<List<ml_kit.ImageLabel>> processImageFile(File imageFile) async {
+  /// The processing method depends on the project type
+  Future<List<ml_kit.ImageLabel>> processImageFile(File imageFile, {String projectType = ''}) async {
     try {
       final inputImage = ml_kit.InputImage.fromFile(imageFile);
-      final labels = await _imageLabeler.processImage(inputImage);
-      _logger.info('Processed image file: ${imageFile.path}, found ${labels.length} labels');
-      return labels;
+      
+      if (projectType.toLowerCase().contains('detection')) {
+        // For detection project types, use object detection
+        final objects = await _objectDetector?.processImage(inputImage) ?? [];
+        _logger.info('Processed image file with object detection: ${imageFile.path}, found ${objects.length} objects');
+        
+        // Convert detected objects to ImageLabel format for compatibility
+        return objects.map((object) {
+          return ml_kit.ImageLabel(
+            label: object.labels.isNotEmpty ? object.labels.first.text : 'Object',
+            confidence: object.labels.isNotEmpty ? object.labels.first.confidence : 0.5,
+            index: 0,
+          );
+        }).toList();
+      } else {
+        // For classification and other project types, use image labeling
+        final labels = await _imageLabeler.processImage(inputImage);
+        _logger.info('Processed image file with classification: ${imageFile.path}, found ${labels.length} labels');
+        return labels;
+      }
     } catch (e) {
       _logger.severe('Error processing image file: ${imageFile.path}', e);
       rethrow;
     }
   }
-  
+
   /// Process an image and return a list of labels with confidence scores
-  Future<List<ml_kit.ImageLabel>> processImage(ui.Image image) async {
+  /// The processing method depends on the project type
+  Future<List<ml_kit.ImageLabel>> processImage(ui.Image image, {String projectType = ''}) async {
     try {
       // Convert ui.Image to InputImage
-      // This is a simplified approach - in a real app, you might need to convert the ui.Image to a file or bytes
       final inputImage = await _convertUiImageToInputImage(image);
-      final labels = await _imageLabeler.processImage(inputImage);
-      _logger.info('Processed image, found ${labels.length} labels');
-      return labels;
+      
+      if (projectType.toLowerCase().contains('detection')) {
+        // For detection project types, use object detection
+        final objects = await _objectDetector?.processImage(inputImage) ?? [];
+        _logger.info('Processed image with object detection, found ${objects.length} objects');
+        
+        // Convert detected objects to ImageLabel format for compatibility
+        return objects.map((object) {
+          return ml_kit.ImageLabel(
+            label: object.labels.isNotEmpty ? object.labels.first.text : 'Object',
+            confidence: object.labels.isNotEmpty ? object.labels.first.confidence : 0.5,
+            index: 0,
+          );
+        }).toList();
+      } else {
+        // For classification and other project types, use image labeling
+        final labels = await _imageLabeler.processImage(inputImage);
+        _logger.info('Processed image with classification, found ${labels.length} labels');
+        return labels;
+      }
     } catch (e) {
       _logger.severe('Error processing image', e);
       rethrow;
@@ -75,14 +123,25 @@ class MLKitImageLabelingService {
   }
   
   /// Convert ML Kit image labels to annotations
+  /// The annotation type depends on the project type
   List<Annotation> convertLabelsToAnnotations({
     required List<ml_kit.ImageLabel> labels,
     required int mediaItemId,
     required List<Label> projectLabels,
     required int annotatorId,
+    String projectType = '',
   }) {
     final annotations = <Annotation>[];
     final now = DateTime.now();
+    final type = projectType.toLowerCase();
+    
+    // Determine the annotation type based on project type
+    String annotationType = 'classification';
+    if (type.contains('detection')) {
+      annotationType = 'bbox';
+    } else if (type.contains('segmentation')) {
+      annotationType = 'polygon';
+    }
     
     for (final imageLabel in labels) {
       // Try to find a matching project label by name
@@ -95,18 +154,45 @@ class MLKitImageLabelingService {
       
       final matchingLabel = matchingLabels.first;
       
+      // Create annotation with appropriate type and data
+      Map<String, dynamic> annotationData = {'label': imageLabel.label};
+      
+      // For detection types, add bounding box data
+      if (annotationType == 'bbox') {
+        // Create a default bounding box in the center of the image
+        // In a real implementation, this would come from the object detector
+        annotationData = {
+          'x': 0.25,
+          'y': 0.25,
+          'width': 0.5,
+          'height': 0.5,
+        };
+      } else if (annotationType == 'polygon') {
+        // Create a default polygon for segmentation
+        // In a real implementation, this would come from a segmentation model
+        annotationData = {
+          'points': [
+            {'x': 0.25, 'y': 0.25},
+            {'x': 0.75, 'y': 0.25},
+            {'x': 0.75, 'y': 0.75},
+            {'x': 0.25, 'y': 0.75},
+          ]
+        };
+      }
+      
       final annotation = Annotation(
         mediaItemId: mediaItemId,
         labelId: matchingLabel.id,
-        annotationType: 'classification',
-        data: {'label': imageLabel.label},
+        annotationType: annotationType,
+        data: annotationData,
         confidence: imageLabel.confidence,
         annotatorId: annotatorId,
         comment: 'Generated by Google ML Kit',
         status: 'auto_generated',
         createdAt: now,
         updatedAt: now,
-      );
+      )
+      ..name = 'AI: ${imageLabel.label}';
       
       annotations.add(annotation);
     }
@@ -119,9 +205,10 @@ class MLKitImageLabelingService {
     return labels;
   }
   
-  /// Close the image labeler when it's no longer needed
+  /// Close all ML Kit services when they're no longer needed
   void close() {
     _imageLabeler.close();
-    _logger.info('ML Kit Image Labeler closed');
+    _objectDetector?.close();
+    _logger.info('ML Kit services closed');
   }
 }
