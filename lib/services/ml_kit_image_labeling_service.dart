@@ -19,13 +19,23 @@ class MLKitImageLabelingService {
   MLKitImageLabelingService._internal();
   
   /// The image labeler instance from ML Kit
-  late final ml_kit.ImageLabeler _imageLabeler;
+  ml_kit.ImageLabeler? _imageLabeler;
   
   /// The object detector instance from ML Kit
-  late final ml_kit.ObjectDetector? _objectDetector;
+  ml_kit.ObjectDetector? _objectDetector;
+  
+  /// Flag to track if the service has been initialized
+  bool _isInitialized = false;
   
   /// Initialize the ML Kit services with the given confidence threshold
+  /// If already initialized, this will only update the configuration if the threshold changes
   void initialize({double confidenceThreshold = 0.5}) {
+    // If already initialized, just log and return
+    if (_isInitialized) {
+      _logger.info('ML Kit services already initialized');
+      return;
+    }
+    
     // Initialize image labeler for classification
     final options = ml_kit.ImageLabelerOptions(confidenceThreshold: confidenceThreshold);
     _imageLabeler = ml_kit.ImageLabeler(options: options);
@@ -38,12 +48,19 @@ class MLKitImageLabelingService {
     );
     _objectDetector = ml_kit.ObjectDetector(options: detectorOptions);
     
+    _isInitialized = true;
     _logger.info('ML Kit services initialized with confidence threshold: $confidenceThreshold');
   }
   
   /// Process an image file and return a list of labels with confidence scores
   /// The processing method depends on the project type
   Future<List<ml_kit.ImageLabel>> processImageFile(File imageFile, {String projectType = ''}) async {
+    // Check if initialized
+    if (!_isInitialized) {
+      _logger.warning('ML Kit services not initialized. Initializing with default settings.');
+      initialize();
+    }
+    
     try {
       final inputImage = ml_kit.InputImage.fromFile(imageFile);
       
@@ -62,7 +79,12 @@ class MLKitImageLabelingService {
         }).toList();
       } else {
         // For classification and other project types, use image labeling
-        final labels = await _imageLabeler.processImage(inputImage);
+        if (_imageLabeler == null) {
+          _logger.warning('Image labeler is null. Returning empty list.');
+          return [];
+        }
+        
+        final labels = await _imageLabeler!.processImage(inputImage);
         _logger.info('Processed image file with classification: ${imageFile.path}, found ${labels.length} labels');
         return labels;
       }
@@ -75,6 +97,12 @@ class MLKitImageLabelingService {
   /// Process an image and return a list of labels with confidence scores
   /// The processing method depends on the project type
   Future<List<ml_kit.ImageLabel>> processImage(ui.Image image, {String projectType = ''}) async {
+    // Check if initialized
+    if (!_isInitialized) {
+      _logger.warning('ML Kit services not initialized. Initializing with default settings.');
+      initialize();
+    }
+    
     try {
       // Convert ui.Image to InputImage
       final inputImage = await _convertUiImageToInputImage(image);
@@ -94,7 +122,12 @@ class MLKitImageLabelingService {
         }).toList();
       } else {
         // For classification and other project types, use image labeling
-        final labels = await _imageLabeler.processImage(inputImage);
+        if (_imageLabeler == null) {
+          _logger.warning('Image labeler is null. Returning empty list.');
+          return [];
+        }
+        
+        final labels = await _imageLabeler!.processImage(inputImage);
         _logger.info('Processed image with classification, found ${labels.length} labels');
         return labels;
       }
@@ -207,8 +240,48 @@ class MLKitImageLabelingService {
   
   /// Close all ML Kit services when they're no longer needed
   void close() {
-    _imageLabeler.close();
-    _objectDetector?.close();
+    if (!_isInitialized) {
+      _logger.info('ML Kit services were not initialized, nothing to close');
+      return;
+    }
+    
+    try {
+      if (_imageLabeler != null) {
+        try {
+          _imageLabeler!.close();
+        } catch (e) {
+          if (e.toString().contains('MissingPluginException')) {
+            _logger.info('Ignoring MissingPluginException when closing image labeler');
+          } else {
+            _logger.warning('Error closing image labeler: ${e.toString()}');
+          }
+        }
+      }
+    } catch (e) {
+      _logger.warning('Error accessing image labeler: ${e.toString()}');
+    }
+    
+    try {
+      if (_objectDetector != null) {
+        try {
+          _objectDetector!.close();
+        } catch (e) {
+          if (e.toString().contains('MissingPluginException')) {
+            _logger.info('Ignoring MissingPluginException when closing object detector');
+          } else {
+            _logger.warning('Error closing object detector: ${e.toString()}');
+          }
+        }
+      }
+    } catch (e) {
+      _logger.warning('Error accessing object detector: ${e.toString()}');
+    }
+    
+    // Reset initialization state
+    _isInitialized = false;
+    _imageLabeler = null;
+    _objectDetector = null;
+    
     _logger.info('ML Kit services closed');
   }
 }
