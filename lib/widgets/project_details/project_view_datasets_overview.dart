@@ -77,9 +77,11 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                     spacing: 16,
                     runSpacing: 16,
                     children: datasets.map((dataset) {
-                      return SizedBox(
-                        width: 520,
-                        height: 560,
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: 300,
+                          maxWidth: 520,
+                        ),
                         child: _buildDatasetCard(dataset),
                       );
                     }).toList(),
@@ -92,12 +94,16 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
 
   Widget _buildDatasetCard(Dataset dataset) {
     final screenWidth = MediaQuery.of(context).size.width;
+    // Responsive font sizes based on screen width
     final labelFontSize = screenWidth < 600 ? 14.0 : 16.0;
+    final titleFontSize = screenWidth < 600 ? 18.0 : 22.0;
+    final contentFontSize = screenWidth < 600 ? 14.0 : 18.0;
+    
+    // Responsive padding based on screen width
+    final cardPadding = screenWidth < 600 ? 12.0 : 20.0;
 
     return Container(
-      //width: 220,
-      //height: 280,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: Colors.grey[800],
         borderRadius: BorderRadius.circular(16),
@@ -116,6 +122,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,65 +130,131 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               Image.asset(
                 'assets/icons/icons8-folder-64.png',
                 fit: BoxFit.cover,
-                height: 70, width: 70,
+                height: screenWidth < 600 ? 50 : 70, 
+                width: screenWidth < 600 ? 50 : 70,
               ),
-              const SizedBox(width: 10),
-              Expanded(
+              SizedBox(width: screenWidth < 600 ? 8 : 10),
+              Flexible(
+                fit: FlexFit.loose,
                 child: Text(
                   dataset.name,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode'),
+                  style: TextStyle(
+                    fontSize: titleFontSize, 
+                    fontWeight: FontWeight.normal, 
+                    fontFamily: 'CascadiaCode'
+                  ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 15),
+          SizedBox(height: screenWidth < 600 ? 10 : 15),
           const Divider(color: Colors.grey),
-          const SizedBox(height: 25),
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
 
-          Row(
-            children: [
-              _buildSmallStatCard('Media files', dataset.mediaCount.toString(), 'assets/icons/icons8-gallery-96.png',),
-              const SizedBox(width: 12),
-              _buildSmallStatCard('Annotations', dataset.annotationCount.toString(), 'assets/icons/icons8-label-64.png',),
-            ],
-          ),
-
-          const SizedBox(height: 25),
-          Row(
-            children: [
-              Icon(Icons.document_scanner),
-              const SizedBox(width: 5),
-              Text(dataset.type, style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode')),
-              const Spacer(),
-              Icon(Icons.watch_later_outlined),
-              const SizedBox(width: 5),
-              Text(
-                formatDate(dataset.createdAt),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: 'CascadiaCode'
-                  ),
+          // Wrap stat cards in a responsive layout
+          screenWidth < 450 
+          ? Column(
+              children: [
+                _buildSmallStatCard('Media files', dataset.mediaCount.toString(), 'assets/icons/icons8-gallery-96.png'),
+                SizedBox(height: 12),
+                _buildSmallStatCard('Annotations', dataset.annotationCount.toString(), 'assets/icons/icons8-label-64.png'),
+              ],
+            )
+          : Row(
+              children: [
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: _buildSmallStatCard('Media files', dataset.mediaCount.toString(), 'assets/icons/icons8-gallery-96.png'),
                 ),
+                SizedBox(width: screenWidth < 600 ? 8 : 12),
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: _buildSmallStatCard('Annotations', dataset.annotationCount.toString(), 'assets/icons/icons8-label-64.png'),
+                ),
+              ],
+            ),
+
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
+          // Type and date always in two rows
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.document_scanner, size: screenWidth < 600 ? 18 : 24),
+                  SizedBox(width: screenWidth < 600 ? 3 : 5),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      dataset.type, 
+                      style: TextStyle(
+                        fontSize: contentFontSize, 
+                        fontWeight: FontWeight.normal, 
+                        fontFamily: 'CascadiaCode'
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.watch_later_outlined, size: screenWidth < 600 ? 18 : 24),
+                  SizedBox(width: screenWidth < 600 ? 3 : 5),
+                  Flexible(
+                    child: Text(
+                      formatDate(dataset.createdAt),
+                      style: TextStyle(
+                        fontSize: contentFontSize,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: 'CascadiaCode'
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
 
-          const SizedBox(height: 25),
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
 
           Row(
             children: [
-              Icon(Icons.source_outlined),
-              const SizedBox(width: 5),
-              Text('Source ${dataset.source}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode')),
+              Icon(Icons.source_outlined, size: screenWidth < 600 ? 18 : 24),
+              SizedBox(width: screenWidth < 600 ? 3 : 5),
+              Flexible(
+                fit: FlexFit.loose,
+                child: Text(
+                  'Source ${dataset.source}', 
+                  style: TextStyle(
+                    fontSize: contentFontSize, 
+                    fontWeight: FontWeight.normal, 
+                    fontFamily: 'CascadiaCode'
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
             ],
           ),
 
-          const SizedBox(height: 25),
-          const Text('Labels:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'CascadiaCode')),
-          const SizedBox(height: 20),
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
+          Text(
+            'Labels:', 
+            style: TextStyle(
+              fontSize: contentFontSize, 
+              fontWeight: FontWeight.bold, 
+              fontFamily: 'CascadiaCode'
+            )
+          ),
+          SizedBox(height: screenWidth < 600 ? 10 : 20),
 
+          // The LabelList widget already uses responsive fontLabelSize
           LabelList(
             labels: widget.project.labels ?? [],
             projectName: widget.project.name,
@@ -189,28 +262,82 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
             fontLabelSize: labelFontSize,
           ),
 
-          const Spacer(),
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
           const Divider(color: Colors.grey),
-          const SizedBox(height: 25),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(icon: const Icon(Icons.copy), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.download), onPressed: () {}),
-            ],
-          ),
+          SizedBox(height: screenWidth < 600 ? 15 : 25),
+          
+          // For very small screens, use a Wrap widget to allow buttons to flow to next line if needed
+          screenWidth < 350
+          ? Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                  padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                  padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                  padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                  padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                ),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  iconSize: screenWidth < 600 ? 20 : 24,
+                  onPressed: () {},
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
 
   Widget _buildSmallStatCard(String title, String value, String icon) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    final iconSize = screenWidth < 600 ? 40.0 : 50.0;
+    final padding = screenWidth < 600 ? 8.0 : 10.0;
+    final spacing = screenWidth < 600 ? 10.0 : 15.0;
+    
     return Container(
-        height: 72,
-        width: 232,
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(padding),
         decoration: BoxDecoration(
           color: Colors.grey[850],
           borderRadius: BorderRadius.circular(12),
@@ -227,17 +354,31 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
-              icon, fit: BoxFit.cover,
-              height: 50, width: 50,
+              icon, 
+              fit: BoxFit.cover,
+              height: iconSize, 
+              width: iconSize,
             ),
-            const SizedBox(width: 15),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(title, style: TextStyle(fontSize: 18, fontFamily: 'CascadiaCode')),
-                Text(value, style: TextStyle(fontSize: 18, color: Colors.grey, fontFamily: 'CascadiaCode')),
-              ],
+            SizedBox(width: spacing),
+            Flexible(
+              fit: FlexFit.loose,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title, 
+                    style: TextStyle(fontSize: fontSize, fontFamily: 'CascadiaCode'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    value, 
+                    style: TextStyle(fontSize: fontSize, color: Colors.grey, fontFamily: 'CascadiaCode'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
