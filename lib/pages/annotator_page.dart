@@ -526,6 +526,18 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   void _handleActionSelected(UserAction action) {
     if (action == UserAction.ml_kit_labeling) {
+      // Check if ML Kit is supported on this platform
+      if (!_mlKitService.isSupported) {
+        // Show an error dialog if ML Kit is not supported
+        AlertErrorDialog.show(
+          context,
+          'ML Kit Not Supported',
+          'ML Kit image labeling is not supported on this platform.',
+          tips: 'ML Kit is only available on Android and iOS devices.',
+        );
+        return;
+      }
+      
       // Process the current image with ML Kit
       _processImageWithMlKit();
       return;

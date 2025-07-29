@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 import 'package:logging/logging.dart';
 
@@ -27,6 +28,12 @@ class MLKitImageLabelingService {
   /// Flag to track if the service has been initialized
   bool _isInitialized = false;
   
+  /// Flag to track if ML Kit is supported on this platform
+  bool _isSupported = false;
+  
+  /// Check if the current platform supports ML Kit
+  bool get isSupported => _isSupported;
+  
   /// Initialize the ML Kit services with the given confidence threshold
   /// If already initialized, this will only update the configuration if the threshold changes
   void initialize({double confidenceThreshold = 0.5}) {
@@ -36,20 +43,37 @@ class MLKitImageLabelingService {
       return;
     }
     
-    // Initialize image labeler for classification
-    final options = ml_kit.ImageLabelerOptions(confidenceThreshold: confidenceThreshold);
-    _imageLabeler = ml_kit.ImageLabeler(options: options);
+    // Check if the current platform is supported
+    // ML Kit is only supported on Android and iOS
+    if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
+      _logger.info('ML Kit services are not supported on this platform');
+      _isInitialized = true;
+      _isSupported = false;
+      return;
+    }
     
-    // Initialize object detector for detection
-    final detectorOptions = ml_kit.ObjectDetectorOptions(
-      mode: ml_kit.DetectionMode.single,
-      classifyObjects: true,
-      multipleObjects: true,
-    );
-    _objectDetector = ml_kit.ObjectDetector(options: detectorOptions);
+    _isSupported = true;
     
-    _isInitialized = true;
-    _logger.info('ML Kit services initialized with confidence threshold: $confidenceThreshold');
+    try {
+      // Initialize image labeler for classification
+      final options = ml_kit.ImageLabelerOptions(confidenceThreshold: confidenceThreshold);
+      _imageLabeler = ml_kit.ImageLabeler(options: options);
+      
+      // Initialize object detector for detection
+      final detectorOptions = ml_kit.ObjectDetectorOptions(
+        mode: ml_kit.DetectionMode.single,
+        classifyObjects: true,
+        multipleObjects: true,
+      );
+      _objectDetector = ml_kit.ObjectDetector(options: detectorOptions);
+      
+      _isInitialized = true;
+      _logger.info('ML Kit services initialized with confidence threshold: $confidenceThreshold');
+    } catch (e) {
+      _logger.severe('Error initializing ML Kit services', e);
+      _isSupported = false;
+      _isInitialized = true;
+    }
   }
   
   /// Process an image file and return a list of labels with confidence scores
@@ -59,6 +83,12 @@ class MLKitImageLabelingService {
     if (!_isInitialized) {
       _logger.warning('ML Kit services not initialized. Initializing with default settings.');
       initialize();
+    }
+    
+    // Check if ML Kit is supported on this platform
+    if (!_isSupported) {
+      _logger.warning('ML Kit services are not supported on this platform. Returning empty list.');
+      return [];
     }
     
     try {
@@ -90,7 +120,7 @@ class MLKitImageLabelingService {
       }
     } catch (e) {
       _logger.severe('Error processing image file: ${imageFile.path}', e);
-      rethrow;
+      return [];
     }
   }
 
@@ -101,6 +131,12 @@ class MLKitImageLabelingService {
     if (!_isInitialized) {
       _logger.warning('ML Kit services not initialized. Initializing with default settings.');
       initialize();
+    }
+    
+    // Check if ML Kit is supported on this platform
+    if (!_isSupported) {
+      _logger.warning('ML Kit services are not supported on this platform. Returning empty list.');
+      return [];
     }
     
     try {
@@ -133,7 +169,7 @@ class MLKitImageLabelingService {
       }
     } catch (e) {
       _logger.severe('Error processing image', e);
-      rethrow;
+      return [];
     }
   }
   
@@ -242,6 +278,15 @@ class MLKitImageLabelingService {
   void close() {
     if (!_isInitialized) {
       _logger.info('ML Kit services were not initialized, nothing to close');
+      return;
+    }
+    
+    // If ML Kit is not supported on this platform, just reset state without trying to close services
+    if (!_isSupported) {
+      _logger.info('ML Kit services are not supported on this platform, resetting state only');
+      _isInitialized = false;
+      _imageLabeler = null;
+      _objectDetector = null;
       return;
     }
     
