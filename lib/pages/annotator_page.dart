@@ -150,7 +150,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       _logger.info('ML Kit detected ${labels.length} labels');
       
       // Convert ML Kit labels to annotations based on project type
-      final annotations = _mlKitService.convertLabelsToAnnotations(
+      var annotations = _mlKitService.convertLabelsToAnnotations(
         labels: labels,
         mediaItemId: currentMedia.mediaItem.id!,
         projectLabels: widget.project.labels ?? [],
@@ -176,11 +176,51 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           return;
         }
         
-        // Show dialog with detected labels and option to add them to the project
-        if (mounted) {
-          await _showDetectedLabelsDialog(detectedLabels);
+        // Automatically add new labels to the project
+        final addedLabels = <Label>[];
+        final existingLabelNames = widget.project.labels?.map((l) => l.name.toLowerCase()).toSet() ?? {};
+        
+        for (final label in detectedLabels) {
+          // Skip if label already exists in the project (case-insensitive comparison)
+          if (existingLabelNames.contains(label.label.toLowerCase())) {
+            continue;
+          }
+          
+          try {
+            // Add the label to the project
+            final newLabel = await _addLabelToProjectInternal(label.label);
+            if (newLabel != null) {
+              addedLabels.add(newLabel);
+              existingLabelNames.add(label.label.toLowerCase());
+            }
+          } catch (e) {
+            _logger.warning('Failed to add label ${label.label}: ${e.toString()}');
+          }
         }
-        return;
+        
+        if (addedLabels.isEmpty) {
+          _logger.info('No new labels were added to the project');
+          return;
+        }
+        
+        _logger.info('Added ${addedLabels.length} new labels to the project');
+        
+        // Process the image again with the updated project labels
+        final updatedAnnotations = _mlKitService.convertLabelsToAnnotations(
+          labels: labels,
+          mediaItemId: currentMedia.mediaItem.id!,
+          projectLabels: widget.project.labels ?? [],
+          annotatorId: 1, // Default annotator ID
+          projectType: widget.project.type,
+        );
+        
+        if (updatedAnnotations.isEmpty) {
+          _logger.warning('Still no matching project labels after adding new labels');
+          return;
+        }
+        
+        // Continue with the updated annotations
+        annotations = updatedAnnotations;
       }
       
       _logger.info('Created ${annotations.length} annotations from ML Kit labels');
@@ -538,6 +578,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         return;
       }
       
+      // Set userAction to ML Kit labeling to show it as selected in the UI
+      setState(() {
+        userAction = action;
+      });
+      
       // Process the current image with ML Kit
       _processImageWithMlKit();
       return;
@@ -724,6 +769,59 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     );
   }
   
+  /// Add a new label to the project and return the created label
+  Future<Label?> _addLabelToProjectInternal(String labelName) async {
+    try {
+      // Generate a random color for the new label
+      final random = Random();
+      final r = random.nextInt(200) + 55; // Avoid too dark colors
+      final g = random.nextInt(200) + 55;
+      final b = random.nextInt(200) + 55;
+      final color = '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+      
+      // Create a new label
+      final newLabel = Label(
+        id: -1, // Will be assigned by the database
+        projectId: widget.project.id!,
+        name: labelName,
+        color: color,
+        labelOrder: (widget.project.labels?.length ?? 0) + 1,
+      );
+      
+      // Save the label to the database
+      final labelDb = LabelsDatabase.instance;
+      final labelId = await labelDb.insertLabel(newLabel);
+      
+      if (labelId != -1) {
+        // Create a complete label with the assigned ID
+        final completeLabel = Label(
+          id: labelId,
+          projectId: newLabel.projectId,
+          name: newLabel.name,
+          color: newLabel.color,
+          labelOrder: newLabel.labelOrder,
+          isDefault: false,
+          description: null,
+          createdAt: DateTime.now(),
+        );
+        
+        // Update the project's labels in memory
+        setState(() {
+          final updatedLabels = List<Label>.from(widget.project.labels ?? []);
+          updatedLabels.add(completeLabel);
+          widget.project.labels?.clear();
+          widget.project.labels?.addAll(updatedLabels);
+        });
+        
+        return completeLabel;
+      }
+      return null;
+    } catch (e) {
+      _logger.severe('Error adding label to project', e);
+      return null;
+    }
+  }
+
   /// Add a new label to the project
   Future<void> _addLabelToProject(String labelName) async {
     try {
@@ -890,6 +988,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           cornerSize: currentCornerSize,
                           selectedAction: userAction,
                           showAnnotationNames: showAnnotationNames,
+                          isProcessingMlKit: _isProcessingMlKit,
                           onOpacityChanged: (v) => setState(() => currentOpacity = v),
                           onStrokeWidthChanged: (v) => setState(() => currentStrokeWidth = v),
                           onCornerSizeChanged: (v) => setState(() => currentCornerSize = v),                        

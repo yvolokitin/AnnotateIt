@@ -17,6 +17,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final bool showAnnotationNames;
   final double strokeWidth;
   final double cornerSize;
+  final bool isProcessingMlKit;
 
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<double> onStrokeWidthChanged;
@@ -40,7 +41,8 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.strokeWidth,
     required this.cornerSize,
     required this.onStrokeWidthChanged,
-    required this.onCornerSizeChanged,    
+    required this.onCornerSizeChanged,
+    this.isProcessingMlKit = false,
   });
 
   @override
@@ -110,6 +112,30 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
+          // ML Kit Image Labeling Button - only shown on Android/iOS
+          if (Platform.isAndroid || Platform.isIOS) ...[
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: widget.isProcessingMlKit 
+                ? SizedBox(
+                    width: Constants.iconSize,
+                    height: Constants.iconSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(Icons.auto_awesome),
+              onTap: widget.isProcessingMlKit 
+                ? null // Disable button while processing
+                : () => _selectUserAction(UserAction.ml_kit_labeling),
+              isActive: widget.selectedAction == UserAction.ml_kit_labeling,
+              tooltip: widget.isProcessingMlKit 
+                ? 'Processing image with ML Kit...'
+                : 'Google ML Kit Image Labeling',
+            ),
+          ],
+
           // Segmentation Button (conditionally shown)
           if (annotationSegment) ...[
             /// disabled since SAM is not supported yet
@@ -159,17 +185,6 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             isActive: showAnnotationsSettingsDialog,
             tooltip: l10n.toolbarAnnotationSettings,
           ),
-
-          // ML Kit Image Labeling Button - only shown on Android/iOS
-          if (Platform.isAndroid || Platform.isIOS) ...[
-            ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
-              icon: Icon(Icons.auto_awesome),
-              onTap: () => _selectUserAction(UserAction.ml_kit_labeling),
-              isActive: widget.selectedAction == UserAction.ml_kit_labeling,
-              tooltip: 'Google ML Kit Image Labeling',
-            ),
-          ],
 
           // Annotation Names Toggle
           ToolbarDivider(isCompact: isCompact),
