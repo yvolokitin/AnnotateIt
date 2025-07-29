@@ -470,4 +470,27 @@ class DatasetDatabase {
     return results.map((row) => row['name'] as String).toList();
   }
 
+  Future<int> countAnnotationsForDataset(String datasetId) async {
+    final db = await database;
+    
+    // Get all media items for the dataset
+    final mediaItems = await fetchMediaForDataset(datasetId);
+    if (mediaItems.isEmpty) {
+      return 0;
+    }
+    
+    // Get the IDs of all media items
+    final mediaItemIds = mediaItems.where((item) => item.id != null).map((item) => item.id!).toList();
+    if (mediaItemIds.isEmpty) {
+      return 0;
+    }
+    
+    // Count annotations for these media items
+    final countResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM annotations WHERE media_item_id IN (${List.filled(mediaItemIds.length, '?').join(',')})',
+      mediaItemIds,
+    );
+    
+    return Sqflite.firstIntValue(countResult) ?? 0;
+  }
 }

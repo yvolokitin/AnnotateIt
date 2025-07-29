@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../data/dataset_database.dart';
@@ -7,6 +8,8 @@ import '../../models/dataset.dart';
 import "../../utils/date_utils.dart";
 
 import '../project_list/labels_list.dart';
+import '../../widgets/dialogs/edit_dataset_name_dialog.dart';
+import '../../pages/project_export/export_project_dialog.dart';
 
 class ProjectViewDatasetsOverview extends StatefulWidget {
   final Project project;
@@ -22,6 +25,7 @@ class ProjectViewDatasetsOverview extends StatefulWidget {
 
 class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview> with TickerProviderStateMixin {
   List<Dataset> datasets = [];
+  Map<String, int> datasetAnnotationCounts = {};
   bool _isLoading = true;
 
   @override
@@ -30,12 +34,98 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
     _loadDatasets();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when the widget becomes visible again
+    if (!_isLoading && datasets.isNotEmpty) {
+      _refreshAnnotationCounts();
+    }
+  }
+
   Future<void> _loadDatasets() async {
     final fetched = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+    
+    // Load actual annotation counts for each dataset
+    Map<String, int> counts = {};
+    for (var dataset in fetched) {
+      counts[dataset.id] = await DatasetDatabase.instance.countAnnotationsForDataset(dataset.id);
+    }
+    
     setState(() {
       datasets = fetched;
+      datasetAnnotationCounts = counts;
       _isLoading = false;
     });
+  }
+  
+  Future<void> _refreshAnnotationCounts() async {
+    Map<String, int> counts = {};
+    for (var dataset in datasets) {
+      counts[dataset.id] = await DatasetDatabase.instance.countAnnotationsForDataset(dataset.id);
+    }
+    
+    setState(() {
+      datasetAnnotationCounts = counts;
+    });
+  }
+  
+  Future<void> _openDatasetFolder(Dataset dataset) async {
+    try {
+      // Get folder IDs for the dataset
+      final folderIds = await DatasetDatabase.instance.getFolderIdsForDataset(dataset.id);
+      
+      if (folderIds.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No folder found for this dataset')),
+        );
+        return;
+      }
+      
+      // Get the path for the first folder (most datasets will have only one folder)
+      final folderPath = await DatasetDatabase.instance.getMediaFolderPath(folderIds.first);
+      
+      if (folderPath == null || folderPath.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Folder path not found')),
+        );
+        return;
+      }
+      
+      // Open the folder in explorer
+      await Process.run('explorer', [folderPath]);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening folder: ${e.toString()}')),
+      );
+    }
+  }
+  
+  void _renameDataset(Dataset dataset) async {
+    await showDialog<Dataset>(
+      context: context,
+      builder: (context) => EditDatasetNameDialog(
+        dataset: dataset,
+        onDatasetNameUpdated: (updated) {
+          setState(() {
+            final index = datasets.indexWhere((d) => d.id == dataset.id);
+            if (index != -1) {
+              datasets[index] = updated;
+            }
+          });
+        },
+      ),
+    );
+  }
+  
+  void _exportDataset(Dataset dataset) async {
+    // Show the export dialog
+    await showDialog(
+      context: context,
+      builder: (context) => ExportProjectDialog(
+        project: widget.project,
+      ),
+    );
   }
 
   @override
@@ -160,7 +250,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               children: [
                 _buildSmallStatCard('Media files', dataset.mediaCount.toString(), 'assets/icons/icons8-gallery-96.png'),
                 SizedBox(height: 12),
-                _buildSmallStatCard('Annotations', dataset.annotationCount.toString(), 'assets/icons/icons8-label-64.png'),
+                _buildSmallStatCard('Annotations', (datasetAnnotationCounts[dataset.id] ?? 0).toString(), 'assets/icons/icons8-label-64.png'),
               ],
             )
           : Row(
@@ -172,7 +262,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                 SizedBox(width: screenWidth < 600 ? 8 : 12),
                 Flexible(
                   fit: FlexFit.loose,
-                  child: _buildSmallStatCard('Annotations', dataset.annotationCount.toString(), 'assets/icons/icons8-label-64.png'),
+                  child: _buildSmallStatCard('Annotations', (datasetAnnotationCounts[dataset.id] ?? 0).toString(), 'assets/icons/icons8-label-64.png'),
                 ),
               ],
             ),
@@ -274,53 +364,48 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               runSpacing: 8,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const Icon(Icons.folder_open),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _openDatasetFolder(dataset),
                   padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
-                  padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                  tooltip: 'Open folder in explorer',
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _renameDataset(dataset),
                   padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                  tooltip: 'Rename dataset',
                 ),
                 IconButton(
                   icon: const Icon(Icons.download),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _exportDataset(dataset),
                   padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
+                  tooltip: 'Export dataset',
                 ),
               ],
             )
           : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const Icon(Icons.folder_open),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _openDatasetFolder(dataset),
+                  tooltip: 'Open folder in explorer',
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _renameDataset(dataset),
+                  tooltip: 'Rename dataset',
                 ),
                 IconButton(
                   icon: const Icon(Icons.download),
                   iconSize: screenWidth < 600 ? 20 : 24,
-                  onPressed: () {},
+                  onPressed: () => _exportDataset(dataset),
+                  tooltip: 'Export dataset',
                 ),
               ],
             ),
