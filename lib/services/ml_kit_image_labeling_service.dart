@@ -9,6 +9,7 @@ import '../models/annotation.dart';
 import '../models/label.dart';
 
 /// A service that uses Google ML Kit to label images
+/// This service is only supported on Android and iOS platforms
 class MLKitImageLabelingService {
   static final _logger = Logger('MLKitImageLabelingService');
   static final MLKitImageLabelingService _instance = MLKitImageLabelingService._internal();

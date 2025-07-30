@@ -18,6 +18,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final double strokeWidth;
   final double cornerSize;
   final bool isProcessingMlKit;
+  final bool isProcessingTFLite;
 
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<double> onStrokeWidthChanged;
@@ -43,6 +44,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onStrokeWidthChanged,
     required this.onCornerSizeChanged,
     this.isProcessingMlKit = false,
+    this.isProcessingTFLite = false,
   });
 
   @override
@@ -113,6 +115,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ],
 
           // ML Kit Image Labeling Button - only shown on Android/iOS
+          // This is the AI annotation tool for mobile platforms
           if (Platform.isAndroid || Platform.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
@@ -133,6 +136,31 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               tooltip: widget.isProcessingMlKit 
                 ? 'Processing image with ML Kit...'
                 : 'Google ML Kit Image Labeling',
+            ),
+          ],
+          
+          // TFLite Object Detection Button - only shown on Windows/macOS for detection projects
+          // This is the AI annotation tool for desktop platforms
+          if ((Platform.isWindows || Platform.isMacOS) && annotationDetection) ...[
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: widget.isProcessingTFLite 
+                ? SizedBox(
+                    width: Constants.iconSize,
+                    height: Constants.iconSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(Icons.view_in_ar_outlined),
+              onTap: widget.isProcessingTFLite 
+                ? null // Disable button while processing
+                : () => _selectUserAction(UserAction.tflite_detection),
+              isActive: widget.selectedAction == UserAction.tflite_detection,
+              tooltip: widget.isProcessingTFLite 
+                ? 'Processing image with TFLite...'
+                : 'TFLite Object Detection',
             ),
           ],
 

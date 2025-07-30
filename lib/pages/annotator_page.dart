@@ -16,6 +16,7 @@ import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
 
 import '../services/ml_kit_image_labeling_service.dart';
+import '../services/tflite_detection_service.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
@@ -82,6 +83,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   // ML Kit image labeling service
   final MLKitImageLabelingService _mlKitService = MLKitImageLabelingService();
   bool _isProcessingMlKit = false;
+  
+  // TFLite detection service
+  final TFLiteDetectionService _tfliteService = TFLiteDetectionService();
+  bool _isProcessingTFLite = false;
 
   final FocusNode _focusNode = FocusNode();
 
@@ -94,6 +99,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     
     // Initialize ML Kit image labeler
     _mlKitService.initialize(confidenceThreshold: 0.6);
+    
+    // Initialize TFLite detection service
+    _tfliteService.initialize(confidenceThreshold: 0.5);
   }
 
   @override
@@ -104,6 +112,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       image.dispose();
     }
     _mlKitService.close();
+    _tfliteService.close();
     super.dispose();
   }
   
@@ -283,6 +292,189 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     } finally {
       if (mounted) {
         setState(() => _isProcessingMlKit = false);
+      }
+    }
+  }
+  
+  /// Process the current image with TFLite and create bounding box annotations from the results
+  Future<void> _processImageWithTFLite() async {
+    if (_isProcessingTFLite) return;
+    
+    final currentMedia = _mediaCache[_currentIndex];
+    final currentImage = _imageCache[_currentIndex];
+    
+    if (currentMedia == null || currentImage == null) {
+      await AlertErrorDialog.show(
+        context,
+        'TFLite Processing Failed',
+        'No image available to process.',
+      );
+      return;
+    }
+    
+    // Check if the project type is compatible with object detection
+    if (!widget.project.type.toLowerCase().contains('detect')) {
+      await AlertErrorDialog.show(
+        context,
+        'TFLite Detection Not Compatible',
+        'TFLite object detection is only compatible with detection project types.',
+        tips: 'This feature is designed for bounding box annotation projects.',
+      );
+      return;
+    }
+    
+    setState(() => _isProcessingTFLite = true);
+    
+    try {
+      _logger.info('Starting TFLite object detection for media ID: ${currentMedia.mediaItem.id}');
+      
+      // Process the image with TFLite
+      final detections = await _tfliteService.processImage(currentImage);
+      
+      if (detections.isEmpty) {
+        _logger.info('No objects detected by TFLite');
+        if (mounted) {
+          await AlertErrorDialog.show(
+            context,
+            'No Objects Detected',
+            'TFLite did not detect any objects in this image.',
+            tips: 'Try a different image or adjust the confidence threshold.',
+          );
+        }
+        return;
+      }
+      
+      _logger.info('TFLite detected ${detections.length} objects');
+      
+      // Convert TFLite detections to annotations
+      var annotations = _tfliteService.convertDetectionsToAnnotations(
+        detections: detections,
+        mediaItemId: currentMedia.mediaItem.id!,
+        projectLabels: widget.project.labels ?? [],
+        annotatorId: 1, // Default annotator ID
+      );
+      
+      if (annotations.isEmpty) {
+        _logger.info('No matching project labels found for TFLite detections');
+        
+        // Get all detected objects from TFLite
+        final detectedObjects = _tfliteService.getDetectedObjects(detections);
+        
+        if (detectedObjects.isEmpty) {
+          if (mounted) {
+            await AlertErrorDialog.show(
+              context,
+              'No Objects Detected',
+              'TFLite did not detect any objects in this image.',
+              tips: 'Try a different image or adjust the confidence threshold.',
+            );
+          }
+          return;
+        }
+        
+        // Automatically add new labels to the project
+        final addedLabels = <Label>[];
+        final existingLabelNames = widget.project.labels?.map((l) => l.name.toLowerCase()).toSet() ?? {};
+        
+        for (final detection in detectedObjects) {
+          // Skip if label already exists in the project (case-insensitive comparison)
+          if (existingLabelNames.contains(detection.label.toLowerCase())) {
+            continue;
+          }
+          
+          try {
+            // Add the label to the project
+            final newLabel = await _addLabelToProjectInternal(detection.label);
+            if (newLabel != null) {
+              addedLabels.add(newLabel);
+              existingLabelNames.add(detection.label.toLowerCase());
+            }
+          } catch (e) {
+            _logger.warning('Failed to add label ${detection.label}: ${e.toString()}');
+          }
+        }
+        
+        if (addedLabels.isEmpty) {
+          _logger.info('No new labels were added to the project');
+          return;
+        }
+        
+        _logger.info('Added ${addedLabels.length} new labels to the project');
+        
+        // Process the image again with the updated project labels
+        annotations = _tfliteService.convertDetectionsToAnnotations(
+          detections: detections,
+          mediaItemId: currentMedia.mediaItem.id!,
+          projectLabels: widget.project.labels ?? [],
+          annotatorId: 1, // Default annotator ID
+        );
+        
+        if (annotations.isEmpty) {
+          _logger.warning('Still no matching project labels after adding new labels');
+          return;
+        }
+      }
+      
+      _logger.info('Created ${annotations.length} annotations from TFLite detections');
+      
+      // Save annotations to database
+      final annotationDb = AnnotationDatabase.instance;
+      final savedAnnotations = <Annotation>[];
+      
+      for (final annotation in annotations) {
+        final insertedId = await annotationDb.insertAnnotation(annotation);
+        
+        final savedAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: annotation.mediaItemId,
+          labelId: annotation.labelId,
+          annotationType: annotation.annotationType,
+          data: annotation.data,
+          confidence: annotation.confidence,
+          annotatorId: annotation.annotatorId,
+          comment: annotation.comment,
+          status: annotation.status,
+          version: annotation.version,
+          createdAt: annotation.createdAt,
+          updatedAt: annotation.updatedAt,
+        )
+        ..name = annotation.name
+        ..color = annotation.color;
+        
+        savedAnnotations.add(savedAnnotation);
+      }
+      
+      // Update UI
+      if (mounted) {
+        setState(() {
+          final existingAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+          final newAnnotations = [...existingAnnotations, ...savedAnnotations];
+          
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+          
+          // Switch back to navigation mode
+          userAction = UserAction.navigation;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added ${savedAnnotations.length} bounding boxes from TFLite'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      _logger.severe('Error processing image with TFLite', e);
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'TFLite Processing Failed',
+          'An error occurred while processing the image: ${e.toString()}',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingTFLite = false);
       }
     }
   }
@@ -585,6 +777,29 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       
       // Process the current image with ML Kit
       _processImageWithMlKit();
+      return;
+    }
+    
+    if (action == UserAction.tflite_detection) {
+      // Check if TFLite is supported on this platform
+      if (!_tfliteService.isSupported) {
+        // Show an error dialog if TFLite is not supported
+        AlertErrorDialog.show(
+          context,
+          'TFLite Not Supported',
+          'TFLite object detection is not supported on this platform.',
+          tips: 'TFLite is not supported on web platforms.',
+        );
+        return;
+      }
+      
+      // Set userAction to TFLite detection to show it as selected in the UI
+      setState(() {
+        userAction = action;
+      });
+      
+      // Process the current image with TFLite
+      _processImageWithTFLite();
       return;
     }
     
@@ -989,6 +1204,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           selectedAction: userAction,
                           showAnnotationNames: showAnnotationNames,
                           isProcessingMlKit: _isProcessingMlKit,
+                          isProcessingTFLite: _isProcessingTFLite,
                           onOpacityChanged: (v) => setState(() => currentOpacity = v),
                           onStrokeWidthChanged: (v) => setState(() => currentStrokeWidth = v),
                           onCornerSizeChanged: (v) => setState(() => currentCornerSize = v),                        
