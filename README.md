@@ -1,4 +1,4 @@
-# AnnotateIt
+# AnnotateIt - Vision Annotation Tool
 AnnotateIt Vision Annotation Platform
 
 ## Features
@@ -7,6 +7,14 @@ AnnotateIt Vision Annotation Platform
 - **Project Management**: Create and manage annotation projects with customizable labels
 - **Dataset Import/Export**: Import and export datasets in various formats
 - **Google ML Kit Integration**: Automatic image labeling using Google's ML Kit (see [ML Kit documentation](docs/ml_kit_image_labeling.md))
+
+## System Requirements
+
+Please see [SYSTEM_REQUIREMENTS.md](SYSTEM_REQUIREMENTS.md) for detailed information about hardware and software requirements.
+
+## Store Listing
+
+For Microsoft Store submission information, see [STORE_LISTING.md](STORE_LISTING.md).
 
 ## Project Structure
 lib/
