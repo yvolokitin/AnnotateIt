@@ -166,3 +166,14 @@ msix_config:
   logo_path: assets/logo/annotateit_white_red.png
   capabilities: broadFileSystemAccess
   sign_msix: false
+  # Explicitly specify files to include
+  files:
+    include_all: true
+    include:
+      - build/windows/x64/runner/Release/data/
+      - build/windows/x64/runner/Release/flutter_windows.dll
+      - build/windows/x64/runner/Release/app.so
+  output_path: build/windows/runner/msix
+  output_name: annotateit
+  build_windows: true
+  install_certificate: false
