@@ -1,3 +1,4 @@
+import 'dart:io';
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
@@ -17,11 +18,17 @@ import "data/project_database.dart";
 import "data/labels_database.dart";
 
 import 'gen_l10n/app_localizations.dart';
+import 'package:window_size/window_size.dart';
 
 ThemeData themeData = getSystemTheme();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    setWindowMinSize(const Size(1200, 700)); // minimum size
+    setWindowMaxSize(Size.infinite); //no max limit
+  }
 
   // Initialize database for desktop (Windows, macOS, Linux)
   await initializeDatabase();

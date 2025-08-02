@@ -63,6 +63,8 @@ dependencies:
   permission_handler: ^12.0.1
   google_ml_kit: ^0.20.0
   tflite_flutter: ^0.11.0
+  msix: ^3.16.10
+  window_size: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -77,7 +79,6 @@ dev_dependencies:
   build_runner: ^2.4.15
   drift_dev: ^2.25.2
   flutter_launcher_icons: ^0.14.4
-  msix: ^3.16.9
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -159,10 +160,12 @@ flutter_launcher_icons:
 
 msix_config:
   display_name: Annot@It
+  architecture: x64
   publisher_display_name: AnnotateIt
   identity_name: AnnotateIt.AnnotIt
   publisher: CN=F5B0E43B-741A-4F78-B09D-923B0B88E548
   msix_version: 1.6.0.0
+  full_trust: true
   logo_path: assets/logo/annotateit_white_red.png
   capabilities: broadFileSystemAccess
   sign_msix: false

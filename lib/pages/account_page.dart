@@ -29,10 +29,10 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadUser();
+    _loadUserData();
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _loadUserData() async {
     var user = await UserDatabase.instance.getUser();
 
     final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
