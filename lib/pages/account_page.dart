@@ -29,9 +29,61 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadUserData();
+    loadUserData();
   }
 
+Future<void> loadUserData() async {
+  try {
+    var user = await UserDatabase.instance.getUser();
+
+    final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
+    final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
+    final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
+
+    if (user != null &&
+        (user.datasetImportFolder.isEmpty ||
+         user.datasetExportFolder.isEmpty ||
+         user.thumbnailFolder.isEmpty)) {
+      user = user.copyWith(
+        datasetImportFolder: user.datasetImportFolder.isEmpty ? importPath : user.datasetImportFolder,
+        datasetExportFolder: user.datasetExportFolder.isEmpty ? exportPath : user.datasetExportFolder,
+        thumbnailFolder: user.thumbnailFolder.isEmpty ? thumbnailPath : user.thumbnailFolder,
+      );
+      await UserDatabase.instance.update(user);
+      _logger.info('Updated user with default import/export/thumbnail folders.');
+    }
+
+    if (mounted) {
+      setState(() {
+        _user = user;
+        _loading = false;
+      });
+    }
+  } catch (e, st) {
+    _logger.severe('Failed to load user data', e, st);
+    if (mounted) {
+      setState(() {
+        _loading = false;
+      });
+    }
+    // Optionally show error UI
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text('Failed to load user data: $e'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+/*
   Future<void> _loadUserData() async {
     var user = await UserDatabase.instance.getUser();
 
@@ -57,6 +109,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
       _loading = false;
     });
   }
+*/
 
   Future<void> _updateUser() async {
     if (_user != null) {

@@ -165,9 +165,9 @@ msix_config:
   identity_name: AnnotateIt.AnnotIt
   publisher: CN=F5B0E43B-741A-4F78-B09D-923B0B88E548
   msix_version: 1.6.0.0
-  full_trust: true
   logo_path: assets/logo/annotateit_white_red.png
-  capabilities: broadFileSystemAccess
+  # full_trust: true
+  # capabilities: broadFileSystemAccess
   sign_msix: false
   # Explicitly specify files to include
   files:

@@ -41,9 +41,8 @@ class AppHeaderState extends State<AppHeader> {
                 ),
               ),
             ),
-            // clipBehavior: Clip.antiAlias,
             child: Image.asset(
-              'assets/logo/annotateit_white.png', // annotateit.png',
+              'assets/logo/annotateit_white.png',
               height: headerHeight,
             ),
           ),
@@ -51,12 +50,9 @@ class AppHeaderState extends State<AppHeader> {
           const Spacer(),
           Container(
             height: headerHeight,
-            padding: EdgeInsets.only(
-              top: screenWidth>1600 ? 16 : (screenWidth>1200 ? 12 : 8),
-              bottom: 10,
-            ),
+            alignment: Alignment.center,
             child: Text(
-              'annot@It',
+              screenWidth>1600 ? "AnnotateIt - Vision Annotations" : 'AnnotateIt',
               style: TextStyle(
                 fontSize: screenWidth>1600 ? 30 : (screenWidth>1200 ? 24 : 20),
                 fontWeight: FontWeight.bold,
@@ -64,7 +60,7 @@ class AppHeaderState extends State<AppHeader> {
               ),
             ),
           ),
-          SizedBox(width: screenWidth>1600 ? 16 : 12),
+          const SizedBox(width: 40),
         ],
       ),
     );
