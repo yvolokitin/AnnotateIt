@@ -59,6 +59,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   }
 
   Future<void> _pickZipArchive() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -71,13 +72,15 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     } catch (e, stack) {
       _logger.severe('Error picking file', e, stack);
       _showErrorDialog(
-        AppLocalizations.of(context)!.datasetDialogFilePickErrorTitle,
-        AppLocalizations.of(context)!.datasetDialogFilePickErrorMessage,
+        l10n.datasetDialogFilePickErrorTitle,
+        l10n.datasetDialogFilePickErrorMessage,
+        l10n.datasetDialogImportFailedTips,
       );
     }
   }
 
   Future<void> _processZipArchive(File file) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!mounted) return;
 
     setState(() {
@@ -115,8 +118,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
       await _cleanupExtractedFiles();
       _showErrorDialog(
-        AppLocalizations.of(context)!.datasetDialogImportFailedTitle,
-        AppLocalizations.of(context)!.datasetDialogImportFailedMessage,
+        l10n.datasetDialogImportFailedTitle,
+        '${l10n.datasetDialogImportFailedMessage}\n\n${e.toString()}',
+        l10n.datasetDialogImportFailedTips,
       );
       
       _resetToInitialState();
@@ -233,12 +237,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     await AlertErrorDialog.show(context, title, message);
   }
 
-  Future<void> _showErrorDialog(String title, String message) async {
+  Future<void> _showErrorDialog(String title, String message, [String? tips]) async {
+    final l10n = AppLocalizations.of(context)!;
     await AlertErrorDialog.show(
       context,
       title,
       message,
-      tips: AppLocalizations.of(context)!.datasetDialogGenericErrorTips,
+      tips: tips ?? l10n.datasetDialogGenericErrorTips,
     );
   }
 

@@ -1467,7 +1467,7 @@ abstract class AppLocalizations {
   /// No description provided for @datasetDialogImportFailedTips.
   ///
   /// In en, this message translates to:
-  /// **'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: '**
+  /// **'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, Datumaro or supported format.\n\nError: '**
   String get datasetDialogImportFailedTips;
 
   /// No description provided for @datasetDialogNoProjectTypeTitle.
@@ -1803,7 +1803,7 @@ abstract class AppLocalizations {
   /// No description provided for @fileNotFound.
   ///
   /// In en, this message translates to:
-  /// **'File not found'**
+  /// **'File not found OR Permission denied'**
   String get fileNotFound;
 
   /// No description provided for @labelEditSave.

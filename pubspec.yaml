@@ -159,17 +159,15 @@ flutter_launcher_icons:
     image_path: "assets/logo/annotateit_white_red.png"
 
 msix_config:
-  display_name: Annot@It
+  display_name: AnnotateIt
   architecture: x64
-  publisher_display_name: AnnotateIt
-  identity_name: AnnotateIt.AnnotIt
-  publisher: CN=F5B0E43B-741A-4F78-B09D-923B0B88E548
-  msix_version: 1.6.0.0
+  publisher_display_name: UmnoAI
+  identity_name: UmnoAI.AnnotateIt
+  publisher: CN=C115178E-F1D2-42DB-8DA3-3252207C04BB
+  msix_version: 1.7.0.0
   logo_path: assets/logo/annotateit_white_red.png
-  # full_trust: true
-  # capabilities: broadFileSystemAccess
   sign_msix: false
-  # Explicitly specify files to include
+  full_trust: false
   files:
     include_all: true
     include:

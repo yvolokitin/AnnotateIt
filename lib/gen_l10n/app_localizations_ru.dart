@@ -977,7 +977,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get uploadInProgressLeave => 'Выйти';
 
   @override
-  String get fileNotFound => 'Файл не найден';
+  String get fileNotFound => 'Файл не найден или доступ запрещён';
 
   @override
   String get labelEditSave => 'Сохранить';

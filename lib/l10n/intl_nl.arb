@@ -404,7 +404,7 @@
   "uploadInProgressStay": "Blijven",
   "uploadInProgressLeave": "Weggaan",
 
-  "fileNotFound": "Bestand niet gevonden",
+  "fileNotFound": "Bestand niet gevonden of toegang geweigerd",
 
   "labelEditSave": "Opslaan",
   "labelEditEdit": "Bewerken",

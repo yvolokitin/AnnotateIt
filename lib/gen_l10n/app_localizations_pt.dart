@@ -996,7 +996,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get uploadInProgressLeave => 'Sair';
 
   @override
-  String get fileNotFound => 'Arquivo não encontrado';
+  String get fileNotFound => 'Arquivo não encontrado ou permissão negada';
 
   @override
   String get labelEditSave => 'Salvar';

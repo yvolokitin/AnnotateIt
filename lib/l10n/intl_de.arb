@@ -404,7 +404,7 @@
   "uploadInProgressStay": "Bleiben",
   "uploadInProgressLeave": "Verlassen",
 
-  "fileNotFound": "Datei nicht gefunden",
+  "fileNotFound": "Datei nicht gefunden oder Zugriff verweigert",
 
   "labelEditSave": "Speichern",
   "labelEditEdit": "Bearbeiten",

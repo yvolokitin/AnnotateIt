@@ -997,7 +997,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get uploadInProgressLeave => 'Salir';
 
   @override
-  String get fileNotFound => 'Archivo no encontrado';
+  String get fileNotFound => 'Archivo no encontrado o permiso denegado';
 
   @override
   String get labelEditSave => 'Guardar';

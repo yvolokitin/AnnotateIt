@@ -771,7 +771,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get datasetDialogImportFailedTips =>
-      'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: ';
+      'Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, Datumaro or supported format.\n\nError: ';
 
   @override
   String get datasetDialogNoProjectTypeTitle => 'No Project Type Selected';
@@ -970,7 +970,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadInProgressLeave => 'Leave';
 
   @override
-  String get fileNotFound => 'File not found';
+  String get fileNotFound => 'File not found OR Permission denied';
 
   @override
   String get labelEditSave => 'Save';

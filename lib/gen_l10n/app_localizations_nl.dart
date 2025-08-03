@@ -978,7 +978,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get uploadInProgressLeave => 'Weggaan';
 
   @override
-  String get fileNotFound => 'Bestand niet gevonden';
+  String get fileNotFound => 'Bestand niet gevonden of toegang geweigerd';
 
   @override
   String get labelEditSave => 'Opslaan';

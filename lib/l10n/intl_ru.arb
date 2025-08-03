@@ -356,7 +356,7 @@
   "uploadInProgressMessage": "В данный момент выполняется загрузка. Если вы покинете страницу, загрузка будет отменена и её нужно будет начать заново.\n\nВы действительно хотите выйти?",
   "uploadInProgressStay": "Остаться",
   "uploadInProgressLeave": "Выйти",
-  "fileNotFound": "Файл не найден",
+  "fileNotFound": "Файл не найден или доступ запрещён",
   "labelEditSave": "Сохранить",
   "labelEditEdit": "Редактировать",
   "labelEditMoveUp": "Переместить вверх",

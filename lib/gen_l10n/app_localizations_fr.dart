@@ -1002,7 +1002,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get uploadInProgressLeave => 'Quitter';
 
   @override
-  String get fileNotFound => 'Fichier non trouvé';
+  String get fileNotFound => 'Fichier introuvable ou permission refusée';
 
   @override
   String get labelEditSave => 'Enregistrer';

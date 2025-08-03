@@ -330,7 +330,7 @@
 
   "datasetDialogImportFailedTitle": "Import Failed",
   "datasetDialogImportFailedMessage": "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
-  "datasetDialogImportFailedTips": "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, or supported format.\n\nError: ",
+  "datasetDialogImportFailedTips": "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, Datumaro or supported format.\n\nError: ",
 
   "datasetDialogNoProjectTypeTitle": "No Project Type Selected",
   "datasetDialogNoProjectTypeMessage": "Please select a Project Type based on the detected annotation types in your dataset.",
@@ -411,7 +411,7 @@
   "uploadInProgressStay": "Stay",
   "uploadInProgressLeave": "Leave",
 
-  "fileNotFound": "File not found",
+  "fileNotFound": "File not found OR Permission denied",
 
   "labelEditSave": "Save",
   "labelEditEdit": "Edit",
