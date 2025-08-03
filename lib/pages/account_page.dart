@@ -21,8 +21,10 @@ class AccountPage extends StatefulWidget {
 
 class AccountPageState extends State<AccountPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  User? _user;
-  bool _loading = true;
+  User? user;
+  bool loading = true;
+  bool error = false;
+  String? errorMessage;
   final _logger = Logger('AccountPage');
 
   @override
@@ -32,88 +34,60 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
     loadUserData();
   }
 
-Future<void> loadUserData() async {
-  try {
-    var user = await UserDatabase.instance.getUser();
+  Future<void> loadUserData() async {
+    try {
+      var fetchedUser = await UserDatabase.instance.getUser();
 
-    final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
-    final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
-    final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
+      if (fetchedUser != null) {
+        try {
+          final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
+          final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
+          final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
 
-    if (user != null &&
-        (user.datasetImportFolder.isEmpty ||
-         user.datasetExportFolder.isEmpty ||
-         user.thumbnailFolder.isEmpty)) {
-      user = user.copyWith(
-        datasetImportFolder: user.datasetImportFolder.isEmpty ? importPath : user.datasetImportFolder,
-        datasetExportFolder: user.datasetExportFolder.isEmpty ? exportPath : user.datasetExportFolder,
-        thumbnailFolder: user.thumbnailFolder.isEmpty ? thumbnailPath : user.thumbnailFolder,
-      );
-      await UserDatabase.instance.update(user);
-      _logger.info('Updated user with default import/export/thumbnail folders.');
-    }
+          fetchedUser = fetchedUser.copyWith(
+            datasetImportFolder: (fetchedUser.datasetImportFolder?.isEmpty ?? true)
+                ? importPath
+                : fetchedUser.datasetImportFolder,
+            datasetExportFolder: (fetchedUser.datasetExportFolder?.isEmpty ?? true)
+                ? exportPath
+                : fetchedUser.datasetExportFolder,
+            thumbnailFolder: (fetchedUser.thumbnailFolder?.isEmpty ?? true)
+                ? thumbnailPath
+                : fetchedUser.thumbnailFolder,
+          );
 
-    if (mounted) {
-      setState(() {
-        _user = user;
-        _loading = false;
-      });
+          await UserDatabase.instance.update(fetchedUser);
+          _logger.info('Updated user with default import/export/thumbnail folders.');
+        } catch (e, st) {
+          _logger.warning('Failed to load folder paths, using existing values', e, st);
+          setState(() {
+            errorMessage = '${e.toString()}';
+          });
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          user = fetchedUser;
+          loading = false;
+          error = false;
+        });
+      }
+    } catch (e, st) {
+      _logger.severe('Failed to load user data', e, st);
+      if (mounted) {
+        setState(() {
+          loading = false;
+          error = true;
+          errorMessage = e.toString();
+        });
+      }
     }
-  } catch (e, st) {
-    _logger.severe('Failed to load user data', e, st);
-    if (mounted) {
-      setState(() {
-        _loading = false;
-      });
-    }
-    // Optionally show error UI
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Error'),
-        content: Text('Failed to load user data: $e'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          )
-        ],
-      ),
-    );
   }
-}
-
-/*
-  Future<void> _loadUserData() async {
-    var user = await UserDatabase.instance.getUser();
-
-    final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
-    final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
-    final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
-
-    if (user != null &&
-        (user.datasetImportFolder.isEmpty ||
-         user.datasetExportFolder.isEmpty ||
-         user.thumbnailFolder.isEmpty)) {
-      user = user.copyWith(
-        datasetImportFolder: user.datasetImportFolder.isEmpty ? importPath : user.datasetImportFolder,
-        datasetExportFolder: user.datasetExportFolder.isEmpty ? exportPath : user.datasetExportFolder,
-        thumbnailFolder: user.thumbnailFolder.isEmpty ? thumbnailPath : user.thumbnailFolder,
-      );
-      await UserDatabase.instance.update(user);
-      _logger.info('Updated user with default import/export/thumbnail folders.');
-    }
-
-    setState(() {
-      _user = user;
-      _loading = false;
-    });
-  }
-*/
 
   Future<void> _updateUser() async {
-    if (_user != null) {
-      await UserDatabase.instance.update(_user!);
+    if (user != null) {
+      await UserDatabase.instance.update(user!);
     }
   }
 
@@ -127,99 +101,152 @@ Future<void> loadUserData() async {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (_loading) {
+    if (loading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
+    if (error) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.accountErrorLoadingUser),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    loading = true;
+                    error = false;
+                  });
+                  loadUserData();
+                },
+                child: Text(l10n.accountRetry),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ResponsiveLayout.builder(
       builder: (context, constraints, screenSize) {
-        return Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                // Header container only for large desktop
-                if (screenSize == ScreenSize.largeDesktop)
-                  Container(
-                    height: 95,
-                    width: double.infinity,
-                    color: const Color(0xFF11191F),
-                    child: const Text(""),
-                  ),
-                Expanded(
-                  child: Padding(
-                    padding: ResponsiveLayout.getHorizontalPadding(context),
-                    child: Column(
-                      children: [
-                        TabBar(
-                          controller: _tabController,
-                          indicatorColor: Colors.red,
-                          indicatorWeight: 3.0,
-                          labelColor: Colors.white,
-                          unselectedLabelColor: Colors.grey,
-                          labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
-                          unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
-                          tabs: [
-                            _buildResponsiveTab(
-                              icon: Icons.person_outline,
-                              shortLabel: l10n.accountUser,
-                              fullLabel: l10n.accountProfile,
-                              screenSize: screenSize,
-                            ),
-                            _buildResponsiveTab(
-                              icon: Icons.folder_open,
-                              shortLabel: l10n.accountStorage,
-                              fullLabel: l10n.accountDeviceStorage,
-                              screenSize: screenSize,
-                            ),
-                            _buildResponsiveTab(
-                              icon: Icons.settings,
-                              shortLabel: l10n.accountSettings,
-                              fullLabel: l10n.accountApplicationSettings,
-                              screenSize: screenSize,
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: TabBarView(
+        try {
+          return Scaffold(
+            body: SafeArea(
+              child: Column(
+                children: [
+                  if (screenSize == ScreenSize.largeDesktop)
+                    Container(
+                      height: 95,
+                      width: double.infinity,
+                      color: const Color(0xFF11191F),
+                      child: const Text(""),
+                    ),
+                  Expanded(
+                    child: Padding(
+                      padding: ResponsiveLayout.getHorizontalPadding(context),
+                      child: Column(
+                        children: [
+                          TabBar(
                             controller: _tabController,
-                            children: [
-                              const UserProfile(),
-                              AccountStorage(
-                                user: _user!,
-                                onUserChange: (updated) => setState(() {
-                                  _user = updated;
-                                  _updateUser();
-                                  // Update the UserSession with the updated user
-                                  UserSession.instance.setUser(updated);
-                                }),
+                            indicatorColor: Colors.red,
+                            indicatorWeight: 3.0,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.grey,
+                            labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                            unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                            tabs: [
+                              _buildResponsiveTab(
+                                icon: Icons.person_outline,
+                                shortLabel: l10n.accountUser,
+                                fullLabel: l10n.accountProfile,
+                                screenSize: screenSize,
                               ),
-                              ApplicationSettings(
-                                user: _user!,
-                                onUserChange: (updated) => setState(() {
-                                  _user = updated;
-                                  _updateUser();
-                                  // Update the UserSession with the updated user
-                                  UserSession.instance.setUser(updated);
-                                }),
+                              _buildResponsiveTab(
+                                icon: Icons.folder_open,
+                                shortLabel: l10n.accountStorage,
+                                fullLabel: l10n.accountDeviceStorage,
+                                screenSize: screenSize,
+                              ),
+                              _buildResponsiveTab(
+                                icon: Icons.settings,
+                                shortLabel: l10n.accountSettings,
+                                fullLabel: l10n.accountApplicationSettings,
+                                screenSize: screenSize,
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          if (errorMessage != null)
+                            Container(
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning, color: Colors.red),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      errorMessage!,
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: user == null
+                                ? Center(child: Text(l10n.accountErrorLoadingUser))
+                                : TabBarView(
+                                    controller: _tabController,
+                                    children: [
+                                      const UserProfile(),
+                                      AccountStorage(
+                                        user: user!,
+                                        onUserChange: (updated) => setState(() {
+                                          user = updated;
+                                          _updateUser();
+                                          UserSession.instance.setUser(updated);
+                                        }),
+                                      ),
+                                      ApplicationSettings(
+                                        user: user!,
+                                        onUserChange: (updated) => setState(() {
+                                          user = updated;
+                                          _updateUser();
+                                          UserSession.instance.setUser(updated);
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        } catch (e, st) {
+          _logger.severe("Error in ResponsiveLayout.builder", e, st);
+          return Scaffold(
+            body: Center(
+              child: Text('Unexpected layout error:\n$e'),
+            ),
+          );
+        }
       },
     );
   }
-  
-  /// Helper method to build responsive tabs
+
   Widget _buildResponsiveTab({
     required IconData icon,
     required String shortLabel,
@@ -231,7 +258,6 @@ Future<void> loadUserData() async {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon),
-          // Show short label for tablet and desktop
           if (screenSize == ScreenSize.tablet || screenSize == ScreenSize.desktop) ...[
             const SizedBox(width: 8),
             Text(
@@ -242,7 +268,6 @@ Future<void> loadUserData() async {
               ),
             ),
           ],
-          // Show full label for large desktop
           if (screenSize == ScreenSize.largeDesktop) ...[
             const SizedBox(width: 8),
             Text(

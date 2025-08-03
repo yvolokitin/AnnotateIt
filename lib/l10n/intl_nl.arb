@@ -35,6 +35,8 @@
   "accountSettings": "Instellingen",
   "accountApplicationSettings": "Applicatie-instellingen",
   "accountLoadingMessage": "Gebruikersgegevens laden...",
+  "accountErrorLoadingUser": "Het laden van gebruikersgegevens is mislukt",
+  "accountRetry": "Opnieuw proberen",
 
   "userProfileName": "Kapitein Annotator",
   "userProfileFeedbackButton": "Feedback",

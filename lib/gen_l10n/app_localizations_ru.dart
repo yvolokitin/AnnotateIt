@@ -108,6 +108,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountLoadingMessage => 'Загрузка данных пользователя...';
 
   @override
+  String get accountErrorLoadingUser =>
+      'Не удалось загрузить данные пользователя';
+
+  @override
+  String get accountRetry => 'Повторить';
+
+  @override
   String get userProfileName => 'Капитан Аннотатор';
 
   @override

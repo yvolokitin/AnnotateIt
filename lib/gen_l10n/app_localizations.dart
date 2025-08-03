@@ -302,6 +302,18 @@ abstract class AppLocalizations {
   /// **'Loading user data...'**
   String get accountLoadingMessage;
 
+  /// No description provided for @accountErrorLoadingUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not  load user data'**
+  String get accountErrorLoadingUser;
+
+  /// No description provided for @accountRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get accountRetry;
+
   /// No description provided for @userProfileName.
   ///
   /// In en, this message translates to:

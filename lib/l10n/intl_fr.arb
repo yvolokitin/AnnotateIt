@@ -35,6 +35,8 @@
   "accountSettings": "Paramètres",
   "accountApplicationSettings": "Paramètres de l'Application",
   "accountLoadingMessage": "Chargement des données utilisateur...",
+  "accountErrorLoadingUser": "Could not  load user data",
+  "accountRetry": "Retry",
 
   "userProfileName": "Capitaine Annotateur",
   "userProfileFeedbackButton": "Commentaires",

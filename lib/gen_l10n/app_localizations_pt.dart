@@ -108,6 +108,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get accountLoadingMessage => 'Carregando dados do usuário...';
 
   @override
+  String get accountErrorLoadingUser => 'Could not  load user data';
+
+  @override
+  String get accountRetry => 'Retry';
+
+  @override
   String get userProfileName => 'Capitão Anotador';
 
   @override

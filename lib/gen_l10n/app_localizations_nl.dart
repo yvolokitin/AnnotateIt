@@ -108,6 +108,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get accountLoadingMessage => 'Gebruikersgegevens laden...';
 
   @override
+  String get accountErrorLoadingUser =>
+      'Het laden van gebruikersgegevens is mislukt';
+
+  @override
+  String get accountRetry => 'Opnieuw proberen';
+
+  @override
   String get userProfileName => 'Kapitein Annotator';
 
   @override
