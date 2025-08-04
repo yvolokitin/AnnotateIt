@@ -129,6 +129,15 @@ class UserSession {
     _logger.info('Updated thumbnail folder to: $path');
   }
 
+  Future<void> setProjectShowImportWarning(bool showWarning) async {
+    final user = getUser();
+    await UserDatabase.instance.update(
+      user.copyWith(projectShowImportWarning: showWarning),
+    );
+    _currentUser = user.copyWith(projectShowImportWarning: showWarning);
+    _logger.info('Updated project show import warning to: $showWarning');
+  }
+
   void clear() {
     _currentUser = null;
   }

@@ -26,6 +26,9 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
   bool _dontAskAgain = false;
   bool _isDeleting = false;
   int _labelCount = 0;
+  String _currentStep = '';
+  double _progress = 0.0;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -34,13 +37,56 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
   }
 
   Future<void> _handleDelete() async {
-    setState(() => _isDeleting = true);
-    await deleteProjectSafe(widget.project, deleteFromDisk: _deleteFromDisk);
+    setState(() {
+      _isDeleting = true;
+      _currentStep = 'Starting deletion...';
+      _progress = 0.0;
+      _errorMessage = null;
+    });
 
-    if (mounted) {
-      widget.onOptionsSelected?.call(_deleteFromDisk, _dontAskAgain);
-      widget.onConfirmed();
-      Navigator.of(context).pop();
+    try {
+      await deleteProjectSafe(
+        widget.project,
+        deleteFromDisk: _deleteFromDisk,
+        onProgress: (step, progress) {
+          if (mounted) {
+            setState(() {
+              _currentStep = step;
+              _progress = progress;
+            });
+          }
+        },
+        onError: (error) {
+          if (mounted) {
+            setState(() {
+              _errorMessage = error;
+            });
+          }
+        },
+      );
+
+      if (mounted) {
+        widget.onOptionsSelected?.call(_deleteFromDisk, _dontAskAgain);
+        widget.onConfirmed();
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Critical error: $e';
+          _currentStep = 'Deletion failed!';
+          _progress = 1.0;
+        });
+        
+        // Show error dialog and allow user to close
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() {
+              _isDeleting = false;
+            });
+          }
+        });
+      }
     }
   }
 
@@ -102,19 +148,86 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                     ? Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 40),
-                          const CircularProgressIndicator(
-                            color: Colors.redAccent,
+                          const SizedBox(height: 20),
+                          // Progress bar
+                          LinearProgressIndicator(
+                            value: _progress,
+                            backgroundColor: Colors.grey[700],
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                            minHeight: 8,
                           ),
                           const SizedBox(height: 20),
+                          // Current step
                           Text(
-                            l10n.deleteProjectInProgress,
+                            _currentStep,
                             style: TextStyle(
                               color: Colors.white70,
                               fontFamily: 'CascadiaCode',
-                              fontSize: screenWidth>700 ? 22 : 18,
+                              fontSize: screenWidth>700 ? 20 : 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          // Progress percentage
+                          Text(
+                            '${(_progress * 100).toInt()}%',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontFamily: 'CascadiaCode',
+                              fontSize: screenWidth>700 ? 18 : 14,
                             ),
                           ),
+                          const SizedBox(height: 20),
+                          // Error messages
+                          if (_errorMessage != null) ...[
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning, color: Colors.orange, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontFamily: 'CascadiaCode',
+                                        fontSize: screenWidth>700 ? 16 : 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          // Show close button if deletion failed
+                          if (_progress >= 1.0 && _errorMessage != null)
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[800],
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: const BorderSide(color: Colors.redAccent, width: 1),
+                                ),
+                              ),
+                              child: Text(
+                                'Close',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'CascadiaCode',
+                                  fontSize: screenWidth>700 ? 16 : 14,
+                                ),
+                              ),
+                            ),
                         ],
                       )
                     : Column(

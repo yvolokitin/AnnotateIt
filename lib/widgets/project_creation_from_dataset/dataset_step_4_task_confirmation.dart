@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'dataset_dialog_project_type_helper.dart';
 import '../../../models/archive.dart';
+import '../../session/user_session.dart';
 
 class StepDatasetTaskConfirmation extends StatefulWidget {
   final Archive archive;
@@ -85,15 +86,14 @@ class StepDatasetTaskConfirmationState
                           ignoreDisabled = value;
                         });
 
-                        //  Auto-show helper dialog after enabling
-                        if (value) {
-                          Future.delayed(Duration.zero, () {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  const DatasetImportProjectTypeHelper(),
-                            );
-                          });
+                        //  Auto-show helper dialog after enabling if user setting allows it
+                        if (value && UserSession.instance.isInitialized) {
+                          final user = UserSession.instance.getUser();
+                          if (user.projectShowImportWarning) {
+                            Future.delayed(Duration.zero, () {
+                              DatasetImportProjectTypeHelper.show(context);
+                            });
+                          }
                         }
                       },
                       activeColor: Colors.redAccent,
@@ -103,11 +103,7 @@ class StepDatasetTaskConfirmationState
                       icon: const Icon(Icons.help_outline, color: Colors.white70),
                       tooltip: 'Help',
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              const DatasetImportProjectTypeHelper(),
-                        );
+                        DatasetImportProjectTypeHelper.show(context);
                       },
                     ),
                   ],

@@ -39,6 +39,12 @@ class ApplicationSettings extends StatelessWidget {
                 onChanged: (val) => onUserChange(user.copyWith(projectShowNoLabels: val)),
                 note: l10n.settingsProjectCreationConfirmNoLabelsNote,
               ),
+              _buildSwitchWithNote(
+                title: "Show Import Warning Dialog",
+                value: user.projectShowImportWarning,
+                onChanged: (val) => onUserChange(user.copyWith(projectShowImportWarning: val)),
+                note: "When enabled, shows a warning dialog when toggling 'Allow Project Type Change' during dataset import",
+              ),
             ], isWide),
 
             _buildSection(l10n.settingsDatasetViewTitle, [
