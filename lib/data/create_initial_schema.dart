@@ -192,6 +192,19 @@ Future<void> createInitialSchema(Database db, int version) async {
         FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL
       );
     ''');
+
+    // Notifications table
+    await db.execute('''
+      CREATE TABLE notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message TEXT NOT NULL,
+        type TEXT NOT NULL,
+        backgroundColor TEXT NOT NULL,
+        textColor TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        isRead INTEGER NOT NULL DEFAULT 0
+      );
+    ''');
 }
 
 Future<String> getDefaultAnnotationRootPath() async {

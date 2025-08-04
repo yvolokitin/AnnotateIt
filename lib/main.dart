@@ -16,6 +16,7 @@ import "data/dataset_database.dart";
 import "data/annotation_database.dart";
 import "data/project_database.dart";
 import "data/labels_database.dart";
+import "data/notification_database.dart";
 
 import 'gen_l10n/app_localizations.dart';
 import 'package:window_size/window_size.dart';
@@ -53,6 +54,7 @@ void main() async {
   AnnotationDatabase.instance.setDatabase(db);
   LabelsDatabase.instance.setDatabase(db);
   UserDatabase.instance.setDatabase(db);
+  NotificationDatabase.instance.setDatabase(db);
 
   // Load the default user into session
   final defaultUser = await UserDatabase.instance.getUser();
