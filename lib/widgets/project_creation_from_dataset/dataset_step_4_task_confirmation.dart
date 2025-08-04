@@ -35,6 +35,7 @@ class StepDatasetTaskConfirmationState
 
   late String? selectedTask;
   bool ignoreDisabled = false;
+  bool convertPolygonsToBbox = false;
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class StepDatasetTaskConfirmationState
   }
 
   String? getSelectedTask() => selectedTask;
+  bool getConvertPolygonsToBbox() => convertPolygonsToBbox;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +113,59 @@ class StepDatasetTaskConfirmationState
                 
               ],
             ),
+            
+            // Show polygon conversion option only for detection projects
+            if (selectedTask != null && selectedTask!.toLowerCase().contains('detection'))
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        "Convert polygon annotations to bounding boxes",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'CascadiaCode',
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      value: convertPolygonsToBbox,
+                      onChanged: (value) {
+                        setState(() {
+                          convertPolygonsToBbox = value;
+                        });
+                      },
+                      activeColor: Colors.redAccent,
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.help_outline, color: Colors.white70),
+                      tooltip: 'Convert polygon annotations to bounding boxes for detection projects',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Polygon Conversion'),
+                            content: const Text(
+                              'When enabled, polygon annotations will be converted to bounding boxes for detection projects. '
+                              'This allows you to use segmentation datasets for detection tasks by automatically '
+                              'calculating the bounding box that encompasses each polygon.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 16),
             LayoutBuilder(
               builder: (context, constraints) {

@@ -39,6 +39,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   int _progressTotal = 0;
   double _processingProgress = 0.0;
   Archive? _archive;
+  
+  // Key to access task confirmation widget state
+  final GlobalKey<StepDatasetTaskConfirmationState> _taskConfirmationKey = GlobalKey<StepDatasetTaskConfirmationState>();
 
   @override
   void dispose() {
@@ -180,9 +183,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       });
 
       try {
+        // Get the convertPolygonsToBbox value from the task confirmation widget
+        final convertPolygonsToBbox = _taskConfirmationKey.currentState?.getConvertPolygonsToBbox() ?? false;
+        
         final newProjectId = await DatasetImportProjectCreation.createProjectWithDataset(
           _archive!,
           onProgress: _onMediaImportProgress,
+          convertPolygonsToBbox: convertPolygonsToBbox,
         );
 
         if (!mounted) return;
@@ -416,6 +423,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       case 4:
         return _archive != null 
             ? StepDatasetTaskConfirmation(
+                key: _taskConfirmationKey,
                 archive: _archive!,
                 onSelectionChanged: (selectedTask) {
                   setState(() {

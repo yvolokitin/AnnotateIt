@@ -25,6 +25,7 @@ class DatumaroParser {
     required AnnotationDatabase annotationDb,
     required int projectId,
     required int annotatorId,
+    bool convertPolygonsToBbox = false,
   }) async {
     final annotationsPath = p.join(datasetPath, 'annotations');
     final annotationsDir = Directory(annotationsPath);
@@ -201,6 +202,31 @@ class DatumaroParser {
           logAndSkip('Unrecognized classification type "$projectType" in ${mediaItem.filePath}');
         }
 
+      } else if (projectTypeLower.contains('detection') && type == 'polygon' && convertPolygonsToBbox) {
+        // Convert polygon to bounding box for detection projects
+        try {
+          final polygonData = ann['points'] ?? ann['data'] ?? ann;
+          final bboxData = _convertPolygonToBbox(polygonData);
+          
+          await annotationDb.insertAnnotation(Annotation(
+            id: null,
+            mediaItemId: mediaItem.id!,
+            labelId: label.id!,
+            annotationType: 'bbox',
+            data: bboxData,
+            confidence: (ann['confidence'] as num?)?.toDouble(),
+            annotatorId: annotatorId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          ));
+          addedCount++;
+          labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
+          
+          _logger.info('[Datumaro] Converted polygon to bbox for detection project in ${mediaItem.filePath}');
+        } catch (e) {
+          logAndSkip('Failed to convert polygon to bbox in ${mediaItem.filePath}: $e');
+        }
+        
       } else {
         logAndSkip('Skipped annotation of type "$type" in ${mediaItem.filePath} for projectType "$projectType"');
       }
@@ -269,5 +295,49 @@ class DatumaroParser {
 
   static String _randomHexColor() {
     return '#${_random.nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+  }
+
+  /// Converts polygon points to bounding box coordinates
+  static Map<String, dynamic> _convertPolygonToBbox(dynamic polygonData) {
+    List<dynamic> points;
+    
+    // Handle different polygon data formats
+    if (polygonData is List) {
+      points = polygonData;
+    } else if (polygonData is Map && polygonData.containsKey('points')) {
+      points = polygonData['points'];
+    } else {
+      throw ArgumentError('Invalid polygon data format');
+    }
+
+    if (points.isEmpty) {
+      throw ArgumentError('Empty polygon points');
+    }
+
+    double minX = double.infinity;
+    double minY = double.infinity;
+    double maxX = double.negativeInfinity;
+    double maxY = double.negativeInfinity;
+
+    // Process points - they can be in different formats
+    for (int i = 0; i < points.length; i += 2) {
+      if (i + 1 < points.length) {
+        final x = (points[i] as num).toDouble();
+        final y = (points[i + 1] as num).toDouble();
+        
+        minX = min(minX, x);
+        minY = min(minY, y);
+        maxX = max(maxX, x);
+        maxY = max(maxY, y);
+      }
+    }
+
+    // Return bounding box in the format expected by the annotation system
+    return {
+      'x': minX,
+      'y': minY,
+      'width': maxX - minX,
+      'height': maxY - minY,
+    };
   }
 }

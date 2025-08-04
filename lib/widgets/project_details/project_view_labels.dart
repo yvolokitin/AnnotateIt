@@ -9,6 +9,7 @@ import '../../session/user_session.dart';
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/edit_labels_list_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
+import '../app_snackbar.dart';
 
 import 'project_details_add_label.dart';
 
@@ -156,11 +157,29 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                 final deletedLabels = previousLabels.where((oldLabel) =>
                   !updatedLabels.any((newLabel) => newLabel.id == oldLabel.id)).toList();
                 for (final label in deletedLabels) {
-                  // Check if we should delete annotations when label is removed
-                  final shouldDeleteAnnotations = UserSession.instance.getUser().labelsDeleteAnnotations;
-                  if (shouldDeleteAnnotations) {
-                    // Delete annotations associated with this label
-                    await AnnotationDatabase.instance.deleteAnnotationsByLabelId(label.id);
+                  // Only show snackbar if label has valid ID (>0)
+                  if (label.id > 0) {
+                    // Check if we should delete annotations when label is removed
+                    final shouldDeleteAnnotations = UserSession.instance.getUser().labelsDeleteAnnotations;
+                    if (shouldDeleteAnnotations) {
+                      // Delete annotations associated with this label
+                      await AnnotationDatabase.instance.deleteAnnotationsByLabelId(label.id);
+                      // Show snackbar that annotations were removed together with the label
+                      AppSnackbar.show(
+                        context,
+                        'Label "${label.name}" and all its annotations have been removed.',
+                        backgroundColor: Colors.orange,
+                        textColor: Colors.black,
+                      );
+                    } else {
+                      // Show snackbar that existing annotations will show as Unknown
+                      AppSnackbar.show(
+                        context,
+                        'Label "${label.name}" removed. Existing annotations with this label will show as Unknown and need to be re-labeled.',
+                        backgroundColor: Colors.orange,
+                        textColor: Colors.black,
+                      );
+                    }
                   }
                   
                   // Delete the label

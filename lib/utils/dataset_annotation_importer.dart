@@ -26,6 +26,7 @@ class DatasetAnnotationImporter {
     required Map<String, MediaItem> mediaItemsMap,
     required int projectId,
     required int annotatorId,
+    bool convertPolygonsToBbox = false,
   }) async {
     switch (format.toLowerCase()) {
       case 'coco':
@@ -48,6 +49,7 @@ class DatasetAnnotationImporter {
           annotationDb: annotationDb,
           projectId: projectId,
           annotatorId: annotatorId,
+          convertPolygonsToBbox: convertPolygonsToBbox,
         );
 
       case 'yolo':

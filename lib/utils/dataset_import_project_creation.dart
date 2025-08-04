@@ -27,7 +27,7 @@ class DatasetImportProjectCreation {
 
   static Future<int> createProjectWithDataset(
     Archive archive,
-    {required ProgressCallback onProgress}
+    {required ProgressCallback onProgress, bool convertPolygonsToBbox = false}
   ) async {
     try {
       _logger.info('Starting project creation from dataset');
@@ -133,6 +133,7 @@ class DatasetImportProjectCreation {
           mediaItemsMap: mediaItemsMap,
           projectId: newProject.id!,
           annotatorId: currentUser.id ?? -1,
+          convertPolygonsToBbox: convertPolygonsToBbox,
         );
         
         _logger.info('Added $addedCount annotations.');
