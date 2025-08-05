@@ -228,30 +228,3 @@ Future<String> getDefaultAnnotationRootPath() async {
   await Directory(basePath).create(recursive: true);
   return basePath;
 }
-
-/*
-Future<String> getDefaultAnnotationRootPath() async {
-  try {
-    final directory = await getApplicationDocumentsDirectory();
-    final returnPath = path.join(directory.path, 'AnnotateIt');
-
-    final dir = Directory(returnPath);
-    if (!(await dir.exists())) {
-      await dir.create(recursive: true);
-    }
-
-    return returnPath;
-  } catch (e) {
-    // Fallback to a temporary directory if Documents directory is not accessible
-    print('Warning: Could not access Documents directory: $e');
-    try {
-      final tempDir = await Directory.systemTemp.createTemp('AnnotateIt');
-      return tempDir.path;
-    } catch (tempError) {
-      print('Error: Could not create temporary directory: $tempError');
-      // Last resort: use current directory
-      return Directory.current.path;
-    }
-  }
-}
-*/
