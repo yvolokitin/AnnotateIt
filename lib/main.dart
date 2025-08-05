@@ -83,7 +83,9 @@ void main() async {
     Database? db;
     try {
       db = await ProjectDatabase.instance.database;
+      final dbPath = await ProjectDatabase.instance.databasePath;
       log.info('Project database initialized successfully');
+      log.info('Database file location: $dbPath');
     } catch (e) {
       log.severe('Failed to initialize project database: $e');
       // This is critical - we can't continue without a database
