@@ -40,10 +40,24 @@ Future<void> createInitialSchema(Database db, int version) async {
     final datasetExportPath = '$rootPath/exports';
     final thumbnailPath = '$rootPath/thumbnails';
 
-    // Create folders if they don't exist
-    await Directory(datasetImportPath).create(recursive: true);
-    await Directory(datasetExportPath).create(recursive: true);
-    await Directory(thumbnailPath).create(recursive: true);
+    // Create folders if they don't exist - with error handling
+    try {
+      await Directory(datasetImportPath).create(recursive: true);
+    } catch (e) {
+      print('Warning: Could not create datasets directory: $e');
+    }
+    
+    try {
+      await Directory(datasetExportPath).create(recursive: true);
+    } catch (e) {
+      print('Warning: Could not create exports directory: $e');
+    }
+    
+    try {
+      await Directory(thumbnailPath).create(recursive: true);
+    } catch (e) {
+      print('Warning: Could not create thumbnails directory: $e');
+    }
 
     final now = DateTime.now().toIso8601String();
     await db.insert('users', {
@@ -208,13 +222,26 @@ Future<void> createInitialSchema(Database db, int version) async {
 }
 
 Future<String> getDefaultAnnotationRootPath() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final returnPath = path.join(directory.path, 'AnnotateIt');
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final returnPath = path.join(directory.path, 'AnnotateIt');
 
-  final dir = Directory(returnPath);
-  if (!(await dir.exists())) {
-    await dir.create(recursive: true);
+    final dir = Directory(returnPath);
+    if (!(await dir.exists())) {
+      await dir.create(recursive: true);
+    }
+
+    return returnPath;
+  } catch (e) {
+    // Fallback to a temporary directory if Documents directory is not accessible
+    print('Warning: Could not access Documents directory: $e');
+    try {
+      final tempDir = await Directory.systemTemp.createTemp('AnnotateIt');
+      return tempDir.path;
+    } catch (tempError) {
+      print('Error: Could not create temporary directory: $tempError');
+      // Last resort: use current directory
+      return Directory.current.path;
+    }
   }
-
-  return returnPath;
 }
