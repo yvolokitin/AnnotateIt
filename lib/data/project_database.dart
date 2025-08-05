@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -28,10 +30,23 @@ class ProjectDatabase {
     return _database!;
   }
 
+  Future<String> get databasePath async {
+    final supportDir = await getApplicationSupportDirectory();
+    return path.join(supportDir.path, 'AnnotateIt', kDatabaseFileName);
+  }
+
   Future<Database> _initDB(String fileName) async {
-    final dbPath = await getDatabasesPath();
-    final returnPath = path.join(dbPath, fileName);
-    return await openDatabase(returnPath, version: 1, onCreate: createInitialSchema);
+    final supportDir = await getApplicationSupportDirectory();
+    final dbDir = Directory(path.join(supportDir.path, 'AnnotateIt'));
+    await dbDir.create(recursive: true);
+    final returnPath = path.join(dbDir.path, fileName);
+    _log.info('Opening database at: $returnPath');
+    try {
+      return await openDatabase(returnPath, version: 1, onCreate: createInitialSchema, singleInstance: true);
+    } catch (e, stack) {
+      _log.severe('Failed to open database at $returnPath', e, stack);
+      rethrow;
+    }
   }
 
 Future<Project> createProject(Project project) async {

@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import '../gen_l10n/app_localizations.dart';
 import '../widgets/responsive/responsive_layout.dart';
 import '../widgets/responsive/responsive_text.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutWidget extends StatelessWidget {
   const AboutWidget({super.key});
   
-  static const String appVersion = '1.0.0+1';
+  Future<String> getAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    return 'v${info.version} (Build ${info.buildNumber})';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +21,7 @@ class AboutWidget extends StatelessWidget {
         return Container(
           color: Colors.grey[800],
           width: double.infinity,
-          height: double.infinity, // Fill vertical space
+          height: double.infinity,
           alignment: Alignment.topLeft,
           child: Padding(
             padding: ResponsiveLayout.getPadding(context),
@@ -79,6 +83,26 @@ class AboutWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 40),
+
+                  FutureBuilder<String>(
+                    future: getAppVersion(),
+                    builder: (context, snapshot) {
+                      final versionText = snapshot.hasData
+                          ? 'Version: ${snapshot.data}'
+                          : 'Loading version...';
+
+                      return ResponsiveText(
+                        versionText,
+                        maxSize: 16,
+                        minSize: 12,
+                        style: TextStyle(
+                          fontFamily: 'CascadiaCode',
+                          color: Colors.grey[400],
+                        ),
+                      );
+                    },
+                  ),
+/*
                   ResponsiveText(
                     'Version: $appVersion',
                     maxSize: 16,
@@ -88,6 +112,7 @@ class AboutWidget extends StatelessWidget {
                       color: Colors.grey[400],
                     ),
                   ),
+*/                  
                 ],
               ),
             ),

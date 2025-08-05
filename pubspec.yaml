@@ -16,8 +16,6 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
-
 environment:
   sdk: ^3.7.0
 
@@ -65,6 +63,7 @@ dependencies:
   tflite_flutter: ^0.11.0
   msix: ^3.16.10
   window_size: ^0.1.0
+  package_info_plus: ^8.3.0
 
 dev_dependencies:
   flutter_test:
@@ -158,13 +157,14 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/logo/annotateit_white_red.png"
 
+version: 1.8.0+1
 msix_config:
   display_name: AnnotateIt
   architecture: x64
   publisher_display_name: UmnoAI
   identity_name: UmnoAI.AnnotateIt
   publisher: CN=C115178E-F1D2-42DB-8DA3-3252207C04BB
-  msix_version: 1.7.0.0
+  msix_version: 1.8.0.0
   logo_path: assets/logo/annotateit_white_red.png
   sign_msix: false
   full_trust: false

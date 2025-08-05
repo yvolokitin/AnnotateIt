@@ -171,6 +171,7 @@ class _AccountStorageState extends State<AccountStorage> {
               child: TextFormField(
                 controller: controller,
                 readOnly: true,
+                enableInteractiveSelection: true,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   enabledBorder: OutlineInputBorder(
@@ -187,6 +188,9 @@ class _AccountStorageState extends State<AccountStorage> {
                   fontSize: isWide ? 24 : 18,
                   fontFamily: 'CascadiaCode',
                 ),
+                maxLines: 2,
+                minLines: 1,
+                // overflow: TextOverflow.visible,
               ),
             ),
           ],

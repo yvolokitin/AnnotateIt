@@ -35,26 +35,26 @@ Future<void> createInitialSchema(Database db, int version) async {
       )
     ''');
 
-    final rootPath = await getDefaultAnnotationRootPath();
-    final datasetImportPath = '$rootPath/datasets';
-    final datasetExportPath = '$rootPath/exports';
-    final thumbnailPath = '$rootPath/thumbnails';
+    final datasetImportFolder = 'datasets';
+    final datasetExportFolder = 'exports';
+    final thumbnailFolder = 'thumbnails';
 
-    // Create folders if they don't exist - with error handling
+    final rootPath = await getDefaultAnnotationRootPath();
     try {
-      await Directory(datasetImportPath).create(recursive: true);
+      await Directory(path.join(rootPath, datasetImportFolder)).create(recursive: true);
     } catch (e) {
       print('Warning: Could not create datasets directory: $e');
     }
-    
+
+    // Create folders if they don't exist - with error handling
     try {
-      await Directory(datasetExportPath).create(recursive: true);
+      await Directory(path.join(rootPath, datasetExportFolder)).create(recursive: true);
     } catch (e) {
       print('Warning: Could not create exports directory: $e');
     }
-    
+
     try {
-      await Directory(thumbnailPath).create(recursive: true);
+      await Directory(path.join(rootPath, thumbnailFolder)).create(recursive: true);
     } catch (e) {
       print('Warning: Could not create thumbnails directory: $e');
     }
@@ -65,9 +65,9 @@ Future<void> createInitialSchema(Database db, int version) async {
       'lastName': 'Annotator',
       'email': 'captain@labelship.local',
       'iconPath': '',
-      'datasetImportFolder': datasetImportPath,
-      'datasetExportFolder': datasetExportPath,
-      'thumbnailFolder': thumbnailPath,
+      'datasetImportFolder': datasetImportFolder,
+      'datasetExportFolder': datasetExportFolder,
+      'thumbnailFolder': thumbnailFolder,
       'themeMode': 'dark',
       'language': 'en',
       'autoSave': 1,
@@ -222,6 +222,15 @@ Future<void> createInitialSchema(Database db, int version) async {
 }
 
 Future<String> getDefaultAnnotationRootPath() async {
+  final docsDir = await getApplicationDocumentsDirectory();
+  final basePath = path.join(docsDir.path, 'AnnotateIt');
+
+  await Directory(basePath).create(recursive: true);
+  return basePath;
+}
+
+/*
+Future<String> getDefaultAnnotationRootPath() async {
   try {
     final directory = await getApplicationDocumentsDirectory();
     final returnPath = path.join(directory.path, 'AnnotateIt');
@@ -245,3 +254,4 @@ Future<String> getDefaultAnnotationRootPath() async {
     }
   }
 }
+*/

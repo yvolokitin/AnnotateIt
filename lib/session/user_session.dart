@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import '../models/user.dart';
 import '../data/user_database.dart';
@@ -73,60 +75,66 @@ class UserSession {
   }
 
   Future<String> getCurrentUserDatasetImportFolder() async {
-    final path = getUser().datasetImportFolder;
-    final dir = Directory(path);
+    final docsDir = await getApplicationDocumentsDirectory();
+    final folder = path.join(docsDir.path, 'AnnotateIt', getUser().datasetImportFolder);
+    final dir = Directory(folder);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
-      _logger.info('Created dataset import folder: $path');
+      _logger.info('Created dataset import folder: $folder');
     }
-    return path;
+    return folder;
   }
 
   Future<String> getCurrentUserDatasetExportFolder() async {
-    final path = getUser().datasetExportFolder;
-    final dir = Directory(path);
+    final docsDir = await getApplicationDocumentsDirectory();
+    final folder = path.join(docsDir.path, 'AnnotateIt', getUser().datasetExportFolder);
+    final dir = Directory(folder);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
-      _logger.info('Created dataset export folder: $path');
+      _logger.info('Created dataset export folder: $folder');
     }
-    return path;
+    return folder;
   }
 
   Future<String> getCurrentUserThumbnailFolder() async {
-    final path = getUser().thumbnailFolder;
-    final dir = Directory(path);
+    final docsDir = await getApplicationDocumentsDirectory();
+    final folder = path.join(docsDir.path, 'AnnotateIt', getUser().thumbnailFolder);
+    final dir = Directory(folder);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
-      _logger.info('Created thumbnail folder: $path');
+      _logger.info('Created thumbnail folder: $folder');
     }
-    return path;
+    return folder;
   }
 
-  Future<void> setCurrentUserDatasetImportFolder(String path) async {
+  Future<void> setCurrentUserDatasetImportFolder(String absolutePath) async {
+    final folderName = path.basename(absolutePath);
     final user = getUser();
     await UserDatabase.instance.update(
-      user.copyWith(datasetImportFolder: path),
+      user.copyWith(datasetImportFolder: folderName),
     );
-    _currentUser = user.copyWith(datasetImportFolder: path);
-    _logger.info('Updated dataset import folder to: $path');
+    _currentUser = user.copyWith(datasetImportFolder: folderName);
+    _logger.info('Updated dataset import folder to: $folderName');
   }
 
-  Future<void> setCurrentUserDatasetExportFolder(String path) async {
+  Future<void> setCurrentUserDatasetExportFolder(String absolutePath) async {
+    final folderName = path.basename(absolutePath);
     final user = getUser();
     await UserDatabase.instance.update(
-      user.copyWith(datasetExportFolder: path),
+      user.copyWith(datasetExportFolder: folderName),
     );
-    _currentUser = user.copyWith(datasetExportFolder: path);
-    _logger.info('Updated dataset export folder to: $path');
+    _currentUser = user.copyWith(datasetExportFolder: folderName);
+    _logger.info('Updated dataset export folder to: $folderName');
   }
 
-  Future<void> setCurrentUserThumbnailFolder(String path) async {
+  Future<void> setCurrentUserThumbnailFolder(String absolutePath) async {
+    final folderName = path.basename(absolutePath);
     final user = getUser();
     await UserDatabase.instance.update(
-      user.copyWith(thumbnailFolder: path),
+      user.copyWith(thumbnailFolder: folderName),
     );
-    _currentUser = user.copyWith(thumbnailFolder: path);
-    _logger.info('Updated thumbnail folder to: $path');
+    _currentUser = user.copyWith(thumbnailFolder: folderName);
+    _logger.info('Updated thumbnail folder to: $folderName');
   }
 
   Future<void> setProjectShowImportWarning(bool showWarning) async {

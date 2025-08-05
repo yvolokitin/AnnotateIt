@@ -45,6 +45,12 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
           final thumbnailPath = await UserSession.instance.getCurrentUserThumbnailFolder();
 
           fetchedUser = fetchedUser.copyWith(
+            datasetImportFolder: importPath,
+            datasetExportFolder: exportPath,
+            thumbnailFolder: thumbnailPath,
+          );
+/*
+          fetchedUser = fetchedUser.copyWith(
             datasetImportFolder: (fetchedUser.datasetImportFolder?.isEmpty ?? true)
                 ? importPath
                 : fetchedUser.datasetImportFolder,
@@ -55,7 +61,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                 ? thumbnailPath
                 : fetchedUser.thumbnailFolder,
           );
-
+*/
           await UserDatabase.instance.update(fetchedUser);
           _logger.info('Updated user with default import/export/thumbnail folders.');
         } catch (e, st) {
