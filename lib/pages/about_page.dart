@@ -5,6 +5,8 @@ import '../widgets/responsive/responsive_text.dart';
 
 class AboutWidget extends StatelessWidget {
   const AboutWidget({super.key});
+  
+  static const String appVersion = '1.0.0+1';
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +76,16 @@ class AboutWidget extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'CascadiaCode',
                       fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  ResponsiveText(
+                    'Version: $appVersion',
+                    maxSize: 16,
+                    minSize: 12,
+                    style: TextStyle(
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.grey[400],
                     ),
                   ),
                 ],
