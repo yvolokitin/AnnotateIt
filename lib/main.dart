@@ -21,15 +21,25 @@ import "data/notification_database.dart";
 
 import 'gen_l10n/app_localizations.dart';
 import 'package:window_size/window_size.dart';
+import 'services/file_logger.dart';
 
 ThemeData themeData = getSystemTheme();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Setup logging first
+  // Initialize file logger first
+  String? logFilePath;
+  try {
+    logFilePath = await FileLogger.instance.initialize();
+  } catch (e) {
+    print('[main] Failed to initialize file logger: $e');
+  }
+
+  // Setup logging with both console and file output
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
+    // Console output (existing)
     print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
     if (record.error != null) {
       print('Error: ${record.error}');
@@ -37,9 +47,18 @@ void main() async {
     if (record.stackTrace != null) {
       print('StackTrace: ${record.stackTrace}');
     }
+    
+    // File output (new)
+    FileLogger.instance.writeLogRecord(record);
   });
 
   final log = Logger('main');
+  
+  if (logFilePath != null) {
+    log.info('File logging initialized. Log file: $logFilePath');
+  } else {
+    log.warning('File logging could not be initialized');
+  }
 
   try {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

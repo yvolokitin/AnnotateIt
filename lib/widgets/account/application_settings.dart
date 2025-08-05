@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/user.dart';
 import '../../main.dart';
+import '../../services/file_logger.dart';
 
 class ApplicationSettings extends StatelessWidget {
   final User user;
@@ -89,6 +90,10 @@ class ApplicationSettings extends StatelessWidget {
                 user.annotationAllowImageCopy,
                 (val) => onUserChange(user.copyWith(annotationAllowImageCopy: val)),
               ),
+            ], isWide),
+
+            _buildSection("Storage", [
+              _buildLogFileLink(context),
             ], isWide),
           ],
         ),
@@ -361,6 +366,124 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             );
           }).toList(),
         ),
+      ],
+    );
+  }
+
+  Widget _buildLogFileLink(BuildContext context) {
+    final logFilePath = FileLogger.instance.logFilePath;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Application Log File',
+          style: const TextStyle(
+            fontSize: 20,
+            fontFamily: 'CascadiaCode',
+            fontWeight: FontWeight.normal,
+            color: Colors.white70,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (logFilePath != null) ...[
+          GestureDetector(
+            onTap: () async {
+              try {
+                await FileLogger.instance.openLogFileLocation();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to open log file location: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.folder_open,
+                    color: Colors.amber,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      logFilePath,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'CascadiaCode',
+                        color: Colors.amber,
+                        decoration: TextDecoration.underline,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.open_in_new,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Click to open the folder containing the application log file. This file contains all app logs including potential crashes.',
+            style: const TextStyle(
+              fontSize: 16,
+              fontFamily: 'CascadiaCode',
+              color: Colors.white60,
+            ),
+          ),
+        ] else ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Log file not available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'The application log file could not be initialized. Check file permissions.',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'CascadiaCode',
+              color: Colors.white60,
+            ),
+          ),
+        ],
       ],
     );
   }
