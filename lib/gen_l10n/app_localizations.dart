@@ -1452,6 +1452,12 @@ abstract class AppLocalizations {
   /// **'LabelMe, CVAT, or media-only (.zip)'**
   String get datasetDialogSupportedFormatsList2;
 
+  /// No description provided for @dialogImageDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File Details'**
+  String get dialogImageDetailsTitle;
+
   /// No description provided for @datasetDialogImportFailedTitle.
   ///
   /// In en, this message translates to:

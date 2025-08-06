@@ -255,7 +255,7 @@
   "noMediaDialogSupportedVideoFormatsWarning": "Die Unterstützung kann je nach Plattform und Videocodec variieren.\nEinige Formate funktionieren möglicherweise nicht in Browsern oder auf iOS.",
 
   "annotatorTopToolbarBackTooltip": "Zurück zum Projekt",
-  "annotatorTopToolbarSelectDefaultLabel": "Standardlabel auswählen",
+  "annotatorTopToolbarSelectDefaultLabel": "Standardlabel",
 
   "toolbarNavigation": "Navigation",
   "toolbarBbox": "Begrenzungsrahmen zeichnen",
@@ -321,6 +321,8 @@
   "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
   "datasetDialogSupportedFormatsList2": "LabelMe, CVAT oder nur Medien (.zip)",
 
+  "dialogImageDetailsTitle": "Dateidetails",
+
   "datasetDialogImportFailedTitle": "Import fehlgeschlagen",
   "datasetDialogImportFailedMessage": "Die ZIP-Datei konnte nicht verarbeitet werden. Sie könnte beschädigt, unvollständig oder kein gültiges Datensatzarchiv sein.",
   "datasetDialogImportFailedTips": "Versuchen Sie, Ihren Datensatz erneut zu exportieren oder zu zippen.\nStellen Sie sicher, dass er im COCO-, YOLO-, VOC- oder unterstützten Format vorliegt.\n\nFehler: ",
@@ -353,7 +355,7 @@
   "menuImageAnnotate": "Annotieren",
   "menuImageDetails": "Details",
   "menuImageDuplicate": "Duplizieren",
-  "menuImageSetAsIcon": "Als Symbol festlegen",
+  "menuImageSetAsIcon": "Als Symbol",
   "menuImageDelete": "Löschen",
 
   "noLabelsTitle": "Sie haben keine Labels im Projekt",
