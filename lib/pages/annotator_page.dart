@@ -98,10 +98,19 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     _preloadInitialMedia();
     
     // Initialize ML Kit image labeler
-    _mlKitService.initialize(confidenceThreshold: 0.6);
+    if (Platform.isAndroid || Platform.isIOS) {
+      _mlKitService.initialize(confidenceThreshold: 0.6);
+    }
     
     // Initialize TFLite detection service
-    _tfliteService.initialize(confidenceThreshold: 0.5);
+    if (Platform.isWindows || Platform.isMacOS) {
+      print('WINDOWS:: Initializing TFLite detection service');
+      _tfliteService.initialize(confidenceThreshold: 0.5);
+    }
+
+    if (widget.project.labels.isEmpty || widget.mediaItem.annotations.isEmpty) {
+      showRightSidebar = false;
+    }
   }
 
   @override
@@ -111,8 +120,15 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     for (final image in _imageCache.values) {
       image.dispose();
     }
-    _mlKitService.close();
-    _tfliteService.close();
+    
+    if (Platform.isAndroid || Platform.isIOS) {
+      _mlKitService.close();
+    }
+    
+    if (Platform.isWindows || Platform.isMacOS) {
+      _tfliteService.close();
+    }
+
     super.dispose();
   }
   
