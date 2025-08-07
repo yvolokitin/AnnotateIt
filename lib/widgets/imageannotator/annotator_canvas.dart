@@ -228,6 +228,12 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _polygonPoints.add(transformed);
         _currentPolygonPoint = transformed;
       });
+    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.sam_annotation) {
+      inverse.copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      
+      // Process the point with SAM2
+      _processSAM2Point(transformed);
     }
   }
   
@@ -265,6 +271,65 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       _polygonPoints = [];
       _currentPolygonPoint = null;
       _isPolygonComplete = false;
+    });
+
+    widget.onAnnotationUpdated?.call(newAnnotation);
+
+    if (UserSession.instance.autoSaveAnnotations) {
+      await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+    }
+  }
+  
+  /// Process a point with SAM2 to generate a segmentation mask
+  void _processSAM2Point(Offset point) async {
+    // We need to convert the point from canvas coordinates to image coordinates
+    // The point is already in image coordinates after transformation with the inverse matrix
+    
+    // Create a custom event to notify the parent widget to process the point with SAM2
+    // This is necessary because the SAM2 service is in the AnnotatorPage, not in the canvas
+    final sam2Event = {
+      'type': 'sam2_point',
+      'point': point,
+      'image': widget.image,
+    };
+    
+    // Call the parent widget's onAnnotationUpdated with a special annotation that contains the SAM2 event
+    // The parent widget will recognize this special annotation and process it with SAM2
+    final sam2RequestAnnotation = Annotation(
+      id: -1, // Special ID to indicate this is not a real annotation
+      mediaItemId: widget.mediaItemId,
+      labelId: widget.selectedLabel.id!,
+      annotationType: 'sam2_request',
+      data: {
+        'point': [point.dx, point.dy],
+      },
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    
+    // Notify the parent widget to process the point with SAM2
+    widget.onAnnotationUpdated?.call(sam2RequestAnnotation);
+  }
+  
+  /// Add a SAM2 annotation from the segmentation mask
+  void addSAM2Annotation(List<List<double>> points) async {
+    final newAnnotation = Annotation(
+      id: DateTime.now().millisecondsSinceEpoch,
+      mediaItemId: widget.mediaItemId,
+      labelId: widget.selectedLabel.id!,
+      annotationType: 'polygon',
+      data: {
+        'points': points,
+      },
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    )
+    ..name = widget.selectedLabel.name
+    ..color = widget.selectedLabel.toColor();
+
+    setState(() {
+      _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
+      widget.onAnnotationSelected?.call(newAnnotation);
     });
 
     widget.onAnnotationUpdated?.call(newAnnotation);

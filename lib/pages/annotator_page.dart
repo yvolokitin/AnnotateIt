@@ -17,6 +17,7 @@ import '../models/annotated_labeled_media.dart';
 
 import '../services/ml_kit_image_labeling_service.dart';
 import '../services/tflite_detection_service.dart';
+import '../services/sam2_annotation_service.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
@@ -87,8 +88,28 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   // TFLite detection service
   final TFLiteDetectionService _tfliteService = TFLiteDetectionService();
   bool _isProcessingTFLite = false;
+  
+  // SAM2 annotation service
+  final SAM2AnnotationService _sam2Service = SAM2AnnotationService();
+  bool _isProcessingSAM2 = false;
 
   final FocusNode _focusNode = FocusNode();
+  
+  /// Shows an error dialog with the given title and message.
+  Future<void> _showErrorDialog({
+    required String title,
+    required String message,
+    String? tips,
+  }) async {
+    if (mounted) {
+      await AlertErrorDialog.show(
+        context,
+        title,
+        message,
+        tips: tips,
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -106,6 +127,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     if (Platform.isWindows || Platform.isMacOS) {
       print('WINDOWS:: Initializing TFLite detection service');
       _tfliteService.initialize(confidenceThreshold: 0.5);
+      
+      // Initialize SAM2 annotation service
+      print('WINDOWS:: Initializing SAM2 annotation service');
+      _sam2Service.initialize();
     }
 
     if (widget.project.labels.isEmpty || widget.mediaItem.annotations.isEmpty) {
@@ -603,6 +628,18 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   void _handleAnnotationUpdated(Annotation updatedAnnotation) {
+    // Check if this is a special SAM2 request annotation
+    if (updatedAnnotation.annotationType == 'sam2_request' && updatedAnnotation.id == -1) {
+      // Extract the point from the annotation data
+      final pointData = updatedAnnotation.data['point'] as List<dynamic>;
+      final point = Offset(pointData[0], pointData[1]);
+      
+      // Process the point with SAM2
+      _processPointWithSAM2(point);
+      return;
+    }
+    
+    // Normal annotation update
     setState(() {
       final currentMedia = _mediaCache[_currentIndex];
       if (currentMedia != null) {
@@ -618,6 +655,109 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: annotations);
       }
     });
+  }
+  
+  /// Process a point with SAM2 to generate a segmentation mask
+  Future<void> _processPointWithSAM2(Offset point) async {
+    // Check if SAM2 is supported on this platform
+    if (!_sam2Service.isSupported) {
+      _showErrorDialog(
+        title: 'SAM2 Not Supported',
+        message: 'SAM2 is not supported on this platform.',
+        tips: 'SAM2 is only available on Windows and macOS.',
+      );
+      return;
+    }
+    
+    // Get the current media item and image from cache
+    final currentMedia = _mediaCache[_currentIndex];
+    final currentImage = _imageCache[_currentIndex];
+    if (currentMedia == null || currentImage == null) {
+      _showErrorDialog(
+        title: 'Error',
+        message: 'No image available for processing.',
+      );
+      return;
+    }
+    
+    // Show loading indicator
+    setState(() {
+      _isProcessingSAM2 = true;
+    });
+    
+    try {
+      // Process the point with SAM2
+      final segment = await _sam2Service.processImageWithPoint(
+        currentImage,
+        point,
+      );
+      
+      if (segment == null) {
+        _showErrorDialog(
+          title: 'Error',
+          message: 'Failed to generate segmentation mask.',
+        );
+        return;
+      }
+      
+      // Convert the segment to an annotation
+      final annotations = _sam2Service.convertSegmentsToAnnotations(
+        segments: [segment],
+        mediaItemId: currentMedia.mediaItem.id!,
+        projectLabels: widget.project.labels ?? [],
+        annotatorId: 0, // Use 0 for auto-generated annotations
+      );
+      
+      if (annotations.isEmpty) {
+        _showErrorDialog(
+          title: 'Error',
+          message: 'Failed to create annotation from segmentation mask.',
+        );
+        return;
+      }
+      
+      // Save the annotation to the database
+      for (final annotation in annotations) {
+        final insertedId = await AnnotationDatabase.instance.insertAnnotation(annotation);
+        
+        // Create a new annotation with the inserted ID
+        final savedAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: annotation.mediaItemId,
+          labelId: annotation.labelId,
+          annotationType: annotation.annotationType,
+          data: annotation.data,
+          confidence: annotation.confidence,
+          annotatorId: annotation.annotatorId,
+          comment: annotation.comment,
+          status: annotation.status,
+          version: annotation.version,
+          createdAt: annotation.createdAt,
+          updatedAt: annotation.updatedAt,
+        );
+        
+        // Set the name and color properties
+        savedAnnotation.name = annotation.name;
+        savedAnnotation.color = annotation.color;
+        
+        // Update the UI
+        setState(() {
+          final updatedAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+          updatedAnnotations.add(savedAnnotation);
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: updatedAnnotations);
+        });
+      }
+    } catch (e) {
+      _showErrorDialog(
+        title: 'Error',
+        message: 'An error occurred while processing the image: $e',
+      );
+    } finally {
+      // Hide loading indicator
+      setState(() {
+        _isProcessingSAM2 = false;
+      });
+    }
   }
 
   void _handleDefaultLabelSelected(Label? defaultLabel) async {
@@ -804,7 +944,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           context,
           'TFLite Not Supported',
           'TFLite object detection is not supported on this platform.',
-          tips: 'TFLite is not supported on web platforms.',
+          tips: 'TFLite is only available on Windows and macOS.',
         );
         return;
       }
@@ -816,6 +956,29 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       
       // Process the current image with TFLite
       _processImageWithTFLite();
+      return;
+    }
+    
+    if (action == UserAction.sam_annotation) {
+      // Check if SAM2 is supported on this platform
+      if (!_sam2Service.isSupported) {
+        // Show an error dialog if SAM2 is not supported
+        AlertErrorDialog.show(
+          context,
+          'SAM2 Not Supported',
+          'Segment Anything 2 is not supported on this platform.',
+          tips: 'SAM2 is only available on Windows and macOS.',
+        );
+        return;
+      }
+      
+      // Set userAction to SAM annotation to show it as selected in the UI
+      setState(() {
+        userAction = action;
+        cursorIcon = SystemMouseCursors.basic; // Use normal arrow cursor for SAM2
+      });
+      
+      // SAM2 doesn't process the whole image at once - it waits for user clicks
       return;
     }
     
@@ -1221,6 +1384,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           showAnnotationNames: showAnnotationNames,
                           isProcessingMlKit: _isProcessingMlKit,
                           isProcessingTFLite: _isProcessingTFLite,
+                          isProcessingSAM2: _isProcessingSAM2,
                           onOpacityChanged: (v) => setState(() => currentOpacity = v),
                           onStrokeWidthChanged: (v) => setState(() => currentStrokeWidth = v),
                           onCornerSizeChanged: (v) => setState(() => currentCornerSize = v),                        

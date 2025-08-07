@@ -66,11 +66,13 @@ class _ToolbarButtonState extends State<ToolbarButton> {
               borderRadius: Constants.buttonBorderRadius,
             ),
             child: Center(
-              child: widget.child ?? Icon(
-                (widget.icon as Icon).icon,
-                color: iconColor,
-                size: Constants.iconSize,
-              ),
+              child: widget.child ?? (widget.icon is Icon 
+                ? Icon(
+                    (widget.icon as Icon).icon,
+                    color: iconColor,
+                    size: Constants.iconSize,
+                  )
+                : widget.icon),
             ),
           ),
         ),
