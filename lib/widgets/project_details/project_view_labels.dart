@@ -9,6 +9,7 @@ import '../../session/user_session.dart';
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/edit_labels_list_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
+import '../dialogs/remove_all_labels_dialog.dart';
 import '../app_snackbar.dart';
 
 import 'project_details_add_label.dart';
@@ -46,6 +47,30 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           widget.onLabelsUpdated!(updated);
         },
       ),
+    );
+  }
+
+  void _showRemoveAllLabelsDialog() {
+    RemoveAllLabelsDialog.show(
+      context: context,
+      project: widget.project,
+      onLabelsRemoved: (updatedLabels) {
+        widget.onLabelsUpdated?.call(updatedLabels);
+      },
+    );
+  }
+
+  void _showLabelsHelpDialog() {
+    AlertErrorDialog.show(
+      context,
+      'About Labels',
+      'Labels are used to categorize and identify annotations in your project. '
+      'Each label has a name and color, and can be set as the default for new annotations.',
+      tips: 'Available options for labels:\n\n'
+          '• Edit name and color: Change the appearance of a label\n'
+          '• Set as default: Make a label the default for new annotations\n'
+          '• Move up/down: Change the order of labels in the list\n'
+          '• Delete: Remove a label (with option to delete its annotations)',
     );
   }
 
@@ -98,6 +123,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
         Padding(
           padding: EdgeInsets.all(smallScreen ? 7 : 20),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Labels (${labels.length})',
@@ -107,6 +133,41 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                   fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              Row(
+                children: [
+                  // Display default label if exists
+                  if (labels.any((label) => label.isDefault)) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: labels.firstWhere((label) => label.isDefault).toColor().withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Default: ${labels.firstWhere((label) => label.isDefault).name}',
+                        style: TextStyle(
+                          fontSize: smallScreen ? 14 : 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  // Remove all labels icon
+                  IconButton(
+                    icon: const Icon(Icons.delete_sweep, color: Colors.redAccent),
+                    tooltip: 'Remove all labels',
+                    onPressed: _showRemoveAllLabelsDialog,
+                  ),
+                  // Help icon
+                  IconButton(
+                    icon: const Icon(Icons.help_outline, color: Colors.blueAccent),
+                    tooltip: 'Help with labels',
+                    onPressed: _showLabelsHelpDialog,
+                  ),
+                ],
               ),
             ],
           ),
