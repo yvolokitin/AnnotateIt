@@ -267,6 +267,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setAsDefault => 'Установить по умолчанию';
 
   @override
+  String get labelDefault => 'По умолчанию';
+
+  @override
+  String get labelUndefault => 'Отменить по умолчанию';
+
+  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Страница $current из $total';
   }

@@ -269,6 +269,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setAsDefault => 'Définir par Défaut';
 
   @override
+  String get labelDefault => 'Par défaut';
+
+  @override
+  String get labelUndefault => 'Retirer par défaut';
+
+  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Page $current sur $total';
   }

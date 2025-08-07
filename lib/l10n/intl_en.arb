@@ -92,6 +92,8 @@
   "rename": "Rename",
   "delete": "Delete",
   "setAsDefault": "Set as Default",
+  "labelDefault": "Default",
+  "labelUndefault": "Undefault",
 
   "paginationPageFromTotal": "Page {current} from {total}",
   "@paginationPageFromTotal": {

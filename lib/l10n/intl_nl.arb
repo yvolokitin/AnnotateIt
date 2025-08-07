@@ -92,6 +92,8 @@
   "rename": "Hernoemen",
   "delete": "Verwijderen",
   "setAsDefault": "Als Standaard Instellen",
+  "labelDefault": "Standaard",
+  "labelUndefault": "Standaard opheffen",
 
   "paginationPageFromTotal": "Pagina {current} van {total}",
   "@paginationPageFromTotal": {

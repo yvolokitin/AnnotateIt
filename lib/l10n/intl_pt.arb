@@ -92,6 +92,8 @@
   "rename": "Renomear",
   "delete": "Excluir",
   "setAsDefault": "Definir como Padrão",
+  "labelDefault": "Padrão",
+  "labelUndefault": "Remover padrão",
 
   "paginationPageFromTotal": "Página {current} de {total}",
   "@paginationPageFromTotal": {

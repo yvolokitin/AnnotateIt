@@ -590,6 +590,18 @@ abstract class AppLocalizations {
   /// **'Set as Default'**
   String get setAsDefault;
 
+  /// No description provided for @labelDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get labelDefault;
+
+  /// No description provided for @labelUndefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Undefault'**
+  String get labelUndefault;
+
   /// No description provided for @paginationPageFromTotal.
   ///
   /// In en, this message translates to:

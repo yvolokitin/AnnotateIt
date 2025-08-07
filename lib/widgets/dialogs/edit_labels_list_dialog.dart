@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/label.dart';
+import '../../data/labels_database.dart';
+import '../../session/user_session.dart';
 
 import 'alert_error_dialog.dart';
 import 'no_labels_dialog.dart';
@@ -270,13 +272,62 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                             color: Colors.white,
                                           ),
                                           iconSize: 30,
-                                          onSelected: (String value) {
+                                          onSelected: (String value) async {
                                             switch (value) {
                                               case 'edit':
                                                 setState(() => _isEditingList[index] = true);
                                                 Future.delayed(Duration(milliseconds: 50), () {
                                                   FocusScope.of(context).requestFocus(FocusNode());
                                                 });
+                                                break;
+                                              case 'setDefault':
+                                                try {
+                                                  // If this label is already default, unset it
+                                                  if (label.isDefault) {
+                                                    // Update the UI state first
+                                                    setState(() {
+                                                      for (int i = 0; i < _labels.length; i++) {
+                                                        // Set isDefault to false for all labels
+                                                        _labels[i] = _labels[i].copyWith(isDefault: false);
+                                                      }
+                                                    });
+                                                    
+                                                    // Use the setLabelAsDefault method with a non-existent label ID
+                                                    // This will unset all labels in the project but fail to set any as default
+                                                    try {
+                                                      // First part of setLabelAsDefault unsets all labels
+                                                      await LabelsDatabase.instance.setLabelAsDefault(-1, widget.projectId);
+                                                    } catch (e) {
+                                                      // Ignore the expected error about label not found
+                                                      // The first part of the method (unsetting all labels) should still work
+                                                    }
+                                                  } else {
+                                                    // Set this label as default in the database
+                                                    await LabelsDatabase.instance.setLabelAsDefault(label.id, widget.projectId);
+                                                    
+                                                    // Update all labels in the state
+                                                    setState(() {
+                                                      for (int i = 0; i < _labels.length; i++) {
+                                                        // Set isDefault to true for this label, false for all others
+                                                        _labels[i] = _labels[i].copyWith(
+                                                          isDefault: _labels[i].id == label.id
+                                                        );
+                                                      }
+                                                    });
+                                                  }
+                                                  
+                                                  // Notify parent about the change
+                                                  widget.onLabelsChanged(_labels);
+                                                } catch (e) {
+                                                  AlertErrorDialog.show(
+                                                    context,
+                                                    l10n.importLabelsFailedTitle,
+                                                    label.isDefault 
+                                                      ? 'Failed to unset default label: ${e.toString()}'
+                                                      : 'Failed to set label as default: ${e.toString()}',
+                                                    tips: 'Make sure the label still exists.',
+                                                  );
+                                                }
                                                 break;
                                               case 'moveUp':
                                                 if (index > 0) {
@@ -314,19 +365,40 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 break;
                                               case 'delete':
                                                 try {
-                                                  setState(() {
-                                                    final removedIndex = _labels.indexOf(label);
-                                                    if (removedIndex != -1) {
+                                                  final isDefaultLabel = label.isDefault;
+                                                  final removedIndex = _labels.indexOf(label);
+                                                  
+                                                  if (removedIndex != -1) {
+                                                    setState(() {
                                                       _labels.removeAt(removedIndex);
                                                       _controllers[removedIndex].dispose();
                                                       _controllers.removeAt(removedIndex);
-                                                        // Update labelOrder for all affected labels
+                                                      
+                                                      // Update labelOrder for all affected labels
                                                       for (int i = 0; i < _labels.length; i++) {
                                                         _labels[i] = _labels[i].copyWith(labelOrder: i);
                                                       }
+                                                    });
+                                                    
+                                                    // If we deleted the default label and there are other labels,
+                                                    // check user preference and set a new default if enabled
+                                                    if (isDefaultLabel && _labels.isNotEmpty) {
+                                                      final setFirstLabelAsDefault = 
+                                                          UserSession.instance.getUser().labelsSetFirstAsDefault;
+                                                          
+                                                      if (setFirstLabelAsDefault) {
+                                                        // Set the first label as default
+                                                        await LabelsDatabase.instance.setLabelAsDefault(
+                                                          _labels[0].id, widget.projectId);
+                                                          
+                                                        setState(() {
+                                                          _labels[0] = _labels[0].copyWith(isDefault: true);
+                                                        });
+                                                      }
                                                     }
-                                                  });
-                                                  widget.onLabelsChanged(_labels);
+                                                    
+                                                    widget.onLabelsChanged(_labels);
+                                                  }
                                                 } catch (e) {
                                                   AlertErrorDialog.show(
                                                     context,
@@ -345,7 +417,31 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 children: [
                                                   Icon(isEditing ? Icons.save : Icons.edit),
                                                   SizedBox(width: 8),
-                                                  Text(isEditing ? 'Save' : 'Edit'),
+                                                  Text(isEditing ? l10n.labelEditSave : l10n.labelEditEdit),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem<String>(
+                                              value: 'setDefault',
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    label.isDefault 
+                                                      ? Icons.star 
+                                                      : Icons.star_border,
+                                                    color: label.isDefault ? Colors.amber : null,
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    label.isDefault 
+                                                      ? 'Default' 
+                                                      : 'Set as Default',
+                                                    style: TextStyle(
+                                                      fontWeight: label.isDefault 
+                                                        ? FontWeight.bold 
+                                                        : FontWeight.normal,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -356,7 +452,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 children: [
                                                   Icon(Icons.arrow_upward_rounded),
                                                   SizedBox(width: 8),
-                                                  Text('Move Up'),
+                                                  Text(l10n.labelEditMoveUp),
                                                 ],
                                               ),
                                             ),
@@ -367,7 +463,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 children: [
                                                   Icon(Icons.arrow_downward_sharp),
                                                   SizedBox(width: 8),
-                                                  Text('Move Down'),
+                                                  Text(l10n.labelEditMoveDown),
                                                 ],
                                               ),
                                             ),  
@@ -378,7 +474,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 children: [
                                                   Icon(Icons.delete, color: Colors.red),
                                                   SizedBox(width: 8),
-                                                  Text('Delete', style: TextStyle(color: Colors.red)),
+                                                  Text(l10n.labelEditDelete, style: TextStyle(color: Colors.red)),
                                                 ],
                                               ),
                                             ),
@@ -424,7 +520,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                     ),
                   ),
                   child: Text(
-                    'Export Labels',
+                    l10n.buttonExportLabels,
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: screenWidth > 1200 ? 18 : 16,

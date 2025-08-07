@@ -82,6 +82,8 @@
   "rename": "Переименовать",
   "delete": "Удалить",
   "setAsDefault": "Установить по умолчанию",
+  "labelDefault": "По умолчанию",
+  "labelUndefault": "Отменить по умолчанию",
   "paginationPageFromTotal": "Страница {current} из {total}",
   "@paginationPageFromTotal": {
     "placeholders": {

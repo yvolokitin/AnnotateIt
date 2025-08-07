@@ -268,6 +268,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setAsDefault => 'Establecer como Predeterminado';
 
   @override
+  String get labelDefault => 'Predeterminado';
+
+  @override
+  String get labelUndefault => 'Quitar predeterminado';
+
+  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Página $current de $total';
   }

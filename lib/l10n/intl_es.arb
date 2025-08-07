@@ -92,6 +92,8 @@
   "rename": "Renombrar",
   "delete": "Eliminar",
   "setAsDefault": "Establecer como Predeterminado",
+  "labelDefault": "Predeterminado",
+  "labelUndefault": "Quitar predeterminado",
 
   "paginationPageFromTotal": "Página {current} de {total}",
   "@paginationPageFromTotal": {

@@ -159,6 +159,17 @@ class LabelsDatabase {
     }
   }
 
+  /// Unset all default labels for a project.
+  Future<void> unsetAllDefaultLabels(int projectId) async {
+    final db = await database;
+    await db.update(
+      'labels',
+      {'is_default': 0},
+      where: 'project_id = ?',
+      whereArgs: [projectId],
+    );
+  }
+
   /// Delete a label by ID, but ensure it belongs to an existing project.
   Future<int> deleteLabel(int labelId) async {
     final db = await database;

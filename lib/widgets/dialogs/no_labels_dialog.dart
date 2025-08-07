@@ -6,6 +6,8 @@ import 'dart:io';
 import 'alert_error_dialog.dart';
 import '../../models/label.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../data/labels_database.dart';
+import '../../session/user_session.dart';
 
 class NoLabelsDialog extends StatelessWidget {
   final int projectId;
@@ -220,8 +222,43 @@ class NoLabelsDialog extends StatelessWidget {
             onPressed: () async {
               try {
                 final labelsToImport = showWarning ? labels.take(2).toList() : labels;
-                // always notify parent, regardless of projectId
-                onLabelsImported(labelsToImport);
+                // Check if we should set the first label as default
+                final setFirstLabelAsDefault = UserSession.instance.getUser().labelsSetFirstAsDefault;
+                
+                if (setFirstLabelAsDefault && labelsToImport.isNotEmpty) {
+                  // Get the first label
+                  final firstLabel = labelsToImport.first;
+                  
+                  // If the label has a valid ID (not -1), set it as default
+                  if (firstLabel.id != -1) {
+                    try {
+                      await LabelsDatabase.instance.setLabelAsDefault(firstLabel.id, projectId);
+                      
+                      // Update the label in the list to reflect it's the default
+                      final updatedLabels = labelsToImport.map((label) {
+                        if (label.id == firstLabel.id) {
+                          return label.copyWith(isDefault: true);
+                        }
+                        return label;
+                      }).toList();
+                      
+                      // Notify parent with updated labels
+                      onLabelsImported(updatedLabels);
+                    } catch (e) {
+                      print('Failed to set default label: ${e.toString()}');
+                      // Still notify parent with original labels if setting default fails
+                      onLabelsImported(labelsToImport);
+                    }
+                  } else {
+                    // If the label doesn't have a valid ID yet, we'll handle setting it as default
+                    // after it's inserted into the database (in the parent component)
+                    onLabelsImported(labelsToImport);
+                  }
+                } else {
+                  // No preference for default label, just notify parent
+                  onLabelsImported(labelsToImport);
+                }
+                
                 // close ONLY import labels preview dialog
                 Navigator.pop(context);
 
