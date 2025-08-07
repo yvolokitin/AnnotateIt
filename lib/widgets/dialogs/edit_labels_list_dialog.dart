@@ -176,7 +176,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           ),
                                         ),
                                       ),
-                                      
+
                                       const SizedBox(width: 12),
                                       GestureDetector(
                                         onTap: () {
@@ -188,7 +188,10 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           decoration: BoxDecoration(
                                             color: label.toColor(),
                                             borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(color: Colors.white24, width: 1),
+                                            border: Border.all(
+                                              color: label.isDefault ? Colors.white : Colors.white24,
+                                              width: label.isDefault ? 3 : 1,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -225,7 +228,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                               fontSize: smallScreen ? 16 : 20,
                                               color: Colors.white,
                                               fontFamily: 'CascadiaCode',
-                                              fontWeight: FontWeight.normal,
+                                              fontWeight: label.isDefault ? FontWeight.bold : FontWeight.normal,
                                             ),
                                             decoration: InputDecoration(
                                               filled: true,
@@ -239,7 +242,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                         ),
                                       ),
 
-                                      // const SizedBox(width: 8),
                                       // Three dots menu OR save button
                                       if (isEditing)...[
                                         IconButton(
@@ -446,7 +448,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                     color: label.isDefault ? Colors.amber : null,
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Text(label.isDefault ? l10n.labelEditDefault : l10n.labelEditUndefault),
+                                                  Text(label.isDefault ? l10n.labelEditUndefault : l10n.labelEditDefault),
                                                 ],
                                               ),
                                             ),

@@ -136,34 +136,27 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
               ),
               Row(
                 children: [
-                  // Display default label if exists
-                  if (labels.any((label) => label.isDefault)) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: labels.firstWhere((label) => label.isDefault).toColor().withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Default: ${labels.firstWhere((label) => label.isDefault).name}',
-                        style: TextStyle(
-                          fontSize: smallScreen ? 14 : 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
                   // Remove all labels icon
-                  IconButton(
-                    icon: const Icon(Icons.delete_sweep, color: Colors.redAccent),
-                    tooltip: 'Remove all labels',
-                    onPressed: _showRemoveAllLabelsDialog,
-                  ),
+                  if (labels.isNotEmpty)...[
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_sweep_outlined,
+                        size: 28,
+                        color: Colors.white70,
+                      ),
+                      tooltip: 'Remove all labels',
+                      onPressed: _showRemoveAllLabelsDialog,
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+
                   // Help icon
                   IconButton(
-                    icon: const Icon(Icons.help_outline, color: Colors.blueAccent),
+                    icon: const Icon(
+                      Icons.help_outline,
+                      size: 28,
+                      color: Colors.white70,
+                    ),
                     tooltip: 'Help with labels',
                     onPressed: _showLabelsHelpDialog,
                   ),
