@@ -12,6 +12,7 @@ import '../../session/user_session.dart';
 import '../../models/project.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../../models/user.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../data/dataset_database.dart';
@@ -36,6 +37,20 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
   bool exportLabels = true;
   bool exportAnnotations = true;
   bool _isExporting = false;
+  bool _showExportLabelsButton = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Get user setting for showing export labels button
+    final user = UserSession.instance.getUser();
+    _showExportLabelsButton = user.showExportLabelsButton;
+    
+    // If the export labels button is hidden, ensure exportLabels is true by default
+    if (!_showExportLabelsButton) {
+      exportLabels = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,12 +188,13 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildExportToggle(
-            'Export All Labels',
-            exportLabels,
-            (value) => setState(() => exportLabels = value),
-            screenWidth,
-          ),
+          if (_showExportLabelsButton)
+            _buildExportToggle(
+              'Export All Labels',
+              exportLabels,
+              (value) => setState(() => exportLabels = value),
+              screenWidth,
+            ),
           _buildExportToggle(
             'Export All Annotations',
             exportAnnotations,
@@ -324,6 +340,11 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
 
   void _handleExport() async {
     if (_isExporting) return;
+
+    // If the export labels button is hidden, ensure exportLabels is true
+    if (!_showExportLabelsButton) {
+      exportLabels = true;
+    }
 
     setState(() => _isExporting = true);
 

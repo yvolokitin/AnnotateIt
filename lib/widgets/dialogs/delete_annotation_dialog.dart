@@ -3,8 +3,19 @@ import 'package:flutter/services.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotation.dart';
+import '../../session/user_session.dart';
 
-class DeleteAnnotationDialog extends StatelessWidget {
+class DeleteAnnotationResult {
+  final bool shouldDelete;
+  final bool dontAskAgain;
+
+  DeleteAnnotationResult({
+    required this.shouldDelete,
+    required this.dontAskAgain,
+  });
+}
+
+class DeleteAnnotationDialog extends StatefulWidget {
   final Annotation annotation;
 
   const DeleteAnnotationDialog({
@@ -12,22 +23,32 @@ class DeleteAnnotationDialog extends StatelessWidget {
     required this.annotation,
   });
 
-  static Future<bool?> show({
+  static Future<DeleteAnnotationResult?> show({
     required BuildContext context,
     required Annotation annotation,
-  }) {
-    return showDialog<bool>(
+  }) async {
+    final result = await showDialog<DeleteAnnotationResult>(
       context: context,
       barrierDismissible: false,
       builder: (_) => DeleteAnnotationDialog(annotation: annotation),
     );
+    
+    // Return the result directly, which can be null if dialog was dismissed
+    return result;
   }
+
+  @override
+  State<DeleteAnnotationDialog> createState() => _DeleteAnnotationDialogState();
+}
+
+class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
+  bool _dontAskAgain = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
-    final FocusNode _focusNode = FocusNode();
 
     return KeyboardListener(
       focusNode: _focusNode,
@@ -35,9 +56,15 @@ class DeleteAnnotationDialog extends StatelessWidget {
       onKeyEvent: (event) {
         if (event is KeyDownEvent) {
           if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
-            Navigator.pop(context, true); // Confirm
+            Navigator.pop(context, DeleteAnnotationResult(
+              shouldDelete: true,
+              dontAskAgain: _dontAskAgain,
+            )); // Confirm
           } else if (event.logicalKey == LogicalKeyboardKey.escape) {
-            Navigator.pop(context, false); // Cancel
+            Navigator.pop(context, DeleteAnnotationResult(
+              shouldDelete: false,
+              dontAskAgain: false,
+            )); // Cancel
           }
         }
       },
@@ -72,7 +99,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.orangeAccent),
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+                shouldDelete: false,
+                dontAskAgain: false,
+              )),
             ),
           ],
         ),
@@ -88,7 +118,7 @@ class DeleteAnnotationDialog extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
                   child: Text(
-                    '${l10n.deleteAnnotationMessage} "${annotation.name ?? l10n.unnamedAnnotation}"?',
+                    '${l10n.deleteAnnotationMessage} "${widget.annotation.name ?? l10n.unnamedAnnotation}"?',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontFamily: 'CascadiaCode',
@@ -98,6 +128,32 @@ class DeleteAnnotationDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 25),
+                // Checkbox for "Don't ask again"
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _dontAskAgain,
+                      onChanged: (value) {
+                        setState(() {
+                          _dontAskAgain = value ?? false;
+                        });
+                      },
+                      activeColor: Colors.orangeAccent,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Remove annotations without confirmation in the future",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 25),
                 const Divider(color: Colors.orangeAccent),
               ],
             ),
@@ -105,7 +161,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+              shouldDelete: false,
+              dontAskAgain: false,
+            )),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             ),
@@ -120,7 +179,10 @@ class DeleteAnnotationDialog extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+              shouldDelete: true,
+              dontAskAgain: _dontAskAgain,
+            )),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red[900],
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),

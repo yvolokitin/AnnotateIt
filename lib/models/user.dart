@@ -22,6 +22,8 @@ class User {
   final bool projectSkipDeleteConfirm;
   final bool projectShowImportWarning;
   final bool annotationAllowImageCopy;
+  final bool askConfirmationOnAnnotationRemoval;
+  final bool showExportLabelsButton;
   final bool autoSaveAnnotations;
   final double annotationOpacity;
 
@@ -49,6 +51,8 @@ class User {
     'datasetEnableDuplicate',
     'datasetEnableDelete',
     'annotationAllowImageCopy',
+    'askConfirmationOnAnnotationRemoval',
+    'showExportLabelsButton',
     'annotationOpacity',
   ];
 
@@ -76,6 +80,8 @@ class User {
     required this.datasetEnableDuplicate,
     required this.datasetEnableDelete,
     required this.annotationAllowImageCopy,
+    required this.askConfirmationOnAnnotationRemoval,
+    required this.showExportLabelsButton,
     required this.annotationOpacity,
   });
 
@@ -103,6 +109,8 @@ class User {
     bool? datasetEnableDuplicate,
     bool? datasetEnableDelete,
     bool? annotationAllowImageCopy,
+    bool? askConfirmationOnAnnotationRemoval,
+    bool? showExportLabelsButton,
     double? annotationOpacity,
   }) {
     return User(
@@ -129,6 +137,8 @@ class User {
       datasetEnableDuplicate: datasetEnableDuplicate ?? this.datasetEnableDuplicate,
       datasetEnableDelete: datasetEnableDelete ?? this.datasetEnableDelete,
       annotationAllowImageCopy: annotationAllowImageCopy ?? this.annotationAllowImageCopy,
+      askConfirmationOnAnnotationRemoval: askConfirmationOnAnnotationRemoval ?? this.askConfirmationOnAnnotationRemoval,
+      showExportLabelsButton: showExportLabelsButton ?? this.showExportLabelsButton,
       annotationOpacity: annotationOpacity ?? this.annotationOpacity,
     );
   }
@@ -157,6 +167,8 @@ class User {
         'datasetEnableDuplicate': datasetEnableDuplicate ? 1 : 0,
         'datasetEnableDelete': datasetEnableDelete ? 1 : 0,
         'annotationAllowImageCopy': annotationAllowImageCopy ? 1 : 0,
+        'askConfirmationOnAnnotationRemoval': askConfirmationOnAnnotationRemoval ? 1 : 0,
+        'showExportLabelsButton': showExportLabelsButton ? 1 : 0,
         'annotationOpacity': annotationOpacity,
       };
 
@@ -184,6 +196,8 @@ class User {
         datasetEnableDuplicate: map['datasetEnableDuplicate'] == 1,
         datasetEnableDelete: map['datasetEnableDelete'] == 1,
         annotationAllowImageCopy: map['annotationAllowImageCopy'] == 1,
+        askConfirmationOnAnnotationRemoval: map['askConfirmationOnAnnotationRemoval'] == null ? true : map['askConfirmationOnAnnotationRemoval'] == 1,
+        showExportLabelsButton: map['showExportLabelsButton'] == null ? true : map['showExportLabelsButton'] == 1,
         annotationOpacity: (map['annotationOpacity'] as num?)?.toDouble() ?? 0.35,
       );
 

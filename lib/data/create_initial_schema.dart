@@ -31,6 +31,8 @@ Future<void> createInitialSchema(Database db, int version) async {
         projectSkipDeleteConfirm INTEGER NOT NULL DEFAULT 0,
         projectShowImportWarning INTEGER NOT NULL DEFAULT 1,
         annotationAllowImageCopy INTEGER NOT NULL DEFAULT 1,
+        askConfirmationOnAnnotationRemoval INTEGER NOT NULL DEFAULT 1,
+        showExportLabelsButton INTEGER NOT NULL DEFAULT 1,
         annotationOpacity REAL NOT NULL DEFAULT 0.35
       )
     ''');
@@ -83,6 +85,8 @@ Future<void> createInitialSchema(Database db, int version) async {
       'projectSkipDeleteConfirm': 0,
       'projectShowImportWarning': 1,
       'annotationAllowImageCopy': 1,
+      'askConfirmationOnAnnotationRemoval': 1,
+      'showExportLabelsButton': 1,
       'annotationOpacity': 0.35,
     });
 

@@ -905,12 +905,31 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   }
 
   Future<void> _handleAnnotationDelete(Annotation annotation) async {
-    final shouldDelete = await DeleteAnnotationDialog.show(
-      context: context,
-      annotation: annotation,
-    );
+    // Check if we should show the confirmation dialog
+    bool shouldShowDialog = UserSession.instance.askConfirmationOnAnnotationRemoval;
+    bool shouldDelete = false;
+    
+    if (shouldShowDialog) {
+      // Show the confirmation dialog
+      final result = await DeleteAnnotationDialog.show(
+        context: context,
+        annotation: annotation,
+      );
+      
+      if (result != null) {
+        shouldDelete = result.shouldDelete;
+        
+        // If user checked "Don't ask again", save this preference
+        if (result.dontAskAgain) {
+          await UserSession.instance.setAskConfirmationOnAnnotationRemoval(false);
+        }
+      }
+    } else {
+      // Skip confirmation and delete directly
+      shouldDelete = true;
+    }
   
-    if (shouldDelete ?? false) {
+    if (shouldDelete) {
       try {
         // Delete from database
         final deletedCount = await AnnotationDatabase.instance.deleteAnnotation(annotation.id!);

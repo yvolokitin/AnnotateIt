@@ -64,6 +64,22 @@ class UserDatabase {
       whereArgs: [userId],
     );
   }
+  
+  Future<void> setAskConfirmationOnAnnotationRemoval({
+    required int userId,
+    required bool askConfirmation,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {
+        'askConfirmationOnAnnotationRemoval': askConfirmation ? 1 : 0,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
 
   Future<void> setProjectSkipDeleteConfirm({
     required int userId,
@@ -74,6 +90,22 @@ class UserDatabase {
       'users',
       {
         'projectSkipDeleteConfirm': skip ? 1 : 0,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<void> setShowExportLabelsButton({
+    required int userId,
+    required bool showExportLabelsButton,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {
+        'showExportLabelsButton': showExportLabelsButton ? 1 : 0,
         'updatedAt': DateTime.now().toIso8601String(),
       },
       where: 'id = ?',

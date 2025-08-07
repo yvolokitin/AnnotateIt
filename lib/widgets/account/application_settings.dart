@@ -76,6 +76,18 @@ class ApplicationSettings extends StatelessWidget {
                 onChanged: (val) => onUserChange(user.copyWith(labelsDeleteAnnotations: val)),
                 note: l10n.settingsLabelsDeletionWithAnnotationsNote,
               ),
+              _buildSwitchWithNote(
+                title: "Ask confirmation when removing annotations",
+                value: user.askConfirmationOnAnnotationRemoval,
+                onChanged: (val) => onUserChange(user.copyWith(askConfirmationOnAnnotationRemoval: val)),
+                note: "When enabled, a confirmation dialog will be shown before removing annotations",
+              ),
+              _buildSwitchWithNote(
+                title: "Show export labels button",
+                value: user.showExportLabelsButton,
+                onChanged: (val) => onUserChange(user.copyWith(showExportLabelsButton: val)),
+                note: "When enabled, shows a button to export labels in the project view",
+              ),
             ], isWide),
 
             _buildSection(l10n.settingsAnnotationTitle, [

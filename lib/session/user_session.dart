@@ -73,6 +73,19 @@ class UserSession {
     );
     _currentUser = user.copyWith(autoSaveAnnotations: autoSave);
   }
+  
+  bool get askConfirmationOnAnnotationRemoval {
+    return getUser().askConfirmationOnAnnotationRemoval;
+  }
+
+  Future<void> setAskConfirmationOnAnnotationRemoval(bool askConfirmation) async {
+    final user = getUser();
+    await UserDatabase.instance.setAskConfirmationOnAnnotationRemoval(
+      userId: user.id!,
+      askConfirmation: askConfirmation,
+    );
+    _currentUser = user.copyWith(askConfirmationOnAnnotationRemoval: askConfirmation);
+  }
 
   Future<String> getCurrentUserDatasetImportFolder() async {
     final docsDir = await getApplicationDocumentsDirectory();
@@ -144,6 +157,20 @@ class UserSession {
     );
     _currentUser = user.copyWith(projectShowImportWarning: showWarning);
     _logger.info('Updated project show import warning to: $showWarning');
+  }
+  
+  bool get showExportLabelsButton {
+    return getUser().showExportLabelsButton;
+  }
+
+  Future<void> setShowExportLabelsButton(bool show) async {
+    final user = getUser();
+    await UserDatabase.instance.setShowExportLabelsButton(
+      userId: user.id!,
+      showExportLabelsButton: show,
+    );
+    _currentUser = user.copyWith(showExportLabelsButton: show);
+    _logger.info('Updated show export labels button to: $show');
   }
 
   void clear() {
