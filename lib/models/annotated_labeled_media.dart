@@ -60,11 +60,6 @@ class AnnotatedLabeledMedia {
       .whereType<int>() // filters out nulls
       .toSet();
   }
-  
-  /// Returns the image associated with this media item.
-  /// This is a convenience getter for accessing the image in the UI.
-  /// The actual image needs to be loaded separately and stored in a cache.
-  dynamic get image => null;
 
   /// Checks if a given user is the last annotator.
   bool wasAnnotatedBy(int userId) {

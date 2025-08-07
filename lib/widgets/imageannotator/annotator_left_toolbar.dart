@@ -19,7 +19,6 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final double cornerSize;
   final bool isProcessingMlKit;
   final bool isProcessingTFLite;
-  final bool isProcessingSAM2;
 
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<double> onStrokeWidthChanged;
@@ -46,7 +45,6 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onCornerSizeChanged,
     this.isProcessingMlKit = false,
     this.isProcessingTFLite = false,
-    this.isProcessingSAM2 = false,
   });
 
   @override
@@ -168,29 +166,14 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Segmentation Button (conditionally shown)
           if (annotationSegment) ...[
-            // SAM2 Annotation Button - only shown on Windows/macOS
-            if (Platform.isWindows || Platform.isMacOS) ...[
-              ToolbarDivider(isCompact: isCompact),
-              ToolbarButton(
-                icon: widget.isProcessingSAM2 
-                  ? SizedBox(
-                      width: Constants.iconSize,
-                      height: Constants.iconSize,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Icon(Icons.auto_awesome_outlined),
-                onTap: widget.isProcessingSAM2 
-                  ? null // Disable button while processing
-                  : () => _selectUserAction(UserAction.sam_annotation),
-                isActive: widget.selectedAction == UserAction.sam_annotation,
-                tooltip: widget.isProcessingSAM2 
-                  ? 'Processing image with SAM2...'
-                  : 'Segment Anything 2',
-              ),
-            ],
+            /// disabled since SAM is not supported yet
+            /// ToolbarDivider(isCompact: isCompact),
+            /// ToolbarButton(
+            ///  icon: Icon(Icons.auto_awesome_outlined),
+            ///  onTap: () => _selectUserAction(UserAction.sam_annotation),
+            ///  isActive: widget.selectedAction == UserAction.sam_annotation,
+            ///  tooltip: l10n.toolbarSAM,
+            ///),
             
             // Polygon Annotation Button
             ToolbarDivider(isCompact: isCompact),
