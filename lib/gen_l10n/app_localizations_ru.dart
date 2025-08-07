@@ -583,8 +583,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get annotatorTopToolbarBackTooltip => 'Назад к проекту';
 
   @override
-  String get annotatorTopToolbarSelectDefaultLabel =>
-      'Выбрать метку по умолчанию';
+  String get annotatorTopToolbarSelectDefaultLabel => 'Метка по умолчанию';
 
   @override
   String get toolbarNavigation => 'Навигация';
@@ -769,6 +768,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'LabelMe, CVAT или только медиа (.zip)';
 
   @override
+  String get dialogImageDetailsTitle => 'Информация о файле';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Ошибка импорта';
 
   @override
@@ -856,7 +858,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuImageDuplicate => 'Дублировать';
 
   @override
-  String get menuImageSetAsIcon => 'Установить как иконку';
+  String get menuImageSetAsIcon => 'Иконка';
 
   @override
   String get menuImageDelete => 'Удалить';

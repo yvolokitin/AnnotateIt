@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
 import '../../data/user_database.dart';
+import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
 
 class ImageDetailsDialog extends StatefulWidget {
@@ -54,6 +55,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final media = widget.media.mediaItem;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
@@ -78,8 +80,8 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                 color: Colors.orangeAccent,
               ),
               const SizedBox(width: 12),
-              const Text(
-                "File Details",
+              Text(
+                l10n.dialogImageDetailsTitle,
                 style: TextStyle(
                   color: Colors.orangeAccent,
                   fontFamily: 'CascadiaCode',
@@ -161,8 +163,8 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               side: const BorderSide(color: Colors.orangeAccent, width: 2),
             ),
           ),
-          child: const Text(
-            "Close",
+          child: Text(
+            l10n.buttonClose,
             style: TextStyle(
               color: Colors.orangeAccent,
               fontFamily: 'CascadiaCode',

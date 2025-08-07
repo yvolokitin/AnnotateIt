@@ -763,6 +763,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'LabelMe, CVAT, or media-only (.zip)';
 
   @override
+  String get dialogImageDetailsTitle => 'File Details';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Import Failed';
 
   @override

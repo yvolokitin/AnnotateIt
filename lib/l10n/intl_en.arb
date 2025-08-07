@@ -328,6 +328,8 @@
   "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
   "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, or media-only (.zip)",
 
+  "dialogImageDetailsTitle": "File Details",
+
   "datasetDialogImportFailedTitle": "Import Failed",
   "datasetDialogImportFailedMessage": "The ZIP file could not be processed. It may be corrupted, incomplete, or not a valid dataset archive.",
   "datasetDialogImportFailedTips": "Try re-exporting or re-zipping your dataset.\nEnsure it is in COCO, YOLO, VOC, Datumaro or supported format.\n\nError: ",

@@ -255,7 +255,7 @@
   "noMediaDialogSupportedVideoFormatsWarning": "Ondersteuning kan variëren afhankelijk van het platform en de videocodec.\nSommige formaten werken mogelijk niet in browsers of op iOS.",
 
   "annotatorTopToolbarBackTooltip": "Terug naar Project",
-  "annotatorTopToolbarSelectDefaultLabel": "Standaardlabel selecteren",
+  "annotatorTopToolbarSelectDefaultLabel": "Standaardlabel",
 
   "toolbarNavigation": "Navigatie",
   "toolbarBbox": "Begrenzingsvak Tekenen",
@@ -321,6 +321,8 @@
   "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
   "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, of alleen media (.zip)",
 
+  "dialogImageDetailsTitle": "Bestandsdetails",
+
   "datasetDialogImportFailedTitle": "Import Mislukt",
   "datasetDialogImportFailedMessage": "Het ZIP-bestand kon niet worden verwerkt. Het is mogelijk beschadigd, onvolledig of geen geldig dataset-archief.",
   "datasetDialogImportFailedTips": "Probeer je dataset opnieuw te exporteren of te zippen.\nZorg ervoor dat het in COCO-, YOLO-, VOC- of ondersteund formaat is.\n\nFout: ",
@@ -353,7 +355,7 @@
   "menuImageAnnotate": "Annoteren",
   "menuImageDetails": "Details",
   "menuImageDuplicate": "Dupliceren",
-  "menuImageSetAsIcon": "Als Icoon Instellen",
+  "menuImageSetAsIcon": "Als Icoon",
   "menuImageDelete": "Verwijderen",
 
   "noLabelsTitle": "Je hebt geen Labels in het Project",

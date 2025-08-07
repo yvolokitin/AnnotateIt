@@ -232,7 +232,7 @@
   "noMediaDialogSupportedVideoFormatsList": "Часто поддерживаемые форматы:\n\n- MP4: Android, iOS, Web, Desktop\n- MOV: Android, iOS, macOS\n- M4V: Android, iOS, macOS\n- WEBM: Android, Web (зависит от браузера)\n- MKV: Android (частично), Windows\n- AVI: только Android/Windows (частично)",
   "noMediaDialogSupportedVideoFormatsWarning": "Поддержка может варьироваться в зависимости от платформы и видеокодека.\nНекоторые форматы могут не работать в браузерах или на iOS.",
   "annotatorTopToolbarBackTooltip": "Назад к проекту",
-  "annotatorTopToolbarSelectDefaultLabel": "Выбрать метку по умолчанию",
+  "annotatorTopToolbarSelectDefaultLabel": "Метка по умолчанию",
   "toolbarNavigation": "Навигация",
   "toolbarBbox": "Рисовать ограничивающий прямоугольник",
   "toolbarPolygon": "Рисовать полигон",
@@ -288,6 +288,9 @@
   "datasetDialogSupportedFormats": "Поддерживаемые форматы датасетов:",
   "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
   "datasetDialogSupportedFormatsList2": "LabelMe, CVAT или только медиа (.zip)",
+
+  "dialogImageDetailsTitle": "Информация о файле",
+
   "datasetDialogImportFailedTitle": "Ошибка импорта",
   "datasetDialogImportFailedMessage": "ZIP-файл не удалось обработать. Возможно, он повреждён, неполный или не является допустимым архивом датасета.",
   "datasetDialogImportFailedTips": "Попробуйте заново экспортировать или упаковать ваш датасет.\nУбедитесь, что он соответствует форматам COCO, YOLO, VOC и т.п.\n\nОшибка: ",
@@ -313,7 +316,7 @@
   "menuImageAnnotate": "Разметить",
   "menuImageDetails": "Детали",
   "menuImageDuplicate": "Дублировать",
-  "menuImageSetAsIcon": "Установить как иконку",
+  "menuImageSetAsIcon": "Иконка",
   "menuImageDelete": "Удалить",
   "noLabelsTitle": "Нет меток в проекте",
   "noLabelsExplain1": "Нельзя аннотировать без меток — они придают смысл разметке.",

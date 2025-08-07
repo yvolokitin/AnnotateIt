@@ -255,7 +255,7 @@
   "noMediaDialogSupportedVideoFormatsWarning": "La prise en charge peut varier selon la plateforme et le codec vidéo.\nCertains formats peuvent ne pas fonctionner dans les navigateurs ou sur iOS.",
 
   "annotatorTopToolbarBackTooltip": "Retour au Projet",
-  "annotatorTopToolbarSelectDefaultLabel": "Sélectionner l'étiquette par défaut",
+  "annotatorTopToolbarSelectDefaultLabel": "Étiquette par défaut",
 
   "toolbarNavigation": "Navigation",
   "toolbarBbox": "Dessiner une Boîte Englobante",
@@ -321,6 +321,8 @@
   "datasetDialogSupportedFormatsList1": "COCO, YOLO, VOC, Datumaro,",
   "datasetDialogSupportedFormatsList2": "LabelMe, CVAT, ou médias uniquement (.zip)",
 
+  "dialogImageDetailsTitle": "Détails du fichier",
+
   "datasetDialogImportFailedTitle": "Échec de l'Importation",
   "datasetDialogImportFailedMessage": "Le fichier ZIP n'a pas pu être traité. Il peut être corrompu, incomplet ou ne pas être une archive d'ensemble de données valide.",
   "datasetDialogImportFailedTips": "Essayez de réexporter ou de recompresser votre ensemble de données.\nAssurez-vous qu'il est au format COCO, YOLO, VOC ou compatible.\n\nErreur: ",
@@ -353,7 +355,7 @@
   "menuImageAnnotate": "Annoter",
   "menuImageDetails": "Détails",
   "menuImageDuplicate": "Dupliquer",
-  "menuImageSetAsIcon": "Définir comme Icône",
+  "menuImageSetAsIcon": "Comme Icône",
   "menuImageDelete": "Supprimer",
 
   "noLabelsTitle": "Vous n'avez pas d'Étiquettes dans le Projet",

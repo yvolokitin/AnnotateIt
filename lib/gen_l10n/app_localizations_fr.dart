@@ -593,8 +593,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get annotatorTopToolbarBackTooltip => 'Retour au Projet';
 
   @override
-  String get annotatorTopToolbarSelectDefaultLabel =>
-      'Sélectionner l\'étiquette par défaut';
+  String get annotatorTopToolbarSelectDefaultLabel => 'Étiquette par défaut';
 
   @override
   String get toolbarNavigation => 'Navigation';
@@ -787,6 +786,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'LabelMe, CVAT, ou médias uniquement (.zip)';
 
   @override
+  String get dialogImageDetailsTitle => 'Détails du fichier';
+
+  @override
   String get datasetDialogImportFailedTitle => 'Échec de l\'Importation';
 
   @override
@@ -879,7 +881,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuImageDuplicate => 'Dupliquer';
 
   @override
-  String get menuImageSetAsIcon => 'Définir comme Icône';
+  String get menuImageSetAsIcon => 'Comme Icône';
 
   @override
   String get menuImageDelete => 'Supprimer';
