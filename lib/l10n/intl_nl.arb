@@ -412,9 +412,10 @@
 
   "labelEditSave": "Opslaan",
   "labelEditEdit": "Bewerken",
-  "labelEditMoveUp": "Omhoog Verplaatsen",
-  "labelEditMoveDown": "Omlaag Verplaatsen",
+  "labelEditMoveUp": "Omhoog",
+  "labelEditMoveDown": "Omlaag",
   "labelEditDelete": "Verwijderen",
+
   "labelExportLabels": "Labels Exporteren",
   "labelSaveDialogTitle": "Labels opslaan in JSON-bestand",
   "labelSaveDefaultFilename": "labels.json",

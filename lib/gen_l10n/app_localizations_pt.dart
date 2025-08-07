@@ -268,12 +268,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setAsDefault => 'Definir como Padrão';
 
   @override
-  String get labelDefault => 'Padrão';
-
-  @override
-  String get labelUndefault => 'Remover padrão';
-
-  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Página $current de $total';
   }
@@ -1013,10 +1007,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get labelEditEdit => 'Editar';
 
   @override
-  String get labelEditMoveUp => 'Mover para Cima';
+  String get labelEditMoveUp => 'Cima';
 
   @override
-  String get labelEditMoveDown => 'Mover para Baixo';
+  String get labelEditMoveDown => 'Baixo';
+
+  @override
+  String get labelEditDefault => 'Padrão';
+
+  @override
+  String get labelEditUndefault => 'Despad.';
 
   @override
   String get labelEditDelete => 'Excluir';

@@ -189,8 +189,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                             color: label.toColor(),
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(color: Colors.white24, width: 1),
-                                            // color: label.toColor(),
-                                            // shape: BoxShape.circle,
                                           ),
                                         ),
                                       ),
@@ -266,7 +264,25 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           },
                                         ),
                                       ] else ...[
-                                        PopupMenuButton<String>(
+                                        Theme(
+                                          data: Theme.of(context).copyWith(
+                                          popupMenuTheme: PopupMenuThemeData(
+                                          color: Colors.grey[800],
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color: Colors.white70,
+                                              width: 1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontSize: screenWidth>1800 ? 22 : smallScreen ? 18 : 14,
+                                            fontWeight: FontWeight.normal,
+                                            fontFamily: 'CascadiaCode',
+                                            ),
+                                          ),
+                                        ),
+                                        child: PopupMenuButton<String>(
                                           icon: Icon(
                                             Icons.more_vert,
                                             color: Colors.white,
@@ -426,22 +442,11 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                               child: Row(
                                                 children: [
                                                   Icon(
-                                                    label.isDefault 
-                                                      ? Icons.star 
-                                                      : Icons.star_border,
+                                                    label.isDefault ? Icons.star : Icons.star_border,
                                                     color: label.isDefault ? Colors.amber : null,
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Text(
-                                                    label.isDefault 
-                                                      ? 'Default' 
-                                                      : 'Set as Default',
-                                                    style: TextStyle(
-                                                      fontWeight: label.isDefault 
-                                                        ? FontWeight.bold 
-                                                        : FontWeight.normal,
-                                                    ),
-                                                  ),
+                                                  Text(label.isDefault ? l10n.labelEditDefault : l10n.labelEditUndefault),
                                                 ],
                                               ),
                                             ),
@@ -474,14 +479,18 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                                 children: [
                                                   Icon(Icons.delete, color: Colors.red),
                                                   SizedBox(width: 8),
-                                                  Text(l10n.labelEditDelete, style: TextStyle(color: Colors.red)),
+                                                  Text(l10n.labelEditDelete,
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
                                           ],
                                         ),
+                                      ),
                                       ],
-                                      // const SizedBox(width: 8),
                                     ],
                                   ),
                                 ),

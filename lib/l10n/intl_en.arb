@@ -92,8 +92,6 @@
   "rename": "Rename",
   "delete": "Delete",
   "setAsDefault": "Set as Default",
-  "labelDefault": "Default",
-  "labelUndefault": "Undefault",
 
   "paginationPageFromTotal": "Page {current} from {total}",
   "@paginationPageFromTotal": {
@@ -421,7 +419,10 @@
   "labelEditEdit": "Edit",
   "labelEditMoveUp": "Move Up",
   "labelEditMoveDown": "Move Down",
+  "labelEditDefault": "Default",
+  "labelEditUndefault": "Undefault",
   "labelEditDelete": "Delete",
+
   "labelExportLabels": "Export Labels",
   "labelSaveDialogTitle": "Save labels in JSON file",
   "labelSaveDefaultFilename": "labels.json",

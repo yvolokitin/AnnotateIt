@@ -268,12 +268,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setAsDefault => 'Establecer como Predeterminado';
 
   @override
-  String get labelDefault => 'Predeterminado';
-
-  @override
-  String get labelUndefault => 'Quitar predeterminado';
-
-  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Página $current de $total';
   }
@@ -1014,10 +1008,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get labelEditEdit => 'Editar';
 
   @override
-  String get labelEditMoveUp => 'Mover Arriba';
+  String get labelEditMoveUp => 'Arriba';
 
   @override
-  String get labelEditMoveDown => 'Mover Abajo';
+  String get labelEditMoveDown => 'Abajo';
+
+  @override
+  String get labelEditDefault => 'Predet.';
+
+  @override
+  String get labelEditUndefault => 'Despredet.';
 
   @override
   String get labelEditDelete => 'Eliminar';

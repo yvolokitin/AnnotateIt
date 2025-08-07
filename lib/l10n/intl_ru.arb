@@ -362,11 +362,15 @@
   "uploadInProgressStay": "Остаться",
   "uploadInProgressLeave": "Выйти",
   "fileNotFound": "Файл не найден или доступ запрещён",
+
   "labelEditSave": "Сохранить",
   "labelEditEdit": "Редактировать",
-  "labelEditMoveUp": "Переместить вверх",
-  "labelEditMoveDown": "Переместить вниз",
+  "labelEditMoveUp": "Вверх",
+  "labelEditMoveDown": "Вниз",
   "labelEditDelete": "Удалить",
+  "labelEditDefault": "По умолчанию",
+  "labelEditUndefault": "Без умолч",
+
   "labelExportLabels": "Экспортировать метки",
   "labelSaveDialogTitle": "Сохранить метки в JSON-файл",
   "labelSaveDefaultFilename": "labels.json",

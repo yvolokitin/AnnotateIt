@@ -267,12 +267,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setAsDefault => 'Установить по умолчанию';
 
   @override
-  String get labelDefault => 'По умолчанию';
-
-  @override
-  String get labelUndefault => 'Отменить по умолчанию';
-
-  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Страница $current из $total';
   }
@@ -994,10 +988,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get labelEditEdit => 'Редактировать';
 
   @override
-  String get labelEditMoveUp => 'Переместить вверх';
+  String get labelEditMoveUp => 'Вверх';
 
   @override
-  String get labelEditMoveDown => 'Переместить вниз';
+  String get labelEditMoveDown => 'Вниз';
+
+  @override
+  String get labelEditDefault => 'По умолчанию';
+
+  @override
+  String get labelEditUndefault => 'Без умолч';
 
   @override
   String get labelEditDelete => 'Удалить';

@@ -268,12 +268,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setAsDefault => 'Als Standard festlegen';
 
   @override
-  String get labelDefault => 'Standard';
-
-  @override
-  String get labelUndefault => 'Standard aufheben';
-
-  @override
   String paginationPageFromTotal(int current, int total) {
     return 'Seite $current von $total';
   }
@@ -1006,10 +1000,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get labelEditEdit => 'Bearbeiten';
 
   @override
-  String get labelEditMoveUp => 'Nach oben verschieben';
+  String get labelEditMoveUp => 'Hoch';
 
   @override
-  String get labelEditMoveDown => 'Nach unten verschieben';
+  String get labelEditMoveDown => 'Runter';
+
+  @override
+  String get labelEditDefault => 'Standard';
+
+  @override
+  String get labelEditUndefault => 'Unstandard';
 
   @override
   String get labelEditDelete => 'Löschen';

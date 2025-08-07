@@ -412,9 +412,12 @@
 
   "labelEditSave": "Salvar",
   "labelEditEdit": "Editar",
-  "labelEditMoveUp": "Mover para Cima",
-  "labelEditMoveDown": "Mover para Baixo",
+  "labelEditMoveUp": "Cima",
+  "labelEditMoveDown": "Baixo",
   "labelEditDelete": "Excluir",
+  "labelEditDefault": "Padrão",
+  "labelEditUndefault": "Despad.",
+
   "labelExportLabels": "Exportar Etiquetas",
   "labelSaveDialogTitle": "Salvar etiquetas em arquivo JSON",
   "labelSaveDefaultFilename": "etiquetas.json",
