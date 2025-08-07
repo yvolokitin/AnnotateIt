@@ -17,6 +17,7 @@ import '../models/annotated_labeled_media.dart';
 
 import '../services/ml_kit_image_labeling_service.dart';
 import '../services/tflite_detection_service.dart';
+import '../session/user_session.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
@@ -110,6 +111,26 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
     if (widget.project.labels.isEmpty || widget.mediaItem.annotations.isEmpty) {
       showRightSidebar = false;
+    }
+    
+    // Set the default label if one exists in the project
+    if (widget.project.labels.isNotEmpty) {
+      // Check if there's a label marked as default
+      final hasDefaultLabel = widget.project.labels.any((label) => label.isDefault);
+      
+      // Get user preference for setting first label as default
+      final setFirstLabelAsDefault = UserSession.instance.getUser().labelsSetFirstAsDefault;
+      
+      if (hasDefaultLabel) {
+        // If there's a default label, use it regardless of user preference
+        final defaultLabel = widget.project.labels.firstWhere((label) => label.isDefault);
+        selectedLabel = defaultLabel;
+      } else if (setFirstLabelAsDefault) {
+        // If user has enabled "set first label as default" and no default label exists,
+        // use the first label as default
+        selectedLabel = widget.project.labels.first;
+      }
+      // If neither condition is met, keep the initial selectedLabel (Unknown)
     }
   }
 

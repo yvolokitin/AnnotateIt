@@ -38,6 +38,10 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
     for (final label in widget.project.labels!) {
       if (label.isDefault) {
         selectedDefaultLabel = label;
+        // Notify parent component about the default label
+        if (widget.onDefaultLabelSelected != null) {
+          widget.onDefaultLabelSelected!(label);
+        }
         break;
       }
     }

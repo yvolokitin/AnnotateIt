@@ -294,9 +294,21 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         );
 
         final fullProject = await ProjectDatabase.instance.createProject(newProject);
-        final labelsWithNewProjectId = labels
+        // Check if user has enabled "set first label as default" preference
+        final setFirstLabelAsDefault = currentUser.labelsSetFirstAsDefault;
+        
+        // Create a list of labels with the new project ID
+        List<Label> labelsWithNewProjectId = labels
           .map((label) => label.copyWith(projectId: fullProject.id!))
           .toList();
+          
+        // If there are labels and user preference is enabled, set the first label as default
+        if (labelsWithNewProjectId.isNotEmpty && setFirstLabelAsDefault) {
+          labelsWithNewProjectId = labelsWithNewProjectId.map((label) {
+            // Set the first label as default, all others as non-default
+            return label.copyWith(isDefault: label == labelsWithNewProjectId.first);
+          }).toList();
+        }
 
         await LabelsDatabase.instance.updateProjectLabels(fullProject.id!, labelsWithNewProjectId);
 

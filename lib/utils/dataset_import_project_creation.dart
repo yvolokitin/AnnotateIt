@@ -294,11 +294,18 @@ class DatasetImportProjectCreation {
           '${b.toRadixString(16).padLeft(2, '0')}';
     }
 
+    // Check if user has enabled "set first label as default" preference
+    final currentUser = UserSession.instance.getUser();
+    final setFirstLabelAsDefault = currentUser.labelsSetFirstAsDefault;
+
     final db = await LabelsDatabase.instance.database;
     final List<Label> insertedLabels = [];
 
     int counter = 0;
     for (final name in labelNames) {
+      // Set isDefault to true for the first label if user preference is enabled
+      final isDefault = counter == 0 && setFirstLabelAsDefault;
+      
       final label = Label(
         id: -1,
         labelOrder: counter,
@@ -306,6 +313,7 @@ class DatasetImportProjectCreation {
         name: name.trim(),
         color: generateRandomColor(),
         description: null,
+        isDefault: isDefault,
       );
 
       counter++;
