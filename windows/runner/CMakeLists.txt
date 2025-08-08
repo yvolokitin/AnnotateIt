@@ -53,9 +53,9 @@ add_dependencies(${BINARY_NAME} flutter_assemble)
 add_custom_command(
     TARGET ${BINARY_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/windows/onnxruntime.dll"
+        "${CMAKE_SOURCE_DIR}/onnxruntime.dll"
         "$<TARGET_FILE_DIR:${BINARY_NAME}>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/windows/sam_onnx.dll"
+        "${CMAKE_SOURCE_DIR}/sam_onnx.dll"
         "$<TARGET_FILE_DIR:${BINARY_NAME}>"
 )

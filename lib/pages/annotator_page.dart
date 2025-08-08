@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
-// ✅ Brings in SamProvider enum and FFI bindings
 import 'package:sam_onnx/sam_onnx.dart';
-// ✅ Float32List (and friends) live here
 import 'dart:typed_data';
 
 import '../data/labels_database.dart';
@@ -102,10 +100,15 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   final FocusNode _focusNode = FocusNode();
 
-  // ✅ SAM state: service, busy flag, provider, and optional embedding cache
+  // SAM state: service, busy flag, provider, and optional embedding cache
   late final SamService _sam;
   bool _samBusy = false;
-  SamProvider _provider = SamProvider.auto;
+
+  // SamProvider _provider = SamProvider.auto;
+  SamProvider _provider = Platform.isWindows
+    ? SamProvider.directml
+    : (Platform.isAndroid ? SamProvider.nnapi : SamProvider.auto);
+
   final _embeddings = <int, Float32List>{};
 
   @override
@@ -113,8 +116,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     super.initState();
     _currentIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
     _pageController = PageController(initialPage: _currentIndex);
+
     _preloadInitialMedia();
-    _initSam(); // ✅ initialize SAM
+
+    // Initialize SAM
+    _initSam();
     
     // Initialize ML Kit image labeler
     if (Platform.isAndroid || Platform.isIOS) {
@@ -191,6 +197,248 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     super.dispose();
   }
   
+// Находим bbox в маске (mask = 256x256, 0/1, но может быть 0/255)
+Rect _bboxFromMask(Uint8List mask, int origW, int origH) {
+  const int M = 256;
+  int minX = M, minY = M, maxX = -1, maxY = -1;
+  for (int y = 0; y < M; y++) {
+    final rowOff = y * M;
+    for (int x = 0; x < M; x++) {
+      final v = mask[rowOff + x];
+      if (v > 127) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0 || maxY < 0) return Rect.zero;
+
+  // Маппим из 256x256 в оригинальные координаты
+  final sx = origW / 256.0;
+  final sy = origH / 256.0;
+  return Rect.fromLTRB(minX * sx, minY * sy, (maxX + 1) * sx, (maxY + 1) * sy);
+}
+
+// Грубый полигонизатор: собираем граничные точки и строим выпуклую оболочку (convex hull).
+List<Offset> _polygonFromMaskConvex(Uint8List mask, int origW, int origH) {
+  const int M = 256;
+  final points = <Offset>[];
+
+  // берём границу с шагом (для скорости)
+  const step = 2;
+  for (int y = step; y < M - step; y += step) {
+    for (int x = step; x < M - step; x += step) {
+      final v = mask[y * M + x] > 127;
+      if (!v) continue;
+      // Элементарный признак границы — есть сосед с нулём
+      bool border = false;
+      for (int dy = -1; dy <= 1 && !border; dy++) {
+        for (int dx = -1; dx <= 1 && !border; dx++) {
+          if (dx == 0 && dy == 0) continue;
+          final nv = mask[(y + dy) * M + (x + dx)] > 127;
+          if (!nv) border = true;
+        }
+      }
+      if (border) {
+        points.add(Offset(x * (origW / 256.0), y * (origH / 256.0)));
+      }
+    }
+  }
+
+  if (points.isEmpty) return const [];
+
+  // Andrew's monotone chain
+  points.sort((a, b) => (a.dx == b.dx) ? a.dy.compareTo(b.dy) : a.dx.compareTo(b.dx));
+  double cross(Offset o, Offset a, Offset b) =>
+    (a.dx - o.dx) * (b.dy - o.dy) - (a.dy - o.dy) * (b.dx - o.dx);
+
+  final lower = <Offset>[];
+  for (final p in points) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower.last, p) <= 0) {
+      lower.removeLast();
+    }
+    lower.add(p);
+  }
+  final upper = <Offset>[];
+  for (int i = points.length - 1; i >= 0; i--) {
+    final p = points[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper.last, p) <= 0) {
+      upper.removeLast();
+    }
+    upper.add(p);
+  }
+  lower.removeLast();
+  upper.removeLast();
+  final hull = <Offset>[...lower, ...upper];
+
+  // Упростим до разумного числа вершин (чтобы не перегружать UI/БД)
+  const maxVerts = 64;
+  if (hull.length <= maxVerts) return hull;
+  final stepPick = hull.length / maxVerts;
+  final simplified = <Offset>[];
+  for (double i = 0; i < hull.length; i += stepPick) {
+    simplified.add(hull[i.toInt()]);
+  }
+  return simplified;
+}
+
+Future<void> _handleSamTap(Offset imagePoint) async {
+  if (_samBusy) return;
+  final currentMedia = _mediaCache[_currentIndex];
+  final uiImg = _imageCache[_currentIndex];
+  if (currentMedia == null || uiImg == null) return;
+
+  final mediaId = currentMedia.mediaItem.id!;
+  final origW = uiImg.width;
+  final origH = uiImg.height;
+
+  setState(() => _samBusy = true);
+  try {
+    // 1) Возьмём/посчитаем embedding (кэш по mediaId)
+    Float32List embedding;
+    if (_embeddings.containsKey(mediaId)) {
+      embedding = _embeddings[mediaId]!;
+    } else {
+      final img = await _currentImageData(); // твоя функция: width/height/rgb
+      // Препроцесс в CHW float32 для encoder (1024x1024, нормализация)
+      final chw = preprocessToSamInput(img).tensor;
+      embedding = SamOnnx.instance.runEncoder(chw);
+      _embeddings[mediaId] = embedding;
+    }
+
+    // 2) Подготовим входы для decoder
+    // points: [x,y] в координатах исходного изображения
+    final points = Float32List.fromList([imagePoint.dx, imagePoint.dy]);
+    final labels = Int32List.fromList([1]); // foreground point
+
+    // 3) Запустим decoder -> получим маску 256x256 и IoU
+    final (mask, iou) = SamOnnx.instance.runDecoder(
+      embedding: embedding,
+      points: points,
+      labels: labels,
+      origH: origH,
+      origW: origW,
+    );
+
+    if (mask.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('SAM: empty mask')),
+      );
+      return;
+    }
+
+    // 4) Конвертируем в аннотацию по типу проекта
+    final isDetect = widget.project.type.toLowerCase().contains('detect');
+    final isSegment = widget.project.type.toLowerCase().contains('segment');
+
+    Annotation newAnn;
+
+    if (isDetect) {
+      final rect = _bboxFromMask(mask, origW, origH);
+      if (rect == Rect.zero) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('SAM: no foreground found')),
+        );
+        return;
+      }
+      newAnn = Annotation(
+        id: null,
+        mediaItemId: mediaId,
+        labelId: selectedLabel.id!,
+        annotationType: 'bbox',
+        data: {
+          'x': rect.left,
+          'y': rect.top,
+          'width': rect.width,
+          'height': rect.height,
+        },
+        confidence: iou,
+        annotatorId: 1,
+        status: 'pending',
+        version: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )
+      ..name = selectedLabel.name
+      ..color = selectedLabel.toColor();
+    } else if (isSegment) {
+      final poly = _polygonFromMaskConvex(mask, origW, origH);
+      if (poly.length < 3) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('SAM: mask too small for polygon')),
+        );
+        return;
+      }
+      newAnn = Annotation(
+        id: null,
+        mediaItemId: mediaId,
+        labelId: selectedLabel.id!,
+        annotationType: 'polygon',
+        data: {
+          'points': poly.map((p) => [p.dx, p.dy]).toList(),
+        },
+        confidence: iou,
+        annotatorId: 1,
+        status: 'pending',
+        version: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )
+      ..name = selectedLabel.name
+      ..color = selectedLabel.toColor();
+    } else {
+      // fallback: как bbox
+      final rect = _bboxFromMask(mask, origW, origH);
+      newAnn = Annotation(
+        id: null,
+        mediaItemId: mediaId,
+        labelId: selectedLabel.id!,
+        annotationType: 'bbox',
+        data: {
+          'x': rect.left,
+          'y': rect.top,
+          'width': rect.width,
+          'height': rect.height,
+        },
+        confidence: iou,
+        annotatorId: 1,
+        status: 'pending',
+        version: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )
+      ..name = selectedLabel.name
+      ..color = selectedLabel.toColor();
+    }
+
+    // 5) Сохраняем в БД и обновляем UI
+    final insertedId = await AnnotationDatabase.instance.insertAnnotation(newAnn);
+    final saved = newAnn.copyWithId(insertedId);
+
+    final existing = List<Annotation>.from(currentMedia.annotations ?? []);
+    existing.add(saved);
+    setState(() {
+      _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: existing);
+      _selectedAnnotation = saved;
+      userAction = UserAction.navigation; // вернёмся в навигацию, можно убрать если не нужно
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('SAM ${isSegment ? 'polygon' : 'bbox'} added (IoU ${iou.toStringAsFixed(2)})')),
+    );
+  } catch (e, st) {
+    _logger.severe('SAM tap failed', e, st);
+    if (mounted) {
+      AlertErrorDialog.show(context, 'SAM failed', e.toString());
+    }
+  } finally {
+    if (mounted) setState(() => _samBusy = false);
+  }
+}
+
+
   /// Process the current image with ML Kit and create annotations from the results
   Future<void> _processImageWithMlKit() async {
     if (_isProcessingMlKit) return;
@@ -1357,6 +1605,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                     },
                                     onAnnotationUpdated: _handleAnnotationUpdated,
                                     onAnnotationSelected: _handleAnnotationSelected,
+
+                                    onSamTap: _handleSamTap,
                                   ),
                                 ),
                               ),

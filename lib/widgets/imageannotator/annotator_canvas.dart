@@ -35,6 +35,8 @@ class AnnotatorCanvas extends StatefulWidget {
   final ValueChanged<Annotation>? onAnnotationUpdated;
   final ValueChanged<Annotation?>? onAnnotationSelected;
 
+  final ValueChanged<Offset>? onSamTap;
+
   const AnnotatorCanvas({
     required this.image,
     required this.mediaItemId,
@@ -51,6 +53,7 @@ class AnnotatorCanvas extends StatefulWidget {
     this.onZoomChanged,
     this.onAnnotationUpdated,
     this.onAnnotationSelected,
+    this.onSamTap,
     super.key,
   });
 
@@ -442,6 +445,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
       final tapped = _findAnnotationAtPosition(transformed);
       widget.onAnnotationSelected?.call(tapped);
+
+    } else if (widget.userAction == UserAction.sam_annotation) {
+      inverse.copyInverse(matrix);
+      final imagePoint = MatrixUtils.transformPoint(inverse, details.localPosition);
+      widget.onSamTap?.call(imagePoint);
     }
   }
 

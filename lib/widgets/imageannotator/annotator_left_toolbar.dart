@@ -116,10 +116,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           if (Platform.isWindows)...[
             ToolbarButton(
-              icon: Icon(Icons.format_shapes_rounded),
+              icon: Icon(Icons.auto_fix_high_outlined),
               onTap: () => _selectUserAction(UserAction.sam_annotation),
               isActive: widget.selectedAction == UserAction.sam_annotation,
-              tooltip: l10n.toolbarBbox,
+              tooltip: 'Segment Anything (SAM)',
             ),
           ],
           

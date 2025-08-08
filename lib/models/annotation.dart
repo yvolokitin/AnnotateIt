@@ -132,6 +132,25 @@ extension AnnotationCopy on Annotation {
     ..name = name ?? this.name
     ..color = color ?? this.color;
   }
+
+  Annotation copyWithId(int newId) {
+    return Annotation(
+      id: newId,
+      mediaItemId: mediaItemId,
+      labelId: labelId,
+      annotationType: annotationType,
+      data: data,
+      confidence: confidence,
+      annotatorId: annotatorId,
+      comment: comment,
+      status: status,
+      version: version,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    )
+      ..name = name
+      ..color = color;
+  }
 }
 
 extension AnnotationShapeExt on Annotation {
