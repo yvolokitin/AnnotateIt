@@ -93,6 +93,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+     - assets/models_sam/mobile_sam.encoder.onnx
+     - assets/models_sam/mobile_sam.decoder.onnx
      - assets/logo/annotateit.png
      - assets/logo/annotateit_white.png
      - assets/images/media_upload.svg
