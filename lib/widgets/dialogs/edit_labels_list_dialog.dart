@@ -189,8 +189,8 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                             color: label.toColor(),
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
-                                              color: label.isDefault ? Colors.white : Colors.white24,
-                                              width: label.isDefault ? 3 : 1,
+                                              color: Colors.white24,
+                                              width: 1,
                                             ),
                                           ),
                                         ),
@@ -505,41 +505,43 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    // Convert labels to JSON
-                    final encoder = const JsonEncoder.withIndent('  ');
-                    final json = encoder.convert(_labels.map((l) => l.toMap()).toList());
-                    // Pick a location to save the file (using file_picker or similar)
-                    // Example using file_picker:
-                    final result = await FilePicker.platform.saveFile(
-                      dialogTitle: 'Save labels in JSON file',
-                      fileName: 'labels.json',
-                    );
-                    if (result != null) {
-                      final file = File(result);
-                      await file.writeAsString(json);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: BorderSide(color: Colors.white70, width: 1),
+                if (UserSession.instance.getUser().showExportLabelsButton)...[
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Convert labels to JSON
+                      final encoder = const JsonEncoder.withIndent('  ');
+                      final json = encoder.convert(_labels.map((l) => l.toMap()).toList());
+                      // Pick a location to save the file (using file_picker or similar)
+                      // Example using file_picker:
+                      final result = await FilePicker.platform.saveFile(
+                        dialogTitle: 'Save labels in JSON file',
+                        fileName: 'labels.json',
+                      );
+                      if (result != null) {
+                        final file = File(result);
+                        await file.writeAsString(json);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(color: Colors.white70, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.buttonExportLabels,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: screenWidth > 1200 ? 18 : 16,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: 'CascadiaCode',
+                      ),
                     ),
                   ),
-                  child: Text(
-                    l10n.buttonExportLabels,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: screenWidth > 1200 ? 18 : 16,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                ),
+                ],
               ],
             ),
           ),
