@@ -456,8 +456,8 @@
   "datasetStepProgressTaskConfirmation": "Task Confirmation",
   "datasetStepProgressProjectCreation": "Project Creation",
 
-  "projectTypeDetectionBoundingBox": "Detection bounding box",
-  "projectTypeDetectionOriented": "Detection oriented",
+  "projectTypeDetectionBoundingBox": "Detection (Bounding Box)",
+  "projectTypeDetectionOriented": "Detection (Rotated Bounding Box)",
   "projectTypeBinaryClassification": "Binary Classification",
   "projectTypeMultiClassClassification": "Multi-class Classification",
   "projectTypeMultiLabelClassification": "Multi-label Classification",

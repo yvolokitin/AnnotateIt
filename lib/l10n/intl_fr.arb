@@ -451,8 +451,8 @@
   "datasetStepProgressTaskConfirmation": "Confirmation de la Tâche",
   "datasetStepProgressProjectCreation": "Création du Projet",
 
-  "projectTypeDetectionBoundingBox": "Détection avec boîte englobante",
-  "projectTypeDetectionOriented": "Détection orientée",
+  "projectTypeDetectionBoundingBox": "Détection (Boîte Englobante)",
+  "projectTypeDetectionOriented": "Détection (Boîte Englobante Pivotée)",
   "projectTypeBinaryClassification": "Classification Binaire",
   "projectTypeMultiClassClassification": "Classification Multi-classes",
   "projectTypeMultiLabelClassification": "Classification Multi-étiquettes",

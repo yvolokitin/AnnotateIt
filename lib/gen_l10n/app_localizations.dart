@@ -1947,13 +1947,13 @@ abstract class AppLocalizations {
   /// No description provided for @projectTypeDetectionBoundingBox.
   ///
   /// In en, this message translates to:
-  /// **'Detection bounding box'**
+  /// **'Detection (Bounding Box)'**
   String get projectTypeDetectionBoundingBox;
 
   /// No description provided for @projectTypeDetectionOriented.
   ///
   /// In en, this message translates to:
-  /// **'Detection oriented'**
+  /// **'Detection (Rotated Bounding Box)'**
   String get projectTypeDetectionOriented;
 
   /// No description provided for @projectTypeBinaryClassification.

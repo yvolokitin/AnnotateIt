@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../gen_l10n/app_localizations.dart';
 import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class DetectionTab extends StatelessWidget {
@@ -14,18 +15,20 @@ class DetectionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return DatasetTaskTypeGrid(
       selectedTaskType: selectedTaskType,
       onTaskSelected: onSelected,
-      tasks: const [
+      tasks: [
         {
-          'title': 'Detection bounding box',
-          'description': 'Draw a rectangle around an object in an image.',
+          'title': l10n.projectTypeDetectionBoundingBox,
+          'description': l10n.projectTypeDetectionBoundingBoxDescription,
           'image': 'assets/images/detection_bounding_box.jpg',
         },
         {
-          'title': 'Detection oriented',
-          'description': 'Draw and enclose an object within a minimal rectangle.',
+          'title': l10n.projectTypeDetectionOriented,
+          'description': l10n.projectTypeDetectionOrientedDescription,
           'image': 'assets/images/detection_oriented.jpg',
         },
         /*

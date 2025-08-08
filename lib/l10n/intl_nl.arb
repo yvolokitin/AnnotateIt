@@ -449,8 +449,8 @@
   "datasetStepProgressTaskConfirmation": "Taakbevestiging",
   "datasetStepProgressProjectCreation": "Project Aanmaken",
 
-  "projectTypeDetectionBoundingBox": "Detectie met begrenzingsvak",
-  "projectTypeDetectionOriented": "Georiënteerde detectie",
+  "projectTypeDetectionBoundingBox": "Detectie (Begrenzingsvak)",
+  "projectTypeDetectionOriented": "Detectie (Geroteerd Begrenzingsvak)",
   "projectTypeBinaryClassification": "Binaire Classificatie",
   "projectTypeMultiClassClassification": "Multi-class Classificatie",
   "projectTypeMultiLabelClassification": "Multi-label Classificatie",

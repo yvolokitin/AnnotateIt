@@ -451,8 +451,8 @@
   "datasetStepProgressTaskConfirmation": "Aufgabenbestätigung",
   "datasetStepProgressProjectCreation": "Projekterstellung",
 
-  "projectTypeDetectionBoundingBox": "Erkennung mit Begrenzungsrahmen",
-  "projectTypeDetectionOriented": "Orientierte Erkennung",
+  "projectTypeDetectionBoundingBox": "Erkennung (Begrenzungsrahmen)",
+  "projectTypeDetectionOriented": "Erkennung (Rotierter Begrenzungsrahmen)",
   "projectTypeBinaryClassification": "Binäre Klassifizierung",
   "projectTypeMultiClassClassification": "Multi-Klassen-Klassifizierung",
   "projectTypeMultiLabelClassification": "Multi-Label-Klassifizierung",

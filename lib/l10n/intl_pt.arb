@@ -451,8 +451,8 @@
   "datasetStepProgressTaskConfirmation": "Confirmação de Tarefa",
   "datasetStepProgressProjectCreation": "Criação de Projeto",
 
-  "projectTypeDetectionBoundingBox": "Detecção com caixa delimitadora",
-  "projectTypeDetectionOriented": "Detecção orientada",
+  "projectTypeDetectionBoundingBox": "Detecção (Caixa Delimitadora)",
+  "projectTypeDetectionOriented": "Detecção (Caixa Delimitadora Rotacionada)",
   "projectTypeBinaryClassification": "Classificação Binária",
   "projectTypeMultiClassClassification": "Classificação Multi-classe",
   "projectTypeMultiLabelClassification": "Classificação Multi-etiqueta",

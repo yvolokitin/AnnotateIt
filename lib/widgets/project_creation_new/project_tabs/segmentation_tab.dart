@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../gen_l10n/app_localizations.dart';
 import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class SegmentationTab extends StatelessWidget {
@@ -14,18 +15,20 @@ class SegmentationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return DatasetTaskTypeGrid(
       selectedTaskType: selectedTaskType,
       onTaskSelected: onSelected,
-      tasks: const [
+      tasks: [
         {
-          'title': 'Instance Segmentation',
-          'description': 'Detect and distinguish each individual object based on its unique features.',
+          'title': l10n.projectTypeInstanceSegmentation,
+          'description': l10n.projectTypeInstanceSegmentationDescription,
           'image': 'assets/images/instance_segmentation.jpg',
         },
         {
-          'title': 'Semantic Segmentation',
-          'description': 'Detect and classify all similar objects as a single entity.',
+          'title': l10n.projectTypeSemanticSegmentation,
+          'description': l10n.projectTypeSemanticSegmentationDescription,
           'image': 'assets/images/semantic_segmentation.jpg',
         },
       ],

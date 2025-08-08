@@ -1050,10 +1050,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get datasetStepProgressProjectCreation => 'Project Creation';
 
   @override
-  String get projectTypeDetectionBoundingBox => 'Detection bounding box';
+  String get projectTypeDetectionBoundingBox => 'Detection (Bounding Box)';
 
   @override
-  String get projectTypeDetectionOriented => 'Detection oriented';
+  String get projectTypeDetectionOriented => 'Detection (Rotated Bounding Box)';
 
   @override
   String get projectTypeBinaryClassification => 'Binary Classification';

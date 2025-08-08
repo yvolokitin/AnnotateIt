@@ -451,8 +451,8 @@
   "datasetStepProgressTaskConfirmation": "Conferma Attività",
   "datasetStepProgressProjectCreation": "Creazione Progetto",
 
-  "projectTypeDetectionBoundingBox": "Rilevamento con riquadro di delimitazione",
-  "projectTypeDetectionOriented": "Rilevamento orientato",
+  "projectTypeDetectionBoundingBox": "Rilevamento (Riquadro di Delimitazione)",
+  "projectTypeDetectionOriented": "Rilevamento (Riquadro di Delimitazione Ruotato)",
   "projectTypeBinaryClassification": "Classificazione Binaria",
   "projectTypeMultiClassClassification": "Classificazione Multi-classe",
   "projectTypeMultiLabelClassification": "Classificazione Multi-etichetta",

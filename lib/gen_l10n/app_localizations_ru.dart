@@ -1058,11 +1058,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get projectTypeDetectionBoundingBox =>
-      'Обнаружение (ограничивающие рамки)';
+      'Детекция (прямоугольные рамки)';
 
   @override
-  String get projectTypeDetectionOriented =>
-      'Обнаружение (ориентированные рамки)';
+  String get projectTypeDetectionOriented => 'Детекция (поворотные рамки)';
 
   @override
   String get projectTypeBinaryClassification => 'Бинарная классификация';

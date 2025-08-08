@@ -404,8 +404,8 @@
   "datasetStepProgressTaskConfirmation": "Подтверждение задачи",
   "datasetStepProgressProjectCreation": "Создание проекта",
 
-  "projectTypeDetectionBoundingBox": "Обнаружение (ограничивающие рамки)",
-  "projectTypeDetectionOriented": "Обнаружение (ориентированные рамки)",
+  "projectTypeDetectionBoundingBox": "Детекция (прямоугольные рамки)",
+  "projectTypeDetectionOriented": "Детекция (поворотные рамки)",
   "projectTypeBinaryClassification": "Бинарная классификация",
   "projectTypeMultiClassClassification": "Многоклассовая классификация",
   "projectTypeMultiLabelClassification": "Многометочная классификация",

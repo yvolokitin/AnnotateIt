@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../gen_l10n/app_localizations.dart';
 import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
 
 class ClassificationTab extends StatelessWidget {
@@ -14,23 +15,25 @@ class ClassificationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return DatasetTaskTypeGrid(
       selectedTaskType: selectedTaskType,
       onTaskSelected: onSelected,
-      tasks: const [
+      tasks: [
         {
-          'title': 'Binary Classification',
-          'description': 'Assign one of two possible labels to each input (e.g., spam or not spam, positive or negative).',
+          'title': l10n.projectTypeBinaryClassification,
+          'description': l10n.projectTypeBinaryClassificationDescription,
           'image': 'assets/images/classification_binary.jpg',
         },
         {
-          'title': 'Multi-class Classification',
-          'description': 'Assign exactly one label from a set of mutually exclusive classes (e.g., cat, dog, or bird).',
+          'title': l10n.projectTypeMultiClassClassification,
+          'description': l10n.projectTypeMultiClassClassificationDescription,
           'image': 'assets/images/classification_multi_class.jpg',
         },
         {
-          'title': 'Multi-label Classification',
-          'description': 'Assign one or more labels from a set of classes — multiple labels can apply at the same time (e.g., an image tagged as both "cat" and "dog")',
+          'title': l10n.projectTypeMultiLabelClassification,
+          'description': l10n.projectTypeMultiLabelClassificationDescription,
           'image': 'assets/images/anomaly_detection.jpg', // 'assets/images/classification_multi_label.jpg',
         },
         /*
