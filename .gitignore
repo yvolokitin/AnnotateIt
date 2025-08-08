@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore ONNX Runtime binaries
+packages/sam_onnx/third_party/onnxruntime/**/bin/
+packages/sam_onnx/third_party/onnxruntime/**/lib/
+packages/sam_onnx/third_party/onnxruntime/**/*.dll
+packages/sam_onnx/third_party/onnxruntime/**/*.lib
+packages/sam_onnx/third_party/onnxruntime/**/*.pdb

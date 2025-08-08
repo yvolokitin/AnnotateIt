@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/repos/AnnotateIt/packages/sam_onnx/windows/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

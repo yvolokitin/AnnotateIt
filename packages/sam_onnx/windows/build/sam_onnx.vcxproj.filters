@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\repos\AnnotateIt\packages\sam_onnx\windows\sam_onnx.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\repos\AnnotateIt\packages\sam_onnx\windows\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{B19ABA2F-40B0-3195-924D-06FB7F6BF782}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

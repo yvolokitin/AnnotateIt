@@ -114,6 +114,19 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
+          if (Platform.isWindows) ...[
+            ToolbarButton(
+              icon: Icons.auto_fix_high,
+              label: 'SAM',
+              isActive: widget.selectedAction == UserAction.samPoint || widget.selectedAction == UserAction.samBox,
+              onTap: () => setState(() => userAction = UserAction.samPoint),
+              submenu: [
+                ToolbarSubItem('Point', onTap: () => setState(() => _selectUserAction(UserAction.samPoint)),
+                ToolbarSubItem('Box',   onTap: () => setState(() => _selectUserAction(UserAction.samBox)),
+              ],
+            ),
+          ],
+
           // ML Kit Image Labeling Button - only shown on Android/iOS
           // This is the AI annotation tool for mobile platforms
           if (Platform.isAndroid || Platform.isIOS) ...[
@@ -166,15 +179,6 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Segmentation Button (conditionally shown)
           if (annotationSegment) ...[
-            /// disabled since SAM is not supported yet
-            /// ToolbarDivider(isCompact: isCompact),
-            /// ToolbarButton(
-            ///  icon: Icon(Icons.auto_awesome_outlined),
-            ///  onTap: () => _selectUserAction(UserAction.sam_annotation),
-            ///  isActive: widget.selectedAction == UserAction.sam_annotation,
-            ///  tooltip: l10n.toolbarSAM,
-            ///),
-            
             // Polygon Annotation Button
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(

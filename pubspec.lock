@@ -1029,6 +1029,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.1"
+  sam_onnx:
+    dependency: "direct main"
+    description:
+      path: "packages/sam_onnx"
+      relative: true
+    source: path
+    version: "0.1.0"
   shelf:
     dependency: transitive
     description:

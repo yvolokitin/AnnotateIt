@@ -1,0 +1,10 @@
+^C:\REPOS\ANNOTATEIT\PACKAGES\SAM_ONNX\WINDOWS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/repos/AnnotateIt/packages/sam_onnx/windows -BC:/repos/AnnotateIt/packages/sam_onnx/windows/build --check-stamp-file C:/repos/AnnotateIt/packages/sam_onnx/windows/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

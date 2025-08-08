@@ -1,0 +1,3 @@
+C:/repos/AnnotateIt/packages/sam_onnx/windows/build/CMakeFiles/sam_onnx.dir
+C:/repos/AnnotateIt/packages/sam_onnx/windows/build/CMakeFiles/ALL_BUILD.dir
+C:/repos/AnnotateIt/packages/sam_onnx/windows/build/CMakeFiles/ZERO_CHECK.dir

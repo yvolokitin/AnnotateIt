@@ -1,0 +1,1 @@
+C:/repos/AnnotateIt/packages/sam_onnx/windows/build/sam_onnx.dir/MinSizeRel/sam_onnx.obj
