@@ -1,0 +1,25 @@
+name: sam_onnx
+description: Minimal ONNX Runtime FFI for MobileSAM (encoder+decoder).
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  ffi: ^2.1.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.annotateit.sam_onnx
+        pluginClass: SamOnnxPlugin
+      ios:
+        pluginClass: SamOnnxPlugin
+      macos:
+        pluginClass: SamOnnxPlugin
+      windows:
+        pluginClass: SamOnnxPlugin
+      linux:
+        pluginClass: SamOnnxPlugin
