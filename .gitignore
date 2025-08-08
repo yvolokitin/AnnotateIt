@@ -50,3 +50,7 @@ packages/sam_onnx/third_party/onnxruntime/**/lib/
 packages/sam_onnx/third_party/onnxruntime/**/*.dll
 packages/sam_onnx/third_party/onnxruntime/**/*.lib
 packages/sam_onnx/third_party/onnxruntime/**/*.pdb
+
+# Native DLLs
+/windows/*.dll
+/build/**/*.dll

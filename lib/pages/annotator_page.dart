@@ -6,6 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
+// ✅ Brings in SamProvider enum and FFI bindings
+import 'package:sam_onnx/sam_onnx.dart';
+// ✅ Float32List (and friends) live here
+import 'dart:typed_data';
+
 import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
 import '../data/annotation_database.dart';
@@ -29,6 +34,7 @@ import '../widgets/imageannotator/annotator_top_toolbar.dart';
 import '../widgets/imageannotator/annotator_canvas.dart';
 import '../widgets/imageannotator/user_action.dart';
 
+// SAM helpers in your repo
 import '../sam/sam_service.dart';
 import '../sam/image_preprocess.dart';
 import '../sam/mask_post.dart';
@@ -96,19 +102,19 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   final FocusNode _focusNode = FocusNode();
 
-  // SAM bits
-  SamService? _sam;
+  // ✅ SAM state: service, busy flag, provider, and optional embedding cache
+  late final SamService _sam;
   bool _samBusy = false;
   SamProvider _provider = SamProvider.auto;
-  final _embeddingCache = <int, Float32List>{}; // optional local cache
-  
+  final _embeddings = <int, Float32List>{};
+
   @override
   void initState() {
     super.initState();
     _currentIndex = (widget.pageIndex * widget.pageSize) + widget.localIndex;
     _pageController = PageController(initialPage: _currentIndex);
     _preloadInitialMedia();
-    _initSam();
+    _initSam(); // ✅ initialize SAM
     
     // Initialize ML Kit image labeler
     if (Platform.isAndroid || Platform.isIOS) {
@@ -146,85 +152,25 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     }
   }
 
+  /// Initialize the SAM service by copying models from assets to temp and creating ORT sessions.
   Future<void> _initSam() async {
-    final encPath = await ensureAssetFile(
-      'assets/models_sam/mobile_sam.encoder.onnx',
-      filename: 'mobile_sam.encoder.onnx',
-    );
-    final decPath = await ensureAssetFile(
-      'assets/models_sam/mobile_sam.decoder.onnx',
-      filename: 'mobile_sam.decoder.onnx',
-    );
-    final svc = SamService(
-      encoderPath: encPath,
-      decoderPath: decPath,
-      provider: _provider,
-    );
-    await svc.load();
-    setState(() => _sam = svc);
-  }
-
-  // Call this when user taps in SAM Point mode
-  Future<void> onCanvasTapForSam(Offset screenPos) async {
-    if (_sam == null) return;
-    if (userAction != UserAction.samPoint) return;
-    final imgPos = transforms.screenToImage(screenPos); // you already have this
-    await _runSam(points: [imgPos], labels: [1]);
-  }
-
-  // Call this when user finishes dragging a rectangle in SAM Box mode
-  Future<void> onBoxCompletedForSam(Rect imageRect) async {
-    if (_sam == null) return;
-    if (userAction != UserAction.samBox) return;
-    await _runSam(box: imageRect);
-  }
-
-  Future<void> _runSam({List<Offset>? points, List<int>? labels, Rect? box}) async {
-    if (_sam == null) return;
-    final img = await _currentImageData(); // implement below
-    final mediaId = currentMediaId;        // whatever unique id you already use
-
-    setState(() => _samBusy = true);
-    final res = await _sam!.decode(
-      mediaItemId: mediaId,
-      img: img,
-      prompt: SamPrompt(points: points ?? const [], labels: labels ?? const [], box: box),
-    );
-    setState(() => _samBusy = false);
-
-    if (projectType == ProjectType.segmentation) {
-      // v1: polygon = bbox outline (fast). We can upgrade to real contours later.
-      final polys = extractPolygons(res.mask256, Size(img.width.toDouble(), img.height.toDouble()));
-      for (final poly in polys) {
-        _addPolygonAnnotation(poly, currentLabelId);
+    try {
+      final encPath = await ensureAssetFile('assets/models_sam/mobile_sam.encoder.onnx');
+      final decPath = await ensureAssetFile('assets/models_sam/mobile_sam.decoder.onnx');
+      final svc = SamService(encoderPath: encPath, decoderPath: decPath, provider: _provider);
+      await svc.load();
+      setState(() => _sam = svc);
+    } catch (e, st) {
+      _logger.severe('Failed to initialize SAM', e, st);
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'SAM Initialization Failed',
+          'Could not initialize the SAM models.\n${e.toString()}',
+        );
       }
-    } else {
-      final bb = tightBbox(res.mask256, Size(img.width.toDouble(), img.height.toDouble()));
-      if (!bb.isEmpty) _addBboxAnnotation(bb, currentLabelId);
     }
   }
-
-  // Busy hint in your bottom bar / app bar
-  Widget _samIndicator() => _samBusy ? const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 8),
-    child: Chip(label: Text('SAM…')),
-  ) : const SizedBox.shrink();
-
-  // Optional provider toggle menu
-  Widget _providerToggle() => PopupMenuButton<SamProvider>(
-    tooltip: 'SAM provider',
-    onSelected: (p) async {
-      setState(() => _provider = p);
-      await _initSam(); // re-init sessions with new provider
-    },
-    itemBuilder: (_) => const [
-      PopupMenuItem(value: SamProvider.auto, child: Text('Auto')),
-      PopupMenuItem(value: SamProvider.cpu, child: Text('CPU')),
-      PopupMenuItem(value: SamProvider.directml, child: Text('DirectML (Win)')),
-      PopupMenuItem(value: SamProvider.nnapi, child: Text('NNAPI (Android)')),
-    ],
-    child: const Icon(Icons.settings_suggest),
-  );
 
   @override
   void dispose() {
@@ -393,10 +339,13 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       // Update UI
       if (mounted) {
         setState(() {
-          final existingAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+          final currentMedia = _mediaCache[_currentIndex];
+          final existingAnnotations = List<Annotation>.from(currentMedia?.annotations ?? []);
           final newAnnotations = [...existingAnnotations, ...savedAnnotations];
           
-          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+          if (currentMedia != null) {
+            _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: newAnnotations);
+          }
           
           // Switch back to navigation mode
           userAction = UserAction.navigation;
@@ -1249,6 +1198,25 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         );
       }
     }
+  }
+
+  /// Helper: return RGB bytes for the currently shown image.
+  /// SAM expects RGB, row-major, no alpha.
+  Future<ImageData> _currentImageData() async {
+    final ui.Image? uiImg = _imageCache[_currentIndex];
+    if (uiImg == null) {
+      throw StateError('No image loaded for index $_currentIndex');
+    }
+    final bd = await uiImg.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final rgba = bd!.buffer.asUint8List();
+    final rgb = Uint8List(uiImg.width * uiImg.height * 3);
+    int di = 0;
+    for (int i = 0; i < rgba.length; i += 4) {
+      rgb[di++] = rgba[i];       // R
+      rgb[di++] = rgba[i + 1];   // G
+      rgb[di++] = rgba[i + 2];   // B
+    }
+    return ImageData(uiImg.width, uiImg.height, rgb);
   }
 
   @override

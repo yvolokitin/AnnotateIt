@@ -113,7 +113,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               tooltip: l10n.toolbarBbox,
             ),
           ],
-
+/*
           if (Platform.isWindows) ...[
             ToolbarButton(
               icon: Icons.auto_fix_high,
@@ -126,7 +126,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               ],
             ),
           ],
-
+*/
           // ML Kit Image Labeling Button - only shown on Android/iOS
           // This is the AI annotation tool for mobile platforms
           if (Platform.isAndroid || Platform.isIOS) ...[

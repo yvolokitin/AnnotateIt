@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-/// Copies an asset to a writable temp file and returns its absolute path.
-/// (ONNX Runtime needs a real file path, not an asset key.)
+/// Копирует asset в temp-файл и возвращает абсолютный путь (ORT требуется файл).
 Future<String> ensureAssetFile(String assetPath, {String? filename}) async {
   final bytes = await rootBundle.load(assetPath);
   final dir = await getTemporaryDirectory();
