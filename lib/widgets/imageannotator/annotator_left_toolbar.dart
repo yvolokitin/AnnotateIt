@@ -104,7 +104,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ),
 
           // Bounding Box Button (conditionally shown)
-          if (annotationDetection) ...[
+          if (annotationDetection)...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
               icon: Icon(Icons.format_shapes_rounded),
@@ -113,23 +113,19 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               tooltip: l10n.toolbarBbox,
             ),
           ],
-/*
-          if (Platform.isWindows) ...[
+
+          if (Platform.isWindows)...[
             ToolbarButton(
-              icon: Icons.auto_fix_high,
-              label: 'SAM',
-              isActive: widget.selectedAction == UserAction.samPoint || widget.selectedAction == UserAction.samBox,
-              onTap: () => setState(() => userAction = UserAction.samPoint),
-              submenu: [
-                ToolbarSubItem('Point', onTap: () => setState(() => _selectUserAction(UserAction.samPoint)),
-                ToolbarSubItem('Box',   onTap: () => setState(() => _selectUserAction(UserAction.samBox)),
-              ],
+              icon: Icon(Icons.format_shapes_rounded),
+              onTap: () => _selectUserAction(UserAction.sam_annotation),
+              isActive: widget.selectedAction == UserAction.sam_annotation,
+              tooltip: l10n.toolbarBbox,
             ),
           ],
-*/
+          
           // ML Kit Image Labeling Button - only shown on Android/iOS
           // This is the AI annotation tool for mobile platforms
-          if (Platform.isAndroid || Platform.isIOS) ...[
+          if (Platform.isAndroid || Platform.isIOS)...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
               icon: widget.isProcessingMlKit 
