@@ -1066,10 +1066,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get projectTypeDetectionBoundingBox =>
-      'Rilevamento con riquadro di delimitazione';
+      'Rilevamento (Riquadro di Delimitazione)';
 
   @override
-  String get projectTypeDetectionOriented => 'Rilevamento orientato';
+  String get projectTypeDetectionOriented =>
+      'Rilevamento (Riquadro di Delimitazione Ruotato)';
 
   @override
   String get projectTypeBinaryClassification => 'Classificazione Binaria';

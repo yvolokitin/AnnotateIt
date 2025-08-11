@@ -66,15 +66,35 @@ class _ToolbarButtonState extends State<ToolbarButton> {
               borderRadius: Constants.buttonBorderRadius,
             ),
             child: Center(
-              child: widget.child ?? Icon(
-                (widget.icon as Icon).icon,
-                color: iconColor,
-                size: Constants.iconSize,
-              ),
+              child: widget.child ?? _buildVisual(iconColor),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildVisual(Color iconColor) {
+    // If child is provided, build method won't call this.
+    final w = widget.icon;
+    if (w == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (w is Icon) {
+      // Rebuild Icon to enforce consistent color/size styling for toolbar
+      return Icon(
+        w.icon,
+        color: w.color ?? iconColor,
+        size: w.size ?? Constants.iconSize,
+      );
+    }
+
+    // For arbitrary widgets (e.g., progress indicator), just apply IconTheme so it can
+    // pick up size/color if it respects IconTheme; otherwise keep its own visuals.
+    return IconTheme(
+      data: IconThemeData(color: iconColor, size: Constants.iconSize),
+      child: w,
     );
   }
 }

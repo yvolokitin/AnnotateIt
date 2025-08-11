@@ -1078,10 +1078,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get projectTypeDetectionBoundingBox =>
-      'Detección con cuadro delimitador';
+      'Detección (Cuadro Delimitador)';
 
   @override
-  String get projectTypeDetectionOriented => 'Detección orientada';
+  String get projectTypeDetectionOriented =>
+      'Detección (Cuadro Delimitador Rotado)';
 
   @override
   String get projectTypeBinaryClassification => 'Clasificación Binaria';

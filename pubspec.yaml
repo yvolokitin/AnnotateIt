@@ -64,6 +64,7 @@ dependencies:
   msix: ^3.16.10
   window_size: ^0.1.0
   package_info_plus: ^8.3.0
+  js: ^0.6.7
 
 dev_dependencies:
   flutter_test:
@@ -119,6 +120,7 @@ flutter:
      - assets/images/no_labels.png
      - assets/images/start_first_project.png
      - assets/models/
+     - assets/models_sam/
   
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

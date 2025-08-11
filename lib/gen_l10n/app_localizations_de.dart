@@ -1069,11 +1069,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get datasetStepProgressProjectCreation => 'Projekterstellung';
 
   @override
-  String get projectTypeDetectionBoundingBox =>
-      'Erkennung mit Begrenzungsrahmen';
+  String get projectTypeDetectionBoundingBox => 'Erkennung (Begrenzungsrahmen)';
 
   @override
-  String get projectTypeDetectionOriented => 'Orientierte Erkennung';
+  String get projectTypeDetectionOriented =>
+      'Erkennung (Rotierter Begrenzungsrahmen)';
 
   @override
   String get projectTypeBinaryClassification => 'Binäre Klassifizierung';

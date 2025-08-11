@@ -1084,11 +1084,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get datasetStepProgressProjectCreation => 'Création du Projet';
 
   @override
-  String get projectTypeDetectionBoundingBox =>
-      'Détection avec boîte englobante';
+  String get projectTypeDetectionBoundingBox => 'Détection (Boîte Englobante)';
 
   @override
-  String get projectTypeDetectionOriented => 'Détection orientée';
+  String get projectTypeDetectionOriented =>
+      'Détection (Boîte Englobante Pivotée)';
 
   @override
   String get projectTypeBinaryClassification => 'Classification Binaire';

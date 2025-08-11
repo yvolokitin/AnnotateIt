@@ -19,6 +19,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final double cornerSize;
   final bool isProcessingMlKit;
   final bool isProcessingTFLite;
+  final bool isProcessingSAM;
 
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<double> onStrokeWidthChanged;
@@ -45,6 +46,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onCornerSizeChanged,
     this.isProcessingMlKit = false,
     this.isProcessingTFLite = false,
+    this.isProcessingSAM = false,
   });
 
   @override
@@ -164,16 +166,26 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
-          // Segmentation Button (conditionally shown)
+          // Segmentation Buttons (conditionally shown)
           if (annotationSegment) ...[
-            /// disabled since SAM is not supported yet
-            /// ToolbarDivider(isCompact: isCompact),
-            /// ToolbarButton(
-            ///  icon: Icon(Icons.auto_awesome_outlined),
-            ///  onTap: () => _selectUserAction(UserAction.sam_annotation),
-            ///  isActive: widget.selectedAction == UserAction.sam_annotation,
-            ///  tooltip: l10n.toolbarSAM,
-            ///),
+            ToolbarDivider(isCompact: isCompact),
+            ToolbarButton(
+              icon: widget.isProcessingSAM
+                ? SizedBox(
+                    width: Constants.iconSize,
+                    height: Constants.iconSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(Icons.auto_awesome_outlined),
+              onTap: widget.isProcessingSAM
+                ? null
+                : () => _selectUserAction(UserAction.sam_annotation),
+              isActive: widget.selectedAction == UserAction.sam_annotation,
+              tooltip: l10n.toolbarSAM,
+            ),
             
             // Polygon Annotation Button
             ToolbarDivider(isCompact: isCompact),

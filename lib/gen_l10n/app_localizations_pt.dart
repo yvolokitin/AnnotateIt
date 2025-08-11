@@ -1076,11 +1076,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get datasetStepProgressProjectCreation => 'Criação de Projeto';
 
   @override
-  String get projectTypeDetectionBoundingBox =>
-      'Detecção com caixa delimitadora';
+  String get projectTypeDetectionBoundingBox => 'Detecção (Caixa Delimitadora)';
 
   @override
-  String get projectTypeDetectionOriented => 'Detecção orientada';
+  String get projectTypeDetectionOriented =>
+      'Detecção (Caixa Delimitadora Rotacionada)';
 
   @override
   String get projectTypeBinaryClassification => 'Classificação Binária';

@@ -34,6 +34,7 @@ class AnnotatorCanvas extends StatefulWidget {
   final ValueChanged<double>? onZoomChanged;
   final ValueChanged<Annotation>? onAnnotationUpdated;
   final ValueChanged<Annotation?>? onAnnotationSelected;
+  final ValueChanged<Offset>? onSamTap;
 
   const AnnotatorCanvas({
     required this.image,
@@ -51,6 +52,7 @@ class AnnotatorCanvas extends StatefulWidget {
     this.onZoomChanged,
     this.onAnnotationUpdated,
     this.onAnnotationSelected,
+    this.onSamTap,
     super.key,
   });
 
@@ -203,6 +205,12 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _drawingStart = transformed;
         _drawingCurrent = transformed;
       });
+    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.sam_annotation) {
+      // In SAM mode: on click, emit the image-space coordinate to parent for processing
+      inverse.copyInverse(matrix);
+      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      widget.onSamTap?.call(transformed);
+      return;
     } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.polygon_annotation) {
       inverse.copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);

@@ -1057,10 +1057,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get datasetStepProgressProjectCreation => 'Project Aanmaken';
 
   @override
-  String get projectTypeDetectionBoundingBox => 'Detectie met begrenzingsvak';
+  String get projectTypeDetectionBoundingBox => 'Detectie (Begrenzingsvak)';
 
   @override
-  String get projectTypeDetectionOriented => 'Georiënteerde detectie';
+  String get projectTypeDetectionOriented =>
+      'Detectie (Geroteerd Begrenzingsvak)';
 
   @override
   String get projectTypeBinaryClassification => 'Binaire Classificatie';

@@ -17,6 +17,7 @@ import '../models/annotated_labeled_media.dart';
 
 import '../services/ml_kit_image_labeling_service.dart';
 import '../services/tflite_detection_service.dart';
+import '../services/sam_segmentation_service.dart';
 import '../session/user_session.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
@@ -89,6 +90,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   final TFLiteDetectionService _tfliteService = TFLiteDetectionService();
   bool _isProcessingTFLite = false;
 
+  // SAM segmentation service
+  final SamSegmentationService _samService = SamSegmentationService();
+  bool _isProcessingSAM = false;
+
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -108,6 +113,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       print('WINDOWS:: Initializing TFLite detection service');
       _tfliteService.initialize(confidenceThreshold: 0.5);
     }
+
+    // Initialize SAM segmentation service (platform-agnostic; uses fallback if runtime unsupported)
+    _samService.initialize();
 
     if (widget.project.labels.isEmpty || widget.mediaItem.annotations.isEmpty) {
       showRightSidebar = false;
@@ -150,7 +158,111 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       _tfliteService.close();
     }
 
+    _samService.close();
+
     super.dispose();
+  }
+  
+  /// Handle a click (in image coordinates) when SAM tool is active
+  Future<void> _handleSamTap(Offset imagePoint) async {
+    if (_isProcessingSAM) return;
+
+    final currentMedia = _mediaCache[_currentIndex];
+    final currentImage = _imageCache[_currentIndex];
+
+    if (currentMedia == null || currentImage == null) {
+      await AlertErrorDialog.show(
+        context,
+        'SAM Segmentation',
+        'No image available to process.',
+      );
+      return;
+    }
+
+    if ((selectedLabel.id ?? -1) == -1) {
+      await AlertErrorDialog.show(
+        context,
+        'No Label Selected',
+        'Please select a label before creating a segmentation mask.',
+      );
+      return;
+    }
+
+    setState(() => _isProcessingSAM = true);
+
+    try {
+      final polygon = await _samService.generateMaskPolygon(
+        image: currentImage,
+        tapPoint: imagePoint,
+      );
+
+      if (polygon.isEmpty) {
+        await AlertErrorDialog.show(
+          context,
+          'SAM Segmentation',
+          'Could not generate a mask for the selected point.',
+        );
+        return;
+      }
+
+      final newAnnotation = Annotation(
+        id: DateTime.now().millisecondsSinceEpoch,
+        mediaItemId: currentMedia.mediaItem.id!,
+        labelId: selectedLabel.id!,
+        annotationType: 'polygon',
+        data: {
+          'points': polygon.map((p) => [p.dx, p.dy]).toList(),
+        },
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )
+      ..name = selectedLabel.name
+      ..color = selectedLabel.toColor();
+
+      final insertedId = await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+      final savedAnnotation = Annotation(
+        id: insertedId,
+        mediaItemId: newAnnotation.mediaItemId,
+        labelId: newAnnotation.labelId,
+        annotationType: newAnnotation.annotationType,
+        data: newAnnotation.data,
+        confidence: newAnnotation.confidence,
+        annotatorId: newAnnotation.annotatorId,
+        comment: newAnnotation.comment,
+        status: newAnnotation.status,
+        version: newAnnotation.version,
+        createdAt: newAnnotation.createdAt,
+        updatedAt: newAnnotation.updatedAt,
+      )
+      ..name = newAnnotation.name
+      ..color = newAnnotation.color;
+
+      if (mounted) {
+        setState(() {
+          final existingAnnotations = List<Annotation>.from(currentMedia.annotations ?? []);
+          existingAnnotations.add(savedAnnotation);
+          _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: existingAnnotations);
+          _selectedAnnotation = savedAnnotation;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Segmentation mask added'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      await AlertErrorDialog.show(
+        context,
+        'SAM Segmentation Failed',
+        'An error occurred while generating the mask: ${e.toString()}',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingSAM = false);
+      }
+    }
   }
   
   /// Process the current image with ML Kit and create annotations from the results
@@ -1261,6 +1373,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           showAnnotationNames: showAnnotationNames,
                           isProcessingMlKit: _isProcessingMlKit,
                           isProcessingTFLite: _isProcessingTFLite,
+                          isProcessingSAM: _isProcessingSAM,
                           onOpacityChanged: (v) => setState(() => currentOpacity = v),
                           onStrokeWidthChanged: (v) => setState(() => currentStrokeWidth = v),
                           onCornerSizeChanged: (v) => setState(() => currentCornerSize = v),                        
@@ -1297,6 +1410,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                     },
                                     onAnnotationUpdated: _handleAnnotationUpdated,
                                     onAnnotationSelected: _handleAnnotationSelected,
+                                    onSamTap: _handleSamTap,
                                   ),
                                 ),
                               ),
