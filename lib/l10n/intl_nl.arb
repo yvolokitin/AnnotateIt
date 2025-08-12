@@ -414,6 +414,8 @@
   "labelEditEdit": "Bewerken",
   "labelEditMoveUp": "Omhoog",
   "labelEditMoveDown": "Omlaag",
+  "labelEditDefault": "Standaard",
+  "labelEditUndefault": "Niet-standaard",
   "labelEditDelete": "Verwijderen",
 
   "labelExportLabels": "Labels Exporteren",
