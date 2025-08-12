@@ -498,6 +498,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.';
 
   @override
+  String get annotations => 'Annotations';
+
+  @override
+  String get deleteAllAnnotations => 'Delete all annotations';
+
+  @override
+  String get deleteAllAnnotationsConfirm =>
+      'Are you sure you want to delete all annotations for this image?\nThis action cannot be undone.';
+
+  @override
   String get deleteProjectTitle => 'Delete Project';
 
   @override

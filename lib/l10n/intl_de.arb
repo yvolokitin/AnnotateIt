@@ -209,6 +209,10 @@
   "editProjectTitle": "Projektnamen bearbeiten",
   "editProjectDescription": "Bitte wählen Sie einen klaren, beschreibenden Projektnamen (3 - 86 Zeichen). Es wird empfohlen, Sonderzeichen zu vermeiden.",
   
+  "annotations": "Anmerkungen",
+  "deleteAllAnnotations": "Alle Anmerkungen löschen",
+  "deleteAllAnnotationsConfirm": "Möchten Sie wirklich alle Anmerkungen für dieses Bild löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.",
+
   "deleteProjectTitle": "Projekt löschen",
   "deleteProjectInProgress": "Projekt wird gelöscht...",
   "deleteProjectOptionDeleteFromDisk": "Auch alle Dateien von der Festplatte löschen",

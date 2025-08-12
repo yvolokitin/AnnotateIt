@@ -209,6 +209,10 @@
   "editProjectTitle": "Projectnaam bewerken",
   "editProjectDescription": "Kies een duidelijke, beschrijvende projectnaam (3 - 86 tekens). Het wordt aanbevolen om speciale tekens te vermijden.",
   
+  "annotations": "Annotaties",
+  "deleteAllAnnotations": "Alle annotaties verwijderen",
+  "deleteAllAnnotationsConfirm": "Weet je zeker dat je alle annotaties voor deze afbeelding wilt verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.",
+
   "deleteProjectTitle": "Project Verwijderen",
   "deleteProjectInProgress": "Project verwijderen...",
   "deleteProjectOptionDeleteFromDisk": "Ook alle bestanden van schijf verwijderen",

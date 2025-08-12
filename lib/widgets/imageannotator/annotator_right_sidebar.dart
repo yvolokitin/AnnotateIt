@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../models/label.dart';
 import '../../models/annotation.dart';
+import '../../gen_l10n/app_localizations.dart';
 import 'annotated_list_item.dart';
 
 class AnnotatorRightSidebar extends StatefulWidget {
@@ -40,6 +42,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     double screenWidth = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -74,7 +77,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Annotations (${widget.annotations.length})",
+                    "${l10n.annotations} (${widget.annotations.length})",
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: (screenWidth > 700) ? 18 : 16,
@@ -84,7 +87,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                   ),
                   if (widget.annotations.isNotEmpty)
                     Tooltip(
-                      message: 'Delete all annotations',
+                      message: l10n.deleteAllAnnotations,
                       child: IconButton(
                         icon: const Icon(Icons.delete_forever),
                         style: IconButton.styleFrom(
@@ -117,7 +120,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          'Delete All Annotations',
+                                          l10n.deleteAllAnnotations,
                                           style: TextStyle(
                                             color: Colors.redAccent,
                                             fontFamily: 'CascadiaCode',
@@ -129,7 +132,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.close, color: Colors.redAccent),
-                                      tooltip: 'Close',
+                                      tooltip: l10n.buttonClose,
                                       onPressed: () => Navigator.pop(ctx, false),
                                     ),
                                   ],
@@ -143,10 +146,10 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Divider(color: Colors.redAccent),
-                                        const Padding(
+                                        Padding(
                                           padding: EdgeInsets.all(20.0),
                                           child: Text(
-                                            'Are you sure you want to delete all annotations for this image?\nThis action cannot be undone.',
+                                            l10n.deleteAllAnnotationsConfirm,
                                             style: TextStyle(
                                               color: Colors.white70,
                                               fontFamily: 'CascadiaCode',
@@ -170,8 +173,8 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                         side: const BorderSide(color: Colors.white70, width: 2),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Cancel',
+                                    child: Text(
+                                      l10n.buttonCancel,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'CascadiaCode',
@@ -190,8 +193,8 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                         side: const BorderSide(color: Colors.redAccent, width: 2),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Delete',
+                                    child: Text(
+                                      l10n.buttonDelete,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'CascadiaCode',

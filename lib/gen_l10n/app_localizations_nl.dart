@@ -502,6 +502,16 @@ class AppLocalizationsNl extends AppLocalizations {
       'Kies een duidelijke, beschrijvende projectnaam (3 - 86 tekens). Het wordt aanbevolen om speciale tekens te vermijden.';
 
   @override
+  String get annotations => 'Annotaties';
+
+  @override
+  String get deleteAllAnnotations => 'Alle annotaties verwijderen';
+
+  @override
+  String get deleteAllAnnotationsConfirm =>
+      'Weet je zeker dat je alle annotaties voor deze afbeelding wilt verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.';
+
+  @override
   String get deleteProjectTitle => 'Project Verwijderen';
 
   @override
@@ -995,10 +1005,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get labelEditMoveDown => 'Omlaag';
 
   @override
-  String get labelEditDefault => 'Default';
+  String get labelEditDefault => 'Standaard';
 
   @override
-  String get labelEditUndefault => 'Undefault';
+  String get labelEditUndefault => 'Niet-standaard';
 
   @override
   String get labelEditDelete => 'Verwijderen';

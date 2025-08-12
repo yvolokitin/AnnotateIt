@@ -502,6 +502,16 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bitte wählen Sie einen klaren, beschreibenden Projektnamen (3 - 86 Zeichen). Es wird empfohlen, Sonderzeichen zu vermeiden.';
 
   @override
+  String get annotations => 'Anmerkungen';
+
+  @override
+  String get deleteAllAnnotations => 'Alle Anmerkungen löschen';
+
+  @override
+  String get deleteAllAnnotationsConfirm =>
+      'Möchten Sie wirklich alle Anmerkungen für dieses Bild löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
   String get deleteProjectTitle => 'Projekt löschen';
 
   @override

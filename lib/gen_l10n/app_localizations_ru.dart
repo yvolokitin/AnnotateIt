@@ -499,6 +499,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выберите чёткое и понятное название проекта (3–86 символов). Рекомендуется избегать специальных символов.';
 
   @override
+  String get annotations => 'Аннотации';
+
+  @override
+  String get deleteAllAnnotations => 'Удалить все аннотации';
+
+  @override
+  String get deleteAllAnnotationsConfirm =>
+      'Вы уверены, что хотите удалить все аннотации для этого изображения?\nЭто действие нельзя отменить.';
+
+  @override
   String get deleteProjectTitle => 'Удалить проект';
 
   @override

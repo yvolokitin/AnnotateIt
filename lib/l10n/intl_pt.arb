@@ -209,6 +209,10 @@
   "editProjectTitle": "Editar nome do projeto",
   "editProjectDescription": "Por favor, escolha um nome de projeto claro e descritivo (3 - 86 caracteres). É recomendável evitar caracteres especiais.",
   
+  "annotations": "Anotações",
+  "deleteAllAnnotations": "Excluir todas as anotações",
+  "deleteAllAnnotationsConfirm": "Tem certeza de que deseja excluir todas as anotações desta imagem?\nEsta ação não pode ser desfeita.",
+
   "deleteProjectTitle": "Excluir Projeto",
   "deleteProjectInProgress": "Excluindo projeto...",
   "deleteProjectOptionDeleteFromDisk": "Também excluir todos os arquivos do disco",

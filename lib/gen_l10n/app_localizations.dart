@@ -986,6 +986,24 @@ abstract class AppLocalizations {
   /// **'Please, choose a clear, descriptive project name (3 - 86 characters). It\'s recommended to avoid special characters.'**
   String get editProjectDescription;
 
+  /// No description provided for @annotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotations'**
+  String get annotations;
+
+  /// No description provided for @deleteAllAnnotations.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all annotations'**
+  String get deleteAllAnnotations;
+
+  /// No description provided for @deleteAllAnnotationsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all annotations for this image?\nThis action cannot be undone.'**
+  String get deleteAllAnnotationsConfirm;
+
   /// No description provided for @deleteProjectTitle.
   ///
   /// In en, this message translates to:

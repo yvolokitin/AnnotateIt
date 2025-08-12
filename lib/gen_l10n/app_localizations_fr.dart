@@ -508,6 +508,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Veuillez choisir un nom de projet clair et descriptif (3 - 86 caractères). Il est recommandé d\'éviter les caractères spéciaux.';
 
   @override
+  String get annotations => 'Annotations';
+
+  @override
+  String get deleteAllAnnotations => 'Supprimer toutes les annotations';
+
+  @override
+  String get deleteAllAnnotationsConfirm =>
+      'Êtes-vous sûr de vouloir supprimer toutes les annotations pour cette image ?\nCette action est irréversible.';
+
+  @override
   String get deleteProjectTitle => 'Supprimer le Projet';
 
   @override
