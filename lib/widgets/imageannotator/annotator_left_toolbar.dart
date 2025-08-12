@@ -166,8 +166,8 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
-          // Segmentation Buttons (conditionally shown)
-          if (annotationSegment) ...[
+          // SAM Button (shown for segmentation and detection projects)
+          if (annotationSegment || annotationDetection) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
               icon: widget.isProcessingSAM
@@ -186,8 +186,10 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               isActive: widget.selectedAction == UserAction.sam_annotation,
               tooltip: l10n.toolbarSAM,
             ),
-            
-            // Polygon Annotation Button
+          ],
+
+          // Polygon Annotation Button (only for segmentation)
+          if (annotationSegment) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
               icon: Icon(Icons.polyline_outlined),

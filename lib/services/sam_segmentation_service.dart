@@ -29,7 +29,8 @@ class SamSegmentationService {
   bool get hasRealSamSupport => kIsWeb && _webSamReady;
 
   Future<void> initialize() async {
-    if (_initialized) return;
+    // Allow re-initialization after a previous close()
+    if (_initialized && !_closed) return;
     _initialized = true;
     _closed = false;
 

@@ -173,7 +173,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     if (currentMedia == null || currentImage == null) {
       await AlertErrorDialog.show(
         context,
-        'SAM Segmentation',
+        'SAM',
         'No image available to process.',
       );
       return;
@@ -183,7 +183,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       await AlertErrorDialog.show(
         context,
         'No Label Selected',
-        'Please select a label before creating a segmentation mask.',
+        'Please select a label before creating an annotation.',
       );
       return;
     }
@@ -199,25 +199,63 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       if (polygon.isEmpty) {
         await AlertErrorDialog.show(
           context,
-          'SAM Segmentation',
+          'SAM',
           'Could not generate a mask for the selected point.',
         );
         return;
       }
 
-      final newAnnotation = Annotation(
-        id: DateTime.now().millisecondsSinceEpoch,
-        mediaItemId: currentMedia.mediaItem.id!,
-        labelId: selectedLabel.id!,
-        annotationType: 'polygon',
-        data: {
-          'points': polygon.map((p) => [p.dx, p.dy]).toList(),
-        },
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      )
-      ..name = selectedLabel.name
-      ..color = selectedLabel.toColor();
+      final isDetectionProject = widget.project.type.toLowerCase().contains('detect');
+
+      Annotation newAnnotation;
+      if (isDetectionProject) {
+        // Convert polygon to tight bounding box
+        double minX = double.infinity, minY = double.infinity, maxX = -double.infinity, maxY = -double.infinity;
+        for (final p in polygon) {
+          if (p.dx < minX) minX = p.dx;
+          if (p.dy < minY) minY = p.dy;
+          if (p.dx > maxX) maxX = p.dx;
+          if (p.dy > maxY) maxY = p.dy;
+        }
+        // Safety clamp to image bounds
+        minX = minX.clamp(0.0, currentImage.width.toDouble());
+        minY = minY.clamp(0.0, currentImage.height.toDouble());
+        maxX = maxX.clamp(0.0, currentImage.width.toDouble());
+        maxY = maxY.clamp(0.0, currentImage.height.toDouble());
+        final rect = ui.Rect.fromLTRB(minX, minY, maxX, maxY);
+
+        newAnnotation = Annotation(
+          id: DateTime.now().millisecondsSinceEpoch,
+          mediaItemId: currentMedia.mediaItem.id!,
+          labelId: selectedLabel.id!,
+          annotationType: 'bbox',
+          data: {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          },
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        )
+        ..name = selectedLabel.name
+        ..color = selectedLabel.toColor();
+      } else {
+        // Segmentation project: save polygon mask
+        newAnnotation = Annotation(
+          id: DateTime.now().millisecondsSinceEpoch,
+          mediaItemId: currentMedia.mediaItem.id!,
+          labelId: selectedLabel.id!,
+          annotationType: 'polygon',
+          data: {
+            'points': polygon.map((p) => [p.dx, p.dy]).toList(),
+          },
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        )
+        ..name = selectedLabel.name
+        ..color = selectedLabel.toColor();
+      }
 
       final insertedId = await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
       final savedAnnotation = Annotation(
@@ -244,19 +282,12 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: existingAnnotations);
           _selectedAnnotation = savedAnnotation;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Segmentation mask added'),
-            duration: Duration(seconds: 2),
-          ),
-        );
       }
     } catch (e) {
       await AlertErrorDialog.show(
         context,
-        'SAM Segmentation Failed',
-        'An error occurred while generating the mask: ${e.toString()}',
+        'SAM Failed',
+        'An error occurred while generating the annotation: ${e.toString()}',
       );
     } finally {
       if (mounted) {

@@ -7,6 +7,7 @@ AnnotateIt Vision Annotation Platform
 - **Project Management**: Create and manage annotation projects with customizable labels
 - **Dataset Import/Export**: Import and export datasets in various formats
 - **Google ML Kit Integration**: Automatic image labeling using Google's ML Kit (see [ML Kit documentation](docs/ml_kit_image_labeling.md))
+- **SAM (Segment Anything) Tool**: Point-prompt segmentation on all platforms, and SAM-powered bounding boxes for detection projects (see [SAM Mobile README](docs/SAM_MOBILE_README.md))
 
 ## System Requirements
 
