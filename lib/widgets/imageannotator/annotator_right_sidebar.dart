@@ -70,14 +70,149 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
           if (!widget.collapsed) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Text(
-                "Annotations (${widget.annotations.length})",
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  fontSize: (screenWidth > 700) ? 20 : 17,
-                  fontFamily: 'CascadiaCode',
-                  color: colorScheme.onSurface,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Annotations (${widget.annotations.length})",
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: (screenWidth > 700) ? 18 : 16,
+                      fontFamily: 'CascadiaCode',
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  if (widget.annotations.isNotEmpty)
+                    Tooltip(
+                      message: 'Delete all annotations',
+                      child: IconButton(
+                        icon: const Icon(Icons.delete_forever),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: colorScheme.error,
+                          shape: const CircleBorder(),
+                        ),
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) {
+                              final screenWidth = MediaQuery.of(ctx).size.width;
+                              final isLargeScreen = screenWidth > 700;
+                              return AlertDialog(
+                                backgroundColor: Colors.grey[800],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: Colors.redAccent, width: 1),
+                                ),
+                                titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.delete_sweep_outlined,
+                                          size: 32,
+                                          color: Colors.redAccent,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'Delete All Annotations',
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontFamily: 'CascadiaCode',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: isLargeScreen ? 24 : 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close, color: Colors.redAccent),
+                                      tooltip: 'Close',
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                    ),
+                                  ],
+                                ),
+                                content: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+                                  ),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Divider(color: Colors.redAccent),
+                                        const Padding(
+                                          padding: EdgeInsets.all(20.0),
+                                          child: Text(
+                                            'Are you sure you want to delete all annotations for this image?\nThis action cannot be undone.',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontFamily: 'CascadiaCode',
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                        const Divider(color: Colors.redAccent),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey[800],
+                                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        side: const BorderSide(color: Colors.white70, width: 2),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'CascadiaCode',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey[800],
+                                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        side: const BorderSide(color: Colors.redAccent, width: 2),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Delete',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'CascadiaCode',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (confirmed == true) {
+                            widget.onDeleteAll?.call();
+                          }
+                        },
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 18,
+                      ),
+                    ),
+                ],
               ),
             ),
             const Divider(height: 1),

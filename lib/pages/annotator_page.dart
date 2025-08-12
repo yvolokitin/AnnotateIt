@@ -1130,6 +1130,30 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     }
   }
 
+  Future<void> _handleDeleteAllAnnotations() async {
+    final currentMedia = _mediaCache[_currentIndex];
+    if (currentMedia == null) return;
+    try {
+      final mediaId = currentMedia.mediaItem.id;
+      if (mediaId == null) return;
+      await AnnotationDatabase.instance.deleteAnnotationsByMedia(mediaId);
+      if (!mounted) return;
+      setState(() {
+        _mediaCache[_currentIndex] = currentMedia.copyWith(annotations: []);
+        _selectedAnnotation = null;
+      });
+    } catch (e) {
+      if (mounted) {
+        await AlertErrorDialog.show(
+          context,
+          'Deletion Error',
+          'An error occurred while deleting all annotations: ${e.toString()}',
+          tips: 'Please try again or contact support if the problem persists.',
+        );
+      }
+    }
+  }
+
   /// Show a dialog with detected labels and option to add them to the project
   Future<void> _showDetectedLabelsDialog(List<ml_kit.ImageLabel> detectedLabels) async {
     if (!mounted) return;
@@ -1495,6 +1519,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           onAnnotationSelected: _handleAnnotationSelected,
                           onAnnotationLabelChanged: _handleAnnotationLabelChanged,
                           onAnnotationDelete: _handleAnnotationDelete,
+                          onDeleteAll: _handleDeleteAllAnnotations,
                         ),
                       ],
                     );

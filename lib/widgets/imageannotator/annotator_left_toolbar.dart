@@ -261,21 +261,21 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ),
 
           // Rotation Buttons (disabled state)
-          ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
-            icon: Icon(Icons.rotate_left_rounded),
-            onTap: null,
-            tooltip: l10n.toolbarRotateLeft,
-            isDisabled: true,
-          ),
+          /// ToolbarDivider(isCompact: isCompact),
+          /// ToolbarButton(
+            /// icon: Icon(Icons.rotate_left_rounded),
+            /// onTap: null,
+            /// tooltip: l10n.toolbarRotateLeft,
+            /// isDisabled: true,
+          /// ),
 
-          ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
-            icon: Icon(Icons.rotate_right_rounded),
-            onTap: null,
-            tooltip: l10n.toolbarRotateRight,
-            isDisabled: true,
-          ),
+          /// ToolbarDivider(isCompact: isCompact),
+          /// ToolbarButton(
+            /// icon: Icon(Icons.rotate_right_rounded),
+            /// onTap: null,
+            /// tooltip: l10n.toolbarRotateRight,
+            /// isDisabled: true,
+          //// ),
 
           const Spacer(),
           ToolbarButton(
