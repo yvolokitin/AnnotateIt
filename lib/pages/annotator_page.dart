@@ -32,6 +32,9 @@ import '../widgets/imageannotator/annotator_top_toolbar.dart';
 import '../widgets/imageannotator/annotator_canvas.dart';
 import '../widgets/imageannotator/user_action.dart';
 
+import 'dart:convert';
+import 'package:crypto/crypto.dart' as crypto;
+
 // SAM helpers in your repo
 import '../sam/sam_service.dart';
 import '../sam/image_preprocess.dart';
@@ -103,11 +106,15 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   // SAM state: service, busy flag, provider, and optional embedding cache
   late final SamService _sam;
   bool _samBusy = false;
+  bool _samReady = false;
 
   // SamProvider _provider = SamProvider.auto;
+/*
   SamProvider _provider = Platform.isWindows
     ? SamProvider.directml
     : (Platform.isAndroid ? SamProvider.nnapi : SamProvider.auto);
+*/
+  SamProvider _provider = SamProvider.cpu;
 
   final _embeddings = <int, Float32List>{};
 
@@ -121,7 +128,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
     // Initialize SAM
     _initSam();
-    
+    setState(() => _samReady = true);
+
     // Initialize ML Kit image labeler
     if (Platform.isAndroid || Platform.isIOS) {
       _mlKitService.initialize(confidenceThreshold: 0.6);
@@ -166,6 +174,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       final svc = SamService(encoderPath: encPath, decoderPath: decPath, provider: _provider);
       await svc.load();
       setState(() => _sam = svc);
+
+      print('Encoder path: $encPath');
+      print('Exists: ${File(encPath).existsSync()}');
+
     } catch (e, st) {
       _logger.severe('Failed to initialize SAM', e, st);
       if (mounted) {
@@ -197,6 +209,30 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     super.dispose();
   }
   
+Future<void> dumpChwTensor(Float32List chw, String path) async {
+  // ВАЖНО: учитывать offsetInBytes/lengthInBytes
+  final bytes = chw.buffer.asUint8List(chw.offsetInBytes, chw.lengthInBytes);
+  await File(path).writeAsBytes(bytes);
+}
+
+String sha256OfFloat32List(Float32List t) {
+  final bytes = t.buffer.asUint8List(t.offsetInBytes, t.lengthInBytes);
+  return crypto.sha256.convert(bytes).toString();
+}
+
+void printStats(Float32List t) {
+  double minV = double.infinity, maxV = -double.infinity, sum = 0.0;
+  for (var v in t) {
+    if (v < minV) minV = v;
+    if (v > maxV) maxV = v;
+    sum += v;
+  }
+  final mean = sum / t.length;
+  final first16 = t.take(16).map((v) => v.toStringAsFixed(6)).join(', ');
+  print('[DART] len=${t.length} min=$minV max=$maxV mean=$mean');
+  print('[DART] first16: $first16');
+}
+
 // Находим bbox в маске (mask = 256x256, 0/1, но может быть 0/255)
 Rect _bboxFromMask(Uint8List mask, int origW, int origH) {
   const int M = 256;
@@ -285,7 +321,15 @@ List<Offset> _polygonFromMaskConvex(Uint8List mask, int origW, int origH) {
 }
 
 Future<void> _handleSamTap(Offset imagePoint) async {
+  if (!_samReady) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('SAM ещё инициализируется…')),
+    );
+    return;
+  }
+
   if (_samBusy) return;
+
   final currentMedia = _mediaCache[_currentIndex];
   final uiImg = _imageCache[_currentIndex];
   if (currentMedia == null || uiImg == null) return;
@@ -301,11 +345,38 @@ Future<void> _handleSamTap(Offset imagePoint) async {
     if (_embeddings.containsKey(mediaId)) {
       embedding = _embeddings[mediaId]!;
     } else {
-      final img = await _currentImageData(); // твоя функция: width/height/rgb
-      // Препроцесс в CHW float32 для encoder (1024x1024, нормализация)
-      final chw = preprocessToSamInput(img).tensor;
+      // твоя функция: width/height/rgb
+      final img = await _currentImageData();
+      final chw = preprocessToSamInputImagenet(img).tensor;
+
+      print('Tensor length: ${chw.length}'); // ожидаем 3145728
+      printStats(chw);
+      print('[DART] sha256: ${sha256OfFloat32List(chw)}');
+      Directory(r'C:\Temp').createSync(recursive: true);
+      await   dumpChwTensor(chw, r'C:\Temp\sam_in_flutter.bin');
+
+      bool hasBad = false;
+      for (final v in chw) { if (v.isNaN || v.isInfinite) { hasBad = true; break; } }
+      if (hasBad) {
+        _logger.severe('Preprocess produced NaN/Inf');
+        throw Exception('Preprocess NaN/Inf');
+      }
+
+      // 2) теперь smoke‑тест нулевого тензора — но не даём ему прервать дампинг
+      try {
+        final zero = Float32List(1 * 3 * 1024 * 1024);
+        SamOnnx.instance.runEncoder(zero);
+        print('SMOKE TEST (zeros) PASSED');
+      } catch (e) {
+        _logger.severe('!!! Encoder dry-run (zeros) failed', e);
+        // не rethrow — продолжаем, чтобы проверить, падает ли и на реальном входе,
+        // а заодно у нас уже есть дампы для сравнения с Python
+      }
+
+      // 3) основной вызов
       embedding = SamOnnx.instance.runEncoder(chw);
       _embeddings[mediaId] = embedding;
+
     }
 
     // 2) Подготовим входы для decoder

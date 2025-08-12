@@ -39,6 +39,48 @@ PreprocessResult preprocessToSamInput(ImageData img) {
   return PreprocessResult(out);
 }
 
+PreprocessResult preprocessToSamInputImagenet(ImageData img) {
+  const _S = 1024;
+  final scale = (img.width >= img.height) ? _S / img.width : _S / img.height;
+  final newW = (img.width * scale).round();
+  final newH = (img.height * scale).round();
+  final resized = _resizeBilinear(img.rgbBytes, img.width, img.height, newW, newH);
+
+  final out = Float32List(1 * 3 * _S * _S);
+
+  // ImageNet mean/std
+  const meanR = 0.485, meanG = 0.456, meanB = 0.406;
+  const stdR  = 0.229, stdG  = 0.224, stdB  = 0.225;
+
+  final padX = (_S - newW) ~/ 2;
+  final padY = (_S - newH) ~/ 2;
+
+  // запись в NCHW
+  final cStride = _S * _S;
+  for (int y = 0; y < _S; y++) {
+    for (int x = 0; x < _S; x++) {
+      final rx = x - padX;
+      final ry = y - padY;
+      int r = 0, g = 0, b = 0;
+      if (rx >= 0 && rx < newW && ry >= 0 && ry < newH) {
+        final p = (ry * newW + rx) * 3;
+        r = resized[p];
+        g = resized[p + 1];
+        b = resized[p + 2];
+      }
+      final fr = (r / 255.0 - meanR) / stdR;
+      final fg = (g / 255.0 - meanG) / stdG;
+      final fb = (b / 255.0 - meanB) / stdB;
+
+      final idx = y * _S + x;
+      out[0 * cStride + idx] = fr;
+      out[1 * cStride + idx] = fg;
+      out[2 * cStride + idx] = fb;
+    }
+  }
+  return PreprocessResult(out);
+}
+
 Uint8List _resizeBilinear(Uint8List src, int w, int h, int nw, int nh) {
   final dst = Uint8List(nw*nh*3);
   final xRatio = (w-1)/nw;
