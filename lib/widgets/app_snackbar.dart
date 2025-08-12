@@ -9,9 +9,12 @@ class AppSnackbar {
     String message, {
     Color backgroundColor = Colors.orangeAccent,
     Color textColor = Colors.black,
+    bool saveToDb = true,
   }) {
-    // Save notification to database
-    _saveNotificationToDatabase(message, backgroundColor, textColor);
+    // Save notification to database (optional)
+    if (saveToDb) {
+      _saveNotificationToDatabase(message, backgroundColor, textColor);
+    }
 
     final snackBar = SnackBar(
       content: Text(

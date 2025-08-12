@@ -24,6 +24,7 @@ import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
 
 import '../widgets/imageannotator/annotator_left_toolbar.dart';
+import '../widgets/app_snackbar.dart';
 import '../widgets/imageannotator/annotator_right_sidebar.dart';
 import '../widgets/imageannotator/annotator_bottom_toolbar.dart';
 import '../widgets/imageannotator/annotator_top_toolbar.dart';
@@ -93,6 +94,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   // SAM segmentation service
   final SamSegmentationService _samService = SamSegmentationService();
   bool _isProcessingSAM = false;
+  bool _samBetaNotified = false;
 
   final FocusNode _focusNode = FocusNode();
 
@@ -983,6 +985,18 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       return;
     }
     
+    // Show SAM Beta quality notice when selecting SAM tool (do not save to DB)
+    if (action == UserAction.sam_annotation) {
+      if (!_samBetaNotified) {
+        AppSnackbar.show(
+          context,
+          'SAM is integrated in Beta quality. Results may be inaccurate and performance may vary.',
+          saveToDb: false,
+        );
+        _samBetaNotified = true;
+      }
+    }
+
     setState(() {
       userAction = action;
       cursorIcon = action == UserAction.navigation
