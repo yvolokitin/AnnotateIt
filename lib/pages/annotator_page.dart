@@ -1456,6 +1456,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                     onAnnotationUpdated: _handleAnnotationUpdated,
                                     onAnnotationSelected: _handleAnnotationSelected,
                                     onSamTap: _handleSamTap,
+                                    onAnnotationLabelChanged: _handleAnnotationLabelChanged,
+                                    onAnnotationDelete: _handleAnnotationDelete,
                                   ),
                                 ),
                               ),

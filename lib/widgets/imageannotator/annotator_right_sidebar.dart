@@ -10,6 +10,7 @@ class AnnotatorRightSidebar extends StatefulWidget {
   final Function(Annotation?)? onAnnotationSelected;
   final Function(Annotation, Label) onAnnotationLabelChanged;
   final Function(Annotation) onAnnotationDelete;
+  final VoidCallback? onDeleteAll;
   final Annotation? selectedAnnotation;
 
   const AnnotatorRightSidebar({
@@ -20,6 +21,7 @@ class AnnotatorRightSidebar extends StatefulWidget {
     required this.onAnnotationSelected,
     required this.onAnnotationLabelChanged,
     required this.onAnnotationDelete,
+    this.onDeleteAll,
     this.selectedAnnotation,
   });
 

@@ -36,6 +36,10 @@ class AnnotatorCanvas extends StatefulWidget {
   final ValueChanged<Annotation?>? onAnnotationSelected;
   final ValueChanged<Offset>? onSamTap;
 
+  // New optional callbacks to mirror sidebar actions
+  final void Function(Annotation, Label)? onAnnotationLabelChanged;
+  final void Function(Annotation)? onAnnotationDelete;
+
   const AnnotatorCanvas({
     required this.image,
     required this.mediaItemId,
@@ -53,6 +57,8 @@ class AnnotatorCanvas extends StatefulWidget {
     this.onAnnotationUpdated,
     this.onAnnotationSelected,
     this.onSamTap,
+    this.onAnnotationLabelChanged,
+    this.onAnnotationDelete,
     super.key,
   });
 
@@ -453,6 +459,111 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     }
   }
 
+  void _handleSecondaryTapDown(TapDownDetails details) async {
+    // Only allow context menu in navigation mode
+    if (widget.userAction != UserAction.navigation) return;
+
+    // Determine which annotation (if any) was right-clicked
+    inverse.copyInverse(matrix);
+    final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
+    final tapped = _findAnnotationAtPosition(transformed);
+
+    // Show context menu only if right-clicked on the currently selected annotation
+    if (tapped == null) return;
+    final selectedId = widget.selectedAnnotation?.id;
+    if (selectedId == null || tapped.id != selectedId) return;
+
+    final global = details.globalPosition;
+    final selectedAction = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(global.dx, global.dy, global.dx, global.dy),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      color: Colors.grey[850],
+      items: [
+        PopupMenuItem<String>(
+          value: 'change',
+          child: Row(
+            children: const [
+              Icon(Icons.label_outline, size: 18, color: Colors.white70),
+              SizedBox(width: 8),
+              Text('Change label', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'delete',
+          child: Row(
+            children: const [
+              Icon(Icons.delete_outline, size: 18, color: Colors.white70),
+              SizedBox(width: 8),
+              Text('Delete', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (!mounted || selectedAction == null) return;
+
+    if (selectedAction == 'delete') {
+      // Delegate deletion to page-level handler if provided
+      if (widget.onAnnotationDelete != null) {
+        widget.onAnnotationDelete!(tapped);
+      }
+      return;
+    }
+
+    if (selectedAction == 'change') {
+      // Show a second-level menu with labels
+      final chosenLabel = await showMenu<Label>(
+        context: context,
+        position: RelativeRect.fromLTRB(global.dx, global.dy, global.dx, global.dy),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        color: Colors.grey[850],
+        items: widget.labels.map((label) => PopupMenuItem<Label>(
+          value: label,
+          child: Row(
+            children: [
+              Container(
+                width: 16,
+                height: 16,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: label.toColor(),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+                ),
+              ),
+              Text(label.name, style: const TextStyle(color: Colors.white)),
+            ],
+          ),
+        )).toList(),
+      );
+
+      if (!mounted || chosenLabel == null) return;
+
+      // Delegate label change to page-level handler if provided
+      if (widget.onAnnotationLabelChanged != null) {
+        widget.onAnnotationLabelChanged!(tapped, chosenLabel);
+      } else if (widget.onAnnotationUpdated != null) {
+        // Fallback: update locally and notify updated
+        final updated = tapped.copyWith(
+          labelId: chosenLabel.id,
+          name: chosenLabel.name,
+          color: chosenLabel.toColor(),
+          updatedAt: DateTime.now(),
+        );
+        widget.onAnnotationUpdated!(updated);
+      }
+    }
+  }
+
   Annotation? _findAnnotationAtPosition(Offset position) {
     final annotations = widget.annotations?.reversed ?? [];
     for (final annotation in annotations) {
@@ -492,6 +603,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTapDown: _handleTapDown,
+                onSecondaryTapDown: _handleSecondaryTapDown,
                 onScaleStart: (_) => prevScale = 1,
                 onDoubleTap: () {
                   setState(() => matrix = setTransformToFit(widget.image));
