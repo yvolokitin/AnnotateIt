@@ -304,6 +304,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     
     try {
       _logger.info('Starting ML Kit image labeling for media ID: ${currentMedia.mediaItem.id}');
+      _logger.fine('Image size: ${currentImage.width}x${currentImage.height}, projectType=${widget.project.type}');
       
       // Process the image with ML Kit based on project type
       final labels = await _mlKitService.processImage(
@@ -333,6 +334,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         projectLabels: widget.project.labels ?? [],
         annotatorId: 1, // Default annotator ID
         projectType: widget.project.type,
+        imageWidth: currentImage.width,
+        imageHeight: currentImage.height,
       );
       
       if (annotations.isEmpty) {
@@ -389,6 +392,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           projectLabels: widget.project.labels ?? [],
           annotatorId: 1, // Default annotator ID
           projectType: widget.project.type,
+          imageWidth: currentImage.width,
+          imageHeight: currentImage.height,
         );
         
         if (updatedAnnotations.isEmpty) {
@@ -407,6 +412,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       final savedAnnotations = <Annotation>[];
       
       for (final annotation in annotations) {
+        _logger.fine('Saving annotation type=${annotation.annotationType}, data=${annotation.data}');
         final insertedId = await annotationDb.insertAnnotation(annotation);
         
         final savedAnnotation = Annotation(

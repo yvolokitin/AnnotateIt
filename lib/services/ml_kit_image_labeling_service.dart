@@ -200,11 +200,13 @@ class MLKitImageLabelingService {
     required List<Label> projectLabels,
     required int annotatorId,
     String projectType = '',
+    int? imageWidth,
+    int? imageHeight,
   }) {
     final annotations = <Annotation>[];
     final now = DateTime.now();
     final type = projectType.toLowerCase();
-    
+
     // Determine the annotation type based on project type
     String annotationType = 'classification';
     if (type.contains('detection')) {
@@ -212,44 +214,78 @@ class MLKitImageLabelingService {
     } else if (type.contains('segmentation')) {
       annotationType = 'polygon';
     }
-    
+
+    _logger.info('[convertLabelsToAnnotations] projectType=$projectType, annotationType=$annotationType, imageSize=${imageWidth}x${imageHeight}, labelsCount=${labels.length}');
+
     for (final imageLabel in labels) {
       // Try to find a matching project label by name
       final matchingLabels = projectLabels.where(
-        (label) => label.name.toLowerCase() == imageLabel.label.toLowerCase()
+        (label) => label.name.toLowerCase() == imageLabel.label.toLowerCase(),
       ).toList();
-      
+
       // If no matching label is found, skip this image label
-      if (matchingLabels.isEmpty) continue;
-      
+      if (matchingLabels.isEmpty) {
+        _logger.fine('[convertLabelsToAnnotations] No matching project label for "${imageLabel.label}"');
+        continue;
+      }
+
       final matchingLabel = matchingLabels.first;
-      
+
       // Create annotation with appropriate type and data
       Map<String, dynamic> annotationData = {'label': imageLabel.label};
-      
+
       // For detection types, add bounding box data
       if (annotationType == 'bbox') {
         // Create a default bounding box in the center of the image
-        // In a real implementation, this would come from the object detector
-        annotationData = {
-          'x': 0.25,
-          'y': 0.25,
-          'width': 0.5,
-          'height': 0.5,
-        };
+        // NOTE: previously this used normalized fractions which rendered as tiny dots.
+        // We now scale to pixel coordinates when image dimensions are available.
+        final iw = (imageWidth ?? 0).toDouble();
+        final ih = (imageHeight ?? 0).toDouble();
+        if (iw > 0 && ih > 0) {
+          final x = 0.25 * iw;
+          final y = 0.25 * ih;
+          final w = 0.5 * iw;
+          final h = 0.5 * ih;
+          annotationData = {
+            'x': x,
+            'y': y,
+            'width': w,
+            'height': h,
+          };
+        } else {
+          // Fallback to a reasonable default box size in pixels
+          annotationData = {
+            'x': 50.0,
+            'y': 50.0,
+            'width': 100.0,
+            'height': 100.0,
+          };
+        }
       } else if (annotationType == 'polygon') {
         // Create a default polygon for segmentation
-        // In a real implementation, this would come from a segmentation model
-        annotationData = {
-          'points': [
-            {'x': 0.25, 'y': 0.25},
-            {'x': 0.75, 'y': 0.25},
-            {'x': 0.75, 'y': 0.75},
-            {'x': 0.25, 'y': 0.75},
-          ]
-        };
+        final iw = (imageWidth ?? 0).toDouble();
+        final ih = (imageHeight ?? 0).toDouble();
+        if (iw > 0 && ih > 0) {
+          annotationData = {
+            'points': [
+              {'x': 0.25 * iw, 'y': 0.25 * ih},
+              {'x': 0.75 * iw, 'y': 0.25 * ih},
+              {'x': 0.75 * iw, 'y': 0.75 * ih},
+              {'x': 0.25 * iw, 'y': 0.75 * ih},
+            ]
+          };
+        } else {
+          annotationData = {
+            'points': [
+              {'x': 50.0, 'y': 50.0},
+              {'x': 150.0, 'y': 50.0},
+              {'x': 150.0, 'y': 150.0},
+              {'x': 50.0, 'y': 150.0},
+            ]
+          };
+        }
       }
-      
+
       final annotation = Annotation(
         mediaItemId: mediaItemId,
         labelId: matchingLabel.id,
@@ -262,11 +298,14 @@ class MLKitImageLabelingService {
         createdAt: now,
         updatedAt: now,
       )
-      ..name = 'AI: ${imageLabel.label}';
-      
+        ..name = 'AI: ${imageLabel.label}';
+
+      _logger.fine('[convertLabelsToAnnotations] Created annotation for label="${imageLabel.label}", confidence=${imageLabel.confidence.toStringAsFixed(3)}, data=$annotationData');
+
       annotations.add(annotation);
     }
-    
+
+    _logger.info('[convertLabelsToAnnotations] Returning ${annotations.length} annotation(s)');
     return annotations;
   }
   
