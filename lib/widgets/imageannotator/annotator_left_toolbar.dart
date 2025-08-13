@@ -143,7 +143,20 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           if (Platform.isAndroid || Platform.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
-              icon: Icon(Icons.auto_awesome),
+              // icon: Icon(Icons.auto_awesome),
+              icon: CircleAvatar(
+                backgroundColor: Colors.deepPurple,
+                radius: 12,
+                child: Text(
+                  'ML',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'CascadiaCode',
+                    fontSize: 12,
+                  ),
+                ),
+              ),
               onTap: widget.isProcessingMlKit
                   ? null // Disable button while processing
                   : () => _selectUserAction(UserAction.ml_kit_labeling),
