@@ -92,7 +92,16 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   bool _isProcessingSAM = false;
   bool _samBetaNotified = false;
 
+  // Selected SAM model key: 'mobile' or 'sam2_hiera_base_plus'
+  String _samModelKey = 'mobile';
+
   final FocusNode _focusNode = FocusNode();
+
+  void _handleSamModelChanged(String key) {
+    setState(() => _samModelKey = key);
+    final variant = key == 'mobile' ? SamModelVariant.mobile : SamModelVariant.sam2HieraBasePlus;
+    _samService.setModelVariant(variant);
+  }
 
   @override
   void initState() {
@@ -1230,6 +1239,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           showAnnotationNames: showAnnotationNames,
                           isProcessingMlKit: _isProcessingMlKit,
                           isProcessingSAM: _isProcessingSAM,
+                          selectedSamModelKey: _samModelKey,
+                          onSamModelChanged: _handleSamModelChanged,
                           onOpacityChanged: (v) => setState(() => currentOpacity = v),
                           onStrokeWidthChanged: (v) => setState(() => currentStrokeWidth = v),
                           onCornerSizeChanged: (v) => setState(() => currentCornerSize = v),                        

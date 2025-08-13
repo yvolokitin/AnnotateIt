@@ -20,6 +20,10 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final bool isProcessingMlKit;
   final bool isProcessingSAM;
 
+  /// Key of selected SAM model: 'mobile' or 'sam2_hiera_base_plus'
+  final String selectedSamModelKey;
+  final ValueChanged<String> onSamModelChanged;
+
   final ValueChanged<double> onOpacityChanged;
   final ValueChanged<double> onStrokeWidthChanged;
   final ValueChanged<double> onCornerSizeChanged;
@@ -43,6 +47,8 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.cornerSize,
     required this.onStrokeWidthChanged,
     required this.onCornerSizeChanged,
+    required this.selectedSamModelKey,
+    required this.onSamModelChanged,
     this.isProcessingMlKit = false,
     this.isProcessingSAM = false,
   });
@@ -74,6 +80,55 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
         });
       },
     ).then((_) => setState(() => showAnnotationsSettingsDialog = false));
+  }
+
+  Future<void> _openSamModelSelector(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return SimpleDialog(
+          title: Text(l10n.toolbarSAM + ' Model'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(ctx).pop('mobile'),
+              child: Row(
+                children: [
+                  if (widget.selectedSamModelKey == 'mobile') ...[
+                    Icon(Icons.check, color: Colors.green),
+                    SizedBox(width: 8),
+                  ] else ...[
+                    SizedBox(width: 32),
+                  ],
+                  Expanded(child: Text('SAM Mobile')),
+                ],
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(ctx).pop('sam2_hiera_base_plus'),
+              child: Row(
+                children: [
+                  if (widget.selectedSamModelKey == 'sam2_hiera_base_plus') ...[
+                    Icon(Icons.check, color: Colors.green),
+                    SizedBox(width: 8),
+                  ] else ...[
+                    SizedBox(width: 32),
+                  ],
+                  Expanded(child: Text('Segment Anything 2 (Hiera-Base+)')),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (choice != null) {
+      if (choice != widget.selectedSamModelKey) {
+        widget.onSamModelChanged(choice);
+      }
+      // After choosing a model, activate the SAM tool for immediate use
+      _selectUserAction(UserAction.sam_annotation);
+    }
   }
 
   @override
@@ -132,7 +187,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
               icon: Icon(Icons.auto_awesome_outlined),
               onTap: widget.isProcessingSAM
                 ? null
-                : () => _selectUserAction(UserAction.sam_annotation),
+                : () async => await _openSamModelSelector(context),
               isActive: widget.selectedAction == UserAction.sam_annotation,
               tooltip: l10n.toolbarSAM,
             ),

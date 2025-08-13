@@ -7,6 +7,30 @@ import 'package:flutter/material.dart';
 
 import 'sam_web_ffi.dart';
 
+/// SAM model variants supported by the app.
+enum SamModelVariant { mobile, sam2HieraBasePlus }
+
+class _SamModelUrls {
+  final String encoder;
+  final String decoder;
+  const _SamModelUrls(this.encoder, this.decoder);
+}
+
+_SamModelUrls _modelUrlsFor(SamModelVariant v) {
+  switch (v) {
+    case SamModelVariant.mobile:
+      return const _SamModelUrls(
+        'assets/assets/models_sam/mobile_sam.encoder.onnx',
+        'assets/assets/models_sam/mobile_sam.decoder.onnx',
+      );
+    case SamModelVariant.sam2HieraBasePlus:
+      return const _SamModelUrls(
+        'assets/assets/models_sam/sam2_hiera_base_plus/sam2_hiera_base_plus.encoder.onnx',
+        'assets/assets/models_sam/sam2_hiera_base_plus/sam2_hiera_base_plus.decoder.onnx',
+      );
+  }
+}
+
 /// SAM (Segment Anything) segmentation service API.
 ///
 /// NOTE:
@@ -24,6 +48,11 @@ class SamSegmentationService {
   bool _closed = false;
   bool _webSamReady = false;
 
+  /// Supported SAM model variants
+  /// - mobile: MobileSAM
+  /// - sam2HieraBasePlus: Segment Anything 2 (Hiera-Base+)
+  SamModelVariant _currentVariant = SamModelVariant.mobile;
+
   /// Whether real SAM inference is available on this platform/build.
   /// On Web, we use onnxruntime-web via JS; otherwise fallback.
   bool get hasRealSamSupport => kIsWeb && _webSamReady;
@@ -37,9 +66,10 @@ class SamSegmentationService {
     // Initialize Web SAM (onnxruntime-web) if available
     if (kIsWeb) {
       try {
+        final urls = _modelUrlsFor(_currentVariant);
         _webSamReady = await samInit(
-          encoderUrl: 'assets/assets/models_sam/mobile_sam.encoder.onnx',
-          decoderUrl: 'assets/assets/models_sam/mobile_sam.decoder.onnx',
+          encoderUrl: urls.encoder,
+          decoderUrl: urls.decoder,
         );
       } catch (_) {
         _webSamReady = false;
@@ -49,6 +79,27 @@ class SamSegmentationService {
 
   Future<void> close() async {
     _closed = true;
+  }
+
+  SamModelVariant get currentVariant => _currentVariant;
+
+  /// Changes the active SAM model variant. On Web, re-initializes ONNX sessions
+  /// with the new encoder/decoder URLs. On other platforms, this only affects
+  /// labeling/UI since a heuristic fallback is used.
+  Future<void> setModelVariant(SamModelVariant v) async {
+    if (_currentVariant == v) return;
+    _currentVariant = v;
+    if (kIsWeb) {
+      try {
+        final urls = _modelUrlsFor(_currentVariant);
+        _webSamReady = await samInit(
+          encoderUrl: urls.encoder,
+          decoderUrl: urls.decoder,
+        );
+      } catch (_) {
+        _webSamReady = false;
+      }
+    }
   }
 
   /// Generates a segmentation polygon for a single-point prompt.
