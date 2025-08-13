@@ -474,6 +474,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Controleer bestandsrechten en probeer het opnieuw';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Let op: Alleen de datasetrecords worden verwijderd. De originele bestanden op de schijf worden door deze actie niet verwijderd. Als je echter ontbrekende afbeeldingen of fouten ziet (bijv. ErrorImageTile), kan dat komen doordat het bestand al van de schijf is verwijderd of omdat je geen toestemming hebt om het te openen.';
+
+  @override
   String get duplicateImage => 'Afbeelding Dupliceren';
 
   @override

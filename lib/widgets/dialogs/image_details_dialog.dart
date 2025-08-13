@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
 
 import '../../data/user_database.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
+import '../../models/media_item.dart';
 
 class ImageDetailsDialog extends StatefulWidget {
   final AnnotatedLabeledMedia media;
@@ -39,11 +41,13 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         uploaded = DateFormat('dd.MM.yyyy HH:mm').format(widget.media.mediaItem.uploadDate);
       });
 
-      final image = img.decodeImage(await file.readAsBytes());
-      if (image != null) {
-        setState(() {
-          resolution = "${image.width}×${image.height}";
-        });
+      if (widget.media.mediaItem.type != MediaType.video) {
+        final image = img.decodeImage(await file.readAsBytes());
+        if (image != null) {
+          setState(() {
+            resolution = "${image.width}×${image.height}";
+          });
+        }
       }
     }
 
@@ -108,13 +112,36 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               const Divider(color: Colors.orangeAccent),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: SelectableText(
-                  media.filePath,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontFamily: 'CascadiaCode',
-                    fontSize: 18,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        media.filePath,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Copy path',
+                      child: IconButton(
+                        icon: const Icon(Icons.copy, color: Colors.orangeAccent),
+                        onPressed: () => _copyFilePath(),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Tooltip(
+                      message: 'Open location',
+                      child: IconButton(
+                        icon: const Icon(Icons.folder_open, color: Colors.orangeAccent),
+                        onPressed: () => _openInExplorer(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -124,7 +151,22 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                   children: [
                     SizedBox(
                       width: screenWidth * 0.2,
-                      child: Image.file(File(media.filePath), fit: BoxFit.contain),
+                      child: () {
+                        if (media.type == MediaType.video) {
+                          return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                        }
+                        final file = File(media.filePath);
+                        if (!file.existsSync()) {
+                          return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                        }
+                        return Image.file(
+                          file,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                          },
+                        );
+                      }(),
                     ),
                     const SizedBox(width: 16),
                     Expanded(child: _buildDetailsList(media)),
@@ -138,7 +180,22 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                     SizedBox(
                       width: double.infinity,
                       height: 200,
-                      child: Image.file(File(media.filePath), fit: BoxFit.contain),
+                      child: () {
+                        if (media.type == MediaType.video) {
+                          return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                        }
+                        final file = File(media.filePath);
+                        if (!file.existsSync()) {
+                          return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                        }
+                        return Image.file(
+                          file,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset('assets/icons/icons8-gallery-96.png', fit: BoxFit.contain);
+                          },
+                        );
+                      }(),
                     ),
                     const SizedBox(height: 16),
                     _buildDetailsList(media),
@@ -175,6 +232,50 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         ),
       ],
     );
+  }
+
+  Future<void> _copyFilePath() async {
+    final path = widget.media.mediaItem.filePath;
+    await Clipboard.setData(ClipboardData(text: path));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Path copied to clipboard')),
+    );
+  }
+
+  Future<void> _openInExplorer() async {
+    final path = widget.media.mediaItem.filePath;
+    try {
+      final file = File(path);
+      if (!file.existsSync()) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File not found')),
+        );
+        return;
+      }
+
+      if (Platform.isWindows) {
+        final windowsPath = path.replaceAll('/', '\\');
+        await Process.run('explorer.exe', ['/select,', windowsPath]);
+      } else if (Platform.isMacOS) {
+        await Process.run('open', ['-R', path]);
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [file.parent.path]);
+      } else {
+        await Process.run('xdg-open', [file.parent.path]);
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Opened in file explorer')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open location')),
+      );
+    }
   }
 
   Widget _buildDetailsList(media) {

@@ -477,6 +477,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Por favor, verifique los permisos de archivo e intente nuevamente';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Nota: Solo se eliminarán los registros del conjunto de datos. Los archivos originales en el disco no se eliminarán con esta acción. Sin embargo, si ve imágenes faltantes o errores (p. ej., ErrorImageTile), puede deberse a que el archivo ya se eliminó del disco o a que no tiene permiso para acceder a él.';
+
+  @override
   String get duplicateImage => 'Duplicar Imagen';
 
   @override

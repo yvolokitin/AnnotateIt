@@ -470,6 +470,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please check file permissions and try again';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Note: Only the dataset records will be deleted. The original files on disk will not be deleted by this action. However, if you see missing images or errors (e.g., ErrorImageTile), it may be because the file has already been removed from disk or you do not have permission to access it.';
+
+  @override
   String get duplicateImage => 'Duplicate Image';
 
   @override

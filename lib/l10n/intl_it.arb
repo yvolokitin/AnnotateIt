@@ -199,6 +199,8 @@
   "removeFilesFailedMessage": "Alcuni file non possono essere eliminati",
   "removeFilesFailedTips": "Controlla i permessi dei file e riprova",
 
+  "removeFilesDbOnlyNote": "Nota: Verranno eliminati solo i record del dataset. I file originali sul disco non verranno eliminati da questa azione. Tuttavia, se vedi immagini mancanti o errori (ad es., ErrorImageTile), potrebbe essere perché il file è già stato rimosso dal disco oppure non hai l'autorizzazione per accedervi.",
+
   "duplicateImage": "Duplica Immagine",
   "duplicateWithAnnotations": "Duplica immagine con annotazioni",
   "duplicateWithAnnotationsHint": "Verrà creata una copia dell'immagine insieme a tutti i dati di annotazione.",

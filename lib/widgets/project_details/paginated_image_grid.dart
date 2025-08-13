@@ -112,7 +112,18 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   onRefreshNeeded: widget.onRefreshNeeded,
                 );
               } else {
-                return MediaTile(media: media);
+                return MediaTile(
+                  mediaItem: mediaItems[index],
+                  onSelectedChanged: (isSelected) {
+                    setState(() {
+                      mediaItems[index].isSelected = isSelected;
+                    });
+                    widget.onSelectionChanged?.call(
+                      mediaItems.where((item) => item.isSelected).toList(),
+                    );
+                  },
+                  onRefreshNeeded: widget.onRefreshNeeded,
+                );
               }
             },
           ),

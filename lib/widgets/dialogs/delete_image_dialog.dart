@@ -8,11 +8,13 @@ import '../../widgets/dialogs/alert_error_dialog.dart';
 class DeleteImageDialog extends StatefulWidget {
   final List<MediaItem> mediaItems;
   final Function(List<String> deletedPaths) onConfirmed;
+  final bool dbOnly;
 
   const DeleteImageDialog({
     super.key,
     required this.mediaItems,
     required this.onConfirmed,
+    this.dbOnly = false,
   });
 
   @override
@@ -34,7 +36,19 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
       for (final mediaItem in widget.mediaItems) {
         if (mediaItem.id == null) continue;
 
-        // Try to delete from filesystem
+        if (widget.dbOnly) {
+          // Delete only from DB, keep physical files intact
+          try {
+            await DatasetDatabase.instance.deleteMediaItemWithAnnotations(mediaItem.id!);
+            debugPrint('Deleted from DB only: ${mediaItem.filePath}');
+            _successfullyDeleted.add(mediaItem.filePath);
+          } catch (e) {
+            debugPrint('Failed to delete DB record for: ${mediaItem.filePath}\n$e');
+          }
+          continue;
+        }
+
+        // Default behavior: Try to delete from filesystem first
         final file = File(mediaItem.filePath);
         bool fileDeleted = false;
         
@@ -173,6 +187,24 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             ),
                           ),
                           const SizedBox(height: 20),
+                          if (widget.dbOnly)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.info_outline, color: Colors.amberAccent),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    l10n.removeFilesDbOnlyNote,
+                                    style: const TextStyle(
+                                      color: Colors.amberAccent,
+                                      fontFamily: 'CascadiaCode',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (widget.dbOnly) const SizedBox(height: 16),
                           ...widget.mediaItems.map((item) {
                             final fileName = File(item.filePath).uri.pathSegments.last;
                             return Padding(

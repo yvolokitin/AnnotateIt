@@ -474,6 +474,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bitte überprüfen Sie die Dateiberechtigungen und versuchen Sie es erneut';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Hinweis: Es werden nur die Datensatzeinträge gelöscht. Die Originaldateien auf der Festplatte werden durch diese Aktion nicht gelöscht. Wenn Sie jedoch fehlende Bilder oder Fehler (z. B. ErrorImageTile) sehen, kann dies daran liegen, dass die Datei bereits von der Festplatte entfernt wurde oder Sie keine Berechtigung zum Zugriff darauf haben.';
+
+  @override
   String get duplicateImage => 'Bild duplizieren';
 
   @override

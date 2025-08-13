@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'Please check file permissions and try again'**
   String get removeFilesFailedTips;
 
+  /// No description provided for @removeFilesDbOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Only the dataset records will be deleted. The original files on disk will not be deleted by this action. However, if you see missing images or errors (e.g., ErrorImageTile), it may be because the file has already been removed from disk or you do not have permission to access it.'**
+  String get removeFilesDbOnlyNote;
+
   /// No description provided for @duplicateImage.
   ///
   /// In en, this message translates to:

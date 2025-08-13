@@ -199,6 +199,8 @@
   "removeFilesFailedMessage": "Algunos archivos no pudieron ser eliminados",
   "removeFilesFailedTips": "Por favor, verifique los permisos de archivo e intente nuevamente",
 
+  "removeFilesDbOnlyNote": "Nota: Solo se eliminarán los registros del conjunto de datos. Los archivos originales en el disco no se eliminarán con esta acción. Sin embargo, si ve imágenes faltantes o errores (p. ej., ErrorImageTile), puede deberse a que el archivo ya se eliminó del disco o a que no tiene permiso para acceder a él.",
+
   "duplicateImage": "Duplicar Imagen",
   "duplicateWithAnnotations": "Duplicar imagen con anotaciones",
   "duplicateWithAnnotationsHint": "Se creará una copia de la imagen junto con todos los datos de anotación.",

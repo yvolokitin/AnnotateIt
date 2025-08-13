@@ -479,6 +479,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Veuillez vérifier les permissions des fichiers et réessayer';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Remarque : Seuls les enregistrements du jeu de données seront supprimés. Les fichiers originaux sur le disque ne seront pas supprimés par cette action. Cependant, si vous voyez des images manquantes ou des erreurs (p. ex., ErrorImageTile), cela peut être dû au fait que le fichier a déjà été supprimé du disque ou que vous n\'avez pas l\'autorisation d\'y accéder.';
+
+  @override
   String get duplicateImage => 'Dupliquer l\'Image';
 
   @override

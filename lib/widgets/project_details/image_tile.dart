@@ -70,13 +70,19 @@ class _ImageTileState extends State<ImageTile> {
   Widget build(BuildContext context) {
     final file = File(widget.mediaItem.mediaItem.filePath);
     final uniqueLabels = extractLabelsFromAnnotations(widget.mediaItem.annotations ?? []);
+    final isSelected = widget.mediaItem.isSelected;
 
     if (!file.existsSync()) {
       final l10n = AppLocalizations.of(context)!;
-      return ErrorImageTile(message: l10n.fileNotFound);
+      return ErrorImageTile(
+        message: l10n.fileNotFound,
+        media: widget.mediaItem,
+        isSelected: isSelected,
+        onSelectedChanged: (value) => widget.onSelectedChanged?.call(value),
+        onRefreshNeeded: widget.onRefreshNeeded,
+      );
     }
 
-    final isSelected = widget.mediaItem.isSelected;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),

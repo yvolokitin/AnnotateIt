@@ -474,6 +474,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get removeFilesFailedTips => 'Controlla i permessi dei file e riprova';
 
   @override
+  String get removeFilesDbOnlyNote =>
+      'Nota: Verranno eliminati solo i record del dataset. I file originali sul disco non verranno eliminati da questa azione. Tuttavia, se vedi immagini mancanti o errori (ad es., ErrorImageTile), potrebbe essere perché il file è già stato rimosso dal disco oppure non hai l\'autorizzazione per accedervi.';
+
+  @override
   String get duplicateImage => 'Duplica Immagine';
 
   @override
