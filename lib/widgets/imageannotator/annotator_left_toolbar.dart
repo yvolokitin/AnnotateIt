@@ -129,16 +129,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           if (annotationSegment || annotationDetection) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
-              icon: widget.isProcessingSAM
-                ? SizedBox(
-                    width: Constants.iconSize,
-                    height: Constants.iconSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Icon(Icons.auto_awesome_outlined),
+              icon: Icon(Icons.auto_awesome_outlined),
               onTap: widget.isProcessingSAM
                 ? null
                 : () => _selectUserAction(UserAction.sam_annotation),
@@ -152,23 +143,12 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           if (Platform.isAndroid || Platform.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
-              icon: widget.isProcessingMlKit
-                  ? SizedBox(
-                width: Constants.iconSize,
-                height: Constants.iconSize,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-                  : Icon(Icons.auto_awesome),
+              icon: Icon(Icons.auto_awesome),
               onTap: widget.isProcessingMlKit
                   ? null // Disable button while processing
                   : () => _selectUserAction(UserAction.ml_kit_labeling),
               isActive: widget.selectedAction == UserAction.ml_kit_labeling,
-              tooltip: widget.isProcessingMlKit
-                  ? 'Processing image with ML Kit...'
-                  : 'Google ML Kit Image Labeling',
+              tooltip: 'Google ML Kit Image Labeling',
             ),
           ],
 

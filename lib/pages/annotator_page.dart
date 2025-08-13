@@ -1129,7 +1129,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       child: Scaffold(
         backgroundColor: Colors.black,
         body: SafeArea(
-          child: Column(
+          child: Stack(
+            children: [
+              Column(
             children: [
               AnnotatorTopToolbar(
                 project: widget.project,
@@ -1305,6 +1307,28 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                   },
                 ),
               ),
+            ],
+          ),
+              // Global processing overlay
+              if (_isProcessingSAM || _isProcessingMlKit)
+                Positioned.fill(
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: Container(
+                      color: Colors.black54,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 6,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
