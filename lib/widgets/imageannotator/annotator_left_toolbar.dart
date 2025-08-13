@@ -114,31 +114,16 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
-          // ML Kit Image Labeling Button - only shown on Android/iOS
-          // This is the AI annotation tool for mobile platforms
-          if (Platform.isAndroid || Platform.isIOS) ...[
+          // Polygon Annotation Button (only for segmentation)
+          if (annotationSegment) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
-              icon: widget.isProcessingMlKit 
-                ? SizedBox(
-                    width: Constants.iconSize,
-                    height: Constants.iconSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Icon(Icons.auto_awesome),
-              onTap: widget.isProcessingMlKit 
-                ? null // Disable button while processing
-                : () => _selectUserAction(UserAction.ml_kit_labeling),
-              isActive: widget.selectedAction == UserAction.ml_kit_labeling,
-              tooltip: widget.isProcessingMlKit 
-                ? 'Processing image with ML Kit...'
-                : 'Google ML Kit Image Labeling',
+              icon: Icon(Icons.polyline_outlined),
+              onTap: () => _selectUserAction(UserAction.polygon_annotation),
+              isActive: widget.selectedAction == UserAction.polygon_annotation,
+              tooltip: l10n.toolbarPolygon,
             ),
           ],
-          
 
           // SAM Button (shown for segmentation and detection projects)
           if (annotationSegment || annotationDetection) ...[
@@ -162,14 +147,28 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
 
-          // Polygon Annotation Button (only for segmentation)
-          if (annotationSegment) ...[
+          // ML Kit Image Labeling Button - only shown on Android/iOS
+          // This is the AI annotation tool for mobile platforms
+          if (Platform.isAndroid || Platform.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
-              icon: Icon(Icons.polyline_outlined),
-              onTap: () => _selectUserAction(UserAction.polygon_annotation),
-              isActive: widget.selectedAction == UserAction.polygon_annotation,
-              tooltip: l10n.toolbarPolygon,
+              icon: widget.isProcessingMlKit
+                  ? SizedBox(
+                width: Constants.iconSize,
+                height: Constants.iconSize,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+                  : Icon(Icons.auto_awesome),
+              onTap: widget.isProcessingMlKit
+                  ? null // Disable button while processing
+                  : () => _selectUserAction(UserAction.ml_kit_labeling),
+              isActive: widget.selectedAction == UserAction.ml_kit_labeling,
+              tooltip: widget.isProcessingMlKit
+                  ? 'Processing image with ML Kit...'
+                  : 'Google ML Kit Image Labeling',
             ),
           ],
 
