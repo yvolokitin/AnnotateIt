@@ -18,7 +18,6 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final double strokeWidth;
   final double cornerSize;
   final bool isProcessingMlKit;
-  final bool isProcessingTFLite;
   final bool isProcessingSAM;
 
   final ValueChanged<double> onOpacityChanged;
@@ -45,7 +44,6 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onStrokeWidthChanged,
     required this.onCornerSizeChanged,
     this.isProcessingMlKit = false,
-    this.isProcessingTFLite = false,
     this.isProcessingSAM = false,
   });
 
@@ -141,30 +139,6 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             ),
           ],
           
-          // TFLite Object Detection Button - only shown on Windows/macOS for detection projects
-          // This is the AI annotation tool for desktop platforms
-          if ((Platform.isWindows || Platform.isMacOS) && annotationDetection) ...[
-            ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
-              icon: widget.isProcessingTFLite 
-                ? SizedBox(
-                    width: Constants.iconSize,
-                    height: Constants.iconSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Icon(Icons.view_in_ar_outlined),
-              onTap: widget.isProcessingTFLite 
-                ? null // Disable button while processing
-                : () => _selectUserAction(UserAction.tflite_detection),
-              isActive: widget.selectedAction == UserAction.tflite_detection,
-              tooltip: widget.isProcessingTFLite 
-                ? 'Processing image with TFLite...'
-                : 'TFLite Object Detection',
-            ),
-          ],
 
           // SAM Button (shown for segmentation and detection projects)
           if (annotationSegment || annotationDetection) ...[

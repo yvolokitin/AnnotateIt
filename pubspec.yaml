@@ -60,7 +60,6 @@ dependencies:
   vector_math: ^2.1.4
   permission_handler: ^12.0.1
   google_ml_kit: ^0.20.0
-  tflite_flutter: ^0.11.0
   msix: ^3.16.10
   window_size: ^0.1.0
   package_info_plus: ^8.3.0

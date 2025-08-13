@@ -49,19 +49,7 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
             datasetExportFolder: exportPath,
             thumbnailFolder: thumbnailPath,
           );
-/*
-          fetchedUser = fetchedUser.copyWith(
-            datasetImportFolder: (fetchedUser.datasetImportFolder?.isEmpty ?? true)
-                ? importPath
-                : fetchedUser.datasetImportFolder,
-            datasetExportFolder: (fetchedUser.datasetExportFolder?.isEmpty ?? true)
-                ? exportPath
-                : fetchedUser.datasetExportFolder,
-            thumbnailFolder: (fetchedUser.thumbnailFolder?.isEmpty ?? true)
-                ? thumbnailPath
-                : fetchedUser.thumbnailFolder,
-          );
-*/
+
           await UserDatabase.instance.update(fetchedUser);
           _logger.info('Updated user with default import/export/thumbnail folders.');
         } catch (e, st) {
