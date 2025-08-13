@@ -17,6 +17,7 @@ import "project_creation/create_from_dataset_dialog.dart";
 import "project_creation/create_new_project_dialog.dart";
 import "project_creation/change_project_type_dialog.dart";
 import "project_export/export_project_dialog.dart";
+import "project_prelabel/pre_label_project_dialog.dart";
 
 class ProjectsListPage extends StatefulWidget {
 
@@ -100,6 +101,17 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
     if (result == 'refresh') {
       loadProjectsWithLabels(); // Refresh the list after export
+    }
+  }
+
+  void _handlePreLabelProject(Project project) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => PreLabelProjectDialog(project: project),
+    );
+
+    if (result == 'refresh') {
+      loadProjectsWithLabels();
     }
   }
 
@@ -365,6 +377,28 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   onTap: () {
                     Navigator.pop(context);
                     _handleExportProject(project);
+                  },
+                ),
+
+                // New: Pre-label Project option
+                ListTile(
+                  leading: Icon(
+                    Icons.auto_awesome,
+                    color: Colors.white70,
+                    size: 30,
+                  ),
+                  title: Text(
+                    'Pre-label Project',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white70,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _handlePreLabelProject(project);
                   },
                 ),
 
