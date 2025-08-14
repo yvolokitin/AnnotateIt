@@ -173,6 +173,22 @@ class UserSession {
     _logger.info('Updated show export labels button to: $show');
   }
 
+  Future<void> setPreferredSamModelKey(String key) async {
+    final user = getUser();
+    final updated = user.copyWith(preferredSamModelKey: key, updatedAt: DateTime.now());
+    await UserDatabase.instance.update(updated);
+    _currentUser = updated;
+    _logger.info('Updated preferred SAM model to: $key');
+  }
+
+  Future<void> setSamRememberChoice(bool remember) async {
+    final user = getUser();
+    final updated = user.copyWith(samRememberChoice: remember, updatedAt: DateTime.now());
+    await UserDatabase.instance.update(updated);
+    _currentUser = updated;
+    _logger.info('Updated SAM remember choice to: $remember');
+  }
+
   void clear() {
     _currentUser = null;
   }

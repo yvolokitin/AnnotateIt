@@ -27,6 +27,10 @@ class User {
   final bool autoSaveAnnotations;
   final double annotationOpacity;
 
+  // SAM settings
+  final String preferredSamModelKey; // e.g., 'sam2_hiera_base_plus' or 'mobile'
+  final bool samRememberChoice;
+
   static final List<String> fields = [
     'id',
     'firstName',
@@ -54,6 +58,8 @@ class User {
     'askConfirmationOnAnnotationRemoval',
     'showExportLabelsButton',
     'annotationOpacity',
+    'preferredSamModelKey',
+    'samRememberChoice',
   ];
 
   const User({
@@ -83,6 +89,8 @@ class User {
     required this.askConfirmationOnAnnotationRemoval,
     required this.showExportLabelsButton,
     required this.annotationOpacity,
+    required this.preferredSamModelKey,
+    required this.samRememberChoice,
   });
 
   User copyWith({
@@ -112,6 +120,8 @@ class User {
     bool? askConfirmationOnAnnotationRemoval,
     bool? showExportLabelsButton,
     double? annotationOpacity,
+    String? preferredSamModelKey,
+    bool? samRememberChoice,
   }) {
     return User(
       id: id ?? this.id,
@@ -140,6 +150,8 @@ class User {
       askConfirmationOnAnnotationRemoval: askConfirmationOnAnnotationRemoval ?? this.askConfirmationOnAnnotationRemoval,
       showExportLabelsButton: showExportLabelsButton ?? this.showExportLabelsButton,
       annotationOpacity: annotationOpacity ?? this.annotationOpacity,
+      preferredSamModelKey: preferredSamModelKey ?? this.preferredSamModelKey,
+      samRememberChoice: samRememberChoice ?? this.samRememberChoice,
     );
   }
 
@@ -170,6 +182,8 @@ class User {
         'askConfirmationOnAnnotationRemoval': askConfirmationOnAnnotationRemoval ? 1 : 0,
         'showExportLabelsButton': showExportLabelsButton ? 1 : 0,
         'annotationOpacity': annotationOpacity,
+        'preferredSamModelKey': preferredSamModelKey,
+        'samRememberChoice': samRememberChoice ? 1 : 0,
       };
 
   static User fromMap(Map<String, dynamic> map) => User(
@@ -199,6 +213,8 @@ class User {
         askConfirmationOnAnnotationRemoval: map['askConfirmationOnAnnotationRemoval'] == null ? true : map['askConfirmationOnAnnotationRemoval'] == 1,
         showExportLabelsButton: map['showExportLabelsButton'] == null ? true : map['showExportLabelsButton'] == 1,
         annotationOpacity: (map['annotationOpacity'] as num?)?.toDouble() ?? 0.35,
+        preferredSamModelKey: (map['preferredSamModelKey'] as String?) ?? 'sam2_hiera_base_plus',
+        samRememberChoice: map['samRememberChoice'] == null ? false : map['samRememberChoice'] == 1,
       );
 
   @override

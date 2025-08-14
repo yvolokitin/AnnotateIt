@@ -4,6 +4,8 @@ import '../../gen_l10n/app_localizations.dart';
 
 import '../dialogs/annotations_settings_dialog.dart';
 import '../dialogs/alert_error_dialog.dart';
+import '../dialogs/sam_model_selector_dialog.dart';
+import '../../session/user_session.dart';
 
 import 'user_action.dart';
 import 'toolbar_button.dart';
@@ -83,49 +85,38 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
   }
 
   Future<void> _openSamModelSelector(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final choice = await showDialog<String>(
-      context: context,
-      builder: (ctx) {
-        return SimpleDialog(
-          title: Text(l10n.toolbarSAM + ' Model'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(ctx).pop('mobile'),
-              child: Row(
-                children: [
-                  if (widget.selectedSamModelKey == 'mobile') ...[
-                    Icon(Icons.check, color: Colors.green),
-                    SizedBox(width: 8),
-                  ] else ...[
-                    SizedBox(width: 32),
-                  ],
-                  Expanded(child: Text('SAM Mobile')),
-                ],
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(ctx).pop('sam2_hiera_base_plus'),
-              child: Row(
-                children: [
-                  if (widget.selectedSamModelKey == 'sam2_hiera_base_plus') ...[
-                    Icon(Icons.check, color: Colors.green),
-                    SizedBox(width: 8),
-                  ] else ...[
-                    SizedBox(width: 32),
-                  ],
-                  Expanded(child: Text('Segment Anything 2 (Hiera-Base+)')),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-    if (choice != null) {
-      if (choice != widget.selectedSamModelKey) {
-        widget.onSamModelChanged(choice);
+    final isInit = UserSession.instance.isInitialized;
+    final initialRemember = isInit ? UserSession.instance.getUser().samRememberChoice : false;
+
+    // If user chose to remember, skip dialog and use preferred model
+    if (isInit && initialRemember) {
+      final preferredKey = UserSession.instance.getUser().preferredSamModelKey;
+      if (preferredKey != widget.selectedSamModelKey) {
+        widget.onSamModelChanged(preferredKey);
       }
+      _selectUserAction(UserAction.sam_annotation);
+      return;
+    }
+
+    final result = await SamModelSelectorDialog.show(
+      context,
+      initialSelectedKey: widget.selectedSamModelKey,
+      initialRemember: initialRemember,
+    );
+
+    if (result != null) {
+      if (result.modelKey != widget.selectedSamModelKey) {
+        widget.onSamModelChanged(result.modelKey);
+      }
+
+      // Persist user preference if requested
+      if (isInit) {
+        await UserSession.instance.setSamRememberChoice(result.remember);
+        if (result.remember) {
+          await UserSession.instance.setPreferredSamModelKey(result.modelKey);
+        }
+      }
+
       // After choosing a model, activate the SAM tool for immediate use
       _selectUserAction(UserAction.sam_annotation);
     }
@@ -189,7 +180,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                 ? null
                 : () async => await _openSamModelSelector(context),
               isActive: widget.selectedAction == UserAction.sam_annotation,
-              tooltip: l10n.toolbarSAM,
+              tooltip: '${l10n.toolbarSAM} • ${widget.selectedSamModelKey == 'mobile' ? 'SAM mobile' : 'SAM2 Hiera-Base+'}',
             ),
           ],
 

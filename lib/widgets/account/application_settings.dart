@@ -91,6 +91,21 @@ class ApplicationSettings extends StatelessWidget {
             ], isWide),
 
             _buildSection(l10n.settingsAnnotationTitle, [
+              _buildDropdown(
+                title: "Preferred SAM Model",
+                value: user.preferredSamModelKey,
+                options: const {
+                  'mobile': 'SAM Mobile',
+                  'sam2_hiera_base_plus': 'SAM2 (Hiera-Base+)',
+                },
+                onChanged: (val) => onUserChange(user.copyWith(preferredSamModelKey: val)),
+              ),
+              _buildSwitchWithNote(
+                title: "Remember my SAM choice",
+                value: user.samRememberChoice,
+                onChanged: (val) => onUserChange(user.copyWith(samRememberChoice: val)),
+                note: "When enabled, the SAM dialog will not be shown and your preferred model will be used automatically.",
+              ),
               _buildSliderWithButtons(
                 context,
                 l10n.settingsAnnotationOpacity,
@@ -496,6 +511,58 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String title,
+    required String value,
+    required Map<String, String> options,
+    required ValueChanged<String> onChanged,
+  }) {
+    final String effectiveValue = options.keys.contains(value)
+        ? value
+        : (options.keys.isNotEmpty ? options.keys.first : value);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.normal,
+              color: Colors.white70,
+            ),
+          ),
+        ),
+        DropdownButton<String>(
+          value: effectiveValue,
+          dropdownColor: Colors.grey[850],
+          items: options.entries
+              .map(
+                (e) => DropdownMenuItem<String>(
+                  value: e.key,
+                  child: Text(
+                    e.value,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 20,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: (newVal) {
+            if (newVal != null) onChanged(newVal);
+          },
+          iconEnabledColor: Colors.white70,
+        ),
       ],
     );
   }

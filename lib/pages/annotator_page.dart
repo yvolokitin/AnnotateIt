@@ -118,6 +118,14 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     // Initialize SAM segmentation service (platform-agnostic; uses fallback if runtime unsupported)
     _samService.initialize();
 
+    // Initialize default SAM model from user preference
+    try {
+      final preferredSam = UserSession.instance.getUser().preferredSamModelKey;
+      _handleSamModelChanged(preferredSam);
+    } catch (_) {
+      // UserSession may not be initialized in some contexts; ignore
+    }
+
     if (widget.project.labels.isEmpty || widget.mediaItem.annotations.isEmpty) {
       showRightSidebar = false;
     }
