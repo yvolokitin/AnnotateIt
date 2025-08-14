@@ -1149,4 +1149,67 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Detectar y clasificar todos los objetos similares como una sola entidad.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Mostrar diálogo de advertencia de importación';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Cuando está habilitado, se muestra un diálogo de advertencia al alternar \'Permitir cambio de tipo de proyecto\' durante la importación del conjunto de datos.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Pedir confirmación al eliminar anotaciones';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Cuando está habilitado, se mostrará un diálogo de confirmación antes de eliminar anotaciones.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Mostrar botón Exportar Etiquetas';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Cuando está habilitado, se muestra un botón para exportar etiquetas en la vista del proyecto.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Modelo SAM preferido';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera-Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice =>
+      'Recordar mi elección de SAM';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Cuando está habilitado, no se mostrará el diálogo de SAM y su modelo preferido se usará automáticamente.';
+
+  @override
+  String get accountStorageLogFileTitle =>
+      'Archivo de registro de la aplicación';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'No se pudo abrir la ubicación del archivo de registro: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Haga clic para abrir la carpeta que contiene el archivo de registro de la aplicación. Este archivo contiene todos los registros de la app, incluidas posibles fallas.';
+
+  @override
+  String get accountStorageLogFileNotAvailable =>
+      'Archivo de registro no disponible';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'No se pudo inicializar el archivo de registro de la aplicación. Verifique los permisos del archivo.';
 }

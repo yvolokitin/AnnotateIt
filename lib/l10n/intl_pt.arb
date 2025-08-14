@@ -476,5 +476,31 @@
   "projectTypeDetectionOrientedDescription": "Desenhar e envolver um objeto dentro de um retângulo mínimo.",
   
   "projectTypeInstanceSegmentationDescription": "Detectar e distinguir cada objeto individual com base em suas características únicas.",
-  "projectTypeSemanticSegmentationDescription": "Detectar e classificar todos os objetos semelhantes como uma única entidade."
+  "projectTypeSemanticSegmentationDescription": "Detectar e classificar todos os objetos semelhantes como uma única entidade.",
+
+  "settingsProjectCreationShowImportWarning": "Mostrar diálogo de aviso de importação",
+  "settingsProjectCreationShowImportWarningNote": "Quando ativado, um diálogo de aviso é exibido ao alternar 'Permitir alteração do tipo de projeto' durante a importação do conjunto de dados.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Pedir confirmação ao remover anotações",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Quando ativado, será exibido um diálogo de confirmação antes de remover anotações.",
+
+  "settingsLabelsShowExportLabelsButton": "Mostrar botão Exportar Etiquetas",
+  "settingsLabelsShowExportLabelsButtonNote": "Quando ativado, é exibido um botão para exportar etiquetas na visualização do projeto.",
+
+  "settingsAnnotationPreferredSamModel": "Modelo SAM preferido",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera-Base+)",
+  "settingsAnnotationSamRememberChoice": "Lembrar minha escolha de SAM",
+  "settingsAnnotationSamRememberChoiceNote": "Quando ativado, o diálogo do SAM não será exibido e seu modelo preferido será usado automaticamente.",
+
+  "accountStorageLogFileTitle": "Arquivo de log do aplicativo",
+  "accountStorageOpenLogFileFailed": "Falha ao abrir a localização do arquivo de log: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Clique para abrir a pasta que contém o arquivo de log do aplicativo. Este arquivo contém todos os logs do app, incluindo possíveis falhas.",
+  "accountStorageLogFileNotAvailable": "Arquivo de log indisponível",
+  "accountStorageLogFileInitError": "Não foi possível inicializar o arquivo de log do aplicativo. Verifique as permissões do arquivo."
 }

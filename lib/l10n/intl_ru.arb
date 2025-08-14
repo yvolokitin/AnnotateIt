@@ -430,5 +430,31 @@
   "projectTypeDetectionOrientedDescription": "Нарисуйте и заключите объект в минимальный прямоугольник.",
   
   "projectTypeInstanceSegmentationDescription": "Обнаружение и различение каждого отдельного объекта на основе его уникальных особенностей.",
-  "projectTypeSemanticSegmentationDescription": "Обнаружение и классификация всех похожих объектов как единого целого."
+  "projectTypeSemanticSegmentationDescription": "Обнаружение и классификация всех похожих объектов как единого целого.",
+
+  "settingsProjectCreationShowImportWarning": "Показывать предупреждение при импорте",
+  "settingsProjectCreationShowImportWarningNote": "Если включено, при переключении «Разрешить изменение типа проекта» во время импорта датасета будет показано предупреждающее диалоговое окно.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Запрашивать подтверждение при удалении аннотаций",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Если включено, перед удалением аннотаций будет показано диалоговое окно подтверждения.",
+
+  "settingsLabelsShowExportLabelsButton": "Показывать кнопку «Экспорт меток»",
+  "settingsLabelsShowExportLabelsButtonNote": "Если включено, в представлении проекта появится кнопка для экспорта меток.",
+
+  "settingsAnnotationPreferredSamModel": "Предпочитаемая модель SAM",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera‑Base+)",
+  "settingsAnnotationSamRememberChoice": "Запомнить мой выбор SAM",
+  "settingsAnnotationSamRememberChoiceNote": "Если включено, диалоговое окно SAM не будет показываться, и автоматически будет использована ваша предпочитаемая модель.",
+
+  "accountStorageLogFileTitle": "Файл журнала приложения",
+  "accountStorageOpenLogFileFailed": "Не удалось открыть расположение файла журнала: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Нажмите, чтобы открыть папку, содержащую файл журнала приложения. Этот файл включает все журналы приложения, включая возможные аварийные завершения.",
+  "accountStorageLogFileNotAvailable": "Файл журнала недоступен",
+  "accountStorageLogFileInitError": "Не удалось инициализировать файл журнала приложения. Проверьте разрешения на файлы."
 }

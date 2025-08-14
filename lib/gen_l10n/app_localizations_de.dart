@@ -1141,4 +1141,65 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Erkennen und klassifizieren Sie alle ähnlichen Objekte als eine einzige Entität.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Import-Warnungsdialog anzeigen';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Wenn aktiviert, wird beim Umschalten von „Projekttyp-Änderung erlauben“ während des Datensatzimports ein Warnhinweis angezeigt.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Beim Entfernen von Annotationen um Bestätigung bitten';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Wenn aktiviert, wird vor dem Entfernen von Annotationen ein Bestätigungsdialog angezeigt.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Schaltfläche „Labels exportieren“ anzeigen';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Wenn aktiviert, wird in der Projektansicht eine Schaltfläche zum Exportieren von Labels angezeigt.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Bevorzugtes SAM‑Modell';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera‑Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Meine SAM‑Auswahl merken';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Wenn aktiviert, wird der SAM‑Dialog nicht angezeigt und Ihr bevorzugtes Modell wird automatisch verwendet.';
+
+  @override
+  String get accountStorageLogFileTitle => 'Anwendungsprotokolldatei';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Speicherort der Protokolldatei konnte nicht geöffnet werden: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Klicken Sie, um den Ordner mit der Anwendungsprotokolldatei zu öffnen. Diese Datei enthält alle App‑Protokolle, einschließlich möglicher Abstürze.';
+
+  @override
+  String get accountStorageLogFileNotAvailable =>
+      'Protokolldatei nicht verfügbar';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'Die Anwendungsprotokolldatei konnte nicht initialisiert werden. Überprüfen Sie die Dateiberechtigungen.';
 }

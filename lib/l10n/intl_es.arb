@@ -476,5 +476,31 @@
   "projectTypeDetectionOrientedDescription": "Dibujar y encerrar un objeto dentro de un rectángulo mínimo.",
   
   "projectTypeInstanceSegmentationDescription": "Detectar y distinguir cada objeto individual basado en sus características únicas.",
-  "projectTypeSemanticSegmentationDescription": "Detectar y clasificar todos los objetos similares como una sola entidad."
+  "projectTypeSemanticSegmentationDescription": "Detectar y clasificar todos los objetos similares como una sola entidad.",
+
+  "settingsProjectCreationShowImportWarning": "Mostrar diálogo de advertencia de importación",
+  "settingsProjectCreationShowImportWarningNote": "Cuando está habilitado, se muestra un diálogo de advertencia al alternar 'Permitir cambio de tipo de proyecto' durante la importación del conjunto de datos.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Pedir confirmación al eliminar anotaciones",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Cuando está habilitado, se mostrará un diálogo de confirmación antes de eliminar anotaciones.",
+
+  "settingsLabelsShowExportLabelsButton": "Mostrar botón Exportar Etiquetas",
+  "settingsLabelsShowExportLabelsButtonNote": "Cuando está habilitado, se muestra un botón para exportar etiquetas en la vista del proyecto.",
+
+  "settingsAnnotationPreferredSamModel": "Modelo SAM preferido",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera-Base+)",
+  "settingsAnnotationSamRememberChoice": "Recordar mi elección de SAM",
+  "settingsAnnotationSamRememberChoiceNote": "Cuando está habilitado, no se mostrará el diálogo de SAM y su modelo preferido se usará automáticamente.",
+
+  "accountStorageLogFileTitle": "Archivo de registro de la aplicación",
+  "accountStorageOpenLogFileFailed": "No se pudo abrir la ubicación del archivo de registro: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Haga clic para abrir la carpeta que contiene el archivo de registro de la aplicación. Este archivo contiene todos los registros de la app, incluidas posibles fallas.",
+  "accountStorageLogFileNotAvailable": "Archivo de registro no disponible",
+  "accountStorageLogFileInitError": "No se pudo inicializar el archivo de registro de la aplicación. Verifique los permisos del archivo."
 }

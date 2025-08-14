@@ -82,7 +82,11 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Ensure SAM 2 Hiera is first in the list
+                // Ensure SAM 2 Hiera is first in the list (best quality on top)
+                _buildRadioTile(
+                  title: 'Segment Anything 2 (Hiera-Large)',
+                  value: 'sam2_hiera_large',
+                ),
                 _buildRadioTile(
                   title: 'Segment Anything 2 (Hiera-Base+)',
                   value: 'sam2_hiera_base_plus',

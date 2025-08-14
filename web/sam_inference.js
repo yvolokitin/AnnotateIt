@@ -85,15 +85,52 @@
     decFeeds[origSizeName] = origSizeTensor;
 
     const decResults = await decoderSession.run(decFeeds);
-    // Try common output names, else take the first
-    let outName = decoderSession.outputNames.find(n => n.toLowerCase().includes('mask')) || decoderSession.outputNames[0];
-    const masksTensor = decResults[outName];
-    const logits = masksTensor.data; // Float32Array size 1*1*256*256
 
-    // Threshold to binary
+    // Pick an output that represents low-res mask logits with spatial 256x256.
+    let outName = null;
+    // Prefer a name containing 'mask' and spatial dims 256x256
+    for (const name of decoderSession.outputNames) {
+      const tensor = decResults[name];
+      if (!tensor || !tensor.dims) continue;
+      const d = tensor.dims; // e.g., [1, 1, 256, 256] or [1, 3, 256, 256]
+      if (d.length === 4 && d[d.length-1] === LOWRES && d[d.length-2] === LOWRES) {
+        outName = name;
+        break;
+      }
+    }
+    if (!outName) {
+      outName = decoderSession.outputNames.find(n => n.toLowerCase().includes('mask')) || decoderSession.outputNames[0];
+    }
+    const masksTensor = decResults[outName];
+
+    // Extract first mask channel as logits (1xCx256x256 or Cx256x256 or 256x256)
+    let logits;
+    if (masksTensor && masksTensor.data) {
+      const data = masksTensor.data; // TypedArray
+      const dims = masksTensor.dims || [];
+      // Compute stride to slice first 256x256 plane
+      if (dims.length === 4) {
+        const c = dims[1] || 1; // [N,C,H,W]
+        const plane = LOWRES * LOWRES;
+        logits = data.subarray(0, plane);
+      } else if (dims.length === 3) {
+        const plane = LOWRES * LOWRES; // [C,H,W]
+        logits = data.subarray(0, plane);
+      } else if (dims.length === 2 && dims[0] === LOWRES && dims[1] === LOWRES) {
+        logits = data;
+      } else {
+        // Fallback: use first 256*256 values if available
+        logits = data.subarray(0, LOWRES * LOWRES);
+      }
+    } else {
+      // No suitable output
+      return null;
+    }
+
+    // Threshold to binary (assume logits; > 0.0 means foreground)
     const size = LOWRES * LOWRES;
     const binary = new Uint8Array(size);
-    for (let i = 0; i < size; i++) binary[i] = logits[i] > 0 ? 1 : 0;
+    for (let i = 0; i < size; i++) binary[i] = (logits[i] > 0.0) ? 1 : 0;
 
     return binary; // length 65536, row-major
   }

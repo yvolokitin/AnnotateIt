@@ -481,5 +481,31 @@
   "projectTypeDetectionOrientedDescription": "Draw and enclose an object within a minimal rectangle.",
   
   "projectTypeInstanceSegmentationDescription": "Detect and distinguish each individual object based on its unique features.",
-  "projectTypeSemanticSegmentationDescription": "Detect and classify all similar objects as a single entity."
+  "projectTypeSemanticSegmentationDescription": "Detect and classify all similar objects as a single entity.",
+
+  "settingsProjectCreationShowImportWarning": "Show import warning dialog",
+  "settingsProjectCreationShowImportWarningNote": "When enabled, a warning dialog is shown when toggling 'Allow Project Type Change' during dataset import.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Ask for confirmation when removing annotations",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "When enabled, a confirmation dialog will be shown before removing annotations.",
+
+  "settingsLabelsShowExportLabelsButton": "Show Export Labels button",
+  "settingsLabelsShowExportLabelsButtonNote": "When enabled, shows a button to export labels in the project view.",
+
+  "settingsAnnotationPreferredSamModel": "Preferred SAM model",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera-Base+)",
+  "settingsAnnotationSamRememberChoice": "Remember my SAM choice",
+  "settingsAnnotationSamRememberChoiceNote": "When enabled, the SAM dialog will not be shown and your preferred model will be used automatically.",
+
+  "accountStorageLogFileTitle": "Application Log File",
+  "accountStorageOpenLogFileFailed": "Failed to open log file location: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Click to open the folder containing the application log file. This file contains all app logs including potential crashes.",
+  "accountStorageLogFileNotAvailable": "Log file not available",
+  "accountStorageLogFileInitError": "The application log file could not be initialized. Check file permissions."
 }

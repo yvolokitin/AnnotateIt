@@ -476,5 +476,31 @@
   "projectTypeDetectionOrientedDescription": "Teken en omsluit een object binnen een minimale rechthoek.",
   
   "projectTypeInstanceSegmentationDescription": "Detecteer en onderscheid elk individueel object op basis van zijn unieke kenmerken.",
-  "projectTypeSemanticSegmentationDescription": "Detecteer en classificeer alle vergelijkbare objecten als één entiteit."
+  "projectTypeSemanticSegmentationDescription": "Detecteer en classificeer alle vergelijkbare objecten als één entiteit.",
+
+  "settingsProjectCreationShowImportWarning": "Waarschuwingsdialoog voor import tonen",
+  "settingsProjectCreationShowImportWarningNote": "Indien ingeschakeld verschijnt er een waarschuwingsdialoog wanneer 'Wijziging van projecttype toestaan' wordt omgeschakeld tijdens het importeren van een dataset.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Bevestiging vragen bij verwijderen van annotaties",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Indien ingeschakeld wordt vóór het verwijderen van annotaties een bevestigingsdialoog getoond.",
+
+  "settingsLabelsShowExportLabelsButton": "Knop 'Labels exporteren' tonen",
+  "settingsLabelsShowExportLabelsButtonNote": "Indien ingeschakeld verschijnt er in de projectweergave een knop om labels te exporteren.",
+
+  "settingsAnnotationPreferredSamModel": "Voorkeurs‑SAM‑model",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera‑Base+)",
+  "settingsAnnotationSamRememberChoice": "Mijn SAM‑keuze onthouden",
+  "settingsAnnotationSamRememberChoiceNote": "Indien ingeschakeld wordt de SAM‑dialoog niet getoond en wordt automatisch uw voorkeursmodel gebruikt.",
+
+  "accountStorageLogFileTitle": "Applicatielogbestand",
+  "accountStorageOpenLogFileFailed": "Kon locatie van logbestand niet openen: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Klik om de map met het logbestand van de applicatie te openen. Dit bestand bevat alle app‑logboeken, inclusief eventuele crashes.",
+  "accountStorageLogFileNotAvailable": "Logbestand niet beschikbaar",
+  "accountStorageLogFileInitError": "Het logbestand van de applicatie kon niet worden geïnitialiseerd. Controleer de bestandsmachtigingen."
 }

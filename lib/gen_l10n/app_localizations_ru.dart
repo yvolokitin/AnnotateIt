@@ -1129,4 +1129,64 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Обнаружение и классификация всех похожих объектов как единого целого.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Показывать предупреждение при импорте';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Если включено, при переключении «Разрешить изменение типа проекта» во время импорта датасета будет показано предупреждающее диалоговое окно.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Запрашивать подтверждение при удалении аннотаций';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Если включено, перед удалением аннотаций будет показано диалоговое окно подтверждения.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Показывать кнопку «Экспорт меток»';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Если включено, в представлении проекта появится кнопка для экспорта меток.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Предпочитаемая модель SAM';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera‑Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Запомнить мой выбор SAM';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Если включено, диалоговое окно SAM не будет показываться, и автоматически будет использована ваша предпочитаемая модель.';
+
+  @override
+  String get accountStorageLogFileTitle => 'Файл журнала приложения';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Не удалось открыть расположение файла журнала: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Нажмите, чтобы открыть папку, содержащую файл журнала приложения. Этот файл включает все журналы приложения, включая возможные аварийные завершения.';
+
+  @override
+  String get accountStorageLogFileNotAvailable => 'Файл журнала недоступен';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'Не удалось инициализировать файл журнала приложения. Проверьте разрешения на файлы.';
 }

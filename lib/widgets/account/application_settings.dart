@@ -41,10 +41,10 @@ class ApplicationSettings extends StatelessWidget {
                 note: l10n.settingsProjectCreationConfirmNoLabelsNote,
               ),
               _buildSwitchWithNote(
-                title: "Show Import Warning Dialog",
+                title: l10n.settingsProjectCreationShowImportWarning,
                 value: user.projectShowImportWarning,
                 onChanged: (val) => onUserChange(user.copyWith(projectShowImportWarning: val)),
-                note: "When enabled, shows a warning dialog when toggling 'Allow Project Type Change' during dataset import",
+                note: l10n.settingsProjectCreationShowImportWarningNote,
               ),
             ], isWide),
 
@@ -77,34 +77,35 @@ class ApplicationSettings extends StatelessWidget {
                 note: l10n.settingsLabelsDeletionWithAnnotationsNote,
               ),
               _buildSwitchWithNote(
-                title: "Ask confirmation when removing annotations",
+                title: l10n.settingsLabelsAskConfirmationOnAnnotationRemoval,
                 value: user.askConfirmationOnAnnotationRemoval,
                 onChanged: (val) => onUserChange(user.copyWith(askConfirmationOnAnnotationRemoval: val)),
-                note: "When enabled, a confirmation dialog will be shown before removing annotations",
+                note: l10n.settingsLabelsAskConfirmationOnAnnotationRemovalNote,
               ),
               _buildSwitchWithNote(
-                title: "Show export labels button",
+                title: l10n.settingsLabelsShowExportLabelsButton,
                 value: user.showExportLabelsButton,
                 onChanged: (val) => onUserChange(user.copyWith(showExportLabelsButton: val)),
-                note: "When enabled, shows a button to export labels in the project view",
+                note: l10n.settingsLabelsShowExportLabelsButtonNote,
               ),
             ], isWide),
 
             _buildSection(l10n.settingsAnnotationTitle, [
               _buildDropdown(
-                title: "Preferred SAM Model",
+                title: l10n.settingsAnnotationPreferredSamModel,
                 value: user.preferredSamModelKey,
-                options: const {
-                  'mobile': 'SAM Mobile',
-                  'sam2_hiera_base_plus': 'SAM2 (Hiera-Base+)',
+                options: {
+                  'sam2_hiera_large': 'SAM2 (Hiera-Large)',
+                  'sam2_hiera_base_plus': l10n.settingsAnnotationSamOptionSam2HieraBasePlus,
+                  'mobile': l10n.settingsAnnotationSamOptionMobile,
                 },
                 onChanged: (val) => onUserChange(user.copyWith(preferredSamModelKey: val)),
               ),
               _buildSwitchWithNote(
-                title: "Remember my SAM choice",
+                title: l10n.settingsAnnotationSamRememberChoice,
                 value: user.samRememberChoice,
                 onChanged: (val) => onUserChange(user.copyWith(samRememberChoice: val)),
-                note: "When enabled, the SAM dialog will not be shown and your preferred model will be used automatically.",
+                note: l10n.settingsAnnotationSamRememberChoiceNote,
               ),
               _buildSliderWithButtons(
                 context,
@@ -119,7 +120,7 @@ class ApplicationSettings extends StatelessWidget {
               ),
             ], isWide),
 
-            _buildSection("Storage", [
+            _buildSection(l10n.accountStorage, [
               _buildLogFileLink(context),
             ], isWide),
           ],
@@ -404,7 +405,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Application Log File',
+          AppLocalizations.of(context)!.accountStorageLogFileTitle,
           style: const TextStyle(
             fontSize: 20,
             fontFamily: 'CascadiaCode',
@@ -421,7 +422,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Failed to open log file location: $e'),
+                    content: Text(AppLocalizations.of(context)!.accountStorageOpenLogFileFailed(e)),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -465,7 +466,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
           ),
           const SizedBox(height: 8),
           Text(
-            'Click to open the folder containing the application log file. This file contains all app logs including potential crashes.',
+            AppLocalizations.of(context)!.accountStorageLogFileHelp,
             style: const TextStyle(
               fontSize: 16,
               fontFamily: 'CascadiaCode',
@@ -488,10 +489,10 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Log file not available',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.accountStorageLogFileNotAvailable,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontFamily: 'CascadiaCode',
                       color: Colors.red,
@@ -502,9 +503,9 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'The application log file could not be initialized. Check file permissions.',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.accountStorageLogFileInitError,
+            style: const TextStyle(
               fontSize: 16,
               fontFamily: 'CascadiaCode',
               color: Colors.white60,

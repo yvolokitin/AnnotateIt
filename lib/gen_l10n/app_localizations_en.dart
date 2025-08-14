@@ -1120,4 +1120,64 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Detect and classify all similar objects as a single entity.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Show import warning dialog';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'When enabled, a warning dialog is shown when toggling \'Allow Project Type Change\' during dataset import.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Ask for confirmation when removing annotations';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'When enabled, a confirmation dialog will be shown before removing annotations.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Show Export Labels button';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'When enabled, shows a button to export labels in the project view.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Preferred SAM model';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera-Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Remember my SAM choice';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'When enabled, the SAM dialog will not be shown and your preferred model will be used automatically.';
+
+  @override
+  String get accountStorageLogFileTitle => 'Application Log File';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Failed to open log file location: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Click to open the folder containing the application log file. This file contains all app logs including potential crashes.';
+
+  @override
+  String get accountStorageLogFileNotAvailable => 'Log file not available';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'The application log file could not be initialized. Check file permissions.';
 }

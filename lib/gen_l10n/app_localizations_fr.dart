@@ -1156,4 +1156,65 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Détecter et classifier tous les objets similaires comme une seule entité.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Afficher la boîte de dialogue d’avertissement d’importation';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Lorsqu’elle est activée, une boîte de dialogue d’avertissement s’affiche lors de l’activation de « Autoriser le changement de type de projet » pendant l’importation du jeu de données.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Demander une confirmation lors de la suppression des annotations';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Lorsqu’elle est activée, une boîte de dialogue de confirmation s’affiche avant la suppression des annotations.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Afficher le bouton Exporter les étiquettes';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Lorsqu’elle est activée, un bouton permettant d’exporter les étiquettes apparaît dans la vue du projet.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Modèle SAM préféré';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera‑Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Mémoriser mon choix SAM';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Lorsqu’elle est activée, la boîte de dialogue SAM n’est plus affichée et votre modèle préféré est utilisé automatiquement.';
+
+  @override
+  String get accountStorageLogFileTitle => 'Fichier journal de l’application';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Impossible d’ouvrir l’emplacement du fichier journal : $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Cliquez pour ouvrir le dossier contenant le fichier journal de l’application. Ce fichier contient tous les journaux de l’app, y compris d’éventuels plantages.';
+
+  @override
+  String get accountStorageLogFileNotAvailable =>
+      'Fichier journal indisponible';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'Impossible d’initialiser le fichier journal de l’application. Vérifiez les autorisations sur les fichiers.';
 }

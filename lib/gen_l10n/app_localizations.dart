@@ -2063,6 +2063,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detect and classify all similar objects as a single entity.'**
   String get projectTypeSemanticSegmentationDescription;
+
+  /// No description provided for @settingsProjectCreationShowImportWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Show import warning dialog'**
+  String get settingsProjectCreationShowImportWarning;
+
+  /// No description provided for @settingsProjectCreationShowImportWarningNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, a warning dialog is shown when toggling \'Allow Project Type Change\' during dataset import.'**
+  String get settingsProjectCreationShowImportWarningNote;
+
+  /// No description provided for @settingsLabelsAskConfirmationOnAnnotationRemoval.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for confirmation when removing annotations'**
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval;
+
+  /// No description provided for @settingsLabelsAskConfirmationOnAnnotationRemovalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, a confirmation dialog will be shown before removing annotations.'**
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote;
+
+  /// No description provided for @settingsLabelsShowExportLabelsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Export Labels button'**
+  String get settingsLabelsShowExportLabelsButton;
+
+  /// No description provided for @settingsLabelsShowExportLabelsButtonNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, shows a button to export labels in the project view.'**
+  String get settingsLabelsShowExportLabelsButtonNote;
+
+  /// No description provided for @settingsAnnotationPreferredSamModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred SAM model'**
+  String get settingsAnnotationPreferredSamModel;
+
+  /// No description provided for @settingsAnnotationSamOptionMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'SAM Mobile'**
+  String get settingsAnnotationSamOptionMobile;
+
+  /// No description provided for @settingsAnnotationSamOptionSam2HieraBasePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'SAM2 (Hiera-Base+)'**
+  String get settingsAnnotationSamOptionSam2HieraBasePlus;
+
+  /// No description provided for @settingsAnnotationSamRememberChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember my SAM choice'**
+  String get settingsAnnotationSamRememberChoice;
+
+  /// No description provided for @settingsAnnotationSamRememberChoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, the SAM dialog will not be shown and your preferred model will be used automatically.'**
+  String get settingsAnnotationSamRememberChoiceNote;
+
+  /// No description provided for @accountStorageLogFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Log File'**
+  String get accountStorageLogFileTitle;
+
+  /// No description provided for @accountStorageOpenLogFileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open log file location: {error}'**
+  String accountStorageOpenLogFileFailed(Object error);
+
+  /// No description provided for @accountStorageLogFileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open the folder containing the application log file. This file contains all app logs including potential crashes.'**
+  String get accountStorageLogFileHelp;
+
+  /// No description provided for @accountStorageLogFileNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Log file not available'**
+  String get accountStorageLogFileNotAvailable;
+
+  /// No description provided for @accountStorageLogFileInitError.
+  ///
+  /// In en, this message translates to:
+  /// **'The application log file could not be initialized. Check file permissions.'**
+  String get accountStorageLogFileInitError;
 }
 
 class _AppLocalizationsDelegate

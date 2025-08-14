@@ -476,5 +476,31 @@
   "projectTypeDetectionOrientedDescription": "Zeichnen und umschließen Sie ein Objekt innerhalb eines minimalen Rechtecks.",
   
   "projectTypeInstanceSegmentationDescription": "Erkennen und unterscheiden Sie jedes einzelne Objekt basierend auf seinen einzigartigen Merkmalen.",
-  "projectTypeSemanticSegmentationDescription": "Erkennen und klassifizieren Sie alle ähnlichen Objekte als eine einzige Entität."
+  "projectTypeSemanticSegmentationDescription": "Erkennen und klassifizieren Sie alle ähnlichen Objekte als eine einzige Entität.",
+
+  "settingsProjectCreationShowImportWarning": "Import-Warnungsdialog anzeigen",
+  "settingsProjectCreationShowImportWarningNote": "Wenn aktiviert, wird beim Umschalten von „Projekttyp-Änderung erlauben“ während des Datensatzimports ein Warnhinweis angezeigt.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Beim Entfernen von Annotationen um Bestätigung bitten",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Wenn aktiviert, wird vor dem Entfernen von Annotationen ein Bestätigungsdialog angezeigt.",
+
+  "settingsLabelsShowExportLabelsButton": "Schaltfläche „Labels exportieren“ anzeigen",
+  "settingsLabelsShowExportLabelsButtonNote": "Wenn aktiviert, wird in der Projektansicht eine Schaltfläche zum Exportieren von Labels angezeigt.",
+
+  "settingsAnnotationPreferredSamModel": "Bevorzugtes SAM‑Modell",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera‑Base+)",
+  "settingsAnnotationSamRememberChoice": "Meine SAM‑Auswahl merken",
+  "settingsAnnotationSamRememberChoiceNote": "Wenn aktiviert, wird der SAM‑Dialog nicht angezeigt und Ihr bevorzugtes Modell wird automatisch verwendet.",
+
+  "accountStorageLogFileTitle": "Anwendungsprotokolldatei",
+  "accountStorageOpenLogFileFailed": "Speicherort der Protokolldatei konnte nicht geöffnet werden: {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Klicken Sie, um den Ordner mit der Anwendungsprotokolldatei zu öffnen. Diese Datei enthält alle App‑Protokolle, einschließlich möglicher Abstürze.",
+  "accountStorageLogFileNotAvailable": "Protokolldatei nicht verfügbar",
+  "accountStorageLogFileInitError": "Die Anwendungsprotokolldatei konnte nicht initialisiert werden. Überprüfen Sie die Dateiberechtigungen."
 }

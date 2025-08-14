@@ -1127,4 +1127,64 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Detecteer en classificeer alle vergelijkbare objecten als één entiteit.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Waarschuwingsdialoog voor import tonen';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Indien ingeschakeld verschijnt er een waarschuwingsdialoog wanneer \'Wijziging van projecttype toestaan\' wordt omgeschakeld tijdens het importeren van een dataset.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Bevestiging vragen bij verwijderen van annotaties';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Indien ingeschakeld wordt vóór het verwijderen van annotaties een bevestigingsdialoog getoond.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Knop \'Labels exporteren\' tonen';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Indien ingeschakeld verschijnt er in de projectweergave een knop om labels te exporteren.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Voorkeurs‑SAM‑model';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera‑Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Mijn SAM‑keuze onthouden';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Indien ingeschakeld wordt de SAM‑dialoog niet getoond en wordt automatisch uw voorkeursmodel gebruikt.';
+
+  @override
+  String get accountStorageLogFileTitle => 'Applicatielogbestand';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Kon locatie van logbestand niet openen: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Klik om de map met het logbestand van de applicatie te openen. Dit bestand bevat alle app‑logboeken, inclusief eventuele crashes.';
+
+  @override
+  String get accountStorageLogFileNotAvailable => 'Logbestand niet beschikbaar';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'Het logbestand van de applicatie kon niet worden geïnitialiseerd. Controleer de bestandsmachtigingen.';
 }

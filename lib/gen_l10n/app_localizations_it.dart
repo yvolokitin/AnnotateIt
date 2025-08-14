@@ -1138,4 +1138,64 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get projectTypeSemanticSegmentationDescription =>
       'Rileva e classifica tutti gli oggetti simili come un\'unica entità.';
+
+  @override
+  String get settingsProjectCreationShowImportWarning =>
+      'Mostra finestra di avviso per l\'importazione';
+
+  @override
+  String get settingsProjectCreationShowImportWarningNote =>
+      'Se abilitato, viene mostrata una finestra di avviso quando si attiva \'Consenti cambio tipo di progetto\' durante l\'importazione del dataset.';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemoval =>
+      'Chiedi conferma quando si rimuovono le annotazioni';
+
+  @override
+  String get settingsLabelsAskConfirmationOnAnnotationRemovalNote =>
+      'Se abilitato, verrà mostrata una finestra di conferma prima di rimuovere le annotazioni.';
+
+  @override
+  String get settingsLabelsShowExportLabelsButton =>
+      'Mostra pulsante Esporta Etichette';
+
+  @override
+  String get settingsLabelsShowExportLabelsButtonNote =>
+      'Se abilitato, nella vista progetto viene mostrato un pulsante per esportare le etichette.';
+
+  @override
+  String get settingsAnnotationPreferredSamModel => 'Modello SAM preferito';
+
+  @override
+  String get settingsAnnotationSamOptionMobile => 'SAM Mobile';
+
+  @override
+  String get settingsAnnotationSamOptionSam2HieraBasePlus =>
+      'SAM2 (Hiera-Base+)';
+
+  @override
+  String get settingsAnnotationSamRememberChoice => 'Ricorda la mia scelta SAM';
+
+  @override
+  String get settingsAnnotationSamRememberChoiceNote =>
+      'Se abilitato, la finestra SAM non verrà mostrata e il modello preferito verrà usato automaticamente.';
+
+  @override
+  String get accountStorageLogFileTitle => 'File di log dell\'applicazione';
+
+  @override
+  String accountStorageOpenLogFileFailed(Object error) {
+    return 'Impossibile aprire la posizione del file di log: $error';
+  }
+
+  @override
+  String get accountStorageLogFileHelp =>
+      'Clicca per aprire la cartella che contiene il file di log dell\'applicazione. Questo file include tutti i log dell\'app, compresi eventuali arresti anomali.';
+
+  @override
+  String get accountStorageLogFileNotAvailable => 'File di log non disponibile';
+
+  @override
+  String get accountStorageLogFileInitError =>
+      'Impossibile inizializzare il file di log dell\'applicazione. Verificare i permessi sui file.';
 }

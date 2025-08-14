@@ -476,5 +476,31 @@
   "projectTypeDetectionOrientedDescription": "Dessiner et enfermer un objet dans un rectangle minimal.",
   
   "projectTypeInstanceSegmentationDescription": "Détecter et distinguer chaque objet individuel en fonction de ses caractéristiques uniques.",
-  "projectTypeSemanticSegmentationDescription": "Détecter et classifier tous les objets similaires comme une seule entité."
+  "projectTypeSemanticSegmentationDescription": "Détecter et classifier tous les objets similaires comme une seule entité.",
+
+  "settingsProjectCreationShowImportWarning": "Afficher la boîte de dialogue d’avertissement d’importation",
+  "settingsProjectCreationShowImportWarningNote": "Lorsqu’elle est activée, une boîte de dialogue d’avertissement s’affiche lors de l’activation de « Autoriser le changement de type de projet » pendant l’importation du jeu de données.",
+
+  "settingsLabelsAskConfirmationOnAnnotationRemoval": "Demander une confirmation lors de la suppression des annotations",
+  "settingsLabelsAskConfirmationOnAnnotationRemovalNote": "Lorsqu’elle est activée, une boîte de dialogue de confirmation s’affiche avant la suppression des annotations.",
+
+  "settingsLabelsShowExportLabelsButton": "Afficher le bouton Exporter les étiquettes",
+  "settingsLabelsShowExportLabelsButtonNote": "Lorsqu’elle est activée, un bouton permettant d’exporter les étiquettes apparaît dans la vue du projet.",
+
+  "settingsAnnotationPreferredSamModel": "Modèle SAM préféré",
+  "settingsAnnotationSamOptionMobile": "SAM Mobile",
+  "settingsAnnotationSamOptionSam2HieraBasePlus": "SAM2 (Hiera‑Base+)",
+  "settingsAnnotationSamRememberChoice": "Mémoriser mon choix SAM",
+  "settingsAnnotationSamRememberChoiceNote": "Lorsqu’elle est activée, la boîte de dialogue SAM n’est plus affichée et votre modèle préféré est utilisé automatiquement.",
+
+  "accountStorageLogFileTitle": "Fichier journal de l’application",
+  "accountStorageOpenLogFileFailed": "Impossible d’ouvrir l’emplacement du fichier journal : {error}",
+  "@accountStorageOpenLogFileFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountStorageLogFileHelp": "Cliquez pour ouvrir le dossier contenant le fichier journal de l’application. Ce fichier contient tous les journaux de l’app, y compris d’éventuels plantages.",
+  "accountStorageLogFileNotAvailable": "Fichier journal indisponible",
+  "accountStorageLogFileInitError": "Impossible d’initialiser le fichier journal de l’application. Vérifiez les autorisations sur les fichiers."
 }

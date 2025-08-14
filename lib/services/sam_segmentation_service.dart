@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'sam_web_ffi.dart';
 
 /// SAM model variants supported by the app.
-enum SamModelVariant { mobile, sam2HieraBasePlus }
+enum SamModelVariant { mobile, sam2HieraBasePlus, sam2HieraLarge }
 
 class _SamModelUrls {
   final String encoder;
@@ -27,6 +27,11 @@ _SamModelUrls _modelUrlsFor(SamModelVariant v) {
       return const _SamModelUrls(
         'assets/assets/models_sam/sam2_hiera_base_plus/sam2_hiera_base_plus.encoder.onnx',
         'assets/assets/models_sam/sam2_hiera_base_plus/sam2_hiera_base_plus.decoder.onnx',
+      );
+    case SamModelVariant.sam2HieraLarge:
+      return const _SamModelUrls(
+        'assets/assets/models_sam/sam2_hiera_large/sam2_hiera_large.encoder.onnx',
+        'assets/assets/models_sam/sam2_hiera_large/sam2_hiera_large.decoder.onnx',
       );
   }
 }
@@ -71,8 +76,10 @@ class SamSegmentationService {
           encoderUrl: urls.encoder,
           decoderUrl: urls.decoder,
         );
-      } catch (_) {
+        debugPrint('[SAM] initialize variant='+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
+      } catch (e) {
         _webSamReady = false;
+        debugPrint('[SAM] initialize failed variant='+_currentVariant.toString()+', error='+e.toString());
       }
     }
   }
@@ -96,8 +103,10 @@ class SamSegmentationService {
           encoderUrl: urls.encoder,
           decoderUrl: urls.decoder,
         );
-      } catch (_) {
+        debugPrint('[SAM] setModelVariant to '+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
+      } catch (e) {
         _webSamReady = false;
+        debugPrint('[SAM] setModelVariant failed '+_currentVariant.toString()+', error='+e.toString());
       }
     }
   }
@@ -127,13 +136,13 @@ class SamSegmentationService {
 
         final mask = await samRun(
           nchw,
-          image.width,
-          image.height,
+          1024,
+          1024,
           tapX1024,
           tapY1024,
         );
         if (mask == null || mask.length != 256 * 256) {
-          // Fallback to heuristic
+          debugPrint('[SAM] Decoder mask invalid (mask==null: '+(mask==null).toString()+', len: '+(mask==null?0:mask.length).toString()+'). Falling back to heuristic.');
           return _fallbackEllipse(image: image, center: tapPoint);
         }
 

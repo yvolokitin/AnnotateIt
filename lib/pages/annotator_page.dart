@@ -99,7 +99,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
   void _handleSamModelChanged(String key) {
     setState(() => _samModelKey = key);
-    final variant = key == 'mobile' ? SamModelVariant.mobile : SamModelVariant.sam2HieraBasePlus;
+    final variant = key == 'mobile'
+        ? SamModelVariant.mobile
+        : (key == 'sam2_hiera_large'
+            ? SamModelVariant.sam2HieraLarge
+            : SamModelVariant.sam2HieraBasePlus);
     _samService.setModelVariant(variant);
   }
 
