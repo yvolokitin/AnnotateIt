@@ -11,6 +11,7 @@ import "project_creation/create_new_project_dialog.dart";
 
 import "project_details_page.dart";
 import "projects_list_page.dart";
+import "models_page.dart";
 import "about_page.dart";
 import "account_page.dart";
 
@@ -129,9 +130,12 @@ class MainPageState extends State<MainPage> {
         return ProjectsListPage();
 
       case 1:
-        return AccountPage();
+        return ModelPage();
 
       case 2:
+        return AccountPage();
+
+      case 3:
         return AboutWidget();
 
       default:

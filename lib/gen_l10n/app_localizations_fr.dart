@@ -290,6 +290,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuProjects => 'Projets';
 
   @override
+  String get menuModels => 'Modèles';
+
+  @override
   String get menuAccount => 'Compte';
 
   @override

@@ -113,9 +113,11 @@
     }
   },
   "menuProjects": "Проекты",
+  "menuModels": "Модели",
   "menuAccount": "Аккаунт",
   "menuLearn": "Обучение",
   "menuAbout": "О приложении",
+
   "menuCreateNewProject": "Создать новый проект",
   "menuCreateFromDataset": "Создать из датасета",
   "menuImportDataset": "Импортировать проект из датасета",

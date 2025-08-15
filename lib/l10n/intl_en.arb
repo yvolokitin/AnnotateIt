@@ -123,6 +123,7 @@
     }
   },
   "menuProjects": "Projects",
+  "menuModels": "Models",
   "menuAccount": "Account",
   "menuLearn": "Learn",
   "menuAbout": "About",

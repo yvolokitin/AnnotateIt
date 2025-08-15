@@ -289,6 +289,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuProjects => 'Proyectos';
 
   @override
+  String get menuModels => 'Modelos';
+
+  @override
   String get menuAccount => 'Cuenta';
 
   @override

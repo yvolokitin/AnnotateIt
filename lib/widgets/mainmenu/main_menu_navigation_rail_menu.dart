@@ -36,8 +36,9 @@ class MainMenuNavigationRailMenu extends StatelessWidget {
               unselectedLabelTextStyle: const TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode'),
               destinations: [
                 _buildDestination(0, Icons.cases_outlined, l10n.menuProjects, screenWidth),
-                _buildDestination(1, Icons.account_circle_outlined, l10n.menuProjects, screenWidth),
-                _buildDestination(2, Icons.error_outline_rounded, l10n.menuProjects, screenWidth),
+                _buildDestination(1, Icons.memory_rounded, l10n.menuModels, screenWidth),
+                _buildDestination(2, Icons.account_circle_outlined, l10n.menuAccount, screenWidth),
+                _buildDestination(3, Icons.error_outline_rounded, l10n.menuAbout, screenWidth),
               ],
             ),
           ),

@@ -290,6 +290,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuProjects => 'Projecten';
 
   @override
+  String get menuModels => 'Modellen';
+
+  @override
   String get menuAccount => 'Account';
 
   @override

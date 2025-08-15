@@ -289,6 +289,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuProjects => 'Projekte';
 
   @override
+  String get menuModels => 'Modelle';
+
+  @override
   String get menuAccount => 'Konto';
 
   @override

@@ -288,6 +288,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuProjects => 'Проекты';
 
   @override
+  String get menuModels => 'Модели';
+
+  @override
   String get menuAccount => 'Аккаунт';
 
   @override

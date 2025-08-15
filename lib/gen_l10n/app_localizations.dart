@@ -620,6 +620,12 @@ abstract class AppLocalizations {
   /// **'Projects'**
   String get menuProjects;
 
+  /// No description provided for @menuModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get menuModels;
+
   /// No description provided for @menuAccount.
   ///
   /// In en, this message translates to:

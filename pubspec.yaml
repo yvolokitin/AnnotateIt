@@ -107,6 +107,7 @@ flutter:
      - assets/icons/icons8-summary-64.png
      - assets/icons/icons8-return-100.png
      - assets/icons/avataaars.png
+     - assets/images/sam_example.png
      - assets/images/empty_project_placeholder.jpg
      - assets/images/default_project_image.svg
      - assets/images/detection_bounding_box.jpg
