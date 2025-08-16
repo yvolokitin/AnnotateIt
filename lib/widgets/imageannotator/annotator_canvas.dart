@@ -31,6 +31,9 @@ class AnnotatorCanvas extends StatefulWidget {
   final double cornerSize;
   final bool showAnnotationNames;
 
+  // Optional: allow parent to request a specific zoom level (1.0 = 100%)
+  final double? requestedZoom;
+
   final ValueChanged<double>? onZoomChanged;
   final ValueChanged<Annotation>? onAnnotationUpdated;
   final ValueChanged<Annotation?>? onAnnotationSelected;
@@ -53,6 +56,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.showAnnotationNames,
     required this.selectedLabel,
     this.selectedAnnotation,
+    this.requestedZoom,
     this.onZoomChanged,
     this.onAnnotationUpdated,
     this.onAnnotationSelected,
@@ -121,6 +125,22 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           matrix = setTransformToFit(widget.image);
         });
         widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
+      });
+    }
+
+    // Apply externally requested zoom, if provided
+    if (widget.requestedZoom != null && widget.requestedZoom != oldWidget.requestedZoom) {
+      final desired = widget.requestedZoom!;
+      // Defer to next frame to ensure size is available (avoid accessing context.size during build)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final current = matrix.getMaxScaleOnAxis();
+        if ((desired - current).abs() > 1e-6) {
+          final size = context.size;
+          final center = size == null ? const Offset(0, 0) : Offset(size.width / 2, size.height / 2);
+          final factor = desired / current;
+          scaleCanvas(Vector3(center.dx, center.dy, 0), factor);
+        }
       });
     }
   }

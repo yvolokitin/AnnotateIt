@@ -1282,6 +1282,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                     userAction: userAction,
                                     selectedLabel: selectedLabel,
                                     selectedAnnotation: _selectedAnnotation,
+                                    requestedZoom: _currentZoom,
                                     onZoomChanged: (zoom) {
                                       if (mounted) {
                                         setState(() => _currentZoom = zoom);
@@ -1299,8 +1300,16 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                 currentZoom: _currentZoom,
                                 currentMedia: media.mediaItem,
                                 showUnknownWarning: _hasUnknownAnnotations,
-                                onZoomIn: () {},
-                                onZoomOut: () {},
+                                onZoomIn: () {
+                                  setState(() {
+                                    _currentZoom = (_currentZoom + 0.01).clamp(0.01, 20.0);
+                                  });
+                                },
+                                onZoomOut: () {
+                                  setState(() {
+                                    _currentZoom = (_currentZoom - 0.01).clamp(0.01, 20.0);
+                                  });
+                                },
                                 onPrevImg: () {
                                   final newPage = _currentIndex - 1;
                                   _pageController.jumpToPage(newPage >= 0 ? newPage : widget.totalMediaCount - 1);
