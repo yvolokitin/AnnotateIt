@@ -467,6 +467,9 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
                         _handleDuplicateImage(media, withAnnotations);
                       },
                       onRefreshNeeded: () {
+                        setState(() {
+                          _datasetTabCache.remove(dataset.id);
+                        });
                         loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
                       },
                     );

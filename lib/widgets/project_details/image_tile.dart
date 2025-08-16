@@ -115,8 +115,14 @@ class _ImageTileState extends State<ImageTile> {
                     ),
                   );
                   
-                  if (result == 'refresh' && widget.onRefreshNeeded != null) {
-                    widget.onRefreshNeeded!();
+                  if (result == 'refresh') {
+                    // Evict the image cache for this file to ensure fresh bytes are loaded
+                    try {
+                      await FileImage(file).evict();
+                    } catch (_) {}
+                    if (widget.onRefreshNeeded != null) {
+                      widget.onRefreshNeeded!();
+                    }
                   }
                 },
               ),
@@ -179,8 +185,14 @@ class _ImageTileState extends State<ImageTile> {
                         ),
                       );
                       
-                      if (result == 'refresh' && widget.onRefreshNeeded != null) {
-                        widget.onRefreshNeeded!();
+                      if (result == 'refresh') {
+                        // Evict the image cache for this file to ensure fresh bytes are loaded
+                        try {
+                          await FileImage(file).evict();
+                        } catch (_) {}
+                        if (widget.onRefreshNeeded != null) {
+                          widget.onRefreshNeeded!();
+                        }
                       }
                     },
                   ),

@@ -45,6 +45,18 @@ class EditorCanvas extends StatefulWidget {
       return null;
     }
   }
+
+  // Static method to get crop rect in original image coordinates
+  static Rect? getCropRectInImageCoordinates() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return null;
+      return (state as dynamic).getCropRectInImageCoordinates();
+    } catch (e) {
+      print('Error getting crop rect: $e');
+      return null;
+    }
+  }
   
   // Global key to access the state
   static final GlobalKey<State<EditorCanvas>> _editorCanvasKey = GlobalKey<State<EditorCanvas>>();
@@ -57,6 +69,22 @@ class EditorCanvas extends StatefulWidget {
 }
 
 class _EditorCanvasState extends State<EditorCanvas> {
+  // Exposes the current crop rectangle in original image coordinates (null if not cropping or if rotation/flips applied)
+  Rect? getCropRectInImageCoordinates() {
+    if (_cropRect == null) return null;
+    // Only support pure crop (no rotation/flips), same constraint as getCroppedImage
+    if (_rotationAngle % 360 != 0 || _flipHorizontal || _flipVertical) return null;
+
+    final scale = matrix.getMaxScaleOnAxis();
+    final offset = matrix.getTranslation();
+
+    final relativeLeft = (_cropRect!.left - offset.x) / scale;
+    final relativeTop = (_cropRect!.top - offset.y) / scale;
+    final relativeWidth = _cropRect!.width / scale;
+    final relativeHeight = _cropRect!.height / scale;
+
+    return Rect.fromLTWH(relativeLeft, relativeTop, relativeWidth, relativeHeight);
+  }
   int _lastResetCount = 0;
   double prevScale = 1;
 
