@@ -194,6 +194,20 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         cursorIcon = SystemMouseCursors.basic;
       });
       return;
+    } else if (action == EditorAction.flip_horizontal) {
+      EditorCanvas.flipHorizontal();
+      setState(() {
+        userAction = EditorAction.navigation;
+        cursorIcon = SystemMouseCursors.basic;
+      });
+      return;
+    } else if (action == EditorAction.flip_vertical) {
+      EditorCanvas.flipVertical();
+      setState(() {
+        userAction = EditorAction.navigation;
+        cursorIcon = SystemMouseCursors.basic;
+      });
+      return;
     }
 
     // Default behavior: set current action and cursor

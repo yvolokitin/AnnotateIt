@@ -78,6 +78,26 @@ class EditorCanvas extends StatefulWidget {
       print('Error rotating right: $e');
     }
   }
+
+  static void flipHorizontal() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).flipHorizontal();
+    } catch (e) {
+      print('Error flipping horizontal: $e');
+    }
+  }
+
+  static void flipVertical() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).flipVertical();
+    } catch (e) {
+      print('Error flipping vertical: $e');
+    }
+  }
   
   // Global key to access the state
   static final GlobalKey<State<EditorCanvas>> _editorCanvasKey = GlobalKey<State<EditorCanvas>>();
@@ -89,7 +109,7 @@ class EditorCanvas extends StatefulWidget {
   State<EditorCanvas> createState() => _EditorCanvasState();
 }
 
-class _EditorCanvasState extends State<EditorCanvas> {
+class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMixin {
   // Exposes the current crop rectangle in original image coordinates (null if not cropping or if rotation/flips applied)
   Rect? getCropRectInImageCoordinates() {
     if (_cropRect == null) return null;
@@ -130,6 +150,19 @@ class _EditorCanvasState extends State<EditorCanvas> {
   bool _flipHorizontal = false;
   bool _flipVertical = false;
   int _rotationAngle = 0; // in degrees, multiple of 90
+
+  // Animation state
+  AnimationController? _rotationController;
+  double _rotationAnim = 0.0; // transient animated delta in degrees
+  int _rotationTargetDelta = 0; // -90 or 90 while animating
+  bool _isRotating = false;
+
+  AnimationController? _flipXController;
+  AnimationController? _flipYController;
+  double _flipAnimX = 1.0; // animated multiplier for X flip
+  double _flipAnimY = 1.0; // animated multiplier for Y flip
+  bool _isFlippingX = false;
+  bool _isFlippingY = false;
   
   // Adjustment panel state
   bool _showAdjustmentPanel = false;
@@ -266,6 +299,67 @@ class _EditorCanvasState extends State<EditorCanvas> {
   @override
   void initState() {
     super.initState();
+
+    // Setup animation controllers
+    _rotationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 220));
+    _flipXController = AnimationController(vsync: this, duration: const Duration(milliseconds: 180));
+    _flipYController = AnimationController(vsync: this, duration: const Duration(milliseconds: 180));
+
+    // Rotation animation listeners
+    _rotationController!.addListener(() {
+      final t = _rotationController!.value;
+      final eased = Curves.easeInOutCubic.transform(t);
+      setState(() {
+        _rotationAnim = eased * _rotationTargetDelta;
+      });
+    });
+    _rotationController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _rotationAngle = (_rotationAngle + _rotationTargetDelta) % 360;
+          _rotationAnim = 0.0;
+          _rotationTargetDelta = 0;
+          _isRotating = false;
+        });
+      }
+    });
+
+    // Flip X animation listeners
+    _flipXController!.addListener(() {
+      final t = _flipXController!.value;
+      final eased = Curves.easeInOut.transform(t);
+      setState(() {
+        _flipAnimX = 1.0 - 2.0 * eased; // 1 -> -1
+      });
+    });
+    _flipXController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _flipHorizontal = !_flipHorizontal;
+          _flipAnimX = 1.0;
+          _isFlippingX = false;
+        });
+      }
+    });
+
+    // Flip Y animation listeners
+    _flipYController!.addListener(() {
+      final t = _flipYController!.value;
+      final eased = Curves.easeInOut.transform(t);
+      setState(() {
+        _flipAnimY = 1.0 - 2.0 * eased; // 1 -> -1
+      });
+    });
+    _flipYController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _flipVertical = !_flipVertical;
+          _flipAnimY = 1.0;
+          _isFlippingY = false;
+        });
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() {
@@ -645,13 +739,13 @@ class _EditorCanvasState extends State<EditorCanvas> {
     
     // Handle one-tap actions
     if (widget.editorAction == EditorAction.rotate_left) {
-      _rotateLeft();
+      rotateLeft();
     } else if (widget.editorAction == EditorAction.rotate_right) {
-      _rotateRight();
+      rotateRight();
     } else if (widget.editorAction == EditorAction.flip_horizontal) {
-      _flipHorizontally();
+      flipHorizontal();
     } else if (widget.editorAction == EditorAction.flip_vertical) {
-      _flipVertically();
+      flipVertical();
     } else if (widget.editorAction == EditorAction.brightness) {
       setState(() {
         _showAdjustmentPanel = true;
@@ -683,36 +777,33 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
   
   // Helper methods for image modifications
-  void _rotateLeft() {
-    setState(() {
-      _rotationAngle = (_rotationAngle - 90) % 360;
-    });
+  void _startRotate(int delta) {
+    if (_isRotating || _rotationController == null) return;
+    _rotationTargetDelta = delta;
+    _isRotating = true;
     _setModified(true);
-  }
-  
-  void _rotateRight() {
-    setState(() {
-      _rotationAngle = (_rotationAngle + 90) % 360;
-    });
-    _setModified(true);
+    _rotationController!.reset();
+    _rotationController!.forward();
   }
 
   // Public methods to allow external triggers via the static wrapper
-  void rotateLeft() => _rotateLeft();
-  void rotateRight() => _rotateRight();
+  void rotateLeft() => _startRotate(-90);
+  void rotateRight() => _startRotate(90);
   
-  void _flipHorizontally() {
-    setState(() {
-      _flipHorizontal = !_flipHorizontal;
-    });
+  void flipHorizontal() {
+    if (_isFlippingX || _flipXController == null) return;
+    _isFlippingX = true;
     _setModified(true);
+    _flipXController!.reset();
+    _flipXController!.forward();
   }
   
-  void _flipVertically() {
-    setState(() {
-      _flipVertical = !_flipVertical;
-    });
+  void flipVertical() {
+    if (_isFlippingY || _flipYController == null) return;
+    _isFlippingY = true;
     _setModified(true);
+    _flipYController!.reset();
+    _flipYController!.forward();
   }
   
   // Helper method to get the current image rectangle in local coordinates
@@ -798,6 +889,9 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   @override
   void dispose() {
+    _rotationController?.dispose();
+    _flipXController?.dispose();
+    _flipYController?.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -881,7 +975,9 @@ class _EditorCanvasState extends State<EditorCanvas> {
                             contrast: _contrast,
                             flipHorizontal: _flipHorizontal,
                             flipVertical: _flipVertical,
-                            rotationAngle: _rotationAngle,
+                            rotationAngle: _rotationAngle.toDouble() + _rotationAnim,
+                            flipScaleX: _flipAnimX,
+                            flipScaleY: _flipAnimY,
                             isModified: _isModified,
                             highlightEdge: widget.editorAction == EditorAction.crop ? _currentHighlightEdge() : null,
                           ),

@@ -12,7 +12,9 @@ class EditorPainter extends CustomPainter {
   final double contrast;
   final bool flipHorizontal;
   final bool flipVertical;
-  final int rotationAngle;
+  final double rotationAngle;
+  final double flipScaleX;
+  final double flipScaleY;
   final bool isModified;
   
   // Highlighted crop edge (5=top, 6=right, 7=bottom, 8=left)
@@ -26,7 +28,9 @@ class EditorPainter extends CustomPainter {
     this.contrast = 1.0,
     this.flipHorizontal = false,
     this.flipVertical = false,
-    this.rotationAngle = 0,
+    this.rotationAngle = 0.0,
+    this.flipScaleX = 1.0,
+    this.flipScaleY = 1.0,
     this.isModified = false,
     this.highlightEdge,
   });
@@ -44,8 +48,8 @@ class EditorPainter extends CustomPainter {
     final centerX = imageWidth / 2;
     final centerY = imageHeight / 2;
     
-    // Apply rotation if needed
-    if (rotationAngle != 0) {
+    // Apply rotation if needed (animated value in degrees)
+    if (rotationAngle != 0.0) {
       // Translate to the center of the image
       canvas.translate(centerX, centerY);
       // Rotate around the center
@@ -54,15 +58,14 @@ class EditorPainter extends CustomPainter {
       canvas.translate(-centerX, -centerY);
     }
     
-    // Apply flips if needed
-    if (flipHorizontal || flipVertical) {
-      final scaleX = flipHorizontal ? -1.0 : 1.0;
-      final scaleY = flipVertical ? -1.0 : 1.0;
-      
+    // Apply flips/scales if needed (combine logical flip with animated scale)
+    final combinedScaleX = (flipHorizontal ? -1.0 : 1.0) * flipScaleX;
+    final combinedScaleY = (flipVertical ? -1.0 : 1.0) * flipScaleY;
+    if (combinedScaleX != 1.0 || combinedScaleY != 1.0) {
       // Translate to the center of the image
       canvas.translate(centerX, centerY);
-      // Apply scaling (flipping)
-      canvas.scale(scaleX, scaleY);
+      // Apply scaling (flipping/animation)
+      canvas.scale(combinedScaleX, combinedScaleY);
       // Translate back
       canvas.translate(-centerX, -centerY);
     }
@@ -179,6 +182,8 @@ class EditorPainter extends CustomPainter {
            oldDelegate.flipHorizontal != flipHorizontal ||
            oldDelegate.flipVertical != flipVertical ||
            oldDelegate.rotationAngle != rotationAngle ||
+           oldDelegate.flipScaleX != flipScaleX ||
+           oldDelegate.flipScaleY != flipScaleY ||
            oldDelegate.isModified != isModified ||
            oldDelegate.highlightEdge != highlightEdge;
   }
