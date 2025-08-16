@@ -96,19 +96,10 @@ flutter:
      - assets/logo/annotateit.png
      - assets/logo/annotateit_white.png
      - assets/images/media_upload.svg
-     - assets/icons/labels_icon.svg
-     - assets/icons/dataset_icon.svg
-     - assets/icons/icons8-dataset-100.png
      - assets/icons/icons8-gallery-96.png
      - assets/icons/icons8-label-64.png
-     - assets/icons/icons8-archive-64.png
-     - assets/icons/icons8-database-100.png
      - assets/icons/icons8-folder-64.png
-     - assets/icons/icons8-summary-64.png
-     - assets/icons/icons8-return-100.png
      - assets/icons/avataaars.png
-     - assets/images/sam_example.png
-     - assets/images/empty_project_placeholder.jpg
      - assets/images/default_project_image.svg
      - assets/images/detection_bounding_box.jpg
      - assets/images/detection_oriented.jpg
@@ -117,9 +108,12 @@ flutter:
      - assets/images/semantic_segmentation.jpg
      - assets/images/classification_binary.jpg
      - assets/images/classification_multi_class.jpg
+     - assets/images/sam_example.jpg
      - assets/images/no_labels.png
-     - assets/images/start_first_project.png
-     - assets/models/
+     - assets/images/start_first_project.jpg
+     - assets/sam_mobile/mobile_sam.encoder.onnx
+     - assets/sam_mobile/mobile_sam.decoder.onnx
+     - assets/sam_mobile/models.ts
      - assets/models_sam/
   
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -172,7 +172,7 @@ class EmptyProjectPlaceholder extends StatelessWidget {
                   bottomLeft: Radius.circular(12),
                 ),
                 child: Image.asset(
-                  'assets/images/start_first_project.png',
+                  'assets/images/start_first_project.jpg',
                   fit: BoxFit.cover,
                 ),
               ),
