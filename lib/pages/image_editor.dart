@@ -179,6 +179,24 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   void _handleActionSelected(EditorAction action) {
+    // Immediate actions that should execute on button press
+    if (action == EditorAction.rotate_left) {
+      EditorCanvas.rotateLeft();
+      setState(() {
+        userAction = EditorAction.navigation;
+        cursorIcon = SystemMouseCursors.basic;
+      });
+      return;
+    } else if (action == EditorAction.rotate_right) {
+      EditorCanvas.rotateRight();
+      setState(() {
+        userAction = EditorAction.navigation;
+        cursorIcon = SystemMouseCursors.basic;
+      });
+      return;
+    }
+
+    // Default behavior: set current action and cursor
     setState(() {
       userAction = action;
       cursorIcon = action == EditorAction.navigation

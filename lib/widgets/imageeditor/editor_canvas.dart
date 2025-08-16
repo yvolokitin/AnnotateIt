@@ -57,6 +57,27 @@ class EditorCanvas extends StatefulWidget {
       return null;
     }
   }
+
+  // Static methods to trigger rotation immediately from outside
+  static void rotateLeft() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).rotateLeft();
+    } catch (e) {
+      print('Error rotating left: $e');
+    }
+  }
+
+  static void rotateRight() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).rotateRight();
+    } catch (e) {
+      print('Error rotating right: $e');
+    }
+  }
   
   // Global key to access the state
   static final GlobalKey<State<EditorCanvas>> _editorCanvasKey = GlobalKey<State<EditorCanvas>>();
@@ -675,6 +696,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
     });
     _setModified(true);
   }
+
+  // Public methods to allow external triggers via the static wrapper
+  void rotateLeft() => _rotateLeft();
+  void rotateRight() => _rotateRight();
   
   void _flipHorizontally() {
     setState(() {
