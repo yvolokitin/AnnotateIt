@@ -3,6 +3,8 @@ import 'package:annotateit/widgets/model_cards/model_card.dart';
 import 'package:annotateit/widgets/model_cards/model_card_build_in.dart';
 import 'package:annotateit/widgets/model_cards/model_card_comming_soon.dart';
 
+import '../../gen_l10n/app_localizations.dart';
+
 class ModelInfo {
   final String id;
   final String title;
@@ -33,56 +35,57 @@ class ModelPage extends StatefulWidget {
 }
 
 class _ModelPageState extends State<ModelPage> {
-  final List<ModelInfo> _models = const [
-    ModelInfo(
-      id: 'sam_mobile',
-      title: 'SAM Mobile',
-      description: 'Lightweight SAM variant for on-device segmentation.',
-      imageAsset: 'assets/images/sam_mobile.jpeg',
-      urlEncoder: '',
-      urlDecoder: '',
-      urlConfig: '',
-      modelSize: '44Mb',
-    ),
-    ModelInfo(
-      id: 'sam2_hiera_base',
-      title: 'SAM2 Hiera Base+',
-      description: 'Balanced accuracy/speed with Hiera base+ backbone.',
-      imageAsset: 'assets/images/sam_example.jpg',
-      urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
-      urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
-      urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
-      modelSize: '352Mb',
-    ),
-    ModelInfo(
-      id: 'sam2_hiera_large',
-      title: 'SAM2 Hiera Large',
-      description: 'High-accuracy variant for best quality masks.',
-      imageAsset: 'assets/images/sam_example.jpg',
-      urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
-      urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
-      urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
-      modelSize: '860Mb',
-    ),
-    ModelInfo(
-      id: 'ssd_mobilenet',
-      title: 'SSD MobileNet',
-      description: 'Fast single-shot detector for general objects.',
-      imageAsset: 'assets/images/ssd_mobilenet.jpg',
-      urlEncoder: '',
-      urlDecoder: '',
-      urlConfig: '',
-      modelSize: 'N/A',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final List<ModelInfo> models = [
+      ModelInfo(
+        id: 'sam_mobile',
+        title: 'SAM Mobile',
+        description: l10n.modelDescriptionSamMobile,
+        imageAsset: 'assets/images/sam_mobile.jpeg',
+        urlEncoder: '',
+        urlDecoder: '',
+        urlConfig: '',
+        modelSize: '44Mb',
+      ),
+      ModelInfo(
+        id: 'sam2_hiera_base',
+        title: 'SAM2 Hiera Base+',
+        description: l10n.modelDescriptionSAM2HieraBasePlus,
+        imageAsset: 'assets/images/sam_example.jpg',
+        // NOTE: Use your correct Base+ release paths; placeholders below if needed.
+        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/sam2_hiera_base_plus.encoder.onnx',
+        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/sam2_hiera_base_plus.decoder.onnx',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/config.yaml',
+        modelSize: '352Mb',
+      ),
+      ModelInfo(
+        id: 'sam2_hiera_large',
+        title: 'SAM2 Hiera Large',
+        description: l10n.modelDescriptionSAM2HieraLarge,
+        imageAsset: 'assets/images/sam_example.jpg',
+        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
+        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
+        modelSize: '860Mb',
+      ),
+      ModelInfo(
+        id: 'ssd_mobilenet',
+        title: 'SSD MobileNet',
+        description: l10n.modelDescriptionSSDMobileNet,
+        imageAsset: 'assets/images/ssd_mobilenet.jpg',
+        urlEncoder: '',
+        urlDecoder: '',
+        urlConfig: '',
+        modelSize: 'N/A',
+      ),
+    ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 900;
         final crossAxisCount = isWide ? 2 : 1;
-
         final double tileHeight = isWide ? 240 : 180;
 
         return Padding(
@@ -94,9 +97,9 @@ class _ModelPageState extends State<ModelPage> {
               mainAxisSpacing: 16,
               mainAxisExtent: tileHeight,
             ),
-            itemCount: _models.length,
+            itemCount: models.length,
             itemBuilder: (context, index) {
-              final m = _models[index];
+              final m = models[index];
               if (m.id == 'sam_mobile') {
                 return ModelCardBuiltIn(
                   id: m.id,
@@ -119,7 +122,7 @@ class _ModelPageState extends State<ModelPage> {
                   description: m.description,
                   imageAsset: m.imageAsset,
                   urlEncoder: m.urlEncoder,
-                  urlDecoder: m.urlDecoder, 
+                  urlDecoder: m.urlDecoder,
                   urlConfig: m.urlConfig,
                   modelSize: m.modelSize,
                 );

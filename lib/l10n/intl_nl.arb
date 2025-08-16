@@ -22,6 +22,11 @@
   "buttonNextConfirmTask": "Volgende: Taak Bevestigen",
   "buttonCreateProject": "Project Aanmaken",
 
+  "modelDescriptionSamMobile": "Lichtgewicht SAM-variant voor segmentatie op het apparaat.",
+  "modelDescriptionSAM2HieraBasePlus": "Goede balans tussen nauwkeurigheid en snelheid met Hiera base+ backbone.",
+  "modelDescriptionSAM2HieraLarge": "Variant met hoge nauwkeurigheid voor de beste maskers.",
+  "modelDescriptionSSDMobileNet": "Snelle single-shot detector voor algemene objecten.",
+
   "aboutTitle": "Over Annot@It",
   "aboutDescription": "Annot@It is een annotatie-applicatie ontworpen om het annotatieproces voor computervisieprojecten te stroomlijnen. Of je nu werkt aan beeldclassificatie, objectdetectie, segmentatie of andere visietaken, Annot@It biedt de flexibiliteit en precisie die nodig zijn voor hoogwaardige gegevenslabeling.",
   "aboutFeaturesTitle": "Belangrijkste functies:",

@@ -69,6 +69,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String get buttonCreateProject => 'Project Aanmaken';
 
   @override
+  String get modelDescriptionSamMobile =>
+      'Lichtgewicht SAM-variant voor segmentatie op het apparaat.';
+
+  @override
+  String get modelDescriptionSAM2HieraBasePlus =>
+      'Goede balans tussen nauwkeurigheid en snelheid met Hiera base+ backbone.';
+
+  @override
+  String get modelDescriptionSAM2HieraLarge =>
+      'Variant met hoge nauwkeurigheid voor de beste maskers.';
+
+  @override
+  String get modelDescriptionSSDMobileNet =>
+      'Snelle single-shot detector voor algemene objecten.';
+
+  @override
   String get aboutTitle => 'Over Annot@It';
 
   @override

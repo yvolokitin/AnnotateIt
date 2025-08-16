@@ -230,6 +230,30 @@ abstract class AppLocalizations {
   /// **'Create Project'**
   String get buttonCreateProject;
 
+  /// No description provided for @modelDescriptionSamMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Lightweight SAM variant for on-device segmentation.'**
+  String get modelDescriptionSamMobile;
+
+  /// No description provided for @modelDescriptionSAM2HieraBasePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced accuracy/speed with Hiera base+ backbone.'**
+  String get modelDescriptionSAM2HieraBasePlus;
+
+  /// No description provided for @modelDescriptionSAM2HieraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'High-accuracy variant for best quality masks.'**
+  String get modelDescriptionSAM2HieraLarge;
+
+  /// No description provided for @modelDescriptionSSDMobileNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast single-shot detector for general objects.'**
+  String get modelDescriptionSSDMobileNet;
+
   /// No description provided for @aboutTitle.
   ///
   /// In en, this message translates to:

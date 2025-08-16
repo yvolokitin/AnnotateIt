@@ -22,6 +22,11 @@
   "buttonNextConfirmTask": "Suivant: Confirmer la Tâche",
   "buttonCreateProject": "Créer un Projet",
 
+  "modelDescriptionSamMobile": "Variante légère de SAM pour la segmentation sur l’appareil.",
+  "modelDescriptionSAM2HieraBasePlus": "Équilibre entre précision et rapidité avec l’architecture Hiera base+.",
+  "modelDescriptionSAM2HieraLarge": "Variante haute précision pour des masques de la meilleure qualité.",
+  "modelDescriptionSSDMobileNet": "Détecteur rapide en un seul passage pour les objets généraux.",
+
   "aboutTitle": "À propos d'Annot@It",
   "aboutDescription": "Annot@It est une application d'annotation conçue pour simplifier le processus d'annotation pour les projets de vision par ordinateur. Que vous travailliez sur la classification d'images, la détection d'objets, la segmentation ou d'autres tâches de vision, Annot@It offre la flexibilité et la précision nécessaires pour un étiquetage de données de haute qualité.",
   "aboutFeaturesTitle": "Fonctionnalités clés:",

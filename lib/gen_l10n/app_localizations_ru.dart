@@ -69,6 +69,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get buttonCreateProject => 'Создать проект';
 
   @override
+  String get modelDescriptionSamMobile =>
+      'Облегчённый вариант SAM для сегментации прямо на устройстве.';
+
+  @override
+  String get modelDescriptionSAM2HieraBasePlus =>
+      'Оптимальное сочетание точности и скорости с архитектурой Hiera base+.';
+
+  @override
+  String get modelDescriptionSAM2HieraLarge =>
+      'Вариант с высокой точностью для получения максимально качественных масок.';
+
+  @override
+  String get modelDescriptionSSDMobileNet =>
+      'Быстрый одношаговый детектор для общих объектов.';
+
+  @override
   String get aboutTitle => 'О приложении Annot@It';
 
   @override

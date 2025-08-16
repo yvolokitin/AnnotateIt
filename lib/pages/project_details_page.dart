@@ -26,7 +26,6 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
   void initState() {
     super.initState();
     project = widget.project;
-    print('ProjectDetailsPage: project: ${project.name} - ${project.labels!.length}');
   }
 
   void _onItemTapped(int index) {

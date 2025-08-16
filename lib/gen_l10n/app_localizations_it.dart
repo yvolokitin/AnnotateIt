@@ -69,6 +69,22 @@ class AppLocalizationsIt extends AppLocalizations {
   String get buttonCreateProject => 'Crea Progetto';
 
   @override
+  String get modelDescriptionSamMobile =>
+      'Variante leggera di SAM per la segmentazione sul dispositivo.';
+
+  @override
+  String get modelDescriptionSAM2HieraBasePlus =>
+      'Equilibrio tra accuratezza e velocità con backbone Hiera base+.';
+
+  @override
+  String get modelDescriptionSAM2HieraLarge =>
+      'Variante ad alta precisione per ottenere maschere di massima qualità.';
+
+  @override
+  String get modelDescriptionSSDMobileNet =>
+      'Rilevatore veloce a singolo passaggio per oggetti generici.';
+
+  @override
   String get aboutTitle => 'Informazioni su Annot@It';
 
   @override
