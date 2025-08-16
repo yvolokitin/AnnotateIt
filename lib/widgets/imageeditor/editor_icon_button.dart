@@ -39,7 +39,7 @@ class _EditorIconButtonState extends State<EditorIconButton> {
             height: widget.size,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: _hovered ? Colors.grey[850] : Colors.transparent,
+              color: _hovered ? Colors.brown[850] : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: widget.icon,

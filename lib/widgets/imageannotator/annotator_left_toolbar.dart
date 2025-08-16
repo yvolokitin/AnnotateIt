@@ -249,8 +249,8 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
             child: widget.showAnnotationNames
                 ? Icon(
                     Icons.text_fields,
-                    color: Constants.iconColor,
-                    size: Constants.iconSize,
+                    color: Colors.white70,
+                    size: 28,
                   )
                 : Stack(
                     alignment: Alignment.center,
@@ -258,7 +258,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                       Icon(
                         Icons.text_fields,
                         color: Colors.white38,
-                        size: Constants.iconSize,
+                        size: 28,
                       ),
                       Transform.rotate(
                         angle: -0.7,

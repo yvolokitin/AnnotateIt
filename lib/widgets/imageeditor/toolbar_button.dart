@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'constants.dart';
 
 class ToolbarButton extends StatefulWidget {
   final Widget? icon;
@@ -57,13 +56,13 @@ class _ToolbarButtonState extends State<ToolbarButton> {
             margin: EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: _isPressed
-                  ? Constants.activeBackgroundColor
+                  ? Colors.brown[900] // Color(0xFF424242)
                   : widget.isActive
-                      ? Colors.grey[850]
+                      ? Colors.brown[900]
                       : _isHovered
-                          ? Colors.grey[850]
+                          ? Colors.brown[900]
                           : Colors.transparent,
-              borderRadius: Constants.buttonBorderRadius,
+              borderRadius: BorderRadius.all(Radius.circular(4)),
             ),
             child: Center(
               child: widget.child ?? _buildVisual(iconColor),

@@ -40,7 +40,7 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
       width: 300, // Fixed width to prevent layout issues
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: Colors.brown[800],
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import 'editor_action.dart';
-import '../imageannotator/toolbar_button.dart';
+import 'toolbar_button.dart';
 import '../imageannotator/toolbar_divider.dart';
-import '../imageannotator/constants.dart';
 
 class EditorLeftToolbar extends StatefulWidget {
   final String type;
@@ -37,7 +36,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      width: Constants.toolbarWidth,
+      width: 62,
       decoration: BoxDecoration(
         color: Colors.brown[800],
         border: const Border(

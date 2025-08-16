@@ -202,56 +202,14 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
       return paint;
     }
 
-    // Helper to render the full edited image (rotation, flips, brightness/contrast)
-    Future<ui.Image> _renderFullEditedImage() async {
-      final origW = sourceImage.width.toDouble();
-      final origH = sourceImage.height.toDouble();
-      final int rot = ((_rotationAngle % 360) + 360) % 360;
-      final bool swap = rot % 180 != 0;
-      final double finalW = swap ? origH : origW;
-      final double finalH = swap ? origW : origH;
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-
-      // Apply rotation with appropriate translation to keep image in view
-      if (rot == 90) {
-        canvas.translate(finalW, 0);
-        canvas.rotate(3.141592653589793 / 2);
-      } else if (rot == 180) {
-        canvas.translate(finalW, finalH);
-        canvas.rotate(3.141592653589793);
-      } else if (rot == 270) {
-        canvas.translate(0, finalH);
-        canvas.rotate(3 * 3.141592653589793 / 2);
-      }
-
-      // Apply flips relative to final orientation
-      if (_flipHorizontal) {
-        canvas.translate(finalW, 0);
-        canvas.scale(-1, 1);
-      }
-      if (_flipVertical) {
-        canvas.translate(0, finalH);
-        canvas.scale(1, -1);
-      }
-
-      // Draw original image with adjustments
-      final paint = _buildAdjustPaint();
-      canvas.drawImage(sourceImage, Offset.zero, paint);
-
-      final picture = recorder.endRecording();
-      return picture.toImage(finalW.round(), finalH.round());
-    }
-
     // If no crop rect, return full edited image (so Save works for non-crop edits)
     if (_cropRect == null) {
-      return _renderFullEditedImage();
+      return _renderFullEditedImageFrom(sourceImage);
     }
 
     // If rotation or flips are active, fall back to saving full edited image (to avoid complex crop mapping)
     if (_rotationAngle % 360 != 0 || _flipHorizontal || _flipVertical) {
-      return _renderFullEditedImage();
+      return _renderFullEditedImageFrom(sourceImage);
     }
 
     // Crop only (apply brightness/contrast to the cropped area)
@@ -286,6 +244,131 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     return picture.toImage(relativeWidth.round(), relativeHeight.round());
   }
   
+  // Helper to render the full edited image (rotation, flips, brightness/contrast)
+  Future<ui.Image> _renderFullEditedImageFrom(ui.Image sourceImage) async {
+    final origW = sourceImage.width.toDouble();
+    final origH = sourceImage.height.toDouble();
+    final int rot = ((_rotationAngle % 360) + 360) % 360;
+    final bool swap = rot % 180 != 0;
+    final double finalW = swap ? origH : origW;
+    final double finalH = swap ? origW : origH;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Apply rotation with appropriate translation to keep image in view
+    if (rot == 90) {
+      canvas.translate(finalW, 0);
+      canvas.rotate(3.141592653589793 / 2);
+    } else if (rot == 180) {
+      canvas.translate(finalW, finalH);
+      canvas.rotate(3.141592653589793);
+    } else if (rot == 270) {
+      canvas.translate(0, finalH);
+      canvas.rotate(3 * 3.141592653589793 / 2);
+    }
+
+    // Apply flips relative to final orientation
+    if (_flipHorizontal) {
+      canvas.translate(finalW, 0);
+      canvas.scale(-1, 1);
+    }
+    if (_flipVertical) {
+      canvas.translate(0, finalH);
+      canvas.scale(1, -1);
+    }
+
+    // Draw original image with adjustments (brightness/contrast)
+    final paint = Paint();
+    if (_brightness != 0.0 || _contrast != 1.0) {
+      final List<double> m = List<double>.filled(20, 0.0);
+      // R
+      m[0] = _contrast;
+      m[4] = _brightness * 255.0;
+      // G
+      m[6] = _contrast;
+      m[9] = _brightness * 255.0;
+      // B
+      m[12] = _contrast;
+      m[14] = _brightness * 255.0;
+      // A
+      m[18] = 1.0;
+      paint.colorFilter = ColorFilter.matrix(m);
+    }
+    canvas.drawImage(sourceImage, Offset.zero, paint);
+
+    final picture = recorder.endRecording();
+    return picture.toImage(finalW.round(), finalH.round());
+  }
+
+  // Helper to render only rotation and flips (no brightness/contrast). Used to commit transforms before crop.
+  Future<ui.Image> _renderImageWithRotationAndFlipsOnly(ui.Image sourceImage) async {
+    final origW = sourceImage.width.toDouble();
+    final origH = sourceImage.height.toDouble();
+    final int rot = ((_rotationAngle % 360) + 360) % 360;
+    final bool swap = rot % 180 != 0;
+    final double finalW = swap ? origH : origW;
+    final double finalH = swap ? origW : origH;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Apply rotation with appropriate translation to keep image in view
+    if (rot == 90) {
+      canvas.translate(finalW, 0);
+      canvas.rotate(3.141592653589793 / 2);
+    } else if (rot == 180) {
+      canvas.translate(finalW, finalH);
+      canvas.rotate(3.141592653589793);
+    } else if (rot == 270) {
+      canvas.translate(0, finalH);
+      canvas.rotate(3 * 3.141592653589793 / 2);
+    }
+
+    // Apply flips relative to final orientation
+    if (_flipHorizontal) {
+      canvas.translate(finalW, 0);
+      canvas.scale(-1, 1);
+    }
+    if (_flipVertical) {
+      canvas.translate(0, finalH);
+      canvas.scale(1, -1);
+    }
+
+    // Draw original image (no color adjustments)
+    canvas.drawImage(sourceImage, Offset.zero, Paint());
+
+    final picture = recorder.endRecording();
+    return picture.toImage(finalW.round(), finalH.round());
+  }
+
+  // Ensure we commit pending rotate/flip into _modifiedImage so crop works in pure image space
+  Future<void> _ensureCommittedTransformsBeforeCrop() async {
+    if ((_rotationAngle % 360 == 0) && !_flipHorizontal && !_flipVertical) {
+      return; // nothing to commit
+    }
+    // Prefer the latest image (already committed edits if any)
+    final ui.Image src = _modifiedImage ?? widget.image;
+    final ui.Image committed = await _renderImageWithRotationAndFlipsOnly(src);
+    if (!mounted) return;
+    setState(() {
+      _modifiedImage = committed;
+      // Reset transform state
+      _rotationAngle = 0;
+      _rotationAnim = 0.0;
+      _rotationTargetDelta = 0;
+      _isRotating = false;
+      _flipHorizontal = false;
+      _flipVertical = false;
+      _flipAnimX = 1.0;
+      _flipAnimY = 1.0;
+      _isFlippingX = false;
+      _isFlippingY = false;
+      matrix = setTransformToFit(committed);
+      _setModified(true);
+    });
+  }
+
   // Helper method to set modified state and notify parent
   void _setModified(bool modified) {
     if (_isModified != modified) {
@@ -387,7 +470,9 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     // Initialize crop rect when crop action is selected
     if (oldWidget.editorAction != widget.editorAction && 
         widget.editorAction == EditorAction.crop) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await _ensureCommittedTransformsBeforeCrop();
         if (!mounted) return;
         setState(() {
           // Initialize crop rect to the entire image

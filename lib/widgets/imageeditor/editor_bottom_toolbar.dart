@@ -35,8 +35,7 @@ class EditorBottomToolbar extends StatefulWidget {
 class _EditorBottomToolbarState extends State<EditorBottomToolbar> {
   @override
   Widget build(BuildContext context) {
-    final String fileName = '${widget.currentMedia.filePath.split(Platform.pathSeparator).last}, ';
-    final String widthHeight = '${widget.currentMedia.width} px x ${widget.currentMedia.height} px';
+    final String fileName = '${widget.currentMedia.filePath.split(Platform.pathSeparator).last}';
     final String percent = '${(widget.currentZoom * 100).toStringAsFixed(0)}%';
     final bool isCompact = MediaQuery.of(context).size.width < 1300;
     final bool isMinimal = MediaQuery.of(context).size.width < 860;
@@ -91,8 +90,6 @@ class _EditorBottomToolbarState extends State<EditorBottomToolbar> {
             ),
             const SizedBox(width: 4),
           ],
-          if (!isMinimal)
-            Text(widthHeight, style: const TextStyle(color: Colors.white70, fontSize: 20)),
 
           const Spacer(),
           Row(
