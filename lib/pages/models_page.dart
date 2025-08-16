@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:annotateit/widgets/model_cards/model_card.dart';
+import 'package:annotateit/widgets/model_cards/model_card_build_in.dart';
+import 'package:annotateit/widgets/model_cards/model_card_comming_soon.dart';
 
 class ModelInfo {
   final String id;
@@ -27,15 +29,14 @@ class ModelPage extends StatefulWidget {
 }
 
 class _ModelPageState extends State<ModelPage> {
-  // Define your 4 models here. Replace URLs with the actual locations.
   final List<ModelInfo> _models = const [
     ModelInfo(
       id: 'sam_mobile',
       title: 'SAM Mobile',
       description: 'Lightweight SAM variant for on-device segmentation.',
-      imageAsset: 'assets/images/sam_example.jpg',
-      downloadUrl: 'https://example.com/models/sam_mobile.onnx',
-      defaultFileName: 'sam_mobile.onnx',
+      imageAsset: 'assets/images/sam_mobile.jpeg',
+      downloadUrl: '',
+      defaultFileName: '',
     ),
     ModelInfo(
       id: 'sam2_hiera_base',
@@ -57,44 +58,61 @@ class _ModelPageState extends State<ModelPage> {
       id: 'ssd_mobilenet',
       title: 'SSD MobileNet',
       description: 'Fast single-shot detector for general objects.',
-      imageAsset: 'assets/images/sam_example.jpg',
-      downloadUrl: 'https://example.com/models/ssd_mobilenet.tflite',
-      defaultFileName: 'ssd_mobilenet.tflite',
+      imageAsset: 'assets/images/ssd_mobilenet.jpg',
+      downloadUrl: '',
+      defaultFileName: '',
     ),
   ];
 
-
-
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width >= 900;
-    final crossAxisCount = isWide ? 2 : 1;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 900;
+        final crossAxisCount = isWide ? 2 : 1;
 
-    // Return only the page content; parent provides Scaffold/AppBar
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          // Taller to accommodate description + button + progress
-          childAspectRatio: isWide ? 2.6 : 1.8,
-        ),
-        itemCount: _models.length,
-        itemBuilder: (context, index) {
-          final m = _models[index];
-          return ModelCard(
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            imageAsset: m.imageAsset,
-            downloadUrl: m.downloadUrl,
-            defaultFileName: m.defaultFileName,
-          );
-        },
-      ),
+        final double tileHeight = isWide ? 240 : 180;
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              mainAxisExtent: tileHeight,
+            ),
+            itemCount: _models.length,
+            itemBuilder: (context, index) {
+              final m = _models[index];
+              if (m.id == 'sam_mobile') {
+                return ModelCardBuiltIn(
+                  id: m.id,
+                  title: m.title,
+                  description: m.description,
+                  imageAsset: m.imageAsset,
+                );
+              } else if (m.id == 'ssd_mobilenet') {
+                return ModelCardCommingSoon(
+                  id: m.id,
+                  title: m.title,
+                  description: m.description,
+                  imageAsset: m.imageAsset,
+                );
+              } else {
+                return ModelCard(
+                  id: m.id,
+                  title: m.title,
+                  description: m.description,
+                  imageAsset: m.imageAsset,
+                  downloadUrl: m.downloadUrl,
+                  defaultFileName: m.defaultFileName,
+                );
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }
-

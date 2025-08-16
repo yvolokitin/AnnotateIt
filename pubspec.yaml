@@ -108,6 +108,8 @@ flutter:
      - assets/images/semantic_segmentation.jpg
      - assets/images/classification_binary.jpg
      - assets/images/classification_multi_class.jpg
+     - assets/images/ssd_mobilenet.jpg
+     - assets/images/sam_mobile.jpeg
      - assets/images/sam_example.jpg
      - assets/images/no_labels.png
      - assets/images/start_first_project.jpg
