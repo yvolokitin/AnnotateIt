@@ -237,21 +237,33 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         ),
       );
       
-      // Get the cropped image from the EditorCanvas using the static method directly
-      // Use the instance method through the key to avoid Type issues
+      // Get the edited image from the EditorCanvas via the key
       final editorCanvasState = EditorCanvas.editorCanvasKey.currentState;
-      final croppedImage = editorCanvasState != null 
+      final editedImage = editorCanvasState != null 
           ? await (editorCanvasState as dynamic).getCroppedImage() 
           : null;
       
-      if (croppedImage != null) {
+      if (editedImage != null) {
         // Convert the image to bytes
-        final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+        final byteData = await editedImage.toByteData(format: ui.ImageByteFormat.png);
         if (byteData != null) {
           final pngBytes = byteData.buffer.asUint8List();
           
           // Write the bytes to the file
           await file.writeAsBytes(pngBytes);
+
+          // Remove all annotations for this media item, as the image was modified
+          try {
+            if (currentMedia.mediaItem.id != null) {
+              await DatasetDatabase.instance.deleteAnnotationsForMediaItem(currentMedia.mediaItem.id!);
+              // Update in-memory cache to reflect removal
+              final updated = currentMedia.copyWith(annotations: []);
+              _mediaCache[_currentIndex] = updated;
+            }
+          } catch (e) {
+            // Log and continue; image save succeeded even if annotation cleanup failed
+            debugPrint('Failed to delete annotations for media item: $e');
+          }
           
           // Properly dispose of the old image before removing it from the cache
           final oldImage = _imageCache[_currentIndex];
@@ -423,7 +435,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                               EditorBottomToolbar(
                                 currentZoom: _currentZoom,
                                 currentMedia: media.mediaItem,
-                                showUnknownWarning: false,
+                                showUnknownWarning: _isImageModified && media.annotations.isNotEmpty,
                                 onZoomIn: () {},
                                 onZoomOut: () {},
                                 onPrevImg: () {
@@ -437,9 +449,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                 onWarning: () {
                                   AlertErrorDialog.show(
                                     context,
-                                    'Unknown Annotations',
-                                    'This image contains annotations with unknown labels. Please assign a label to continue.',
-                                    tips: 'You can select a default label or choose from the available labels.',
+                                    'Annotations Warning',
+                                    'This image contains annotations, which will be removed if you modified image because we cannot garantee that annotation will be stayed valid after your changes',
                                   );
                                 },
                               ),

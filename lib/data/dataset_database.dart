@@ -493,4 +493,14 @@ class DatasetDatabase {
     
     return Sqflite.firstIntValue(countResult) ?? 0;
   }
+
+  // Deletes all annotations associated with a specific media item, without deleting the media item itself
+  Future<void> deleteAnnotationsForMediaItem(int mediaItemId) async {
+    final db = await database;
+    await db.delete(
+      'annotations',
+      where: 'media_item_id = ?',
+      whereArgs: [mediaItemId],
+    );
+  }
 }
