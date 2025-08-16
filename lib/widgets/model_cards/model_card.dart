@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -8,8 +9,12 @@ class ModelCard extends StatefulWidget {
   final String title;
   final String description;
   final String imageAsset;
-  final String downloadUrl;
-  final String defaultFileName;
+
+  // Новые параметры
+  final String urlEncoder;
+  final String urlDecoder;
+  final String urlConfig;
+  final String modelSize;
 
   const ModelCard({
     super.key,
@@ -17,8 +22,10 @@ class ModelCard extends StatefulWidget {
     required this.title,
     required this.description,
     required this.imageAsset,
-    required this.downloadUrl,
-    required this.defaultFileName,
+    required this.urlEncoder,
+    required this.urlDecoder,
+    required this.urlConfig,
+    required this.modelSize,
   });
 
   @override
@@ -28,84 +35,181 @@ class ModelCard extends StatefulWidget {
 class _ModelCardState extends State<ModelCard> {
   bool _downloading = false;
   bool _downloaded = false;
-  double _progress = 0.0;
-  String? _savedPath;
+  double _progress = 0.0; // общий прогресс по трём файлам (0..1)
+  String? _folderPath;
 
-  Future<Directory> _getSaveDir() => getApplicationDocumentsDirectory();
+  http.Client? _client;
+  StreamSubscription<List<int>>? _sub;
+  IOSink? _sink;
+  bool _canceled = false; // флаг для graceful cancel
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAlreadyDownloaded();
+  }
+
+  @override
+  void dispose() {
+    _canceled = true;
+    // Остановить поток/клиента, закрыть файл
+    _sub?.cancel();
+    _sink?.close();
+    _client?.close();
+    super.dispose();
+  }
+
+  Future<Directory> _modelsRoot() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final folder = Directory('${dir.path}/models/${widget.id}');
+    if (!folder.existsSync()) {
+      folder.createSync(recursive: true);
+    }
+    _folderPath = folder.path;
+    return folder;
+  }
+
+  List<Uri> get _urls => [
+        Uri.parse(widget.urlEncoder),
+        Uri.parse(widget.urlDecoder),
+        Uri.parse(widget.urlConfig),
+      ];
+
+  Future<List<File>> _targetFiles() async {
+    final folder = await _modelsRoot();
+    return _urls
+        .map((u) => File('${folder.path}/${u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file'}'))
+        .toList();
+  }
+
+  Future<void> _checkAlreadyDownloaded() async {
+    final files = await _targetFiles();
+    final allExist = files.every((f) => f.existsSync() && f.lengthSync() > 0);
+    if (!mounted) return;
+    setState(() => _downloaded = allExist);
+  }
 
   Future<void> _downloadModel() async {
     if (_downloading) return;
 
-    setState(() {
-      _downloading = true;
-      _progress = 0.0;
-    });
+    if (mounted) {
+      setState(() {
+        _downloading = true;
+        _progress = 0.0;
+      });
+    }
 
     final scaffold = ScaffoldMessenger.of(context);
 
     try {
-      final dir = await _getSaveDir();
-      final filePath = '${dir.path}/${widget.defaultFileName}';
-      final file = File(filePath);
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
+      _client = http.Client();
+      final client = _client!;
+      final files = await _targetFiles();
+
+      // Суммарная длина (если сервер отдаёт)
+      int totalBytes = 0;
+      final lengths = <int>[];
+      for (final url in _urls) {
+        if (_canceled) return;
+        try {
+          final head = await client.send(http.Request('HEAD', url));
+          final len = head.contentLength ?? 0;
+          lengths.add(len);
+          totalBytes += len;
+        } catch (_) {
+          lengths.add(0);
+        }
       }
 
-      final client = http.Client();
-      try {
-        final request = http.Request('GET', Uri.parse(widget.downloadUrl));
-        final streamed = await client.send(request);
+      int downloadedSoFar = 0;
 
-        final contentLen = streamed.contentLength ?? 0;
+      for (int i = 0; i < _urls.length; i++) {
+        if (_canceled) return;
+
+        final url = _urls[i];
+        final file = files[i];
+
+        // Пропуск, если уже есть
+        if (file.existsSync() && file.lengthSync() > 0) {
+          downloadedSoFar += lengths[i];
+          if (totalBytes > 0 && mounted) {
+            setState(() => _progress = downloadedSoFar / totalBytes);
+          }
+          continue;
+        }
+
+        final req = http.Request('GET', url);
+        final resp = await client.send(req);
+        if (_canceled) return;
+
+        _sink = file.openWrite();
         int received = 0;
-        final sink = file.openWrite();
+        final thisLen = resp.contentLength ?? lengths[i];
 
-        await streamed.stream.listen(
+        _sub = resp.stream.listen(
           (chunk) {
-            sink.add(chunk);
+            if (_canceled) return;
+            _sink?.add(chunk);
             received += chunk.length;
-            if (contentLen > 0) {
-              setState(() => _progress = received / contentLen);
+            if (!mounted) return;
+            if (totalBytes > 0) {
+              final currentTotal = downloadedSoFar + received;
+              setState(() => _progress = currentTotal / totalBytes);
+            } else if (thisLen > 0) {
+              setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
+            } else {
+              // Без длины — просто триггерим перестройку (не меняем прогресс)
+              setState(() {});
             }
           },
           onDone: () async {
-            await sink.flush();
-            await sink.close();
-            if (!mounted) return;
-            setState(() {
-              _downloading = false;
-              _downloaded = true;
-              _progress = 1.0;
-              _savedPath = filePath;
-            });
-            scaffold.showSnackBar(
-              SnackBar(content: Text('${widget.title} downloaded to $filePath')),
-            );
+            await _sink?.flush();
+            await _sink?.close();
+            _sink = null;
+            _sub = null;
+            downloadedSoFar += (thisLen > 0 ? thisLen : received);
           },
           onError: (e) async {
-            await sink.close();
+            await _sink?.close();
+            _sink = null;
+            _sub = null;
             if (file.existsSync()) file.deleteSync();
-            if (!mounted) return;
-            setState(() {
-              _downloading = false;
-              _progress = 0.0;
-            });
-            scaffold.showSnackBar(SnackBar(content: Text('Download failed: $e')));
+            if (!_canceled && mounted) {
+              setState(() {
+                _downloading = false;
+                _progress = 0.0;
+              });
+              scaffold.showSnackBar(SnackBar(content: Text('Download failed: $e')));
+            }
           },
           cancelOnError: true,
-        ).asFuture();
-      } finally {
-        client.close();
+        );
+
+        // Ждём завершения текущей подписки
+        await _sub?.asFuture<void>();
+        if (_canceled) return;
       }
-    } catch (e) {
+
       if (!mounted) return;
       setState(() {
         _downloading = false;
-        _progress = 0.0;
+        _downloaded = true;
+        _progress = 1.0;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Download error: $e')),
+      scaffold.showSnackBar(
+        SnackBar(content: Text('${widget.title} downloaded to ${_folderPath ?? ''}')),
       );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _downloading = false;
+          _progress = 0.0;
+          _downloaded = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download error: $e')),
+        );
+      }
     }
   }
 
@@ -115,9 +219,7 @@ class _ModelCardState extends State<ModelCard> {
     final radius = BorderRadius.circular(16);
     final darkGreen = Colors.lightGreen[900]!;
 
-    final isComingSoon = widget.id == 'ssd_mobilenet'; // твоя логика "coming soon"
-
-    // Рамка: если скачано — темно-зелёная, иначе нейтральная
+    // Бордер зелёный, если всё скачано
     final borderColor = _downloaded ? darkGreen : theme.colorScheme.outlineVariant;
     final borderWidth = _downloaded ? 2.0 : 1.5;
 
@@ -130,17 +232,15 @@ class _ModelCardState extends State<ModelCard> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Размеры ячейки диктует Grid (см. ModelPage с mainAxisExtent)
           final isNarrow = constraints.maxWidth < 900;
           final h = constraints.maxHeight;
           final compact = h <= 120;
-
           final leftWidth = constraints.maxWidth * (isNarrow ? 0.40 : 0.35);
 
           return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // картинка тянется по высоте карточки
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ЛЕВАЯ ЧАСТЬ: картинка (40% / 35% ширины)
+              // Картинка слева
               SizedBox(
                 width: leftWidth,
                 child: Ink.image(
@@ -150,16 +250,17 @@ class _ModelCardState extends State<ModelCard> {
                 ),
               ),
 
-              // ПРАВАЯ ЧАСТЬ: контент
+              // Контент справа
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(isNarrow ? 12 : 16),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max, // растягиваем колонку на всю высоту карточки
+                    mainAxisSize: MainAxisSize.max, // чтобы нижний блок был у низа
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Заголовок + бейдж статуса
+                      // Заголовок + чип размера
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -172,38 +273,19 @@ class _ModelCardState extends State<ModelCard> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          if (_downloaded)
-                            Chip(
-                              label: const Text('Downloaded'),
-                              backgroundColor: theme.colorScheme.primaryContainer,
-                              labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)
-                                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            )
-                          else if (_downloading)
-                            Chip(
-                              label: Text('${(_progress * 100).clamp(0, 100).toStringAsFixed(0)}%'),
-                              backgroundColor: theme.colorScheme.surfaceVariant,
-                              labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium),
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            )
-                          else if (isComingSoon)
-                            Chip(
-                              label: const Text('Coming soon'),
-                              backgroundColor: theme.colorScheme.secondaryContainer,
-                              labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)
-                                  ?.copyWith(color: theme.colorScheme.onSecondaryContainer),
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
+                          Chip(
+                            label: Text(widget.modelSize),
+                            backgroundColor: theme.colorScheme.surfaceVariant,
+                            labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium),
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                         ],
                       ),
 
                       const SizedBox(height: 4),
 
-                      // Описание — заполняет всё доступное пространство и толкает статус/кнопку вниз
+                      // Описание — заполняет пространство
                       Expanded(
                         child: Text(
                           widget.description,
@@ -215,35 +297,19 @@ class _ModelCardState extends State<ModelCard> {
 
                       SizedBox(height: compact ? 6 : 10),
 
-                      // НИЖНИЙ БЛОК: всегда прижат к низу
-                      if (isComingSoon)
-                        Row(
-                          children: [
-                            Icon(Icons.hourglass_empty, color: theme.colorScheme.outline),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Coming soon — Not available yet',
-                                style: compact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        )
-                      else if (_downloading) ...[
+                      // Нижний блок: Download / Downloading / Downloaded
+                      if (_downloading) ...[
                         LinearProgressIndicator(value: _progress > 0 ? _progress : null),
                         const SizedBox(height: 6),
                         Text(
                           _progress > 0
-                              ? 'Downloading ${(_progress * 100).toStringAsFixed(0)}%'
+                              ? 'Downloading ${(_progress * 100).clamp(0, 100).toStringAsFixed(0)}%'
                               : 'Starting download…',
                           style: theme.textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ]
-                      else if (_downloaded)
+                      ] else if (_downloaded) ...[
                         Row(
                           children: [
                             Icon(Icons.check_circle, color: darkGreen),
@@ -258,9 +324,9 @@ class _ModelCardState extends State<ModelCard> {
                             ),
                             TextButton.icon(
                               onPressed: () {
-                                final p = _savedPath;
+                                final p = _folderPath;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(p == null ? 'File not found' : 'Saved at: $p')),
+                                  SnackBar(content: Text(p == null ? 'Folder not found' : 'Saved in: $p')),
                                 );
                               },
                               icon: const Icon(Icons.folder_open),
@@ -268,8 +334,8 @@ class _ModelCardState extends State<ModelCard> {
                               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                             ),
                           ],
-                        )
-                      else
+                        ),
+                      ] else ...[
                         Align(
                           alignment: Alignment.centerRight,
                           child: ElevatedButton.icon(
@@ -277,7 +343,7 @@ class _ModelCardState extends State<ModelCard> {
                             icon: const Icon(Icons.download),
                             label: const Text('Download'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: Colors.red, // красная кнопка
                               padding: EdgeInsets.symmetric(
                                 horizontal: compact ? 10 : 14,
                                 vertical: compact ? 8 : 10,
@@ -289,6 +355,7 @@ class _ModelCardState extends State<ModelCard> {
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),

@@ -33,38 +33,34 @@ class ModelCardCommingSoon extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 900;
-          final h = constraints.maxHeight;         // высоту задаёт Grid (mainAxisExtent)
-          final compact = h <= 120;                // компактный режим для низких плиток
+          final h = constraints.maxHeight;
+          final compact = h <= 120;
           final leftWidth = constraints.maxWidth * (isNarrow ? 0.40 : 0.35);
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ЛЕВАЯ часть: затемнённое изображение
               SizedBox(
                 width: leftWidth,
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5), // затемнение
-                    BlendMode.darken,
-                  ),
-                  child: Ink.image(
-                    image: AssetImage(imageAsset),
-                    fit: BoxFit.cover,
-                    child: const SizedBox.expand(),
-                  ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Ink.image(
+                      image: AssetImage(imageAsset),
+                      fit: BoxFit.cover,
+                      child: const SizedBox.expand(),
+                    ),
+                    const ColoredBox(color: Color(0x80000000)),
+                  ],
                 ),
               ),
-
-              // ПРАВАЯ часть: контент
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(isNarrow ? 12 : 16),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max, // растягиваем колонку на всю высоту карточки
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Заголовок
                       Text(
                         title,
                         style: (compact
@@ -76,10 +72,7 @@ class ModelCardCommingSoon extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-
                       const SizedBox(height: 4),
-
-                      // Описание — заполняет всё доступное пространство и толкает статус вниз
                       Expanded(
                         child: Text(
                           description,
@@ -91,10 +84,7 @@ class ModelCardCommingSoon extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-
                       SizedBox(height: compact ? 6 : 10),
-
-                      // Статус — всегда в самом низу карточки
                       Row(
                         children: [
                           const Icon(Icons.hourglass_empty, color: disabledTextColor, size: 20),

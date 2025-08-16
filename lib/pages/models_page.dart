@@ -8,16 +8,20 @@ class ModelInfo {
   final String title;
   final String description;
   final String imageAsset;
-  final String downloadUrl;
-  final String defaultFileName;
+  final String urlEncoder;
+  final String urlDecoder;
+  final String urlConfig;
+  final String modelSize;
 
   const ModelInfo({
     required this.id,
     required this.title,
     required this.description,
     required this.imageAsset,
-    required this.downloadUrl,
-    required this.defaultFileName,
+    required this.urlEncoder,
+    required this.urlDecoder,
+    required this.urlConfig,
+    required this.modelSize,
   });
 }
 
@@ -35,32 +39,40 @@ class _ModelPageState extends State<ModelPage> {
       title: 'SAM Mobile',
       description: 'Lightweight SAM variant for on-device segmentation.',
       imageAsset: 'assets/images/sam_mobile.jpeg',
-      downloadUrl: '',
-      defaultFileName: '',
+      urlEncoder: '',
+      urlDecoder: '',
+      urlConfig: '',
+      modelSize: '44Mb',
     ),
     ModelInfo(
       id: 'sam2_hiera_base',
       title: 'SAM2 Hiera Base+',
       description: 'Balanced accuracy/speed with Hiera base+ backbone.',
       imageAsset: 'assets/images/sam_example.jpg',
-      downloadUrl: 'https://example.com/models/sam2_hiera_base_plus.onnx',
-      defaultFileName: 'sam2_hiera_base_plus.onnx',
+      urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
+      urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
+      urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
+      modelSize: '352Mb',
     ),
     ModelInfo(
       id: 'sam2_hiera_large',
       title: 'SAM2 Hiera Large',
       description: 'High-accuracy variant for best quality masks.',
       imageAsset: 'assets/images/sam_example.jpg',
-      downloadUrl: 'https://example.com/models/sam2_hiera_large.onnx',
-      defaultFileName: 'sam2_hiera_large.onnx',
+      urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
+      urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
+      urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
+      modelSize: '860Mb',
     ),
     ModelInfo(
       id: 'ssd_mobilenet',
       title: 'SSD MobileNet',
       description: 'Fast single-shot detector for general objects.',
       imageAsset: 'assets/images/ssd_mobilenet.jpg',
-      downloadUrl: '',
-      defaultFileName: '',
+      urlEncoder: '',
+      urlDecoder: '',
+      urlConfig: '',
+      modelSize: 'N/A',
     ),
   ];
 
@@ -91,6 +103,7 @@ class _ModelPageState extends State<ModelPage> {
                   title: m.title,
                   description: m.description,
                   imageAsset: m.imageAsset,
+                  modelSize: m.modelSize,
                 );
               } else if (m.id == 'ssd_mobilenet') {
                 return ModelCardCommingSoon(
@@ -105,8 +118,10 @@ class _ModelPageState extends State<ModelPage> {
                   title: m.title,
                   description: m.description,
                   imageAsset: m.imageAsset,
-                  downloadUrl: m.downloadUrl,
-                  defaultFileName: m.defaultFileName,
+                  urlEncoder: m.urlEncoder,
+                  urlDecoder: m.urlDecoder, 
+                  urlConfig: m.urlConfig,
+                  modelSize: m.modelSize,
                 );
               }
             },

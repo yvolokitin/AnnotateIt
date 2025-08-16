@@ -43,15 +43,14 @@ class ImageTileMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert, color: Colors.white),
       onSelected: (value) async {
         switch (value) {
-          /// disable image edit since it is production ready
-          case 'edit':
-            // Call the edit image callback
-            onEditImage?.call();
-            break;
-
           case 'annotate':
             // Navigate to the image annotation screen
             onAnnotate?.call();
+            break;
+
+          case 'edit':
+            // Call the edit image callback
+            onEditImage?.call();
             break;
 
           case 'details':
@@ -106,7 +105,7 @@ class ImageTileMenuButton extends StatelessWidget {
       itemBuilder: (context) => [
         /// disable image edit since it is production ready
         /// PopupMenuItem(value: 'edit', child: _MenuItemRow(Icons.edit, 'Edit image')),
-        PopupMenuItem(value: 'annotate', child: _MenuItemRow(Icons.info_outline, l10n.menuImageAnnotate)),
+        PopupMenuItem(value: 'annotate', child: _MenuItemRow(Icons.new_label_outlined, l10n.menuImageAnnotate)),
         PopupMenuItem(value: 'details', child: _MenuItemRow(Icons.info_outline, l10n.menuImageDetails)),
         PopupMenuItem(value: 'duplicate', child: _MenuItemRow(Icons.copy, l10n.menuImageDuplicate)),
         PopupMenuItem(value: 'seticon', child: _MenuItemRow(Icons.image_outlined, l10n.menuImageSetAsIcon)),

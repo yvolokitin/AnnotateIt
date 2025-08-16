@@ -5,6 +5,7 @@ class ModelCardBuiltIn extends StatelessWidget {
   final String title;
   final String description;
   final String imageAsset;
+  final String modelSize;
 
   const ModelCardBuiltIn({
     super.key,
@@ -12,6 +13,7 @@ class ModelCardBuiltIn extends StatelessWidget {
     required this.title,
     required this.description,
     required this.imageAsset,
+    required this.modelSize,
   });
 
   @override
@@ -32,13 +34,10 @@ class ModelCardBuiltIn extends StatelessWidget {
           final isNarrow = constraints.maxWidth < 900;
           final h = constraints.maxHeight;
           final compact = h <= 120;
-
           final leftWidth = constraints.maxWidth * (isNarrow ? 0.40 : 0.35);
-
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Левая часть: картинка
               SizedBox(
                 width: leftWidth,
                 child: Ink.image(
@@ -47,16 +46,13 @@ class ModelCardBuiltIn extends StatelessWidget {
                   child: const SizedBox.expand(),
                 ),
               ),
-
-              // Правая часть: контент
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(isNarrow ? 12 : 16),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max, // тянем колонку на всю высоту карточки
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Заголовок + бейдж
                       Row(
                         children: [
                           Expanded(
@@ -73,7 +69,7 @@ class ModelCardBuiltIn extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Chip(
-                            label: const Text('Built-in'),
+                            label: Text('Built-in, $modelSize'),
                             backgroundColor: darkGreen,
                             labelStyle: (compact
                                     ? theme.textTheme.labelSmall
@@ -84,10 +80,7 @@ class ModelCardBuiltIn extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 4),
-
-                      // Описание тянет всё свободное пространство
                       Expanded(
                         child: Text(
                           description,
