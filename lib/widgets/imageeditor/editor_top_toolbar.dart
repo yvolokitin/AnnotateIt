@@ -38,7 +38,7 @@ class _EditorTopToolbarState extends State<EditorTopToolbar> {
     return Container(
       height: 62,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: Colors.brown[800],
         border: const Border(
           bottom: BorderSide(
             color: Colors.black,

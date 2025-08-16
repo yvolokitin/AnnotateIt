@@ -14,6 +14,9 @@ class EditorPainter extends CustomPainter {
   final bool flipVertical;
   final int rotationAngle;
   final bool isModified;
+  
+  // Highlighted crop edge (5=top, 6=right, 7=bottom, 8=left)
+  final int? highlightEdge;
 
   EditorPainter({
     required this.image,
@@ -25,6 +28,7 @@ class EditorPainter extends CustomPainter {
     this.flipVertical = false,
     this.rotationAngle = 0,
     this.isModified = false,
+    this.highlightEdge,
   });
 
   @override
@@ -90,203 +94,75 @@ class EditorPainter extends CustomPainter {
     // Draw the image
     canvas.drawImage(image, Offset.zero, paint);
     
-    // Draw crop rectangle if needed
+    // Draw crop overlay if needed (no visible rectangle or handles)
     if (cropRect != null) {
-      final cropPaint = Paint()
-        ..color = Colors.blue
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0;
-      
-      canvas.drawRect(cropRect!, cropPaint);
-      
-      // Draw semi-transparent overlay outside the crop area
+      // Draw semi-transparent overlay outside the crop area only
       final overlayPaint = Paint()
         ..color = Colors.black.withOpacity(0.5)
         ..style = PaintingStyle.fill;
-      
+
       // Top overlay
       canvas.drawRect(
         Rect.fromLTRB(0, 0, imageWidth, cropRect!.top),
         overlayPaint
       );
-      
+
       // Bottom overlay
       canvas.drawRect(
         Rect.fromLTRB(0, cropRect!.bottom, imageWidth, imageHeight),
         overlayPaint
       );
-      
+
       // Left overlay
       canvas.drawRect(
         Rect.fromLTRB(0, cropRect!.top, cropRect!.left, cropRect!.bottom),
         overlayPaint
       );
-      
+
       // Right overlay
       canvas.drawRect(
         Rect.fromLTRB(cropRect!.right, cropRect!.top, imageWidth, cropRect!.bottom),
         overlayPaint
       );
-      
-      // Draw corner handles for resizing
-      final handleSize = 10.0;
-      final handlePaint = Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.fill;
-      
-      final handleBorderPaint = Paint()
-        ..color = Colors.blue
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
-      
-      // Top-left handle
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.topLeft,
-          width: handleSize,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.topLeft,
-          width: handleSize,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Top-right handle
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.topRight,
-          width: handleSize,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.topRight,
-          width: handleSize,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Bottom-right handle
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.bottomRight,
-          width: handleSize,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.bottomRight,
-          width: handleSize,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Bottom-left handle
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.bottomLeft,
-          width: handleSize,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: cropRect!.bottomLeft,
-          width: handleSize,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Edge handles
-      // Top edge handle
-      final topCenter = Offset(cropRect!.left + cropRect!.width / 2, cropRect!.top);
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: topCenter,
-          width: handleSize * 1.5,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: topCenter,
-          width: handleSize * 1.5,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Right edge handle
-      final rightCenter = Offset(cropRect!.right, cropRect!.top + cropRect!.height / 2);
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: rightCenter,
-          width: handleSize,
-          height: handleSize * 1.5
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: rightCenter,
-          width: handleSize,
-          height: handleSize * 1.5
-        ),
-        handleBorderPaint
-      );
-      
-      // Bottom edge handle
-      final bottomCenter = Offset(cropRect!.left + cropRect!.width / 2, cropRect!.bottom);
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: bottomCenter,
-          width: handleSize * 1.5,
-          height: handleSize
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: bottomCenter,
-          width: handleSize * 1.5,
-          height: handleSize
-        ),
-        handleBorderPaint
-      );
-      
-      // Left edge handle
-      final leftCenter = Offset(cropRect!.left, cropRect!.top + cropRect!.height / 2);
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: leftCenter,
-          width: handleSize,
-          height: handleSize * 1.5
-        ),
-        handlePaint
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: leftCenter,
-          width: handleSize,
-          height: handleSize * 1.5
-        ),
-        handleBorderPaint
-      );
+
+      // Highlight targeted edge in red if specified
+      if (highlightEdge != null) {
+        final edge = highlightEdge!;
+        final redPaint = Paint()
+          ..color = Colors.red
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5;
+        switch (edge) {
+          case 5: // top
+            canvas.drawLine(
+              Offset(cropRect!.left, cropRect!.top),
+              Offset(cropRect!.right, cropRect!.top),
+              redPaint,
+            );
+            break;
+          case 6: // right
+            canvas.drawLine(
+              Offset(cropRect!.right, cropRect!.top),
+              Offset(cropRect!.right, cropRect!.bottom),
+              redPaint,
+            );
+            break;
+          case 7: // bottom
+            canvas.drawLine(
+              Offset(cropRect!.left, cropRect!.bottom),
+              Offset(cropRect!.right, cropRect!.bottom),
+              redPaint,
+            );
+            break;
+          case 8: // left
+            canvas.drawLine(
+              Offset(cropRect!.left, cropRect!.top),
+              Offset(cropRect!.left, cropRect!.bottom),
+              redPaint,
+            );
+            break;
+        }
+      }
     }
     
     // Restore the canvas state
@@ -303,6 +179,7 @@ class EditorPainter extends CustomPainter {
            oldDelegate.flipHorizontal != flipHorizontal ||
            oldDelegate.flipVertical != flipVertical ||
            oldDelegate.rotationAngle != rotationAngle ||
-           oldDelegate.isModified != isModified;
+           oldDelegate.isModified != isModified ||
+           oldDelegate.highlightEdge != highlightEdge;
   }
 }

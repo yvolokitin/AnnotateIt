@@ -45,7 +45,7 @@ class _EditorBottomToolbarState extends State<EditorBottomToolbar> {
       height: 50,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: Colors.brown[800],
         border: const Border(
           top: BorderSide(
             color: Colors.black,

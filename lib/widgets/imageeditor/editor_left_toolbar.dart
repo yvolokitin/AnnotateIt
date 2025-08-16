@@ -39,7 +39,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
     return Container(
       width: Constants.toolbarWidth,
       decoration: BoxDecoration(
-        color: Constants.toolbarBackgroundColor,
+        color: Colors.brown[800],
         border: const Border(
           right: BorderSide(color: Colors.black, width: 2),
         ),

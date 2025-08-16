@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'editor_painter.dart';
 import 'editor_action.dart';
@@ -66,6 +67,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
   int? _activeResizeHandle;
   Offset? _dragStartPosition;
   Rect? _originalCropRect;
+  double? _aspectAtDragStart;
+  
+  // Hovered resize handle (for cursor/highlight)
+  int? _hoverResizeHandle;
   
   // Image modification state
   bool _isModified = false;
@@ -80,48 +85,121 @@ class _EditorCanvasState extends State<EditorCanvas> {
   // Adjustment panel state
   bool _showAdjustmentPanel = false;
   bool _isBrightnessMode = true; // true for brightness, false for contrast
+
+  // Keyboard modifiers for crop behavior
+  final FocusNode _focusNode = FocusNode();
+  bool _shiftPressed = false;
+  bool _altPressed = false;
+
+  static const double _minCropSize = 16.0; // px
   
-  // Method to get the cropped image
+  // Method to get the edited image (supports crop, rotation, flips, brightness/contrast)
   Future<ui.Image?> getCroppedImage() async {
-    if (_cropRect == null || !_isModified) return null;
-    
-    // Get the image rect in local coordinates
-    final imageRect = _getImageRect();
-    
-    // Calculate the crop rect relative to the original image
+    if (!_isModified) return null;
+
+    final ui.Image sourceImage = _modifiedImage ?? widget.image;
+
+    // Helper to build paint with color filter for brightness/contrast
+    Paint _buildAdjustPaint() {
+      final paint = Paint();
+      if (_brightness != 0.0 || _contrast != 1.0) {
+        final List<double> m = List<double>.filled(20, 0.0);
+        // R
+        m[0] = _contrast;
+        m[4] = _brightness * 255.0;
+        // G
+        m[6] = _contrast;
+        m[9] = _brightness * 255.0;
+        // B
+        m[12] = _contrast;
+        m[14] = _brightness * 255.0;
+        // A
+        m[18] = 1.0;
+        paint.colorFilter = ColorFilter.matrix(m);
+      }
+      return paint;
+    }
+
+    // Helper to render the full edited image (rotation, flips, brightness/contrast)
+    Future<ui.Image> _renderFullEditedImage() async {
+      final origW = sourceImage.width.toDouble();
+      final origH = sourceImage.height.toDouble();
+      final int rot = ((_rotationAngle % 360) + 360) % 360;
+      final bool swap = rot % 180 != 0;
+      final double finalW = swap ? origH : origW;
+      final double finalH = swap ? origW : origH;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      // Apply rotation with appropriate translation to keep image in view
+      if (rot == 90) {
+        canvas.translate(finalW, 0);
+        canvas.rotate(3.141592653589793 / 2);
+      } else if (rot == 180) {
+        canvas.translate(finalW, finalH);
+        canvas.rotate(3.141592653589793);
+      } else if (rot == 270) {
+        canvas.translate(0, finalH);
+        canvas.rotate(3 * 3.141592653589793 / 2);
+      }
+
+      // Apply flips relative to final orientation
+      if (_flipHorizontal) {
+        canvas.translate(finalW, 0);
+        canvas.scale(-1, 1);
+      }
+      if (_flipVertical) {
+        canvas.translate(0, finalH);
+        canvas.scale(1, -1);
+      }
+
+      // Draw original image with adjustments
+      final paint = _buildAdjustPaint();
+      canvas.drawImage(sourceImage, Offset.zero, paint);
+
+      final picture = recorder.endRecording();
+      return picture.toImage(finalW.round(), finalH.round());
+    }
+
+    // If no crop rect, return full edited image (so Save works for non-crop edits)
+    if (_cropRect == null) {
+      return _renderFullEditedImage();
+    }
+
+    // If rotation or flips are active, fall back to saving full edited image (to avoid complex crop mapping)
+    if (_rotationAngle % 360 != 0 || _flipHorizontal || _flipVertical) {
+      return _renderFullEditedImage();
+    }
+
+    // Crop only (apply brightness/contrast to the cropped area)
+    // Calculate the crop rect relative to the original image using the current view matrix
     final scale = matrix.getMaxScaleOnAxis();
     final offset = matrix.getTranslation();
-    
-    // Convert crop rect from screen coordinates to image coordinates
+
     final relativeLeft = (_cropRect!.left - offset.x) / scale;
     final relativeTop = (_cropRect!.top - offset.y) / scale;
     final relativeWidth = _cropRect!.width / scale;
     final relativeHeight = _cropRect!.height / scale;
-    
-    // Create a rect in the original image's coordinate space
+
     final cropRectInImage = Rect.fromLTWH(
       relativeLeft,
       relativeTop,
       relativeWidth,
-      relativeHeight
+      relativeHeight,
     );
-    
-    // Create a picture recorder
+
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    
-    // Draw only the cropped portion of the image
+
+    // Draw only the cropped portion with adjustments
     canvas.drawImageRect(
-      widget.image,
+      sourceImage,
       cropRectInImage,
       Rect.fromLTWH(0, 0, relativeWidth, relativeHeight),
-      Paint()
+      _buildAdjustPaint(),
     );
-    
-    // Apply other modifications (brightness, contrast, flip, rotation) if needed
-    // Note: For simplicity, we're only implementing cropping for now
-    
-    // Convert to an image
+
     final picture = recorder.endRecording();
     return picture.toImage(relativeWidth.round(), relativeHeight.round());
   }
@@ -157,7 +235,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
-          matrix = setTransformToFit(widget.image);
+          matrix = setTransformToFit(_modifiedImage ?? widget.image);
         });
         widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
       });
@@ -165,15 +243,27 @@ class _EditorCanvasState extends State<EditorCanvas> {
     
     // Initialize crop rect when crop action is selected
     if (oldWidget.editorAction != widget.editorAction && 
-        widget.editorAction == EditorAction.crop && 
-        _cropRect == null) {
+        widget.editorAction == EditorAction.crop) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
           // Initialize crop rect to the entire image
           _cropRect = _getImageRect();
-          _setModified(true);
+          _activeResizeHandle = null;
+          _dragStartPosition = null;
+          _originalCropRect = null;
         });
+        // ensure we can capture keyboard modifiers
+        _focusNode.requestFocus();
+      });
+    }
+
+    // Clear hover/active when leaving crop mode
+    if (oldWidget.editorAction == EditorAction.crop &&
+        widget.editorAction != EditorAction.crop) {
+      setState(() {
+        _hoverResizeHandle = null;
+        _activeResizeHandle = null;
       });
     }
   }
@@ -219,7 +309,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
   // Helper method to check if a point is near a corner or edge of the crop rect
   // Returns:
   // 0-3: corners (top-left, top-right, bottom-right, bottom-left)
-  // 4: inside the rect (for moving)
   // 5-8: edges (top, right, bottom, left)
   // null: not near any handle
   int? _getResizeHandleAtPosition(Offset position) {
@@ -275,12 +364,25 @@ class _EditorCanvasState extends State<EditorCanvas> {
       return 8;
     }
     
-    // Check if inside the crop rect (for moving)
-    if (_cropRect!.contains(position)) {
-      return 4; // Special value for moving the entire rect
-    }
-    
+    // Do not allow moving the entire rect; only edges/corners are interactive
     return null;
+  }
+  
+  bool _isEdgeHandle(int? h) => h == 5 || h == 6 || h == 7 || h == 8;
+  
+  MouseCursor _currentMouseCursor() {
+    if (widget.editorAction != EditorAction.crop || _cropRect == null) {
+      return SystemMouseCursors.basic;
+    }
+    final int? h = _activeResizeHandle ?? _hoverResizeHandle;
+    if (h == 5 || h == 7) return SystemMouseCursors.resizeUpDown;
+    if (h == 6 || h == 8) return SystemMouseCursors.resizeLeftRight;
+    return SystemMouseCursors.basic;
+  }
+  
+  int? _currentHighlightEdge() {
+    final int? h = _activeResizeHandle ?? _hoverResizeHandle;
+    return _isEdgeHandle(h) ? h : null;
   }
   
   void _handlePointerDown(PointerDownEvent event) {
@@ -299,17 +401,13 @@ class _EditorCanvasState extends State<EditorCanvas> {
           _activeResizeHandle = handleIndex;
           _dragStartPosition = event.localPosition;
           _originalCropRect = _cropRect;
+          _aspectAtDragStart = _originalCropRect == null || _originalCropRect!.height == 0
+              ? null
+              : _originalCropRect!.width / _originalCropRect!.height;
         });
       } else {
-        // Start a new crop operation if not on a handle
-        final imageRect = _getImageRect();
-        if (imageRect.contains(event.localPosition)) {
-          setState(() {
-            _cropRect = Rect.fromPoints(event.localPosition, event.localPosition);
-            _activeResizeHandle = 2; // Bottom-right corner
-            _dragStartPosition = event.localPosition;
-          });
-        }
+        // Edge-based cropping: do not create a new inner rectangle or move the rect
+        // Simply ignore clicks that are not on handles.
       }
     }
   }
@@ -320,7 +418,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
       return;
     }
     
-    if (widget.editorAction == EditorAction.crop && _cropRect != null && _activeResizeHandle != null) {
+    if (widget.editorAction == EditorAction.crop && _cropRect != null && _activeResizeHandle != null && _originalCropRect != null) {
       final imageRect = _getImageRect();
       
       // Constrain the position to the image bounds
@@ -328,82 +426,141 @@ class _EditorCanvasState extends State<EditorCanvas> {
         event.localPosition.dx.clamp(imageRect.left, imageRect.right),
         event.localPosition.dy.clamp(imageRect.top, imageRect.bottom)
       );
-      
-      setState(() {
-        if (_activeResizeHandle == 4) {
-          // Moving the entire crop rect
-          if (_dragStartPosition != null && _originalCropRect != null) {
-            final delta = constrainedPosition - _dragStartPosition!;
-            
-            // Calculate new rect position, ensuring it stays within image bounds
-            final newLeft = (_originalCropRect!.left + delta.dx).clamp(imageRect.left, imageRect.right - _originalCropRect!.width);
-            final newTop = (_originalCropRect!.top + delta.dy).clamp(imageRect.top, imageRect.bottom - _originalCropRect!.height);
-            
-            _cropRect = Rect.fromLTWH(
-              newLeft,
-              newTop,
-              _originalCropRect!.width,
-              _originalCropRect!.height
-            );
-          }
-        } else {
-          // Resizing the crop rect
-          Offset topLeft = _cropRect!.topLeft;
-          Offset bottomRight = _cropRect!.bottomRight;
-          
-          switch (_activeResizeHandle) {
-            case 0: // Top-left
-              topLeft = constrainedPosition;
-              break;
-            case 1: // Top-right
-              topLeft = Offset(topLeft.dx, constrainedPosition.dy);
-              bottomRight = Offset(constrainedPosition.dx, bottomRight.dy);
-              break;
-            case 2: // Bottom-right
-              bottomRight = constrainedPosition;
-              break;
-            case 3: // Bottom-left
-              topLeft = Offset(constrainedPosition.dx, topLeft.dy);
-              bottomRight = Offset(bottomRight.dx, constrainedPosition.dy);
-              break;
-            case 5: // Top edge
-              topLeft = Offset(topLeft.dx, constrainedPosition.dy);
-              break;
-            case 6: // Right edge
-              bottomRight = Offset(constrainedPosition.dx, bottomRight.dy);
-              break;
-            case 7: // Bottom edge
-              bottomRight = Offset(bottomRight.dx, constrainedPosition.dy);
-              break;
-            case 8: // Left edge
-              topLeft = Offset(constrainedPosition.dx, topLeft.dy);
-              break;
-          }
-          
-          // Ensure minimum size and correct orientation
-          if (bottomRight.dx - topLeft.dx < 20) {
-            if (_activeResizeHandle == 0 || _activeResizeHandle == 3 || _activeResizeHandle == 8) {
-              // Left side is being dragged
-              topLeft = Offset(bottomRight.dx - 20, topLeft.dy);
-            } else if (_activeResizeHandle == 1 || _activeResizeHandle == 2 || _activeResizeHandle == 6) {
-              // Right side is being dragged
-              bottomRight = Offset(topLeft.dx + 20, bottomRight.dy);
-            }
-          }
-          
-          if (bottomRight.dy - topLeft.dy < 20) {
-            if (_activeResizeHandle == 0 || _activeResizeHandle == 1 || _activeResizeHandle == 5) {
-              // Top side is being dragged
-              topLeft = Offset(topLeft.dx, bottomRight.dy - 20);
-            } else if (_activeResizeHandle == 2 || _activeResizeHandle == 3 || _activeResizeHandle == 7) {
-              // Bottom side is being dragged
-              bottomRight = Offset(bottomRight.dx, topLeft.dy + 20);
-            }
-          }
-          
-          _cropRect = Rect.fromPoints(topLeft, bottomRight);
+
+      Rect newRect = _originalCropRect!;
+      final orig = _originalCropRect!;
+
+      // Helper to clamp rect within image and min size
+      Rect _clampRect(Rect r) {
+        double left = r.left.clamp(imageRect.left, imageRect.right);
+        double top = r.top.clamp(imageRect.top, imageRect.bottom);
+        double right = r.right.clamp(imageRect.left, imageRect.right);
+        double bottom = r.bottom.clamp(imageRect.top, imageRect.bottom);
+        // enforce min size
+        if (right - left < _minCropSize) {
+          final cx = (left + right) / 2;
+          left = cx - _minCropSize / 2;
+          right = cx + _minCropSize / 2;
         }
-        
+        if (bottom - top < _minCropSize) {
+          final cy = (top + bottom) / 2;
+          top = cy - _minCropSize / 2;
+          bottom = cy + _minCropSize / 2;
+        }
+        // clamp again to imageRect after min size adjust
+        left = left.clamp(imageRect.left, imageRect.right - _minCropSize);
+        top = top.clamp(imageRect.top, imageRect.bottom - _minCropSize);
+        right = right.clamp(imageRect.left + _minCropSize, imageRect.right);
+        bottom = bottom.clamp(imageRect.top + _minCropSize, imageRect.bottom);
+        return Rect.fromLTRB(left, top, right, bottom);
+      }
+
+      double left = orig.left;
+      double top = orig.top;
+      double right = orig.right;
+      double bottom = orig.bottom;
+
+      switch (_activeResizeHandle) {
+        case 0: // Top-left corner
+          left = constrainedPosition.dx;
+          top = constrainedPosition.dy;
+          if (_altPressed) {
+            final dx = left - orig.left;
+            final dy = top - orig.top;
+            right = orig.right - dx;
+            bottom = orig.bottom - dy;
+          }
+          if (_shiftPressed && _aspectAtDragStart != null) {
+            final aspect = _aspectAtDragStart!;
+            // anchor bottom-right
+            final width = right - left;
+            final height = width / aspect;
+            top = bottom - height;
+          }
+          break;
+        case 1: // Top-right corner
+          right = constrainedPosition.dx;
+          top = constrainedPosition.dy;
+          if (_altPressed) {
+            final dx = right - orig.right;
+            final dy = top - orig.top;
+            left = orig.left - dx;
+            bottom = orig.bottom - dy;
+          }
+          if (_shiftPressed && _aspectAtDragStart != null) {
+            final aspect = _aspectAtDragStart!;
+            final width = right - left;
+            final height = width / aspect;
+            top = bottom - height;
+          }
+          break;
+        case 2: // Bottom-right corner
+          right = constrainedPosition.dx;
+          bottom = constrainedPosition.dy;
+          if (_altPressed) {
+            final dx = right - orig.right;
+            final dy = bottom - orig.bottom;
+            left = orig.left - dx;
+            top = orig.top - dy;
+          }
+          if (_shiftPressed && _aspectAtDragStart != null) {
+            final aspect = _aspectAtDragStart!;
+            final width = right - left;
+            final height = width / aspect;
+            bottom = top + height;
+          }
+          break;
+        case 3: // Bottom-left corner
+          left = constrainedPosition.dx;
+          bottom = constrainedPosition.dy;
+          if (_altPressed) {
+            final dx = left - orig.left;
+            final dy = bottom - orig.bottom;
+            right = orig.right - dx;
+            top = orig.top - dy;
+          }
+          if (_shiftPressed && _aspectAtDragStart != null) {
+            final aspect = _aspectAtDragStart!;
+            final width = right - left;
+            final height = width / aspect;
+            bottom = top + height;
+          }
+          break;
+        case 5: // Top edge
+          top = constrainedPosition.dy;
+          if (_altPressed) {
+            final dy = top - orig.top;
+            bottom = orig.bottom - dy;
+          }
+          break;
+        case 6: // Right edge
+          right = constrainedPosition.dx;
+          if (_altPressed) {
+            final dx = right - orig.right;
+            left = orig.left - dx;
+          }
+          break;
+        case 7: // Bottom edge
+          bottom = constrainedPosition.dy;
+          if (_altPressed) {
+            final dy = bottom - orig.bottom;
+            top = orig.top - dy;
+          }
+          break;
+        case 8: // Left edge
+          left = constrainedPosition.dx;
+          if (_altPressed) {
+            final dx = left - orig.left;
+            right = orig.right - dx;
+          }
+          break;
+      }
+
+      newRect = Rect.fromLTRB(left, top, right, bottom);
+      newRect = _clampRect(newRect);
+
+      setState(() {
+        _cropRect = newRect;
         _setModified(true);
       });
     }
@@ -417,27 +574,17 @@ class _EditorCanvasState extends State<EditorCanvas> {
     }
     
     if (widget.editorAction == EditorAction.crop && _cropRect != null) {
-      // Finalize crop rectangle
+      // Finalize crop rectangle and release handle
       final imageRect = _getImageRect();
       final normalizedCropRect = _normalizeCropRect(_cropRect!, imageRect);
       
-      if (normalizedCropRect.width > 20 && normalizedCropRect.height > 20) {
-        setState(() {
-          _cropRect = normalizedCropRect;
-          _activeResizeHandle = null;
-          _dragStartPosition = null;
-          _originalCropRect = null;
-        });
-        _setModified(true);
-      } else {
-        // Crop area too small, cancel crop
-        setState(() {
-          _cropRect = null;
-          _activeResizeHandle = null;
-          _dragStartPosition = null;
-          _originalCropRect = null;
-        });
-      }
+      setState(() {
+        _cropRect = normalizedCropRect;
+        _activeResizeHandle = null;
+        _dragStartPosition = null;
+        _originalCropRect = null;
+      });
+      _setModified(true);
     }
   }
 
@@ -517,7 +664,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
   
   // Helper method to get the current image rectangle in local coordinates
   Rect _getImageRect() {
-    final imageSize = Size(widget.image.width.toDouble(), widget.image.height.toDouble());
+    final ui.Image img = _modifiedImage ?? widget.image;
+    final imageSize = Size(img.width.toDouble(), img.height.toDouble());
     final canvasSize = context.size!;
     
     // Calculate the scaled image size
@@ -543,6 +691,64 @@ class _EditorCanvasState extends State<EditorCanvas> {
     return Rect.fromLTRB(left, top, right, bottom);
   }
 
+  Rect? _cropRectInImageSpace() {
+    if (_cropRect == null) return null;
+    final scale = matrix.getMaxScaleOnAxis();
+    final offset = matrix.getTranslation();
+    final left = (_cropRect!.left - offset.x) / scale;
+    final top = (_cropRect!.top - offset.y) / scale;
+    final width = _cropRect!.width / scale;
+    final height = _cropRect!.height / scale;
+    return Rect.fromLTWH(left, top, width, height);
+  }
+
+  Future<void> _applyCrop() async {
+    if (_cropRect == null) return;
+    final Rect? cropInImg = _cropRectInImageSpace();
+    if (cropInImg == null) return;
+    final ui.Image src = _modifiedImage ?? widget.image;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.drawImageRect(
+      src,
+      Rect.fromLTWH(
+        cropInImg.left.clamp(0, src.width.toDouble()),
+        cropInImg.top.clamp(0, src.height.toDouble()),
+        cropInImg.width.clamp(1, src.width.toDouble()),
+        cropInImg.height.clamp(1, src.height.toDouble()),
+      ),
+      Rect.fromLTWH(0, 0, cropInImg.width, cropInImg.height),
+      Paint(),
+    );
+    final picture = recorder.endRecording();
+    final ui.Image newImg = await picture.toImage(cropInImg.width.round(), cropInImg.height.round());
+
+    if (!mounted) return;
+    setState(() {
+      _modifiedImage = newImg;
+      matrix = setTransformToFit(newImg);
+      _cropRect = _getImageRect(); // reset to full image after trim
+      _setModified(true);
+    });
+  }
+
+  void _cancelCrop() {
+    setState(() {
+      _cropRect = _getImageRect();
+      _activeResizeHandle = null;
+      _hoverResizeHandle = null;
+      _dragStartPosition = null;
+      _originalCropRect = null;
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<SizeChangedLayoutNotification>(
@@ -552,9 +758,20 @@ class _EditorCanvasState extends State<EditorCanvas> {
         });
         return false;
       },
-      child: SizeChangedLayoutNotifier(
-        child: Stack(
-          children: [
+      child: RawKeyboardListener(
+        focusNode: _focusNode,
+        onKey: (RawKeyEvent e) {
+          final keys = RawKeyboard.instance.keysPressed;
+          final shift = keys.contains(LogicalKeyboardKey.shiftLeft) || keys.contains(LogicalKeyboardKey.shiftRight);
+          final alt = keys.contains(LogicalKeyboardKey.altLeft) || keys.contains(LogicalKeyboardKey.altRight);
+          setState(() {
+            _shiftPressed = shift;
+            _altPressed = alt;
+          });
+        },
+        child: SizeChangedLayoutNotifier(
+          child: Stack(
+          children: <Widget>[
             SizedBox.expand(
               child: Container(
                 clipBehavior: Clip.hardEdge,
@@ -570,7 +787,23 @@ class _EditorCanvasState extends State<EditorCanvas> {
                       scaleCanvas(Vector3(p.localPosition.dx, p.localPosition.dy, 0), scale);
                     }
                   },
-                  child: GestureDetector(
+                  child: MouseRegion(
+                    cursor: _currentMouseCursor(),
+                    onHover: (event) {
+                      if (widget.editorAction == EditorAction.crop && _cropRect != null && _activeResizeHandle == null) {
+                        final h = _getResizeHandleAtPosition(event.localPosition);
+                        final edge = _isEdgeHandle(h) ? h : null;
+                        if (edge != _hoverResizeHandle) {
+                          setState(() => _hoverResizeHandle = edge);
+                        }
+                      }
+                    },
+                    onExit: (_) {
+                      if (_hoverResizeHandle != null) {
+                        setState(() => _hoverResizeHandle = null);
+                      }
+                    },
+                    child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTapDown: _handleTapDown,
                     onScaleStart: (_) => prevScale = 1,
@@ -588,15 +821,16 @@ class _EditorCanvasState extends State<EditorCanvas> {
                         transform: matrix,
                         child: CustomPaint(
                           painter: EditorPainter(
-                            image: widget.image,
+                            image: _modifiedImage ?? widget.image,
                             scale: matrix.getMaxScaleOnAxis(),
-                            cropRect: _cropRect,
+                            cropRect: widget.editorAction == EditorAction.crop ? _cropRectInImageSpace() : null,
                             brightness: _brightness,
                             contrast: _contrast,
                             flipHorizontal: _flipHorizontal,
                             flipVertical: _flipVertical,
                             rotationAngle: _rotationAngle,
                             isModified: _isModified,
+                            highlightEdge: widget.editorAction == EditorAction.crop ? _currentHighlightEdge() : null,
                           ),
                         ),
                       ),
@@ -605,7 +839,20 @@ class _EditorCanvasState extends State<EditorCanvas> {
                 ),
               ),
             ),
+          ),
             
+            // Crop numeric overlay and actions
+            if (widget.editorAction == EditorAction.crop && _cropRect != null)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: _CropOverlay(
+                  cropRectInImage: _cropRectInImageSpace(),
+                  onApply: _applyCrop,
+                  onCancel: _cancelCrop,
+                ),
+              ),
+
             // Show adjustment panel when needed
             if (_showAdjustmentPanel)
               Positioned(
@@ -621,6 +868,112 @@ class _EditorCanvasState extends State<EditorCanvas> {
               ),
           ],
         ),
+      ),
+    ),
+  );
+  }
+}
+
+
+class _CropOverlay extends StatelessWidget {
+  final Rect? cropRectInImage;
+  final Future<void> Function()? onApply;
+  final VoidCallback? onCancel;
+
+  const _CropOverlay({
+    Key? key,
+    required this.cropRectInImage,
+    this.onApply,
+    this.onCancel,
+  }) : super(key: key);
+
+  String _fmt(double v) => v.isFinite ? v.toStringAsFixed(0) : '0';
+
+  @override
+  Widget build(BuildContext context) {
+    final r = cropRectInImage;
+    final x = r?.left ?? 0;
+    final y = r?.top ?? 0;
+    final w = r?.width ?? 0;
+    final h = r?.height ?? 0;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Stat(label: 'x', value: _fmt(x)),
+                const SizedBox(width: 8),
+                _Stat(label: 'y', value: _fmt(y)),
+                const SizedBox(width: 12),
+                _Stat(label: 'w', value: _fmt(w)),
+                const SizedBox(width: 8),
+                _Stat(label: 'h', value: _fmt(h)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check, size: 18),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 13),
+                  ),
+                  onPressed: onApply,
+                  label: const Text('Apply'),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.close, size: 18),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 13),
+                  ),
+                  onPressed: onCancel,
+                  label: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _Stat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: '$label: ',
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+          TextSpan(
+            text: value,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        ],
       ),
     );
   }
