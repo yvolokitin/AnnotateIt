@@ -54,10 +54,9 @@ class _ModelPageState extends State<ModelPage> {
         title: 'SAM2 Hiera Base+',
         description: l10n.modelDescriptionSAM2HieraBasePlus,
         imageAsset: 'assets/images/sam_example.jpg',
-        // NOTE: Use your correct Base+ release paths; placeholders below if needed.
-        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/sam2_hiera_base_plus.encoder.onnx',
-        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/sam2_hiera_base_plus.decoder.onnx',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Base_Plus/config.yaml',
+        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus.encoder.onnx',
+        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus.decoder.onnx',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus_config.yaml',
         modelSize: '352Mb',
       ),
       ModelInfo(
@@ -67,7 +66,7 @@ class _ModelPageState extends State<ModelPage> {
         imageAsset: 'assets/images/sam_example.jpg',
         urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
         urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/config.yaml',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large_config.yaml',
         modelSize: '860Mb',
       ),
       ModelInfo(

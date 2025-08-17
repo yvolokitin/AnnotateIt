@@ -3,6 +3,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../models/user.dart';
 import '../../main.dart';
 import '../../services/file_logger.dart';
+import '../../utils/sam_model_utils.dart';
 
 class ApplicationSettings extends StatelessWidget {
   final User user;
@@ -91,15 +92,22 @@ class ApplicationSettings extends StatelessWidget {
             ], isWide),
 
             _buildSection(l10n.settingsAnnotationTitle, [
-              _buildDropdown(
-                title: l10n.settingsAnnotationPreferredSamModel,
-                value: user.preferredSamModelKey,
-                options: {
-                  'sam2_hiera_large': 'SAM2 (Hiera-Large)',
-                  'sam2_hiera_base_plus': l10n.settingsAnnotationSamOptionSam2HieraBasePlus,
-                  'mobile': l10n.settingsAnnotationSamOptionMobile,
+              FutureBuilder<List<String>>(
+                future: SamModelUtils.availableKeysWithMobile(),
+                builder: (context, snapshot) {
+                  final keys = snapshot.data ?? const ['mobile'];
+                  final Map<String, String> options = {
+                    if (keys.contains('sam2_hiera_large')) 'sam2_hiera_large': 'SAM2 (Hiera-Large)',
+                    if (keys.contains('sam2_hiera_base_plus')) 'sam2_hiera_base_plus': l10n.settingsAnnotationSamOptionSam2HieraBasePlus,
+                    'mobile': l10n.settingsAnnotationSamOptionMobile,
+                  };
+                  return _buildDropdown(
+                    title: l10n.settingsAnnotationPreferredSamModel,
+                    value: user.preferredSamModelKey,
+                    options: options,
+                    onChanged: (val) => onUserChange(user.copyWith(preferredSamModelKey: val)),
+                  );
                 },
-                onChanged: (val) => onUserChange(user.copyWith(preferredSamModelKey: val)),
               ),
               _buildSwitchWithNote(
                 title: l10n.settingsAnnotationSamRememberChoice,

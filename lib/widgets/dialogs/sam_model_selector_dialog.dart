@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/sam_model_utils.dart';
 
 class SamModelSelectionResult {
   final String modelKey;
@@ -82,18 +83,20 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Ensure SAM 2 Hiera is first in the list (best quality on top)
-                _buildRadioTile(
-                  title: 'Segment Anything 2 (Hiera-Large)',
-                  value: 'sam2_hiera_large',
-                ),
-                _buildRadioTile(
-                  title: 'Segment Anything 2 (Hiera-Base+)',
-                  value: 'sam2_hiera_base_plus',
-                ),
-                _buildRadioTile(
-                  title: 'SAM Mobile',
-                  value: 'mobile',
+                FutureBuilder<List<String>>(
+                  future: SamModelUtils.availableKeysWithMobile(),
+                  builder: (context, snapshot) {
+                    final keys = snapshot.data ?? const ['mobile'];
+                    final tiles = <Widget>[];
+                    if (keys.contains('sam2_hiera_large')) {
+                      tiles.add(_buildRadioTile(title: 'Segment Anything 2 (Hiera-Large)', value: 'sam2_hiera_large'));
+                    }
+                    if (keys.contains('sam2_hiera_base_plus')) {
+                      tiles.add(_buildRadioTile(title: 'Segment Anything 2 (Hiera-Base+)', value: 'sam2_hiera_base_plus'));
+                    }
+                    tiles.add(_buildRadioTile(title: 'SAM Mobile', value: 'mobile'));
+                    return Column(mainAxisSize: MainAxisSize.min, children: tiles);
+                  },
                 ),
                 const SizedBox(height: 12),
                 CheckboxListTile(

@@ -11,7 +11,6 @@ class ModelCard extends StatefulWidget {
   final String description;
   final String imageAsset;
 
-  // Новые параметры
   final String urlEncoder;
   final String urlDecoder;
   final String urlConfig;
@@ -36,13 +35,13 @@ class ModelCard extends StatefulWidget {
 class _ModelCardState extends State<ModelCard> {
   bool _downloading = false;
   bool _downloaded = false;
-  double _progress = 0.0; // общий прогресс по трём файлам (0..1)
+  double _progress = 0.0;
   String? _folderPath;
 
   http.Client? _client;
   StreamSubscription<List<int>>? _sub;
   IOSink? _sink;
-  bool _canceled = false; // флаг для graceful cancel
+  bool _canceled = false;
 
   @override
   void initState() {
@@ -53,7 +52,7 @@ class _ModelCardState extends State<ModelCard> {
   @override
   void dispose() {
     _canceled = true;
-    // Остановить поток/клиента, закрыть файл
+
     _sub?.cancel();
     _sink?.close();
     _client?.close();
@@ -83,9 +82,51 @@ class _ModelCardState extends State<ModelCard> {
         .toList();
   }
 
+  // Common request headers to improve compatibility with hosting providers (e.g., GitHub Releases)
+  static const Map<String, String> _commonHeaders = {
+    'User-Agent': 'AnnotateIt/1.0 (+https://github.com/) ',
+    'Accept': '*/*',
+  };
+
+  int _minValidBytes(String path) {
+    final p = path.toLowerCase();
+    if (p.endsWith('.onnx')) return 5 * 1024 * 1024; // ≥ 5 MB for model binaries
+    if (p.endsWith('.yaml') || p.endsWith('.yml')) return 20; // small text file is fine
+    return 100; // default small threshold
+    }
+
+  bool _looksLikeHtmlContentType(String? ct) {
+    if (ct == null) return false;
+    final l = ct.toLowerCase();
+    return l.contains('text/html') || l.contains('text/plain');
+  }
+
+  Future<http.StreamedResponse> _getWithRedirects(http.Client client, Uri uri, {int maxRedirects = 5}) async {
+    Uri current = uri;
+    for (int i = 0; i < maxRedirects; i++) {
+      final req = http.Request('GET', current);
+      req.headers.addAll(_commonHeaders);
+      final resp = await client.send(req);
+      // 3xx redirect handling
+      if ((resp.statusCode >= 300 && resp.statusCode < 400) || resp.isRedirect) {
+        final location = resp.headers['location'];
+        await resp.stream.drain<void>();
+        if (location == null) return resp;
+        current = current.resolve(location);
+        continue;
+      }
+      return resp;
+    }
+    throw Exception('Too many redirects when downloading: ' + uri.toString());
+  }
+
   Future<void> _checkAlreadyDownloaded() async {
     final files = await _targetFiles();
-    final allExist = files.every((f) => f.existsSync() && f.lengthSync() > 0);
+    final allExist = files.every((f) {
+      if (!f.existsSync()) return false;
+      final minBytes = _minValidBytes(f.path);
+      return f.lengthSync() >= minBytes;
+    });
     if (!mounted) return;
     setState(() => _downloaded = allExist);
   }
@@ -113,10 +154,13 @@ class _ModelCardState extends State<ModelCard> {
       for (final url in _urls) {
         if (_canceled) return;
         try {
-          final head = await client.send(http.Request('HEAD', url));
+          final headReq = http.Request('HEAD', url);
+          headReq.headers.addAll(_commonHeaders);
+          final head = await client.send(headReq);
           final len = head.contentLength ?? 0;
           lengths.add(len);
           totalBytes += len;
+          await head.stream.drain<void>();
         } catch (_) {
           lengths.add(0);
         }
@@ -130,8 +174,8 @@ class _ModelCardState extends State<ModelCard> {
         final url = _urls[i];
         final file = files[i];
 
-        // Пропуск, если уже есть
-        if (file.existsSync() && file.lengthSync() > 0) {
+        // Skip if a valid file already exists (meets min size)
+        if (file.existsSync() && file.lengthSync() >= _minValidBytes(file.path)) {
           downloadedSoFar += lengths[i];
           if (totalBytes > 0 && mounted) {
             setState(() => _progress = downloadedSoFar / totalBytes);
@@ -139,11 +183,57 @@ class _ModelCardState extends State<ModelCard> {
           continue;
         }
 
-        final req = http.Request('GET', url);
-        final resp = await client.send(req);
+        // Perform GET with manual redirect handling and common headers
+        final resp = await _getWithRedirects(client, url);
         if (_canceled) return;
 
-        _sink = file.openWrite();
+        // Validate status code
+        if (resp.statusCode < 200 || resp.statusCode >= 300) {
+          await resp.stream.drain<void>();
+          if (mounted) {
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
+            AppSnackbar.show(
+              context,
+              'Download failed (${resp.statusCode}) for ${url.toString()}',
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              saveToDb: false,
+            );
+          }
+          return;
+        }
+
+        final contentType = resp.headers['content-type'];
+        final filePath = file.path;
+        final isOnnx = filePath.toLowerCase().endsWith('.onnx');
+        // Fail fast if server returns HTML/text for supposed binary
+        if (isOnnx && _looksLikeHtmlContentType(contentType)) {
+          await resp.stream.drain<void>();
+          if (mounted) {
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
+            AppSnackbar.show(
+              context,
+              'Download failed: unexpected content for ${url.toString()}',
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              saveToDb: false,
+            );
+          }
+          return;
+        }
+
+        // Write into temporary .part file
+        final tmp = File(filePath + '.part');
+        if (tmp.existsSync()) {
+          try { tmp.deleteSync(); } catch (_) {}
+        }
+        _sink = tmp.openWrite();
         int received = 0;
         final thisLen = resp.contentLength ?? lengths[i];
 
@@ -159,7 +249,6 @@ class _ModelCardState extends State<ModelCard> {
             } else if (thisLen > 0) {
               setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
             } else {
-              // Без длины — просто триггерим перестройку (не меняем прогресс)
               setState(() {});
             }
           },
@@ -168,13 +257,54 @@ class _ModelCardState extends State<ModelCard> {
             await _sink?.close();
             _sink = null;
             _sub = null;
-            downloadedSoFar += (thisLen > 0 ? thisLen : received);
+            try {
+              final finalLen = tmp.lengthSync();
+              final minBytes = _minValidBytes(filePath);
+              if (finalLen < minBytes) {
+                try { tmp.deleteSync(); } catch (_) {}
+                if (mounted && !_canceled) {
+                  setState(() {
+                    _downloading = false;
+                    _progress = 0.0;
+                  });
+                  AppSnackbar.show(
+                    context,
+                    'Download failed: file too small for ${url.toString()}',
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    saveToDb: false,
+                  );
+                }
+                return;
+              }
+              // Move into place
+              if (file.existsSync()) {
+                try { file.deleteSync(); } catch (_) {}
+              }
+              tmp.renameSync(filePath);
+              downloadedSoFar += (thisLen > 0 ? thisLen : received);
+            } catch (e) {
+              try { tmp.deleteSync(); } catch (_) {}
+              if (mounted && !_canceled) {
+                setState(() {
+                  _downloading = false;
+                  _progress = 0.0;
+                });
+                AppSnackbar.show(
+                  context,
+                  'Download failed: $e',
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  saveToDb: false,
+                );
+              }
+            }
           },
           onError: (e) async {
             await _sink?.close();
             _sink = null;
             _sub = null;
-            if (file.existsSync()) file.deleteSync();
+            try { File(filePath + '.part').deleteSync(); } catch (_) {}
             if (!_canceled && mounted) {
               setState(() {
                 _downloading = false;
@@ -192,7 +322,7 @@ class _ModelCardState extends State<ModelCard> {
           cancelOnError: true,
         );
 
-        // Ждём завершения текущей подписки
+        // Wait for current subscription
         await _sub?.asFuture<void>();
         if (_canceled) return;
       }

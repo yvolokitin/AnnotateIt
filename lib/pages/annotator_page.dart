@@ -30,6 +30,7 @@ import '../widgets/imageannotator/annotator_canvas.dart';
 import '../widgets/imageannotator/user_action.dart';
 
 import '../widgets/app_snackbar.dart';
+import '../utils/sam_model_utils.dart';
 
 class AnnotatorPage extends StatefulWidget {
   final Project project;
@@ -98,13 +99,33 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   final FocusNode _focusNode = FocusNode();
 
   void _handleSamModelChanged(String key) {
-    setState(() => _samModelKey = key);
-    final variant = key == 'mobile'
-        ? SamModelVariant.mobile
-        : (key == 'sam2_hiera_large'
+    // Only allow switching to models that are available locally (except mobile which is always available)
+    if (key == 'mobile') {
+      setState(() => _samModelKey = key);
+      _samService.setModelVariant(SamModelVariant.mobile);
+      return;
+    }
+
+    SamModelUtils.isDownloaded(key).then((available) {
+      if (!mounted) return;
+      if (available) {
+        setState(() => _samModelKey = key);
+        final variant = key == 'sam2_hiera_large'
             ? SamModelVariant.sam2HieraLarge
-            : SamModelVariant.sam2HieraBasePlus);
-    _samService.setModelVariant(variant);
+            : SamModelVariant.sam2HieraBasePlus;
+        _samService.setModelVariant(variant);
+      } else {
+        // Fallback to mobile and inform the user
+        AppSnackbar.show(
+          context,
+          'Selected SAM2 model is not available. Please download it first from the Models page.',
+          backgroundColor: Colors.orangeAccent,
+          textColor: Colors.black,
+        );
+        setState(() => _samModelKey = 'mobile');
+        _samService.setModelVariant(SamModelVariant.mobile);
+      }
+    });
   }
 
   @override
