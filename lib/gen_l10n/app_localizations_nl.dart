@@ -69,6 +69,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get buttonCreateProject => 'Project Aanmaken';
 
   @override
+  String get modelsAnnotation => 'Annotatiemodellen';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Lichtgewicht SAM-variant voor segmentatie op het apparaat.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Snelle single-shot detector voor algemene objecten.';
+
+  @override
+  String get modelsHelpBody =>
+      'Annotatiemodellen (gebaseerd op SAM) zetten snelle invoer — klikken, kaders of grove streken — om in nauwkeurige maskers.\n\nHoe het werkt:\n• De encoder draait één keer per afbeelding om beeldkenmerken te berekenen.\n• De decoder draait na elke invoer om het masker te genereren of aan te passen.\n\nWaarom het helpt:\nU hoeft minder tijd te besteden aan het tekenen van polygonen; het model stelt maskers voor die u met een paar klikken kunt verfijnen.';
+
+  @override
+  String get modelsHelpTips =>
+      'Tips:\n• Beste invoer: begin met een kader of 1–2 positieve klikken, voeg daarna negatieve klikken toe om extra’s uit te sluiten.\n• Verfijnen, niet opnieuw tekenen: blijf invoer toevoegen om hetzelfde masker bij te werken.\n• Prestaties: de encoder is de zware stap; hergebruik hem voor meerdere invoeren op dezelfde afbeelding.\n• Grote afbeeldingen: zoom in voordat u een prompt geeft voor scherpere randen.\n• Kwantisatie vs volledige precisie: kwantisatie is sneller en gebruikt minder geheugen, maar kan fijne details verliezen.';
 
   @override
   String get aboutTitle => 'Over Annot@It';

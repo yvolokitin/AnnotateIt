@@ -22,10 +22,14 @@
   "buttonNextConfirmTask": "Avanti: Conferma Attività",
   "buttonCreateProject": "Crea Progetto",
 
+  "modelsAnnotation": "Modelli di annotazione",
   "modelDescriptionSamMobile": "Variante leggera di SAM per la segmentazione sul dispositivo.",
   "modelDescriptionSAM2HieraBasePlus": "Equilibrio tra accuratezza e velocità con backbone Hiera base+.",
   "modelDescriptionSAM2HieraLarge": "Variante ad alta precisione per ottenere maschere di massima qualità.",
   "modelDescriptionSSDMobileNet": "Rilevatore veloce a singolo passaggio per oggetti generici.",
+
+  "modelsHelpBody": "I modelli di annotazione (basati su SAM) trasformano input rapidi — clic, riquadri o tratti grossolani — in maschere precise.\n\nCome funziona:\n• L’encoder viene eseguito una volta per immagine per costruire le caratteristiche.\n• Il decoder viene eseguito dopo ogni input per generare o regolare la maschera.\n\nPerché è utile:\nSi dedica meno tempo a disegnare poligoni; il modello propone maschere che puoi perfezionare con pochi clic.",
+  "modelsHelpTips": "Suggerimenti:\n• Input migliori: inizia con un riquadro o 1–2 clic positivi, quindi aggiungi clic negativi per escludere elementi.\n• Raffina, non ridisegnare: continua ad aggiungere input per aggiornare la stessa maschera.\n• Prestazioni: l’encoder è la parte più pesante; riutilizzalo per molti input sulla stessa immagine.\n• Immagini grandi: ingrandisci prima di dare input per ottenere bordi più netti.\n• Quantizzato vs piena precisione: il quantizzato è più veloce e usa meno memoria, ma può perdere dettagli fini.",
 
   "aboutTitle": "Informazioni su Annot@It",
   "aboutDescription": "Annot@It è un'applicazione di annotazione progettata per semplificare il processo di annotazione per progetti di computer vision. Che tu stia lavorando su classificazione di immagini, rilevamento di oggetti, segmentazione o altre attività di visione, Annot@It offre la flessibilità e la precisione necessarie per un'etichettatura di dati di alta qualità.",

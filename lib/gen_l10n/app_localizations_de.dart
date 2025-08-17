@@ -69,6 +69,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get buttonCreateProject => 'Projekt erstellen';
 
   @override
+  String get modelsAnnotation => 'Annotierungsmodelle';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Leichte SAM-Variante für Segmentierung direkt auf dem Gerät.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Schneller Single-Shot-Detektor für allgemeine Objekte.';
+
+  @override
+  String get modelsHelpBody =>
+      'Annotierungsmodelle (basierend auf SAM) verwandeln schnelle Eingaben – Klicks, Boxen oder grobe Striche – in präzise Masken.\n\nFunktionsweise:\n• Der Encoder wird einmal pro Bild ausgeführt, um Bildmerkmale zu erstellen.\n• Der Decoder läuft nach jeder Eingabe, um die Maske zu erzeugen oder anzupassen.\n\nVorteile:\nSie verbringen weniger Zeit mit dem Zeichnen von Polygonen; das Modell schlägt Masken vor, die Sie mit wenigen Klicks verfeinern können.';
+
+  @override
+  String get modelsHelpTips =>
+      'Tipps:\n• Beste Eingaben: beginnen Sie mit einer Box oder 1–2 positiven Klicks, fügen Sie dann negative Klicks hinzu, um Bereiche auszuschließen.\n• Verfeinern statt neu zeichnen: fügen Sie weitere Eingaben hinzu, um dieselbe Maske zu aktualisieren.\n• Leistung: der Encoder ist der aufwendige Schritt; verwenden Sie ihn mehrfach pro Bild.\n• Große Bilder: vor dem Markieren hineinzoomen für klarere Kanten.\n• Quantisiert vs. volle Präzision: quantisiert läuft schneller mit weniger Speicher, kann aber Details verlieren.';
 
   @override
   String get aboutTitle => 'Über Annot@It';

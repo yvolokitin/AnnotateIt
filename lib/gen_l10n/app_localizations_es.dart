@@ -69,6 +69,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get buttonCreateProject => 'Crear Proyecto';
 
   @override
+  String get modelsAnnotation => 'Modelos de anotación';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Variante ligera de SAM para segmentación en el dispositivo.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Detector rápido de una sola pasada para objetos generales.';
+
+  @override
+  String get modelsHelpBody =>
+      'Los modelos de anotación (basados en SAM) convierten indicaciones rápidas —clics, cuadros o trazos— en máscaras precisas.\n\nCómo funciona:\n• El codificador (Encoder) se ejecuta una vez por imagen para generar las características.\n• El decodificador (Decoder) se ejecuta tras cada indicación para generar o ajustar la máscara.\n\nPor qué ayuda:\nDedica menos tiempo a dibujar polígonos; el modelo propone máscaras que puedes perfeccionar con unos pocos clics.';
+
+  @override
+  String get modelsHelpTips =>
+      'Consejos:\n• Mejores indicaciones: empieza con un cuadro o 1–2 clics positivos, luego añade clics negativos para excluir extras.\n• Refinar, no redibujar: sigue añadiendo indicaciones para actualizar la misma máscara.\n• Rendimiento: el codificador es el paso pesado; reutilízalo para muchas indicaciones en la misma imagen.\n• Imágenes grandes: haz zoom antes de indicar para obtener bordes más limpios.\n• Cuantizado vs. precisión total: el cuantizado es más rápido y consume menos memoria, pero puede perder detalles finos.';
 
   @override
   String get aboutTitle => 'Acerca de Annot@It';

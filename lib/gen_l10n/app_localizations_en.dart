@@ -69,6 +69,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buttonCreateProject => 'Create Project';
 
   @override
+  String get modelsAnnotation => 'Annotation Models';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Lightweight SAM variant for on-device segmentation.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Fast single-shot detector for general objects.';
+
+  @override
+  String get modelsHelpBody =>
+      'Annotation models (based on SAM) turn quick prompts—clicks, boxes, or rough strokes—into precise masks.\n\nHow it works:\n• The Encoder runs once per image to build image features.\n• The Decoder runs after each prompt to generate/adjust the mask.\n\nWhy it helps:\nYou spend less time drawing polygons; the model proposes masks that you can refine with a couple of clicks.';
+
+  @override
+  String get modelsHelpTips =>
+      'Tips:\n• Best prompts: start with a box or 1–2 positive clicks, then add negative clicks to exclude extras.\n• Refine, don’t redraw: keep adding prompts to update the same mask.\n• Performance: the encoder is the heavy step; reuse it for many prompts on the same image.\n• Large images: zoom in before prompting for cleaner edges.\n• Quantized vs full precision: quantized runs faster with lower memory, but may lose fine detail.';
 
   @override
   String get aboutTitle => 'About Annot@It';

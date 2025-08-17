@@ -230,6 +230,12 @@ abstract class AppLocalizations {
   /// **'Create Project'**
   String get buttonCreateProject;
 
+  /// No description provided for @modelsAnnotation.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation Models'**
+  String get modelsAnnotation;
+
   /// No description provided for @modelDescriptionSamMobile.
   ///
   /// In en, this message translates to:
@@ -253,6 +259,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fast single-shot detector for general objects.'**
   String get modelDescriptionSSDMobileNet;
+
+  /// No description provided for @modelsHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation models (based on SAM) turn quick prompts—clicks, boxes, or rough strokes—into precise masks.\n\nHow it works:\n• The Encoder runs once per image to build image features.\n• The Decoder runs after each prompt to generate/adjust the mask.\n\nWhy it helps:\nYou spend less time drawing polygons; the model proposes masks that you can refine with a couple of clicks.'**
+  String get modelsHelpBody;
+
+  /// No description provided for @modelsHelpTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips:\n• Best prompts: start with a box or 1–2 positive clicks, then add negative clicks to exclude extras.\n• Refine, don’t redraw: keep adding prompts to update the same mask.\n• Performance: the encoder is the heavy step; reuse it for many prompts on the same image.\n• Large images: zoom in before prompting for cleaner edges.\n• Quantized vs full precision: quantized runs faster with lower memory, but may lose fine detail.'**
+  String get modelsHelpTips;
 
   /// No description provided for @aboutTitle.
   ///
