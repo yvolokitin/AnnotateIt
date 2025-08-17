@@ -16,6 +16,7 @@ Future<void> createInitialSchema(Database db, int version) async {
         datasetImportFolder TEXT,
         datasetExportFolder TEXT,
         thumbnailFolder TEXT,
+        modelsFolder TEXT,
         themeMode TEXT NOT NULL,
         language TEXT NOT NULL,
         autoSave INTEGER NOT NULL,
@@ -42,6 +43,7 @@ Future<void> createInitialSchema(Database db, int version) async {
     final datasetImportFolder = 'datasets';
     final datasetExportFolder = 'exports';
     final thumbnailFolder = 'thumbnails';
+    final modelsFolder = 'models';
 
     final rootPath = await getDefaultAnnotationRootPath();
     try {
@@ -63,6 +65,12 @@ Future<void> createInitialSchema(Database db, int version) async {
       print('Warning: Could not create thumbnails directory: $e');
     }
 
+    try {
+      await Directory(path.join(rootPath, modelsFolder)).create(recursive: true);
+    } catch (e) {
+      print('Warning: Could not create models directory: $e');
+    }
+
     final now = DateTime.now().toIso8601String();
     await db.insert('users', {
       'firstName': 'Captain',
@@ -72,6 +80,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       'datasetImportFolder': datasetImportFolder,
       'datasetExportFolder': datasetExportFolder,
       'thumbnailFolder': thumbnailFolder,
+            'modelsFolder': modelsFolder,
       'themeMode': 'dark',
       'language': 'en',
       'autoSave': 1,

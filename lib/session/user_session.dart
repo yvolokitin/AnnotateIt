@@ -120,6 +120,17 @@ class UserSession {
     return folder;
   }
 
+  Future<String> getCurrentUserModelsFolder() async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    final folder = path.join(docsDir.path, 'AnnotateIt', getUser().modelsFolder);
+    final dir = Directory(folder);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      _logger.info('Created models folder: $folder');
+    }
+    return folder;
+  }
+
   Future<void> setCurrentUserDatasetImportFolder(String absolutePath) async {
     final folderName = path.basename(absolutePath);
     final user = getUser();
@@ -148,6 +159,16 @@ class UserSession {
     );
     _currentUser = user.copyWith(thumbnailFolder: folderName);
     _logger.info('Updated thumbnail folder to: $folderName');
+  }
+
+  Future<void> setCurrentUserModelsFolder(String absolutePath) async {
+    final folderName = path.basename(absolutePath);
+    final user = getUser();
+    await UserDatabase.instance.update(
+      user.copyWith(modelsFolder: folderName),
+    );
+    _currentUser = user.copyWith(modelsFolder: folderName);
+    _logger.info('Updated models folder to: $folderName');
   }
 
   Future<void> setProjectShowImportWarning(bool showWarning) async {

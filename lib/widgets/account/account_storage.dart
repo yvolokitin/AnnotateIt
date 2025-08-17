@@ -31,6 +31,7 @@ class _AccountStorageState extends State<AccountStorage> {
   late TextEditingController _datasetImportController;
   late TextEditingController _datasetExportController;
   late TextEditingController _thumbnailController;
+  late TextEditingController _modelsController;
 
   @override
   void initState() {
@@ -38,6 +39,26 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetImportController = TextEditingController(text: widget.user.datasetImportFolder);
     _datasetExportController = TextEditingController(text: widget.user.datasetExportFolder);
     _thumbnailController = TextEditingController(text: widget.user.thumbnailFolder);
+    _modelsController = TextEditingController(text: widget.user.modelsFolder);
+    _loadAbsolutePaths();
+  }
+
+  Future<void> _loadAbsolutePaths() async {
+    try {
+      final importPath = await UserSession.instance.getCurrentUserDatasetImportFolder();
+      final exportPath = await UserSession.instance.getCurrentUserDatasetExportFolder();
+      final thumbPath = await UserSession.instance.getCurrentUserThumbnailFolder();
+      final modelsPath = await UserSession.instance.getCurrentUserModelsFolder();
+      if (!mounted) return;
+      setState(() {
+        _datasetImportController.text = importPath;
+        _datasetExportController.text = exportPath;
+        _thumbnailController.text = thumbPath;
+        _modelsController.text = modelsPath;
+      });
+    } catch (e) {
+      _logger.warning('Failed to resolve absolute storage paths', e);
+    }
   }
 
   @override
@@ -46,6 +67,8 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetImportController.text = widget.user.datasetImportFolder;
     _datasetExportController.text = widget.user.datasetExportFolder;
     _thumbnailController.text = widget.user.thumbnailFolder;
+    _modelsController.text = widget.user.modelsFolder;
+    _loadAbsolutePaths();
   }
 
   @override
@@ -53,6 +76,7 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetImportController.dispose();
     _datasetExportController.dispose();
     _thumbnailController.dispose();
+    _modelsController.dispose();
     super.dispose();
   }
 
@@ -102,6 +126,19 @@ class _AccountStorageState extends State<AccountStorage> {
                   _datasetExportController.text = val;
                   widget.onUserChange(widget.user.copyWith(datasetExportFolder: val));
                   await UserSession.instance.setCurrentUserDatasetExportFolder(val);
+                },
+                isWide: isWide,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSection(
+              'Models folder',
+              _folderField(
+                controller: _modelsController,
+                onPathSelected: (val) async {
+                  _modelsController.text = val;
+                  widget.onUserChange(widget.user.copyWith(modelsFolder: val));
+                  await UserSession.instance.setCurrentUserModelsFolder(val);
                 },
                 isWide: isWide,
               ),

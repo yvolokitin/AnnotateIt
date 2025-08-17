@@ -7,6 +7,7 @@ class User {
   final String datasetImportFolder;
   final String datasetExportFolder;
   final String thumbnailFolder;
+  final String modelsFolder;
   final String themeMode;
   final String language;
   final bool autoSave;
@@ -40,6 +41,7 @@ class User {
     'datasetImportFolder',
     'datasetExportFolder',
     'thumbnailFolder',
+    'modelsFolder',
     'themeMode',
     'language',
     'autoSave',
@@ -71,6 +73,7 @@ class User {
     required this.datasetImportFolder,
     required this.datasetExportFolder,
     required this.thumbnailFolder,
+    required this.modelsFolder,
     required this.themeMode,
     required this.language,
     required this.autoSave,
@@ -102,6 +105,7 @@ class User {
     String? datasetImportFolder,
     String? datasetExportFolder,
     String? thumbnailFolder,
+    String? modelsFolder,
     String? themeMode,
     String? language,
     bool? autoSave,
@@ -132,6 +136,7 @@ class User {
       datasetImportFolder: datasetImportFolder ?? this.datasetImportFolder,
       datasetExportFolder: datasetExportFolder ?? this.datasetExportFolder,
       thumbnailFolder: thumbnailFolder ?? this.thumbnailFolder,
+      modelsFolder: modelsFolder ?? this.modelsFolder,
       themeMode: themeMode ?? this.themeMode,
       language: language ?? this.language,
       autoSave: autoSave ?? this.autoSave,
@@ -164,6 +169,7 @@ class User {
         'datasetImportFolder': datasetImportFolder,
         'datasetExportFolder': datasetExportFolder,
         'thumbnailFolder': thumbnailFolder,
+        'modelsFolder': modelsFolder,
         'themeMode': themeMode,
         'language': language,
         'autoSave': autoSave ? 1 : 0,
@@ -195,6 +201,7 @@ class User {
         datasetImportFolder: map['datasetImportFolder'],
         datasetExportFolder: map['datasetExportFolder'],
         thumbnailFolder: map['thumbnailFolder'],
+        modelsFolder: map['modelsFolder'] ?? 'models',
         themeMode: map['themeMode'],
         language: map['language'],
         autoSave: map['autoSave'] == 1,

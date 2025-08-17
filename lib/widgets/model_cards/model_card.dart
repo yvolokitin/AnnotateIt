@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import '../app_snackbar.dart';
 
 class ModelCard extends StatefulWidget {
   final String id;
@@ -61,12 +62,12 @@ class _ModelCardState extends State<ModelCard> {
 
   Future<Directory> _modelsRoot() async {
     final dir = await getApplicationDocumentsDirectory();
-    final folder = Directory('${dir.path}/models/${widget.id}');
-    if (!folder.existsSync()) {
-      folder.createSync(recursive: true);
+    final base = Directory('${dir.path}/AnnotateIt/models/${widget.id}');
+    if (!base.existsSync()) {
+      base.createSync(recursive: true);
     }
-    _folderPath = folder.path;
-    return folder;
+    _folderPath = base.path;
+    return base;
   }
 
   List<Uri> get _urls => [
@@ -179,7 +180,13 @@ class _ModelCardState extends State<ModelCard> {
                 _downloading = false;
                 _progress = 0.0;
               });
-              scaffold.showSnackBar(SnackBar(content: Text('Download failed: $e')));
+              AppSnackbar.show(
+                context,
+                'Download failed: $e',
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                saveToDb: false,
+              );
             }
           },
           cancelOnError: true,
@@ -196,8 +203,12 @@ class _ModelCardState extends State<ModelCard> {
         _downloaded = true;
         _progress = 1.0;
       });
-      scaffold.showSnackBar(
-        SnackBar(content: Text('${widget.title} downloaded to ${_folderPath ?? ''}')),
+      AppSnackbar.show(
+        context,
+        '${widget.title} downloaded to ${_folderPath ?? ''}',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        saveToDb: false,
       );
     } catch (e) {
       if (mounted) {
@@ -206,8 +217,12 @@ class _ModelCardState extends State<ModelCard> {
           _progress = 0.0;
           _downloaded = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download error: $e')),
+        AppSnackbar.show(
+          context,
+          'Download error: $e',
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          saveToDb: false,
         );
       }
     }
@@ -325,8 +340,12 @@ class _ModelCardState extends State<ModelCard> {
                             TextButton.icon(
                               onPressed: () {
                                 final p = _folderPath;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(p == null ? 'Folder not found' : 'Saved in: $p')),
+                                AppSnackbar.show(
+                                  context,
+                                  p == null ? 'Folder not found' : 'Saved in: $p',
+                                  backgroundColor: Colors.orangeAccent,
+                                  textColor: Colors.black,
+                                  saveToDb: false,
                                 );
                               },
                               icon: const Icon(Icons.folder_open),
