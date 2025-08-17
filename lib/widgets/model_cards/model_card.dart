@@ -43,6 +43,60 @@ class _ModelCardState extends State<ModelCard> {
   IOSink? _sink;
   bool _canceled = false;
 
+  // Prevent concurrent downloads across all ModelCard instances
+  static bool _globalDownloading = false;
+  // Throttle UI updates to avoid spamming the Windows message queue
+  DateTime _lastProgressUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
+
+  // Network robustness settings
+  static const Duration _requestTimeout = Duration(seconds: 30); // connection and first-byte
+  static const Duration _inactivityTimeout = Duration(seconds: 30); // between chunks
+
+  void _showError(String message) {
+    if (!mounted) return;
+    AppSnackbar.show(
+      context,
+      message,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      saveToDb: false,
+    );
+  }
+
+  String _friendlyError(Object e) {
+    final s = e.toString();
+    if (e is TimeoutException) {
+      return 'Network timeout. Please check your internet connection and try again.';
+    }
+    if (e is SocketException) {
+      return 'Network error: ${e.message}. Please check your internet connection.';
+    }
+    if (e is HandshakeException) {
+      return 'Secure connection failed. Please try again later or check your network.';
+    }
+    if (e is HttpException) {
+      return 'HTTP error: ${e.message}';
+    }
+    // Fallback to the object's string
+    return s;
+  }
+
+  void _cleanupPartialFiles() {
+    try {
+      final folder = _folderPath;
+      if (folder == null) return;
+      final dir = Directory(folder);
+      if (!dir.existsSync()) return;
+      for (final ent in dir.listSync()) {
+        if (ent is File && ent.path.toLowerCase().endsWith('.part')) {
+          try { ent.deleteSync(); } catch (_) {}
+        }
+      }
+    } catch (_) {
+      // ignore cleanup errors
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +110,8 @@ class _ModelCardState extends State<ModelCard> {
     _sub?.cancel();
     _sink?.close();
     _client?.close();
+    // Ensure any partial .part files are cleaned up on cancellation/dispose
+    _cleanupPartialFiles();
     super.dispose();
   }
 
@@ -101,16 +157,45 @@ class _ModelCardState extends State<ModelCard> {
     return l.contains('text/html') || l.contains('text/plain');
   }
 
+  Future<http.StreamedResponse> _sendWithRetry(
+    http.Client client,
+    String method,
+    Uri uri, {
+    Map<String, String>? headers,
+    int maxAttempts = 3,
+  }) async {
+    Object? lastError;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final req = http.Request(method, uri);
+        if (headers != null) req.headers.addAll(headers);
+        return await client.send(req).timeout(_requestTimeout);
+      } catch (e) {
+        lastError = e;
+        if (attempt >= maxAttempts) rethrow;
+        // Exponential backoff: 0.5s, 2s, 4.5s ...
+        final delayMs = 500 * attempt * attempt;
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+    }
+    // Should not reach here; throw the last error if any
+    throw lastError ?? Exception('Unknown error sending request');
+  }
+
+  Future<void> _drainWithTimeout(Stream<List<int>> s) async {
+    await s.drain<void>().timeout(_requestTimeout, onTimeout: () {
+      throw TimeoutException('Timed out while draining response');
+    });
+  }
+
   Future<http.StreamedResponse> _getWithRedirects(http.Client client, Uri uri, {int maxRedirects = 5}) async {
     Uri current = uri;
     for (int i = 0; i < maxRedirects; i++) {
-      final req = http.Request('GET', current);
-      req.headers.addAll(_commonHeaders);
-      final resp = await client.send(req);
+      final resp = await _sendWithRetry(client, 'GET', current, headers: _commonHeaders);
       // 3xx redirect handling
       if ((resp.statusCode >= 300 && resp.statusCode < 400) || resp.isRedirect) {
         final location = resp.headers['location'];
-        await resp.stream.drain<void>();
+        await _drainWithTimeout(resp.stream);
         if (location == null) return resp;
         current = current.resolve(location);
         continue;
@@ -154,13 +239,11 @@ class _ModelCardState extends State<ModelCard> {
       for (final url in _urls) {
         if (_canceled) return;
         try {
-          final headReq = http.Request('HEAD', url);
-          headReq.headers.addAll(_commonHeaders);
-          final head = await client.send(headReq);
+          final head = await _sendWithRetry(client, 'HEAD', url, headers: _commonHeaders);
           final len = head.contentLength ?? 0;
           lengths.add(len);
           totalBytes += len;
-          await head.stream.drain<void>();
+          await _drainWithTimeout(head.stream);
         } catch (_) {
           lengths.add(0);
         }
@@ -189,7 +272,7 @@ class _ModelCardState extends State<ModelCard> {
 
         // Validate status code
         if (resp.statusCode < 200 || resp.statusCode >= 300) {
-          await resp.stream.drain<void>();
+          await _drainWithTimeout(resp.stream);
           if (mounted) {
             setState(() {
               _downloading = false;
@@ -211,7 +294,7 @@ class _ModelCardState extends State<ModelCard> {
         final isOnnx = filePath.toLowerCase().endsWith('.onnx');
         // Fail fast if server returns HTML/text for supposed binary
         if (isOnnx && _looksLikeHtmlContentType(contentType)) {
-          await resp.stream.drain<void>();
+          await _drainWithTimeout(resp.stream);
           if (mounted) {
             setState(() {
               _downloading = false;
@@ -237,7 +320,7 @@ class _ModelCardState extends State<ModelCard> {
         int received = 0;
         final thisLen = resp.contentLength ?? lengths[i];
 
-        _sub = resp.stream.listen(
+        _sub = resp.stream.timeout(_inactivityTimeout).listen(
           (chunk) {
             if (_canceled) return;
             _sink?.add(chunk);
@@ -292,7 +375,7 @@ class _ModelCardState extends State<ModelCard> {
                 });
                 AppSnackbar.show(
                   context,
-                  'Download failed: $e',
+                  'Download failed: ${_friendlyError(e)}',
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
                   saveToDb: false,
@@ -312,7 +395,7 @@ class _ModelCardState extends State<ModelCard> {
               });
               AppSnackbar.show(
                 context,
-                'Download failed: $e',
+                'Download failed: ${_friendlyError(e)}',
                 backgroundColor: Colors.red,
                 textColor: Colors.white,
                 saveToDb: false,
@@ -349,11 +432,21 @@ class _ModelCardState extends State<ModelCard> {
         });
         AppSnackbar.show(
           context,
-          'Download error: $e',
+          'Download error: ${_friendlyError(e)}',
           backgroundColor: Colors.red,
           textColor: Colors.white,
           saveToDb: false,
         );
+      }
+    } finally {
+      try { await _sub?.cancel(); } catch (_) {}
+      try { await _sink?.flush(); } catch (_) {}
+      try { await _sink?.close(); } catch (_) {}
+      _sink = null;
+      _sub = null;
+      try { _client?.close(); } catch (_) {}
+      if (_canceled) {
+        _cleanupPartialFiles();
       }
     }
   }

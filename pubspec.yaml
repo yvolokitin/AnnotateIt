@@ -116,8 +116,7 @@ flutter:
      - assets/sam_mobile/mobile_sam.encoder.onnx
      - assets/sam_mobile/mobile_sam.decoder.onnx
      - assets/sam_mobile/models.ts
-     - assets/models_sam/
-  
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
