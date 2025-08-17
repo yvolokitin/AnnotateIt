@@ -64,6 +64,7 @@ dependencies:
   window_size: ^0.1.0
   package_info_plus: ^8.3.0
   js: ^0.6.7
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:

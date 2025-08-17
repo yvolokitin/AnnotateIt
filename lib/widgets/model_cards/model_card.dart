@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:crypto/crypto.dart';
+
 import '../app_snackbar.dart';
 import '../../session/user_session.dart';
 
@@ -15,6 +17,11 @@ class ModelCard extends StatefulWidget {
   final String urlEncoder;
   final String urlDecoder;
   final String urlConfig;
+
+  final String shaEncoder;
+  final String shaDecoder;
+  final String shaConfig;
+
   final String modelSize;
 
   const ModelCard({
@@ -26,6 +33,9 @@ class ModelCard extends StatefulWidget {
     required this.urlEncoder,
     required this.urlDecoder,
     required this.urlConfig,
+    required this.shaEncoder,
+    required this.shaDecoder,
+    required this.shaConfig,
     required this.modelSize,
   });
 
@@ -109,6 +119,16 @@ class _ModelCardState extends State<ModelCard> {
     }
   }
 
+  Future<String> _sha256OfFile(File f) async {
+    final digest = await sha256.bind(f.openRead()).first;
+    return digest.toString();
+  }
+
+  bool _shaMatches(String expected, String actual) {
+    if (expected.isEmpty) return true; // нет эталона — пропускаем проверку
+    return expected.toLowerCase() == actual.toLowerCase();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -178,9 +198,12 @@ class _ModelCardState extends State<ModelCard> {
 
   Future<List<File>> _targetFiles() async {
     final folder = await _modelsRoot();
-    return _urls
-        .map((u) => File('${folder.path}/${u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file'}'))
-        .toList();
+    final names = _urls.map((u) => u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file').toList();
+    return [
+      File('${folder.path}/${names[0]}'), // encoder.onnx
+      File('${folder.path}/${names[1]}'), // decoder.onnx
+      File('${folder.path}/${names[2]}'), // *_config.yaml
+    ];
   }
 
   // Common request headers to improve compatibility with hosting providers (e.g., GitHub Releases)
@@ -386,6 +409,134 @@ class _ModelCardState extends State<ModelCard> {
 
       int downloadedSoFar = 0;
 
+// ... перед циклом как было
+for (int i = 0; i < _urls.length; i++) {
+  if (_canceled) return;
+
+  final url = _urls[i];
+  final file = files[i];
+
+  // если уже есть валидный — пропустим
+  if (file.existsSync() && file.lengthSync() >= _minValidBytes(file.path)) {
+    downloadedSoFar += lengths[i];
+    if (totalBytes > 0 && mounted) {
+      setState(() => _progress = downloadedSoFar / totalBytes);
+    }
+    continue;
+  }
+
+  final resp = await _getWithRedirects(client, url);
+  if (_canceled) return;
+
+  if (resp.statusCode < 200 || resp.statusCode >= 300) {
+    await _drainWithTimeout(resp.stream);
+    if (mounted) {
+      setState(() { _downloading = false; _progress = 0.0; });
+      _showError('Download failed (${resp.statusCode}) for ${url.toString()}');
+    }
+    return;
+  }
+
+  final contentType = resp.headers['content-type'];
+  final filePath = file.path;
+  final isOnnx = filePath.toLowerCase().endsWith('.onnx');
+  if (isOnnx && _looksLikeHtmlContentType(contentType)) {
+    await _drainWithTimeout(resp.stream);
+    if (mounted) {
+      setState(() { _downloading = false; _progress = 0.0; });
+      _showError('Download failed: unexpected content for ${url.toString()}');
+    }
+    return;
+  }
+
+  // --- запись в .part с корректным ожиданием завершения ---
+  final tmp = File('$filePath.part');
+  if (tmp.existsSync()) { try { tmp.deleteSync(); } catch(_) {} }
+  final sink = tmp.openWrite();
+
+  int received = 0;
+  final thisLen = resp.contentLength ?? lengths[i];
+
+  try {
+    // Читаем поток с таймаутом без listen/onDone
+    await for (final chunk in resp.stream.timeout(_inactivityTimeout)) {
+      sink.add(chunk);
+      received += chunk.length;
+
+      if (mounted) {
+        final now = DateTime.now();
+        if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
+          if (totalBytes > 0) {
+            final currentTotal = downloadedSoFar + received;
+            setState(() => _progress = currentTotal / totalBytes);
+          } else if (thisLen > 0) {
+            setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
+          }
+          _lastProgressUiUpdate = now;
+        }
+      }
+    }
+    await sink.flush();
+    await sink.close();
+  } catch (e) {
+    try { await sink.flush(); await sink.close(); } catch (_) {}
+    try { if (tmp.existsSync()) tmp.deleteSync(); } catch (_) {}
+    if (!_canceled && mounted) {
+      setState(() { _downloading = false; _progress = 0.0; });
+      _showError('Download failed: ${_friendlyError(e)}');
+    }
+    return;
+  }
+
+  // --- пост-проверки и финализация ---
+  try {
+    final finalLen = tmp.lengthSync();
+    final minBytes = _minValidBytes(filePath);
+    if (finalLen < minBytes) {
+      try { tmp.deleteSync(); } catch (_) {}
+      if (mounted && !_canceled) {
+        setState(() { _downloading = false; _progress = 0.0; });
+        _showError('Download failed: file too small for ${url.toString()}');
+      }
+      return;
+    }
+
+    // SHA-256 (если заданы ожидаемые)
+    String expectedSha = '';
+    if (i == 0) expectedSha = widget.shaEncoder;
+    if (i == 1) expectedSha = widget.shaDecoder;
+    if (i == 2) expectedSha = widget.shaConfig;
+
+    if (expectedSha.isNotEmpty) {
+      final actual = await _sha256OfFile(tmp);
+      if (!_shaMatches(expectedSha, actual)) {
+        try { tmp.deleteSync(); } catch (_) {}
+        if (mounted && !_canceled) {
+          setState(() { _downloading = false; _progress = 0.0; });
+          _showError('Checksum mismatch for ${url.pathSegments.isNotEmpty ? url.pathSegments.last : url.toString()}');
+        }
+        return;
+      }
+    }
+
+    if (file.existsSync()) {
+      try { file.deleteSync(); } catch (_) {}
+    }
+    tmp.renameSync(filePath); // ← теперь безопасно: запись точно завершена
+    downloadedSoFar += (thisLen > 0 ? thisLen : received);
+  } catch (e) {
+    try { tmp.deleteSync(); } catch (_) {}
+    if (mounted && !_canceled) {
+      setState(() { _downloading = false; _progress = 0.0; });
+      _showError('Download failed: ${_friendlyError(e)}');
+    }
+    return;
+  }
+}
+// --- end for ---
+
+
+/*
       for (int i = 0; i < _urls.length; i++) {
         if (_canceled) return;
 
@@ -548,21 +699,25 @@ class _ModelCardState extends State<ModelCard> {
         await _sub?.asFuture<void>();
         if (_canceled) return;
       }
-
+*/
       if (!mounted) return;
-      setState(() {
-        _downloading = false;
-        _progress = 1.0;
-      });
+      setState(() { _downloading = false; _progress = 1.0; });
+
       // Re-validate from disk after all files are finalized to avoid any transient UI mismatch
       await _checkAlreadyDownloaded();
-      AppSnackbar.show(
-        context,
-        '${widget.title} downloaded to ${_folderPath ?? ''}',
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        saveToDb: false,
-      );
+
+      if (_downloaded) {
+        AppSnackbar.show(
+          context,
+          '${widget.title} downloaded to ${_folderPath ?? ''}',
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          saveToDb: false,
+        );
+      } else {
+        _showError('Downloaded files not found or incomplete. Please try again.');
+      }
+
     } catch (e) {
       if (mounted) {
         setState(() {

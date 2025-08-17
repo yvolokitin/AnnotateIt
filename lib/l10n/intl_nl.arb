@@ -22,10 +22,14 @@
   "buttonNextConfirmTask": "Volgende: Taak Bevestigen",
   "buttonCreateProject": "Project Aanmaken",
 
+  "modelsAnnotation": "Annotatiemodellen",
   "modelDescriptionSamMobile": "Lichtgewicht SAM-variant voor segmentatie op het apparaat.",
   "modelDescriptionSAM2HieraBasePlus": "Goede balans tussen nauwkeurigheid en snelheid met Hiera base+ backbone.",
   "modelDescriptionSAM2HieraLarge": "Variant met hoge nauwkeurigheid voor de beste maskers.",
   "modelDescriptionSSDMobileNet": "Snelle single-shot detector voor algemene objecten.",
+
+  "modelsHelpBody": "Annotatiemodellen (gebaseerd op SAM) zetten snelle invoer — klikken, kaders of grove streken — om in nauwkeurige maskers.\n\nHoe het werkt:\n• De encoder draait één keer per afbeelding om beeldkenmerken te berekenen.\n• De decoder draait na elke invoer om het masker te genereren of aan te passen.\n\nWaarom het helpt:\nU hoeft minder tijd te besteden aan het tekenen van polygonen; het model stelt maskers voor die u met een paar klikken kunt verfijnen.",
+  "modelsHelpTips": "Tips:\n• Beste invoer: begin met een kader of 1–2 positieve klikken, voeg daarna negatieve klikken toe om extra’s uit te sluiten.\n• Verfijnen, niet opnieuw tekenen: blijf invoer toevoegen om hetzelfde masker bij te werken.\n• Prestaties: de encoder is de zware stap; hergebruik hem voor meerdere invoeren op dezelfde afbeelding.\n• Grote afbeeldingen: zoom in voordat u een prompt geeft voor scherpere randen.\n• Kwantisatie vs volledige precisie: kwantisatie is sneller en gebruikt minder geheugen, maar kan fijne details verliezen.",
 
   "aboutTitle": "Over Annot@It",
   "aboutDescription": "Annot@It is een annotatie-applicatie ontworpen om het annotatieproces voor computervisieprojecten te stroomlijnen. Of je nu werkt aan beeldclassificatie, objectdetectie, segmentatie of andere visietaken, Annot@It biedt de flexibiliteit en precisie die nodig zijn voor hoogwaardige gegevenslabeling.",

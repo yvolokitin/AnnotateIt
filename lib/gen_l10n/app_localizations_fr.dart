@@ -69,6 +69,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get buttonCreateProject => 'Créer un Projet';
 
   @override
+  String get modelsAnnotation => 'Modèles d’annotation';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Variante légère de SAM pour la segmentation sur l’appareil.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Détecteur rapide en un seul passage pour les objets généraux.';
+
+  @override
+  String get modelsHelpBody =>
+      'Les modèles d’annotation (basés sur SAM) transforment des invites rapides — clics, boîtes ou traits grossiers — en masques précis.\n\nFonctionnement :\n• L’encodeur s’exécute une fois par image pour construire les caractéristiques.\n• Le décodeur s’exécute après chaque invite pour générer ou ajuster le masque.\n\nPourquoi c’est utile :\nVous passez moins de temps à dessiner des polygones ; le modèle propose des masques que vous pouvez affiner en quelques clics.';
+
+  @override
+  String get modelsHelpTips =>
+      'Conseils :\n• Meilleures invites : commencez par une boîte ou 1–2 clics positifs, puis ajoutez des clics négatifs pour exclure des zones.\n• Affinez, ne redessinez pas : continuez à ajouter des invites pour mettre à jour le même masque.\n• Performances : l’encodeur est l’étape lourde ; réutilisez-le pour plusieurs invites sur la même image.\n• Grandes images : zoomez avant d’indiquer pour des contours plus nets.\n• Quantifié vs pleine précision : le quantifié est plus rapide et utilise moins de mémoire, mais peut perdre en détails.';
 
   @override
   String get aboutTitle => 'À propos d\'Annot@It';

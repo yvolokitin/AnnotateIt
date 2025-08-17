@@ -69,6 +69,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get buttonCreateProject => 'Crea Progetto';
 
   @override
+  String get modelsAnnotation => 'Modelli di annotazione';
+
+  @override
   String get modelDescriptionSamMobile =>
       'Variante leggera di SAM per la segmentazione sul dispositivo.';
 
@@ -83,6 +86,14 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get modelDescriptionSSDMobileNet =>
       'Rilevatore veloce a singolo passaggio per oggetti generici.';
+
+  @override
+  String get modelsHelpBody =>
+      'I modelli di annotazione (basati su SAM) trasformano input rapidi — clic, riquadri o tratti grossolani — in maschere precise.\n\nCome funziona:\n• L’encoder viene eseguito una volta per immagine per costruire le caratteristiche.\n• Il decoder viene eseguito dopo ogni input per generare o regolare la maschera.\n\nPerché è utile:\nSi dedica meno tempo a disegnare poligoni; il modello propone maschere che puoi perfezionare con pochi clic.';
+
+  @override
+  String get modelsHelpTips =>
+      'Suggerimenti:\n• Input migliori: inizia con un riquadro o 1–2 clic positivi, quindi aggiungi clic negativi per escludere elementi.\n• Raffina, non ridisegnare: continua ad aggiungere input per aggiornare la stessa maschera.\n• Prestazioni: l’encoder è la parte più pesante; riutilizzalo per molti input sulla stessa immagine.\n• Immagini grandi: ingrandisci prima di dare input per ottenere bordi più netti.\n• Quantizzato vs piena precisione: il quantizzato è più veloce e usa meno memoria, ma può perdere dettagli fini.';
 
   @override
   String get aboutTitle => 'Informazioni su Annot@It';
