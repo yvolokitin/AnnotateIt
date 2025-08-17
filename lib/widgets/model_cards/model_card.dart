@@ -45,12 +45,14 @@ class _ModelCardState extends State<ModelCard> {
 
   // Prevent concurrent downloads across all ModelCard instances
   static bool _globalDownloading = false;
+  bool _ownsGlobalLock = false;
   // Throttle UI updates to avoid spamming the Windows message queue
   DateTime _lastProgressUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   // Network robustness settings
   static const Duration _requestTimeout = Duration(seconds: 30); // connection and first-byte
   static const Duration _inactivityTimeout = Duration(seconds: 30); // between chunks
+  static const Duration _progressUiInterval = Duration(milliseconds: 120); // throttle UI updates
 
   void _showError(String message) {
     if (!mounted) return;
@@ -97,6 +99,13 @@ class _ModelCardState extends State<ModelCard> {
     }
   }
 
+  void _releaseGlobalLock() {
+    if (_ownsGlobalLock) {
+      _ownsGlobalLock = false;
+      _globalDownloading = false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +121,8 @@ class _ModelCardState extends State<ModelCard> {
     _client?.close();
     // Ensure any partial .part files are cleaned up on cancellation/dispose
     _cleanupPartialFiles();
+    // Release global lock if this widget owned it
+    _releaseGlobalLock();
     super.dispose();
   }
 
@@ -219,14 +230,26 @@ class _ModelCardState extends State<ModelCard> {
   Future<void> _downloadModel() async {
     if (_downloading) return;
 
+    if (_globalDownloading) {
+      // Inform user and avoid starting another download simultaneously
+      AppSnackbar.show(
+        context,
+        'Another model download is already in progress. Please wait until it finishes.',
+        backgroundColor: Colors.orangeAccent,
+        textColor: Colors.black,
+        saveToDb: false,
+      );
+      return;
+    }
+    _globalDownloading = true;
+    _ownsGlobalLock = true;
+
     if (mounted) {
       setState(() {
         _downloading = true;
         _progress = 0.0;
       });
     }
-
-    final scaffold = ScaffoldMessenger.of(context);
 
     try {
       _client = http.Client();
@@ -326,13 +349,17 @@ class _ModelCardState extends State<ModelCard> {
             _sink?.add(chunk);
             received += chunk.length;
             if (!mounted) return;
-            if (totalBytes > 0) {
-              final currentTotal = downloadedSoFar + received;
-              setState(() => _progress = currentTotal / totalBytes);
-            } else if (thisLen > 0) {
-              setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
-            } else {
-              setState(() {});
+            final now = DateTime.now();
+            if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
+              if (totalBytes > 0) {
+                final currentTotal = downloadedSoFar + received;
+                setState(() => _progress = currentTotal / totalBytes);
+              } else if (thisLen > 0) {
+                setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
+              } else {
+                setState(() {});
+              }
+              _lastProgressUiUpdate = now;
             }
           },
           onDone: () async {
@@ -448,6 +475,8 @@ class _ModelCardState extends State<ModelCard> {
       if (_canceled) {
         _cleanupPartialFiles();
       }
+      // Always release global download lock
+      _releaseGlobalLock();
     }
   }
 
