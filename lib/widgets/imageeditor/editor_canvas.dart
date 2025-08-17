@@ -172,8 +172,36 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   final FocusNode _focusNode = FocusNode();
   bool _shiftPressed = false;
   bool _altPressed = false;
-
+  
   static const double _minCropSize = 16.0; // px
+  
+  @override
+  void didUpdateWidget(covariant EditorCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.editorAction != oldWidget.editorAction) {
+      if (widget.editorAction == EditorAction.brightness) {
+        if (!_showAdjustmentPanel || !_isBrightnessMode) {
+          setState(() {
+            _showAdjustmentPanel = true;
+            _isBrightnessMode = true;
+          });
+        }
+      } else if (widget.editorAction == EditorAction.contrast) {
+        if (!_showAdjustmentPanel || _isBrightnessMode) {
+          setState(() {
+            _showAdjustmentPanel = true;
+            _isBrightnessMode = false;
+          });
+        }
+      } else {
+        if (_showAdjustmentPanel) {
+          setState(() {
+            _showAdjustmentPanel = false;
+          });
+        }
+      }
+    }
+  }
   
   // Method to get the edited image (supports crop, rotation, flips, brightness/contrast)
   Future<ui.Image?> getCroppedImage() async {
