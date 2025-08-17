@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import '../session/user_session.dart';
 
 class SamModelUtils {
   // Keys used around the app
@@ -24,8 +25,6 @@ class SamModelUtils {
     if (key == keyMobile) return true;
 
     try {
-      final dir = await getApplicationDocumentsDirectory();
-
       // Folder names are based on ModelCard.id (from models_page.dart)
       // Base+: folder id is 'sam2_hiera_base' (files named ...base_plus.*)
       // Large: folder id is 'sam2_hiera_large'
@@ -37,23 +36,40 @@ class SamModelUtils {
         expectedFiles = const [
           'sam2_hiera_base_plus.encoder.onnx',
           'sam2_hiera_base_plus.decoder.onnx',
-          'config.yaml',
+          'sam2_hiera_base_plus_config.yaml',
         ];
       } else if (key == keySam2Large) {
         folderName = 'sam2_hiera_large';
         expectedFiles = const [
           'sam2_hiera_large.encoder.onnx',
           'sam2_hiera_large.decoder.onnx',
-          'config.yaml',
+          'sam2_hiera_large_config.yaml',
         ];
       } else {
         // Unknown key
         return false;
       }
 
-      final basePath = '${dir.path}/AnnotateIt/models/$folderName';
-      final baseDir = Directory(basePath);
-      if (!baseDir.existsSync()) return false;
+      // Determine models root: prefer user-configured, fallback to legacy default
+      String baseRoot;
+      try {
+        baseRoot = await UserSession.instance.getCurrentUserModelsFolder();
+      } catch (_) {
+        final docs = await getApplicationDocumentsDirectory();
+        baseRoot = '${docs.path}/AnnotateIt/models';
+      }
+      String basePath = '$baseRoot/$folderName';
+
+      // If configured root doesn't contain this model yet, try legacy default
+      if (!Directory(basePath).existsSync()) {
+        final docs = await getApplicationDocumentsDirectory();
+        final legacy = '${docs.path}/AnnotateIt/models/$folderName';
+        if (Directory(legacy).existsSync()) {
+          basePath = legacy;
+        } else {
+          return false;
+        }
+      }
 
       for (final name in expectedFiles) {
         final f = File('$basePath/$name');

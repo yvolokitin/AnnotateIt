@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../app_snackbar.dart';
+import '../../session/user_session.dart';
 
 class ModelCard extends StatefulWidget {
   final String id;
@@ -33,6 +34,7 @@ class ModelCard extends StatefulWidget {
 }
 
 class _ModelCardState extends State<ModelCard> {
+  int _checkCounter = 0;
   bool _downloading = false;
   bool _downloaded = false;
   double _progress = 0.0;
@@ -42,6 +44,7 @@ class _ModelCardState extends State<ModelCard> {
   StreamSubscription<List<int>>? _sub;
   IOSink? _sink;
   bool _canceled = false;
+  bool _postFrameCheckScheduled = false;
 
   // Prevent concurrent downloads across all ModelCard instances
   static bool _globalDownloading = false;
@@ -113,6 +116,25 @@ class _ModelCardState extends State<ModelCard> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Revalidate download status when dependencies change (e.g., on page return)
+    _checkAlreadyDownloaded();
+  }
+
+  @override
+  void didUpdateWidget(covariant ModelCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the model id or URLs change, re-check the files on disk
+    if (oldWidget.id != widget.id ||
+        oldWidget.urlEncoder != widget.urlEncoder ||
+        oldWidget.urlDecoder != widget.urlDecoder ||
+        oldWidget.urlConfig != widget.urlConfig) {
+      _checkAlreadyDownloaded();
+    }
+  }
+
+  @override
   void dispose() {
     _canceled = true;
 
@@ -127,13 +149,25 @@ class _ModelCardState extends State<ModelCard> {
   }
 
   Future<Directory> _modelsRoot() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final base = Directory('${dir.path}/AnnotateIt/models/${widget.id}');
-    if (!base.existsSync()) {
-      base.createSync(recursive: true);
+    try {
+      // Use user-configured models root folder
+      final modelsRoot = await UserSession.instance.getCurrentUserModelsFolder();
+      final base = Directory('$modelsRoot/${widget.id}');
+      if (!base.existsSync()) {
+        base.createSync(recursive: true);
+      }
+      _folderPath = base.path;
+      return base;
+    } catch (_) {
+      // Fallback to legacy default location if UserSession is not initialized
+      final dir = await getApplicationDocumentsDirectory();
+      final base = Directory('${dir.path}/AnnotateIt/models/${widget.id}');
+      if (!base.existsSync()) {
+        base.createSync(recursive: true);
+      }
+      _folderPath = base.path;
+      return base;
     }
-    _folderPath = base.path;
-    return base;
   }
 
   List<Uri> get _urls => [
@@ -217,14 +251,92 @@ class _ModelCardState extends State<ModelCard> {
   }
 
   Future<void> _checkAlreadyDownloaded() async {
-    final files = await _targetFiles();
-    final allExist = files.every((f) {
-      if (!f.existsSync()) return false;
-      final minBytes = _minValidBytes(f.path);
-      return f.lengthSync() >= minBytes;
-    });
-    if (!mounted) return;
-    setState(() => _downloaded = allExist);
+    // Ticket-based guard to ensure only the latest check updates UI
+    final int myTicket = ++_checkCounter;
+    try {
+      final files = await _targetFiles();
+      bool allExist = files.every((f) {
+        if (!f.existsSync()) return false;
+        final minBytes = _minValidBytes(f.path);
+        return f.lengthSync() >= minBytes;
+      });
+
+      if (!allExist) {
+        // Fallback: accept legacy config filename (config.yaml) and robust presence
+        final folder = await _modelsRoot();
+        final encoder = files.isNotEmpty ? files[0] : null;
+        final decoder = files.length > 1 ? files[1] : null;
+        final config = files.length > 2 ? files[2] : null;
+
+        bool encOk = encoder != null && encoder.existsSync() && encoder.lengthSync() >= _minValidBytes(encoder.path);
+        bool decOk = decoder != null && decoder.existsSync() && decoder.lengthSync() >= _minValidBytes(decoder.path);
+        bool cfgOk = config != null && config.existsSync() && config.lengthSync() >= _minValidBytes(config.path);
+        if (!cfgOk) {
+          final alt = File('${folder.path}/config.yaml');
+          if (alt.existsSync() && alt.lengthSync() >= _minValidBytes(alt.path)) {
+            cfgOk = true;
+          }
+        }
+        if (encOk && decOk && cfgOk) {
+          allExist = true;
+        }
+      }
+
+      if (!mounted || myTicket != _checkCounter) return;
+      setState(() => _downloaded = allExist);
+    } catch (_) {
+      if (!mounted || myTicket != _checkCounter) return;
+      setState(() => _downloaded = false);
+    }
+  }
+
+  Future<void> _ensureFolderPath() async {
+    if (_folderPath == null) {
+      final d = await _modelsRoot();
+      _folderPath = d.path;
+    }
+  }
+
+  Future<void> _showSavedPath() async {
+    await _ensureFolderPath();
+    final p = _folderPath;
+    AppSnackbar.show(
+      context,
+      p == null ? 'Folder not found' : 'Saved in: $p',
+      backgroundColor: Colors.orangeAccent,
+      textColor: Colors.black,
+      saveToDb: false,
+    );
+  }
+
+  Future<void> _openInFileExplorer() async {
+    try {
+      await _ensureFolderPath();
+      final p = _folderPath;
+      if (p == null) {
+        throw Exception('Folder not found');
+      }
+      if (!Directory(p).existsSync()) {
+        throw Exception('Folder not found');
+      }
+      if (Platform.isWindows) {
+        await Process.run('explorer', [p]);
+      } else if (Platform.isMacOS) {
+        await Process.run('open', [p]);
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [p]);
+      } else {
+        throw Exception('Unsupported platform');
+      }
+    } catch (e) {
+      AppSnackbar.show(
+        context,
+        'Cannot open folder: ${_friendlyError(e)}',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        saveToDb: false,
+      );
+    }
   }
 
   Future<void> _downloadModel() async {
@@ -440,9 +552,10 @@ class _ModelCardState extends State<ModelCard> {
       if (!mounted) return;
       setState(() {
         _downloading = false;
-        _downloaded = true;
         _progress = 1.0;
       });
+      // Re-validate from disk after all files are finalized to avoid any transient UI mismatch
+      await _checkAlreadyDownloaded();
       AppSnackbar.show(
         context,
         '${widget.title} downloaded to ${_folderPath ?? ''}',
@@ -485,6 +598,16 @@ class _ModelCardState extends State<ModelCard> {
     final theme = Theme.of(context);
     final radius = BorderRadius.circular(16);
     final darkGreen = Colors.lightGreen[900]!;
+
+    // Ensure we re-check status after rebuilds (e.g., returning to page)
+    if (!_postFrameCheckScheduled) {
+      _postFrameCheckScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _postFrameCheckScheduled = false;
+        _checkAlreadyDownloaded();
+      });
+    }
 
     // Бордер зелёный, если всё скачано
     final borderColor = _downloaded ? darkGreen : theme.colorScheme.outlineVariant;
@@ -542,8 +665,10 @@ class _ModelCardState extends State<ModelCard> {
                           const SizedBox(width: 8),
                           Chip(
                             label: Text(widget.modelSize),
-                            backgroundColor: theme.colorScheme.surfaceVariant,
-                            labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium),
+                            backgroundColor: _downloaded ? Colors.green : theme.colorScheme.surfaceVariant,
+                            labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)?.copyWith(
+                              color: _downloaded ? Colors.white : null,
+                            ),
                             visualDensity: VisualDensity.compact,
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
@@ -589,20 +714,26 @@ class _ModelCardState extends State<ModelCard> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            TextButton.icon(
-                              onPressed: () {
-                                final p = _folderPath;
-                                AppSnackbar.show(
-                                  context,
-                                  p == null ? 'Folder not found' : 'Saved in: $p',
-                                  backgroundColor: Colors.orangeAccent,
-                                  textColor: Colors.black,
-                                  saveToDb: false,
-                                );
-                              },
-                              icon: const Icon(Icons.folder_open),
-                              label: const Text('Show path'),
-                              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  tooltip: 'Show path',
+                                  icon: const Icon(Icons.folder),
+                                  onPressed: () {
+                                    _showSavedPath();
+                                  },
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                IconButton(
+                                  tooltip: 'Open folder',
+                                  icon: const Icon(Icons.folder_open),
+                                  onPressed: () {
+                                    _openInFileExplorer();
+                                  },
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ],
                             ),
                           ],
                         ),
