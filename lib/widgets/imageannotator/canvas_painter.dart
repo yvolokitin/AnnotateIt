@@ -425,6 +425,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       oldDelegate.opacity != opacity ||
       oldDelegate.scale != scale ||
       oldDelegate.drawingRect != drawingRect ||
+      oldDelegate.showAnnotationNames != showAnnotationNames ||
       polygonChanged ||
       currentPointChanged;
   }
