@@ -94,6 +94,15 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   int? _activeResizeHandle;
   List<Offset>? _originalCorners;
 
+  // Clamp a point (in image coordinates) to the image bounds
+  Offset _clampToImage(Offset p) {
+    final double w = widget.image.width.toDouble();
+    final double h = widget.image.height.toDouble();
+    final double x = p.dx.clamp(0.0, w);
+    final double y = p.dy.clamp(0.0, h);
+    return Offset(x, y);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -227,24 +236,27 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.bbox_annotation) {
       inverse.copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final clamped = _clampToImage(transformed);
       setState(() {
-        _drawingStart = transformed;
-        _drawingCurrent = transformed;
+        _drawingStart = clamped;
+        _drawingCurrent = clamped;
       });
     } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.sam_annotation) {
       // In SAM mode: on click, emit the image-space coordinate to parent for processing
       inverse.copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
-      widget.onSamTap?.call(transformed);
+      final clamped = _clampToImage(transformed);
+      widget.onSamTap?.call(clamped);
       return;
     } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.polygon_annotation) {
       inverse.copyInverse(matrix);
       final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final clampedPoint = _clampToImage(transformed);
       
       // If we have at least 3 points and clicked near the first point, complete the polygon
       // Use a larger threshold to make it easier to close the polygon
       if (_polygonPoints.length >= 3) {
-        final distanceToFirst = (_polygonPoints.first - transformed).distance;
+        final distanceToFirst = (_polygonPoints.first - clampedPoint).distance;
         final closeThreshold = 25.0 / matrix.getMaxScaleOnAxis(); // Increased from 20 to 25
         
         if (distanceToFirst < closeThreshold) {
@@ -259,8 +271,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       
       // Add the point to the polygon
       setState(() {
-        _polygonPoints.add(transformed);
-        _currentPolygonPoint = transformed;
+        _polygonPoints.add(clampedPoint);
+        _currentPolygonPoint = clampedPoint;
       });
     }
   }
@@ -377,8 +389,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _drawingStart != null) {
       inverse.copyInverse(matrix);
       final current = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final clamped = _clampToImage(current);
       setState(() {
-        _drawingCurrent = current;
+        _drawingCurrent = clamped;
       });
     }
     
@@ -386,15 +399,16 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     if (widget.userAction == UserAction.polygon_annotation && !_isPolygonComplete) {
       inverse.copyInverse(matrix);
       final current = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final clamped = _clampToImage(current);
       
       // Only update if the point has moved significantly to reduce unnecessary repaints
       if (_currentPolygonPoint == null || 
-          (_currentPolygonPoint! - current).distance > 1.0) {
+          (_currentPolygonPoint! - clamped).distance > 1.0) {
         
         // Check if we're near the first point for closing the polygon
         bool nearFirstPoint = false;
         if (_polygonPoints.length >= 3) {
-          final distanceToFirst = (_polygonPoints.first - current).distance;
+          final distanceToFirst = (_polygonPoints.first - clamped).distance;
           final closeThreshold = 20.0 / matrix.getMaxScaleOnAxis();
           nearFirstPoint = distanceToFirst < closeThreshold;
         }
@@ -403,7 +417,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
-              _currentPolygonPoint = current;
+              _currentPolygonPoint = clamped;
             });
           }
         });
