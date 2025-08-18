@@ -31,6 +31,7 @@ import '../widgets/imageannotator/user_action.dart';
 
 import '../widgets/app_snackbar.dart';
 import '../utils/sam_model_utils.dart';
+import 'image_editor.dart';
 
 class AnnotatorPage extends StatefulWidget {
   final Project project;
@@ -1281,6 +1282,24 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           onShowDatasetGridChanged: (v) => setState(() => showRightSidebar = v),
                           onActionSelected: _handleActionSelected,
                           onShowAnnotationNames: (v) => setState(() => showAnnotationNames = v),
+                          onSwitchToEditor: () {
+                            final newPageIndex = _currentIndex ~/ widget.pageSize;
+                            final newLocalIndex = _currentIndex % widget.pageSize;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ImageEditorPage(
+                                  project: widget.project,
+                                  mediaItem: media!,
+                                  datasetId: widget.datasetId,
+                                  pageIndex: newPageIndex,
+                                  pageSize: widget.pageSize,
+                                  localIndex: newLocalIndex,
+                                  totalMediaCount: widget.totalMediaCount,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         Expanded(
                           child: Column(

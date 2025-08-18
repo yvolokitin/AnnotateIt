@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import '../dialogs/annotations_settings_dialog.dart';
-import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/sam_model_selector_dialog.dart';
 import '../../session/user_session.dart';
 
@@ -33,6 +32,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
   final ValueChanged<bool> onShowDatasetGridChanged;
   final ValueChanged<UserAction> onActionSelected;
   final ValueChanged<bool> onShowAnnotationNames;
+  final VoidCallback onSwitchToEditor;
 
   const AnnotatorLeftToolbar({
     super.key,
@@ -51,6 +51,7 @@ class AnnotatorLeftToolbar extends StatefulWidget {
     required this.onCornerSizeChanged,
     required this.selectedSamModelKey,
     required this.onSamModelChanged,
+    required this.onSwitchToEditor,
     this.isProcessingMlKit = false,
     this.isProcessingSAM = false,
   });
@@ -272,35 +273,11 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                   ),
           ),
 
-          // Rotation Buttons (disabled state)
-          /// ToolbarDivider(isCompact: isCompact),
-          /// ToolbarButton(
-            /// icon: Icon(Icons.rotate_left_rounded),
-            /// onTap: null,
-            /// tooltip: l10n.toolbarRotateLeft,
-            /// isDisabled: true,
-          /// ),
-
-          /// ToolbarDivider(isCompact: isCompact),
-          /// ToolbarButton(
-            /// icon: Icon(Icons.rotate_right_rounded),
-            /// onTap: null,
-            /// tooltip: l10n.toolbarRotateRight,
-            /// isDisabled: true,
-          //// ),
-
           const Spacer(),
           ToolbarButton(
-            icon: Icon(Icons.help_outline_outlined),
-            onTap: () {
-              AlertErrorDialog.show(
-                context,
-                l10n.dialogHelpTitle,
-                l10n.dialogHelpContent,
-                tips: l10n.dialogHelpTips,
-              );
-            },
-            tooltip: l10n.toolbarHelp,
+            icon: Icon(Icons.edit_outlined),
+            onTap: widget.onSwitchToEditor,
+            tooltip: 'Switch to Image Editor',
           ),
           const SizedBox(height: 10),
         ],

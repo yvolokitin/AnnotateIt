@@ -15,6 +15,7 @@ import '../widgets/imageeditor/editor_bottom_toolbar.dart';
 import '../widgets/imageeditor/editor_top_toolbar.dart';
 import '../widgets/imageeditor/editor_canvas.dart';
 import '../widgets/imageeditor/editor_action.dart';
+import 'annotator_page.dart';
 
 class ImageEditorPage extends StatefulWidget {
   final Project project;
@@ -404,6 +405,24 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                           selectedAction: userAction,
                           onResetZoomPressed: () => setState(() => _resetZoomCount++),
                           onActionSelected: _handleActionSelected,
+                          onSwitchToAnnotator: () {
+                            final newPageIndex = _currentIndex ~/ widget.pageSize;
+                            final newLocalIndex = _currentIndex % widget.pageSize;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AnnotatorPage(
+                                  project: widget.project,
+                                  mediaItem: media!,
+                                  datasetId: widget.datasetId,
+                                  pageIndex: newPageIndex,
+                                  pageSize: widget.pageSize,
+                                  localIndex: newLocalIndex,
+                                  totalMediaCount: widget.totalMediaCount,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         Expanded(
                           child: Column(

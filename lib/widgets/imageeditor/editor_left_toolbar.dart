@@ -11,6 +11,7 @@ class EditorLeftToolbar extends StatefulWidget {
 
   final VoidCallback onResetZoomPressed;
   final ValueChanged<EditorAction> onActionSelected;
+  final VoidCallback onSwitchToAnnotator;
 
   const EditorLeftToolbar({
     super.key,
@@ -18,6 +19,7 @@ class EditorLeftToolbar extends StatefulWidget {
     required this.selectedAction,
     required this.onResetZoomPressed,
     required this.onActionSelected,
+    required this.onSwitchToAnnotator,
   });
 
   @override
@@ -122,6 +124,13 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
             onTap: () => _selectUserAction(EditorAction.contrast),
             isActive: widget.selectedAction == EditorAction.contrast,
             tooltip: 'Adjust Contrast',
+          ),
+
+          const Spacer(),
+          ToolbarButton(
+            icon: Icon(Icons.border_color_outlined),
+            onTap: widget.onSwitchToAnnotator,
+            tooltip: 'Switch to Annotator',
           ),
         ],
       ),
