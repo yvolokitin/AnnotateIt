@@ -88,6 +88,33 @@ class AppLocalizationsPt extends AppLocalizations {
       'Detector rápido de disparo único para objetos gerais.';
 
   @override
+  String get modelBuildIn => 'Integrado';
+
+  @override
+  String get modelDownload => 'Baixar';
+
+  @override
+  String get modelDownloaded => 'Baixado';
+
+  @override
+  String get modelBuildInAndReady => 'Integrado e pronto para usar';
+
+  @override
+  String get modelComingSoon => 'Em breve – Ainda não disponível';
+
+  @override
+  String get modelShowPath => 'Mostrar caminho onde o modelo foi salvo';
+
+  @override
+  String get modelOpenPath => 'Abrir caminho onde o modelo foi salvo';
+
+  @override
+  String get modelDownloading => 'Baixando';
+
+  @override
+  String get modelStartingDownload => 'Iniciando download';
+
+  @override
   String get modelsHelpBody =>
       'Os modelos de anotação (baseados em SAM) transformam comandos rápidos — cliques, caixas ou traços — em máscaras precisas.\n\nComo funciona:\n• O codificador (Encoder) roda uma vez por imagem para gerar as características.\n• O decodificador (Decoder) roda após cada comando para gerar ou ajustar a máscara.\n\nPor que ajuda:\nVocê gasta menos tempo desenhando polígonos; o modelo sugere máscaras que podem ser refinadas com alguns cliques.';
 

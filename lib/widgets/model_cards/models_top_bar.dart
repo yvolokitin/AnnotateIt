@@ -22,15 +22,15 @@ class ModelsTopBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: (screenWidth > 1200) ? 16 : (screenWidth >= 700) ? 6 : 2,
-        vertical: (screenWidth > 1200) ? 22 : (screenWidth >= 700) ? 12 : 4,
+        horizontal: 25,
+        vertical: 10,
       ),
       child: Row(
         children: [
           Text(
             l10n.modelsAnnotation,
             style: TextStyle(
-              fontSize: screenWidth > 1600 ? 22 : 18,
+              fontSize: screenWidth > 1600 ? 26 : (screenWidth > 1200) ? 22 : 18,
               color: Colors.white,
               fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,

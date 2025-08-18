@@ -260,6 +260,60 @@ abstract class AppLocalizations {
   /// **'Fast single-shot detector for general objects.'**
   String get modelDescriptionSSDMobileNet;
 
+  /// No description provided for @modelBuildIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Build-in'**
+  String get modelBuildIn;
+
+  /// No description provided for @modelDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get modelDownload;
+
+  /// No description provided for @modelDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get modelDownloaded;
+
+  /// No description provided for @modelBuildInAndReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Build-in and ready to use'**
+  String get modelBuildInAndReady;
+
+  /// No description provided for @modelComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon - Not available yet'**
+  String get modelComingSoon;
+
+  /// No description provided for @modelShowPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Show path where model saved'**
+  String get modelShowPath;
+
+  /// No description provided for @modelOpenPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Open path where model saved'**
+  String get modelOpenPath;
+
+  /// No description provided for @modelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get modelDownloading;
+
+  /// No description provided for @modelStartingDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting download'**
+  String get modelStartingDownload;
+
   /// No description provided for @modelsHelpBody.
   ///
   /// In en, this message translates to:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ModelCardCommingSoon extends StatelessWidget {
   final String id;
@@ -16,6 +17,7 @@ class ModelCardCommingSoon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final radius = BorderRadius.circular(16);
     const disabledTextColor = Colors.white70;
 
@@ -91,7 +93,7 @@ class ModelCardCommingSoon extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Coming soon — Not available yet',
+                              l10n.modelComingSoon,
                               style: (compact
                                       ? Theme.of(context).textTheme.bodySmall
                                       : Theme.of(context).textTheme.bodyMedium)

@@ -88,6 +88,33 @@ class AppLocalizationsRu extends AppLocalizations {
       'Быстрый одношаговый детектор для общих объектов.';
 
   @override
+  String get modelBuildIn => 'Встроенная';
+
+  @override
+  String get modelDownload => 'Скачать';
+
+  @override
+  String get modelDownloaded => 'Скачано';
+
+  @override
+  String get modelBuildInAndReady => 'Встроенная и готова к использованию';
+
+  @override
+  String get modelComingSoon => 'Скоро – Пока недоступно';
+
+  @override
+  String get modelShowPath => 'Показать путь, где сохранена модель';
+
+  @override
+  String get modelOpenPath => 'Открыть путь, где сохранена модель';
+
+  @override
+  String get modelDownloading => 'Скачиваю';
+
+  @override
+  String get modelStartingDownload => 'Начало загрузки';
+
+  @override
   String get modelsHelpBody =>
       'Модели аннотаций (на основе SAM) превращают быстрые подсказки — клики, рамки или грубые штрихи — в точные маски.\n\nКак это работает:\n• Энкодер запускается один раз для изображения, чтобы построить признаки.\n• Декодер запускается после каждой подсказки, чтобы сгенерировать или скорректировать маску.\n\nЗачем это нужно:\nВы тратите меньше времени на рисование полигонов; модель предлагает маски, которые можно уточнить парой кликов.';
 

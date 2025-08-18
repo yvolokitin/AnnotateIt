@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ModelCardBuiltIn extends StatelessWidget {
   final String id;
@@ -18,6 +19,8 @@ class ModelCardBuiltIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     final theme = Theme.of(context);
     final radius = BorderRadius.circular(16);
     final darkGreen = Colors.lightGreen[900]!;
@@ -69,7 +72,7 @@ class ModelCardBuiltIn extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Chip(
-                            label: Text('Built-in, $modelSize'),
+                            label: Text('${l10n.modelBuildIn}, $modelSize'),
                             backgroundColor: darkGreen,
                             labelStyle: (compact
                                     ? theme.textTheme.labelSmall
@@ -101,7 +104,7 @@ class ModelCardBuiltIn extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Built-in and ready to use',
+                              l10n.modelBuildInAndReady,
                               style: compact
                                   ? theme.textTheme.bodySmall
                                   : theme.textTheme.bodyMedium,

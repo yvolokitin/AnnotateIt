@@ -88,6 +88,33 @@ class AppLocalizationsIt extends AppLocalizations {
       'Rilevatore veloce a singolo passaggio per oggetti generici.';
 
   @override
+  String get modelBuildIn => 'Integrato';
+
+  @override
+  String get modelDownload => 'Scarica';
+
+  @override
+  String get modelDownloaded => 'Scaricato';
+
+  @override
+  String get modelBuildInAndReady => 'Integrato e pronto all\'uso';
+
+  @override
+  String get modelComingSoon => 'In arrivo – Non ancora disponibile';
+
+  @override
+  String get modelShowPath => 'Mostra percorso dove è salvato il modello';
+
+  @override
+  String get modelOpenPath => 'Apri percorso dove è salvato il modello';
+
+  @override
+  String get modelDownloading => 'Download in corso';
+
+  @override
+  String get modelStartingDownload => 'Avvio del download';
+
+  @override
   String get modelsHelpBody =>
       'I modelli di annotazione (basati su SAM) trasformano input rapidi — clic, riquadri o tratti grossolani — in maschere precise.\n\nCome funziona:\n• L’encoder viene eseguito una volta per immagine per costruire le caratteristiche.\n• Il decoder viene eseguito dopo ogni input per generare o regolare la maschera.\n\nPerché è utile:\nSi dedica meno tempo a disegnare poligoni; il modello propone maschere che puoi perfezionare con pochi clic.';
 

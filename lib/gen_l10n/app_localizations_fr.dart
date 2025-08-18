@@ -88,6 +88,33 @@ class AppLocalizationsFr extends AppLocalizations {
       'Détecteur rapide en un seul passage pour les objets généraux.';
 
   @override
+  String get modelBuildIn => 'Intégré';
+
+  @override
+  String get modelDownload => 'Télécharger';
+
+  @override
+  String get modelDownloaded => 'Téléchargé';
+
+  @override
+  String get modelBuildInAndReady => 'Intégré et prêt à l’emploi';
+
+  @override
+  String get modelComingSoon => 'Bientôt disponible – Pas encore accessible';
+
+  @override
+  String get modelShowPath => 'Afficher le chemin où le modèle est enregistré';
+
+  @override
+  String get modelOpenPath => 'Ouvrir le chemin où le modèle est enregistré';
+
+  @override
+  String get modelDownloading => 'Téléchargement en cours';
+
+  @override
+  String get modelStartingDownload => 'Démarrage du téléchargement';
+
+  @override
   String get modelsHelpBody =>
       'Les modèles d’annotation (basés sur SAM) transforment des invites rapides — clics, boîtes ou traits grossiers — en masques précis.\n\nFonctionnement :\n• L’encodeur s’exécute une fois par image pour construire les caractéristiques.\n• Le décodeur s’exécute après chaque invite pour générer ou ajuster le masque.\n\nPourquoi c’est utile :\nVous passez moins de temps à dessiner des polygones ; le modèle propose des masques que vous pouvez affiner en quelques clics.';
 

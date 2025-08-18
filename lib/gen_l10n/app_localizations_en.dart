@@ -88,6 +88,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fast single-shot detector for general objects.';
 
   @override
+  String get modelBuildIn => 'Build-in';
+
+  @override
+  String get modelDownload => 'Download';
+
+  @override
+  String get modelDownloaded => 'Downloaded';
+
+  @override
+  String get modelBuildInAndReady => 'Build-in and ready to use';
+
+  @override
+  String get modelComingSoon => 'Coming soon - Not available yet';
+
+  @override
+  String get modelShowPath => 'Show path where model saved';
+
+  @override
+  String get modelOpenPath => 'Open path where model saved';
+
+  @override
+  String get modelDownloading => 'Downloading';
+
+  @override
+  String get modelStartingDownload => 'Starting download';
+
+  @override
   String get modelsHelpBody =>
       'Annotation models (based on SAM) turn quick prompts—clicks, boxes, or rough strokes—into precise masks.\n\nHow it works:\n• The Encoder runs once per image to build image features.\n• The Decoder runs after each prompt to generate/adjust the mask.\n\nWhy it helps:\nYou spend less time drawing polygons; the model proposes masks that you can refine with a couple of clicks.';
 

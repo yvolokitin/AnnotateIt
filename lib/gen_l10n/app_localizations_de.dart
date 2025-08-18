@@ -88,6 +88,33 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schneller Single-Shot-Detektor für allgemeine Objekte.';
 
   @override
+  String get modelBuildIn => 'Integriert';
+
+  @override
+  String get modelDownload => 'Herunterladen';
+
+  @override
+  String get modelDownloaded => 'Heruntergeladen';
+
+  @override
+  String get modelBuildInAndReady => 'Integriert und einsatzbereit';
+
+  @override
+  String get modelComingSoon => 'Demnächst verfügbar – Noch nicht erhältlich';
+
+  @override
+  String get modelShowPath => 'Pfad anzeigen, wo das Modell gespeichert ist';
+
+  @override
+  String get modelOpenPath => 'Pfad öffnen, wo das Modell gespeichert ist';
+
+  @override
+  String get modelDownloading => 'Wird heruntergeladen';
+
+  @override
+  String get modelStartingDownload => 'Download wird gestartet';
+
+  @override
   String get modelsHelpBody =>
       'Annotierungsmodelle (basierend auf SAM) verwandeln schnelle Eingaben – Klicks, Boxen oder grobe Striche – in präzise Masken.\n\nFunktionsweise:\n• Der Encoder wird einmal pro Bild ausgeführt, um Bildmerkmale zu erstellen.\n• Der Decoder läuft nach jeder Eingabe, um die Maske zu erzeugen oder anzupassen.\n\nVorteile:\nSie verbringen weniger Zeit mit dem Zeichnen von Polygonen; das Modell schlägt Masken vor, die Sie mit wenigen Klicks verfeinern können.';
 

@@ -28,6 +28,16 @@
   "modelDescriptionSAM2HieraLarge": "Variante de alta precisão para obter máscaras da melhor qualidade.",
   "modelDescriptionSSDMobileNet": "Detector rápido de disparo único para objetos gerais.",
 
+  "modelBuildIn": "Integrado",
+  "modelDownload": "Baixar",
+  "modelDownloaded": "Baixado",
+  "modelBuildInAndReady": "Integrado e pronto para usar",
+  "modelComingSoon": "Em breve – Ainda não disponível",
+  "modelShowPath": "Mostrar caminho onde o modelo foi salvo",
+  "modelOpenPath": "Abrir caminho onde o modelo foi salvo",
+  "modelDownloading": "Baixando",
+  "modelStartingDownload": "Iniciando download",
+
   "modelsHelpBody": "Os modelos de anotação (baseados em SAM) transformam comandos rápidos — cliques, caixas ou traços — em máscaras precisas.\n\nComo funciona:\n• O codificador (Encoder) roda uma vez por imagem para gerar as características.\n• O decodificador (Decoder) roda após cada comando para gerar ou ajustar a máscara.\n\nPor que ajuda:\nVocê gasta menos tempo desenhando polígonos; o modelo sugere máscaras que podem ser refinadas com alguns cliques.",
   "modelsHelpTips": "Dicas:\n• Melhores comandos: comece com uma caixa ou 1–2 cliques positivos, depois adicione cliques negativos para excluir áreas.\n• Refine, não redesenhe: continue adicionando comandos para atualizar a mesma máscara.\n• Desempenho: o codificador é a etapa pesada; reutilize-o em vários comandos na mesma imagem.\n• Imagens grandes: aproxime antes de marcar para bordas mais limpas.\n• Quantizado vs. precisão total: quantizado é mais rápido e usa menos memória, mas pode perder detalhes finos.",
 

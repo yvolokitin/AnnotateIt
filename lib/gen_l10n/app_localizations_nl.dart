@@ -88,6 +88,33 @@ class AppLocalizationsNl extends AppLocalizations {
       'Snelle single-shot detector voor algemene objecten.';
 
   @override
+  String get modelBuildIn => 'Ingebouwd';
+
+  @override
+  String get modelDownload => 'Downloaden';
+
+  @override
+  String get modelDownloaded => 'Gedownload';
+
+  @override
+  String get modelBuildInAndReady => 'Ingebouwd en klaar voor gebruik';
+
+  @override
+  String get modelComingSoon => 'Binnenkort beschikbaar – Nog niet beschikbaar';
+
+  @override
+  String get modelShowPath => 'Toon pad waar het model is opgeslagen';
+
+  @override
+  String get modelOpenPath => 'Open pad waar het model is opgeslagen';
+
+  @override
+  String get modelDownloading => 'Bezig met downloaden';
+
+  @override
+  String get modelStartingDownload => 'Download starten';
+
+  @override
   String get modelsHelpBody =>
       'Annotatiemodellen (gebaseerd op SAM) zetten snelle invoer — klikken, kaders of grove streken — om in nauwkeurige maskers.\n\nHoe het werkt:\n• De encoder draait één keer per afbeelding om beeldkenmerken te berekenen.\n• De decoder draait na elke invoer om het masker te genereren of aan te passen.\n\nWaarom het helpt:\nU hoeft minder tijd te besteden aan het tekenen van polygonen; het model stelt maskers voor die u met een paar klikken kunt verfijnen.';
 

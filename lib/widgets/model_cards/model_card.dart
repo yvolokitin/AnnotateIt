@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 
 import '../app_snackbar.dart';
 import '../../session/user_session.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class ModelCard extends StatefulWidget {
   final String id;
@@ -391,7 +392,6 @@ class _ModelCardState extends State<ModelCard> {
       final client = _client!;
       final files = await _targetFiles();
 
-      // Суммарная длина (если сервер отдаёт)
       int totalBytes = 0;
       final lengths = <int>[];
       for (final url in _urls) {
@@ -408,142 +408,12 @@ class _ModelCardState extends State<ModelCard> {
       }
 
       int downloadedSoFar = 0;
-
-// ... перед циклом как было
-for (int i = 0; i < _urls.length; i++) {
-  if (_canceled) return;
-
-  final url = _urls[i];
-  final file = files[i];
-
-  // если уже есть валидный — пропустим
-  if (file.existsSync() && file.lengthSync() >= _minValidBytes(file.path)) {
-    downloadedSoFar += lengths[i];
-    if (totalBytes > 0 && mounted) {
-      setState(() => _progress = downloadedSoFar / totalBytes);
-    }
-    continue;
-  }
-
-  final resp = await _getWithRedirects(client, url);
-  if (_canceled) return;
-
-  if (resp.statusCode < 200 || resp.statusCode >= 300) {
-    await _drainWithTimeout(resp.stream);
-    if (mounted) {
-      setState(() { _downloading = false; _progress = 0.0; });
-      _showError('Download failed (${resp.statusCode}) for ${url.toString()}');
-    }
-    return;
-  }
-
-  final contentType = resp.headers['content-type'];
-  final filePath = file.path;
-  final isOnnx = filePath.toLowerCase().endsWith('.onnx');
-  if (isOnnx && _looksLikeHtmlContentType(contentType)) {
-    await _drainWithTimeout(resp.stream);
-    if (mounted) {
-      setState(() { _downloading = false; _progress = 0.0; });
-      _showError('Download failed: unexpected content for ${url.toString()}');
-    }
-    return;
-  }
-
-  // --- запись в .part с корректным ожиданием завершения ---
-  final tmp = File('$filePath.part');
-  if (tmp.existsSync()) { try { tmp.deleteSync(); } catch(_) {} }
-  final sink = tmp.openWrite();
-
-  int received = 0;
-  final thisLen = resp.contentLength ?? lengths[i];
-
-  try {
-    // Читаем поток с таймаутом без listen/onDone
-    await for (final chunk in resp.stream.timeout(_inactivityTimeout)) {
-      sink.add(chunk);
-      received += chunk.length;
-
-      if (mounted) {
-        final now = DateTime.now();
-        if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
-          if (totalBytes > 0) {
-            final currentTotal = downloadedSoFar + received;
-            setState(() => _progress = currentTotal / totalBytes);
-          } else if (thisLen > 0) {
-            setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
-          }
-          _lastProgressUiUpdate = now;
-        }
-      }
-    }
-    await sink.flush();
-    await sink.close();
-  } catch (e) {
-    try { await sink.flush(); await sink.close(); } catch (_) {}
-    try { if (tmp.existsSync()) tmp.deleteSync(); } catch (_) {}
-    if (!_canceled && mounted) {
-      setState(() { _downloading = false; _progress = 0.0; });
-      _showError('Download failed: ${_friendlyError(e)}');
-    }
-    return;
-  }
-
-  // --- пост-проверки и финализация ---
-  try {
-    final finalLen = tmp.lengthSync();
-    final minBytes = _minValidBytes(filePath);
-    if (finalLen < minBytes) {
-      try { tmp.deleteSync(); } catch (_) {}
-      if (mounted && !_canceled) {
-        setState(() { _downloading = false; _progress = 0.0; });
-        _showError('Download failed: file too small for ${url.toString()}');
-      }
-      return;
-    }
-
-    // SHA-256 (если заданы ожидаемые)
-    String expectedSha = '';
-    if (i == 0) expectedSha = widget.shaEncoder;
-    if (i == 1) expectedSha = widget.shaDecoder;
-    if (i == 2) expectedSha = widget.shaConfig;
-
-    if (expectedSha.isNotEmpty) {
-      final actual = await _sha256OfFile(tmp);
-      if (!_shaMatches(expectedSha, actual)) {
-        try { tmp.deleteSync(); } catch (_) {}
-        if (mounted && !_canceled) {
-          setState(() { _downloading = false; _progress = 0.0; });
-          _showError('Checksum mismatch for ${url.pathSegments.isNotEmpty ? url.pathSegments.last : url.toString()}');
-        }
-        return;
-      }
-    }
-
-    if (file.existsSync()) {
-      try { file.deleteSync(); } catch (_) {}
-    }
-    tmp.renameSync(filePath); // ← теперь безопасно: запись точно завершена
-    downloadedSoFar += (thisLen > 0 ? thisLen : received);
-  } catch (e) {
-    try { tmp.deleteSync(); } catch (_) {}
-    if (mounted && !_canceled) {
-      setState(() { _downloading = false; _progress = 0.0; });
-      _showError('Download failed: ${_friendlyError(e)}');
-    }
-    return;
-  }
-}
-// --- end for ---
-
-
-/*
       for (int i = 0; i < _urls.length; i++) {
         if (_canceled) return;
 
         final url = _urls[i];
         final file = files[i];
 
-        // Skip if a valid file already exists (meets min size)
         if (file.existsSync() && file.lengthSync() >= _minValidBytes(file.path)) {
           downloadedSoFar += lengths[i];
           if (totalBytes > 0 && mounted) {
@@ -552,25 +422,14 @@ for (int i = 0; i < _urls.length; i++) {
           continue;
         }
 
-        // Perform GET with manual redirect handling and common headers
         final resp = await _getWithRedirects(client, url);
         if (_canceled) return;
 
-        // Validate status code
         if (resp.statusCode < 200 || resp.statusCode >= 300) {
           await _drainWithTimeout(resp.stream);
           if (mounted) {
-            setState(() {
-              _downloading = false;
-              _progress = 0.0;
-            });
-            AppSnackbar.show(
-              context,
-              'Download failed (${resp.statusCode}) for ${url.toString()}',
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              saveToDb: false,
-            );
+            setState(() { _downloading = false; _progress = 0.0; });
+            _showError('Download failed (${resp.statusCode}) for ${url.toString()}');
           }
           return;
         }
@@ -578,128 +437,96 @@ for (int i = 0; i < _urls.length; i++) {
         final contentType = resp.headers['content-type'];
         final filePath = file.path;
         final isOnnx = filePath.toLowerCase().endsWith('.onnx');
-        // Fail fast if server returns HTML/text for supposed binary
         if (isOnnx && _looksLikeHtmlContentType(contentType)) {
           await _drainWithTimeout(resp.stream);
           if (mounted) {
-            setState(() {
-              _downloading = false;
-              _progress = 0.0;
-            });
-            AppSnackbar.show(
-              context,
-              'Download failed: unexpected content for ${url.toString()}',
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              saveToDb: false,
-            );
+            setState(() { _downloading = false; _progress = 0.0; });
+            _showError('Download failed: unexpected content for ${url.toString()}');
           }
           return;
         }
 
-        // Write into temporary .part file
-        final tmp = File(filePath + '.part');
-        if (tmp.existsSync()) {
-          try { tmp.deleteSync(); } catch (_) {}
-        }
-        _sink = tmp.openWrite();
+        final tmp = File('$filePath.part');
+        if (tmp.existsSync()) { try { tmp.deleteSync(); } catch(_) {} }
+        final sink = tmp.openWrite();
+
         int received = 0;
         final thisLen = resp.contentLength ?? lengths[i];
 
-        _sub = resp.stream.timeout(_inactivityTimeout).listen(
-          (chunk) {
-            if (_canceled) return;
-            _sink?.add(chunk);
+        try {
+          await for (final chunk in resp.stream.timeout(_inactivityTimeout)) {
+            sink.add(chunk);
             received += chunk.length;
-            if (!mounted) return;
-            final now = DateTime.now();
-            if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
-              if (totalBytes > 0) {
-                final currentTotal = downloadedSoFar + received;
-                setState(() => _progress = currentTotal / totalBytes);
-              } else if (thisLen > 0) {
-                setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
-              } else {
-                setState(() {});
-              }
-              _lastProgressUiUpdate = now;
-            }
-          },
-          onDone: () async {
-            await _sink?.flush();
-            await _sink?.close();
-            _sink = null;
-            _sub = null;
-            try {
-              final finalLen = tmp.lengthSync();
-              final minBytes = _minValidBytes(filePath);
-              if (finalLen < minBytes) {
-                try { tmp.deleteSync(); } catch (_) {}
-                if (mounted && !_canceled) {
-                  setState(() {
-                    _downloading = false;
-                    _progress = 0.0;
-                  });
-                  AppSnackbar.show(
-                    context,
-                    'Download failed: file too small for ${url.toString()}',
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
-                    saveToDb: false,
-                  );
+
+            if (mounted) {
+              final now = DateTime.now();
+              if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
+                if (totalBytes > 0) {
+                  final currentTotal = downloadedSoFar + received;
+                  setState(() => _progress = currentTotal / totalBytes);
+                } else if (thisLen > 0) {
+                  setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
                 }
-                return;
+                _lastProgressUiUpdate = now;
               }
-              // Move into place
-              if (file.existsSync()) {
-                try { file.deleteSync(); } catch (_) {}
-              }
-              tmp.renameSync(filePath);
-              downloadedSoFar += (thisLen > 0 ? thisLen : received);
-            } catch (e) {
+            }
+          }
+          await sink.flush();
+          await sink.close();
+        } catch (e) {
+          try { await sink.flush(); await sink.close(); } catch (_) {}
+          try { if (tmp.existsSync()) tmp.deleteSync(); } catch (_) {}
+          if (!_canceled && mounted) {
+            setState(() { _downloading = false; _progress = 0.0; });
+            _showError('Download failed: ${_friendlyError(e)}');
+          }
+          return;
+        }
+
+        try {
+          final finalLen = tmp.lengthSync();
+          final minBytes = _minValidBytes(filePath);
+          if (finalLen < minBytes) {
+            try { tmp.deleteSync(); } catch (_) {}
+            if (mounted && !_canceled) {
+              setState(() { _downloading = false; _progress = 0.0; });
+              _showError('Download failed: file too small for ${url.toString()}');
+            }
+            return;
+          }
+
+          String expectedSha = '';
+          if (i == 0) expectedSha = widget.shaEncoder;
+          if (i == 1) expectedSha = widget.shaDecoder;
+          if (i == 2) expectedSha = widget.shaConfig;
+
+          if (expectedSha.isNotEmpty) {
+            final actual = await _sha256OfFile(tmp);
+            if (!_shaMatches(expectedSha, actual)) {
               try { tmp.deleteSync(); } catch (_) {}
               if (mounted && !_canceled) {
-                setState(() {
-                  _downloading = false;
-                  _progress = 0.0;
-                });
-                AppSnackbar.show(
-                  context,
-                  'Download failed: ${_friendlyError(e)}',
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                  saveToDb: false,
-                );
+                setState(() { _downloading = false; _progress = 0.0; });
+                _showError('Checksum mismatch for ${url.pathSegments.isNotEmpty ? url.pathSegments.last : url.toString()}');
               }
+              return;
             }
-          },
-          onError: (e) async {
-            await _sink?.close();
-            _sink = null;
-            _sub = null;
-            try { File(filePath + '.part').deleteSync(); } catch (_) {}
-            if (!_canceled && mounted) {
-              setState(() {
-                _downloading = false;
-                _progress = 0.0;
-              });
-              AppSnackbar.show(
-                context,
-                'Download failed: ${_friendlyError(e)}',
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                saveToDb: false,
-              );
-            }
-          },
-          cancelOnError: true,
-        );
+          }
 
-        // Wait for current subscription
-        await _sub?.asFuture<void>();
-        if (_canceled) return;
+          if (file.existsSync()) {
+            try { file.deleteSync(); } catch (_) {}
+          }
+          tmp.renameSync(filePath);
+          downloadedSoFar += (thisLen > 0 ? thisLen : received);
+        } catch (e) {
+          try { tmp.deleteSync(); } catch (_) {}
+          if (mounted && !_canceled) {
+            setState(() { _downloading = false; _progress = 0.0; });
+            _showError('Download failed: ${_friendlyError(e)}');
+          }
+          return;
+        }
       }
-*/
+
       if (!mounted) return;
       setState(() { _downloading = false; _progress = 1.0; });
 
@@ -750,6 +577,8 @@ for (int i = 0; i < _urls.length; i++) {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     final theme = Theme.of(context);
     final radius = BorderRadius.circular(16);
     final darkGreen = Colors.lightGreen[900]!;
@@ -764,7 +593,6 @@ for (int i = 0; i < _urls.length; i++) {
       });
     }
 
-    // Бордер зелёный, если всё скачано
     final borderColor = _downloaded ? darkGreen : theme.colorScheme.outlineVariant;
     final borderWidth = _downloaded ? 2.0 : 1.5;
 
@@ -785,7 +613,6 @@ for (int i = 0; i < _urls.length; i++) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Картинка слева
               SizedBox(
                 width: leftWidth,
                 child: Ink.image(
@@ -795,15 +622,13 @@ for (int i = 0; i < _urls.length; i++) {
                 ),
               ),
 
-              // Контент справа
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(isNarrow ? 12 : 16),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max, // чтобы нижний блок был у низа
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Заголовок + чип размера
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -832,7 +657,6 @@ for (int i = 0; i < _urls.length; i++) {
 
                       const SizedBox(height: 4),
 
-                      // Описание — заполняет пространство
                       Expanded(
                         child: Text(
                           widget.description,
@@ -844,14 +668,13 @@ for (int i = 0; i < _urls.length; i++) {
 
                       SizedBox(height: compact ? 6 : 10),
 
-                      // Нижний блок: Download / Downloading / Downloaded
                       if (_downloading) ...[
                         LinearProgressIndicator(value: _progress > 0 ? _progress : null),
                         const SizedBox(height: 6),
                         Text(
                           _progress > 0
-                              ? 'Downloading ${(_progress * 100).clamp(0, 100).toStringAsFixed(0)}%'
-                              : 'Starting download…',
+                              ? '${l10n.modelDownloading} ${(_progress * 100).clamp(0, 100).toStringAsFixed(0)}%'
+                              : '${l10n.modelStartingDownload}…',
                           style: theme.textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -863,7 +686,7 @@ for (int i = 0; i < _urls.length; i++) {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Downloaded',
+                                l10n.modelDownloaded,
                                 style: compact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -873,7 +696,7 @@ for (int i = 0; i < _urls.length; i++) {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  tooltip: 'Show path',
+                                  tooltip: l10n.modelShowPath,
                                   icon: const Icon(Icons.folder),
                                   onPressed: () {
                                     _showSavedPath();
@@ -881,7 +704,7 @@ for (int i = 0; i < _urls.length; i++) {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 IconButton(
-                                  tooltip: 'Open folder',
+                                  tooltip: l10n.modelOpenPath,
                                   icon: const Icon(Icons.folder_open),
                                   onPressed: () {
                                     _openInFileExplorer();
@@ -898,9 +721,9 @@ for (int i = 0; i < _urls.length; i++) {
                           child: ElevatedButton.icon(
                             onPressed: _downloadModel,
                             icon: const Icon(Icons.download),
-                            label: const Text('Download'),
+                            label: Text(l10n.modelDownload),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red, // красная кнопка
+                              backgroundColor: Colors.red,
                               padding: EdgeInsets.symmetric(
                                 horizontal: compact ? 10 : 14,
                                 vertical: compact ? 8 : 10,
