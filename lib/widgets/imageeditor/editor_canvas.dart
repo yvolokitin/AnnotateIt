@@ -98,6 +98,27 @@ class EditorCanvas extends StatefulWidget {
       print('Error flipping vertical: $e');
     }
   }
+
+  // Static methods to trigger zoom in/out from outside
+  static void zoomIn() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).zoomIn();
+    } catch (e) {
+      print('Error zooming in: $e');
+    }
+  }
+
+  static void zoomOut() {
+    try {
+      final state = _editorCanvasKey.currentState;
+      if (state == null) return;
+      (state as dynamic).zoomOut();
+    } catch (e) {
+      print('Error zooming out: $e');
+    }
+  }
   
   // Global key to access the state
   static final GlobalKey<State<EditorCanvas>> _editorCanvasKey = GlobalKey<State<EditorCanvas>>();
@@ -140,6 +161,10 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   
   // Hovered resize handle (for cursor/highlight)
   int? _hoverResizeHandle;
+  
+  // Middle mouse panning state
+  bool _isMiddlePanning = false;
+  Offset? _lastPanPosition;
   
   // Image modification state
   bool _isModified = false;
@@ -574,6 +599,21 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
   }
 
+  // Programmatic zoom controls
+  void zoomIn() {
+    final size = context.size;
+    if (size == null) return;
+    final center = Vector3(size.width / 2, size.height / 2, 0);
+    scaleCanvas(center, 1.05);
+  }
+
+  void zoomOut() {
+    final size = context.size;
+    if (size == null) return;
+    final center = Vector3(size.width / 2, size.height / 2, 0);
+    scaleCanvas(center, 0.95);
+  }
+
   // Helper method to check if a point is near a corner or edge of the crop rect
   // Returns:
   // 0-3: corners (top-left, top-right, bottom-right, bottom-left)
@@ -655,7 +695,14 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   
   void _handlePointerDown(PointerDownEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // Navigation mode - do nothing special
+      // Navigation mode: enable middle-mouse panning
+      if ((event.buttons & kMiddleMouseButton) != 0) {
+        setState(() {
+          _isMiddlePanning = true;
+          _lastPanPosition = event.localPosition;
+        });
+        return;
+      }
       return;
     }
     
@@ -682,7 +729,20 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
 
   void _handlePointerMove(PointerMoveEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // Navigation mode - do nothing special
+      // Navigation mode - middle mouse panning
+      if (_isMiddlePanning) {
+        final last = _lastPanPosition;
+        if (last != null) {
+          final dx = event.localPosition.dx - last.dx;
+          final dy = event.localPosition.dy - last.dy;
+          setState(() {
+            matrix.translate(dx, dy);
+            _lastPanPosition = event.localPosition;
+          });
+        } else {
+          _lastPanPosition = event.localPosition;
+        }
+      }
       return;
     }
     
@@ -837,7 +897,13 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
 
   void _handlePointerUp(PointerUpEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // Navigation mode - do nothing special
+      // End middle-mouse panning
+      if (_isMiddlePanning) {
+        setState(() {
+          _isMiddlePanning = false;
+          _lastPanPosition = null;
+        });
+      }
       return;
     }
     

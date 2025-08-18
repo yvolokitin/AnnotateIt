@@ -436,8 +436,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                 currentZoom: _currentZoom,
                                 currentMedia: media.mediaItem,
                                 showUnknownWarning: _isImageModified && media.annotations.isNotEmpty,
-                                onZoomIn: () {},
-                                onZoomOut: () {},
+                                onZoomIn: () { EditorCanvas.zoomIn(); },
+                                onZoomOut: () { EditorCanvas.zoomOut(); },
                                 onPrevImg: () {
                                   final newPage = _currentIndex - 1;
                                   _pageController.jumpToPage(newPage >= 0 ? newPage : widget.totalMediaCount - 1);
