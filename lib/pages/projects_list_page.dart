@@ -1,3 +1,4 @@
+import 'dart:io';
 import "package:flutter/material.dart";
 import '../gen_l10n/app_localizations.dart';
 
@@ -201,7 +202,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
             builder: (context) => ProjectDetailsPage(newProject),
           ),
         );
-        loadProjectsWithLabels(); // Refresh after returning from details
+        // Refresh after returning from details
+        loadProjectsWithLabels();
       }
     }
   }
@@ -366,7 +368,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                     size: 30,
                   ),
                   title: Text(
-                    l10n.exportProjectAsDataset, // 'Export Project as Dataset',
+                    l10n.exportProjectAsDataset,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
@@ -381,26 +383,29 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ),
 
                 // New: Pre-label Project option
-                ListTile(
-                  leading: Icon(
-                    Icons.auto_awesome,
-                    color: Colors.white70,
-                    size: 30,
-                  ),
-                  title: Text(
-                    'Pre-label Project',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
+                if (Platform.isAndroid || Platform.isIOS)...[
+                  ListTile(
+                    leading: Icon(
+                      Icons.auto_awesome,
                       color: Colors.white70,
+                      size: 30,
                     ),
+                    title: Text(
+                      // l10n.preLabelProject,
+                      "Pre-label Project with ML Kit",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: 'CascadiaCode',
+                        color: Colors.white70,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _handlePreLabelProject(project);
+                    },
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _handlePreLabelProject(project);
-                  },
-                ),
+                ],
 
                 ListTile(
                   leading: Icon(

@@ -331,6 +331,7 @@
   "changeProjectTypeErrorMessage": "Er is een fout opgetreden bij het wijzigen van het projecttype. De wijzigingen konden niet worden toegepast.",
   "changeProjectTypeErrorTips": "Controleer of het project geldige annotaties heeft en probeer het opnieuw. Als het probleem aanhoudt, herstart de app of neem contact op met ondersteuning.",
 
+  "preLabelProject": "Project voorlabelen met ML Kit",
   "exportProjectAsDataset": "Project Exporteren als Dataset",
 
   "projectHelpTitle": "Hoe Projecten Werken",

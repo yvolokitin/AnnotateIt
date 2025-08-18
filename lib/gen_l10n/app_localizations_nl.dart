@@ -374,13 +374,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuSortOldestNewest => 'Oudste-Nieuwste';
 
   @override
-  String get menuSortType => 'Projecttype';
+  String get menuSortProjectType => 'Projecttype';
 
   @override
-  String get menuSortAz => 'A-Z';
+  String get menuSortAZ => 'A-Z';
 
   @override
-  String get menuSortZa => 'Z-A';
+  String get menuSortZA => 'Z-A';
 
   @override
   String get projectNameLabel => 'Projectnaam';
@@ -791,6 +791,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Controleer of het project geldige annotaties heeft en probeer het opnieuw. Als het probleem aanhoudt, herstart de app of neem contact op met ondersteuning.';
 
   @override
+  String get preLabelProject => 'Project voorlabelen met ML Kit';
+
+  @override
   String get exportProjectAsDataset => 'Project Exporteren als Dataset';
 
   @override
@@ -1027,15 +1030,6 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get importLabelsNameMissingOrEmptyTips =>
       'Zorg ervoor dat elk label in de JSON een niet-leeg \'naam\'-veld bevat.';
-
-  @override
-  String get menuSortAZ => 'A-Z';
-
-  @override
-  String get menuSortZA => 'Z-A';
-
-  @override
-  String get menuSortProjectType => 'Projecttype';
 
   @override
   String get uploadInProgressTitle => 'Upload Bezig';

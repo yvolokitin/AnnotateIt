@@ -372,13 +372,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuSortOldestNewest => 'Сначала старые';
 
   @override
-  String get menuSortType => 'Тип проекта';
+  String get menuSortProjectType => 'Тип проекта';
 
   @override
-  String get menuSortAz => 'А-Я';
+  String get menuSortAZ => 'А-Я';
 
   @override
-  String get menuSortZa => 'Я-А';
+  String get menuSortZA => 'Я-А';
 
   @override
   String get projectNameLabel => 'Название проекта';
@@ -788,6 +788,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Проверьте, есть ли в проекте допустимые аннотации, и повторите попытку. Если ошибка сохраняется — перезапустите приложение или обратитесь в поддержку.';
 
   @override
+  String get preLabelProject =>
+      'Предварительно разметить проект с помощью ML Kit';
+
+  @override
   String get exportProjectAsDataset => 'Экспортировать проект как датасет';
 
   @override
@@ -1026,15 +1030,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get importLabelsNameMissingOrEmptyTips =>
       'Убедитесь, что каждая метка содержит поле \'name\' и оно не пустое.';
-
-  @override
-  String get menuSortAZ => 'А-Я';
-
-  @override
-  String get menuSortZA => 'Я-А';
-
-  @override
-  String get menuSortProjectType => 'Тип проекта';
 
   @override
   String get uploadInProgressTitle => 'Идёт загрузка';

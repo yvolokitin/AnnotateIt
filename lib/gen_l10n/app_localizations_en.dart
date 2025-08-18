@@ -362,7 +362,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuImportDataset => 'Create project from Dataset Import';
 
   @override
-  String get menuSortLastUpdated => 'Last Updated';
+  String get menuSortLastUpdated => 'Last updated';
 
   @override
   String get menuSortNewestOldest => 'Newest-Oldest';
@@ -371,13 +371,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuSortOldestNewest => 'Oldest-Newest';
 
   @override
-  String get menuSortType => 'Project Type';
+  String get menuSortProjectType => 'Project Type';
 
   @override
-  String get menuSortAz => 'A-Z';
+  String get menuSortAZ => 'A-Z';
 
   @override
-  String get menuSortZa => 'Z-A';
+  String get menuSortZA => 'Z-A';
 
   @override
   String get projectNameLabel => 'Project Name';
@@ -713,13 +713,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unnamedAnnotation => 'this annotation';
 
   @override
-  String get accountStorage_importFolderTitle => 'Datasets import folder';
+  String get accountStorage_importFolderTitle => 'Datasets import Folder';
 
   @override
-  String get accountStorage_thumbnailsFolderTitle => 'Thumbnails folder';
+  String get accountStorage_thumbnailsFolderTitle => 'Thumbnails Folder';
 
   @override
-  String get accountStorage_exportFolderTitle => 'Datasets export folder';
+  String get accountStorage_exportFolderTitle => 'Datasets export Folder';
 
   @override
   String get accountStorage_folderTooltip => 'Choose folder';
@@ -729,11 +729,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountStorage_helpMessage =>
-      'You can configure your default folders here.';
+      'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.';
 
   @override
   String get accountStorage_helpTips =>
-      'Use consistent folder structure to keep things organized.';
+      'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n';
 
   @override
   String get accountStorage_copySuccess => 'Path copied to clipboard';
@@ -782,6 +782,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get changeProjectTypeErrorTips =>
       'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.';
+
+  @override
+  String get preLabelProject => 'Pre-label Project with ML Kit';
 
   @override
   String get exportProjectAsDataset => 'Export Project as Dataset';
@@ -1020,15 +1023,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get importLabelsNameMissingOrEmptyTips =>
       'Ensure every label in the JSON includes a non-empty \'name\' field.';
-
-  @override
-  String get menuSortAZ => 'A-Z';
-
-  @override
-  String get menuSortZA => 'Z-A';
-
-  @override
-  String get menuSortProjectType => 'Project Type';
 
   @override
   String get uploadInProgressTitle => 'Upload in Progress';

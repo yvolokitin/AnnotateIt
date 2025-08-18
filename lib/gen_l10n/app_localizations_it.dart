@@ -373,13 +373,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get menuSortOldestNewest => 'Più Vecchio-Più Recente';
 
   @override
-  String get menuSortType => 'Tipo di Progetto';
+  String get menuSortProjectType => 'Tipo di Progetto';
 
   @override
-  String get menuSortAz => 'A-Z';
+  String get menuSortAZ => 'A-Z';
 
   @override
-  String get menuSortZa => 'Z-A';
+  String get menuSortZA => 'Z-A';
 
   @override
   String get projectNameLabel => 'Nome Progetto';
@@ -794,6 +794,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Verifica che il progetto abbia annotazioni valide e riprova. Se il problema persiste, riavvia l\'app o contatta l\'assistenza.';
 
   @override
+  String get preLabelProject => 'Pre-etichetta progetto con ML Kit';
+
+  @override
   String get exportProjectAsDataset => 'Esporta Progetto come Dataset';
 
   @override
@@ -1034,15 +1037,6 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get importLabelsNameMissingOrEmptyTips =>
       'Assicurati che ogni etichetta nel JSON includa un campo \'nome\' non vuoto.';
-
-  @override
-  String get menuSortAZ => 'A-Z';
-
-  @override
-  String get menuSortZA => 'Z-A';
-
-  @override
-  String get menuSortProjectType => 'Tipo di Progetto';
 
   @override
   String get uploadInProgressTitle => 'Caricamento in Corso';

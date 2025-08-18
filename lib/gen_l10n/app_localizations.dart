@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuSortLastUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last Updated'**
+  /// **'Last updated'**
   String get menuSortLastUpdated;
 
   /// No description provided for @menuSortNewestOldest.
@@ -776,23 +776,23 @@ abstract class AppLocalizations {
   /// **'Oldest-Newest'**
   String get menuSortOldestNewest;
 
-  /// No description provided for @menuSortType.
+  /// No description provided for @menuSortProjectType.
   ///
   /// In en, this message translates to:
   /// **'Project Type'**
-  String get menuSortType;
+  String get menuSortProjectType;
 
-  /// No description provided for @menuSortAz.
+  /// No description provided for @menuSortAZ.
   ///
   /// In en, this message translates to:
   /// **'A-Z'**
-  String get menuSortAz;
+  String get menuSortAZ;
 
-  /// No description provided for @menuSortZa.
+  /// No description provided for @menuSortZA.
   ///
   /// In en, this message translates to:
   /// **'Z-A'**
-  String get menuSortZa;
+  String get menuSortZA;
 
   /// No description provided for @projectNameLabel.
   ///
@@ -1365,19 +1365,19 @@ abstract class AppLocalizations {
   /// No description provided for @accountStorage_importFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Datasets import folder'**
+  /// **'Datasets import Folder'**
   String get accountStorage_importFolderTitle;
 
   /// No description provided for @accountStorage_thumbnailsFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Thumbnails folder'**
+  /// **'Thumbnails Folder'**
   String get accountStorage_thumbnailsFolderTitle;
 
   /// No description provided for @accountStorage_exportFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Datasets export folder'**
+  /// **'Datasets export Folder'**
   String get accountStorage_exportFolderTitle;
 
   /// No description provided for @accountStorage_folderTooltip.
@@ -1395,13 +1395,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountStorage_helpMessage.
   ///
   /// In en, this message translates to:
-  /// **'You can configure your default folders here.'**
+  /// **'You can change the folder where imported datasets, exported ZIP archives, and thumbnails are stored.\nTap the \"Folder\" icon next to the path field to select or change the directory.\n\nThis folder will be used as the default location for:\n- Imported dataset files (e.g., COCO, YOLO, VOC, Datumaro, etc.)\n- Exported dataset Zip archives\n- Project thumbnails\n\nMake sure the selected folder is writable and has enough space.\nOn Android or iOS, you may need to grant storage permissions.\nRecommended folders vary by platform — see below platform-specific tips.'**
   String get accountStorage_helpMessage;
 
   /// No description provided for @accountStorage_helpTips.
   ///
   /// In en, this message translates to:
-  /// **'Use consistent folder structure to keep things organized.'**
+  /// **'Recommended folders by platform:\n\nWindows:\n  C:\\Users\\<you>\\AppData\\Roaming\\AnnotateIt\\datasets\n\nLinux / Ubuntu:\n  /home/<you>/.annotateit/datasets\n\nmacOS:\n  /Users/<you>/Library/Application Support/AnnotateIt/datasets\n\nAndroid:\n  /storage/emulated/0/AnnotateIt/datasets\n\niOS:\n  <App sandbox path>/Documents/AnnotateIt/datasets\n'**
   String get accountStorage_helpTips;
 
   /// No description provided for @accountStorage_copySuccess.
@@ -1487,6 +1487,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.'**
   String get changeProjectTypeErrorTips;
+
+  /// No description provided for @preLabelProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-label Project with ML Kit'**
+  String get preLabelProject;
 
   /// No description provided for @exportProjectAsDataset.
   ///
@@ -1889,24 +1895,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ensure every label in the JSON includes a non-empty \'name\' field.'**
   String get importLabelsNameMissingOrEmptyTips;
-
-  /// No description provided for @menuSortAZ.
-  ///
-  /// In en, this message translates to:
-  /// **'A-Z'**
-  String get menuSortAZ;
-
-  /// No description provided for @menuSortZA.
-  ///
-  /// In en, this message translates to:
-  /// **'Z-A'**
-  String get menuSortZA;
-
-  /// No description provided for @menuSortProjectType.
-  ///
-  /// In en, this message translates to:
-  /// **'Project Type'**
-  String get menuSortProjectType;
 
   /// No description provided for @uploadInProgressTitle.
   ///
