@@ -93,7 +93,7 @@ class _EditorTopToolbarState extends State<EditorTopToolbar> {
                 icon: const Icon(Icons.save),
                 label: Text(l10n.buttonSave),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
+                  backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
                 ),
               ),

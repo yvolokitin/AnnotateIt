@@ -72,18 +72,26 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
                 const Icon(Icons.brightness_low, color: Colors.white70),
                 SizedBox(
                   width: 200, // Fixed width for the slider
-                  child: Slider(
-                    value: _brightness,
-                    min: -1.0,
-                    max: 1.0,
-                    divisions: 100,
-                    label: _brightness.toStringAsFixed(2),
-                    onChanged: (value) {
-                      setState(() {
-                        _brightness = value;
-                      });
-                      widget.onPreview?.call(_brightness, _contrast);
-                    },
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Colors.orange,
+                      inactiveTrackColor: Colors.orangeAccent.withOpacity(0.3),
+                      thumbColor: Colors.orange,
+                      overlayColor: Colors.orange.withOpacity(0.2),
+                    ),
+                    child: Slider(
+                      value: _brightness,
+                      min: -1.0,
+                      max: 1.0,
+                      divisions: 100,
+                      label: _brightness.toStringAsFixed(2),
+                      onChanged: (value) {
+                        setState(() {
+                          _brightness = value;
+                        });
+                        widget.onPreview?.call(_brightness, _contrast);
+                      },
+                    ),
                   ),
                 ),
                 const Icon(Icons.brightness_high, color: Colors.white70),
@@ -96,18 +104,26 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
                 const Icon(Icons.contrast, color: Colors.white70),
                 SizedBox(
                   width: 200, // Fixed width for the slider
-                  child: Slider(
-                    value: _contrast,
-                    min: 0.0,
-                    max: 2.0,
-                    divisions: 100,
-                    label: _contrast.toStringAsFixed(2),
-                    onChanged: (value) {
-                      setState(() {
-                        _contrast = value;
-                      });
-                      widget.onPreview?.call(_brightness, _contrast);
-                    },
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Colors.orange,
+                      inactiveTrackColor: Colors.orangeAccent.withOpacity(0.3),
+                      thumbColor: Colors.orange,
+                      overlayColor: Colors.orange.withOpacity(0.2),
+                    ),
+                    child: Slider(
+                      value: _contrast,
+                      min: 0.0,
+                      max: 2.0,
+                      divisions: 100,
+                      label: _contrast.toStringAsFixed(2),
+                      onChanged: (value) {
+                        setState(() {
+                          _contrast = value;
+                        });
+                        widget.onPreview?.call(_brightness, _contrast);
+                      },
+                    ),
                   ),
                 ),
                 const Icon(Icons.contrast_outlined, color: Colors.white70),
@@ -130,8 +146,8 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
                 onPressed: () => widget.onApply(_brightness, _contrast),
                 child: Text(l10n.buttonApply),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.black,
                 ),
               ),
             ],
