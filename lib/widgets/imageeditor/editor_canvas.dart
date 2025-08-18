@@ -167,6 +167,10 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   // Adjustment panel state
   bool _showAdjustmentPanel = false;
   bool _isBrightnessMode = true; // true for brightness, false for contrast
+  
+  // Temp store values to restore on cancel while previewing adjustments
+  double? _preAdjustBrightness;
+  double? _preAdjustContrast;
 
   // Keyboard modifiers for crop behavior
   final FocusNode _focusNode = FocusNode();
@@ -184,6 +188,11 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
       if (widget.editorAction == EditorAction.brightness) {
         if (!_showAdjustmentPanel || !_isBrightnessMode) {
           setState(() {
+            // If panel was previously hidden, remember values for Cancel
+            if (!_showAdjustmentPanel) {
+              _preAdjustBrightness = _brightness;
+              _preAdjustContrast = _contrast;
+            }
             _showAdjustmentPanel = true;
             _isBrightnessMode = true;
           });
@@ -191,6 +200,10 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
       } else if (widget.editorAction == EditorAction.contrast) {
         if (!_showAdjustmentPanel || _isBrightnessMode) {
           setState(() {
+            if (!_showAdjustmentPanel) {
+              _preAdjustBrightness = _brightness;
+              _preAdjustContrast = _contrast;
+            }
             _showAdjustmentPanel = true;
             _isBrightnessMode = false;
           });
@@ -871,12 +884,23 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     }
   }
   
+  // Live preview brightness/contrast adjustments
+  void _handlePreviewAdjustment(double brightness, double contrast) {
+    setState(() {
+      _brightness = brightness;
+      _contrast = contrast;
+      // no _setModified here; preview shouldn't mark as modified until Apply
+    });
+  }
+  
   // Handle applying brightness/contrast adjustments
   void _handleApplyAdjustment(double brightness, double contrast) {
     setState(() {
       _brightness = brightness;
       _contrast = contrast;
       _showAdjustmentPanel = false;
+      _preAdjustBrightness = null;
+      _preAdjustContrast = null;
       _setModified(true);
     });
   }
@@ -884,6 +908,13 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   // Handle canceling brightness/contrast adjustments
   void _handleCancelAdjustment() {
     setState(() {
+      // Restore values if we had previewed changes
+      if (_preAdjustBrightness != null && _preAdjustContrast != null) {
+        _brightness = _preAdjustBrightness!;
+        _contrast = _preAdjustContrast!;
+      }
+      _preAdjustBrightness = null;
+      _preAdjustContrast = null;
       _showAdjustmentPanel = false;
     });
   }
@@ -1123,6 +1154,7 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
                   initialBrightness: _brightness,
                   initialContrast: _contrast,
                   isBrightnessMode: _isBrightnessMode,
+                  onPreview: _handlePreviewAdjustment,
                   onApply: _handleApplyAdjustment,
                   onCancel: _handleCancelAdjustment,
                 ),

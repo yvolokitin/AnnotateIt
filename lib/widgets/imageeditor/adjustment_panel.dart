@@ -7,6 +7,7 @@ class AdjustmentPanel extends StatefulWidget {
   final Function(double brightness, double contrast) onApply;
   final VoidCallback onCancel;
   final bool isBrightnessMode; // true for brightness, false for contrast
+  final void Function(double brightness, double contrast)? onPreview;
 
   const AdjustmentPanel({
     Key? key,
@@ -15,6 +16,7 @@ class AdjustmentPanel extends StatefulWidget {
     required this.onApply,
     required this.onCancel,
     required this.isBrightnessMode,
+    this.onPreview,
   }) : super(key: key);
 
   @override
@@ -80,6 +82,7 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
                       setState(() {
                         _brightness = value;
                       });
+                      widget.onPreview?.call(_brightness, _contrast);
                     },
                   ),
                 ),
@@ -103,6 +106,7 @@ class _AdjustmentPanelState extends State<AdjustmentPanel> {
                       setState(() {
                         _contrast = value;
                       });
+                      widget.onPreview?.call(_brightness, _contrast);
                     },
                   ),
                 ),
