@@ -69,7 +69,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get buttonCreateProject => 'Создать проект';
 
   @override
-  String get modelsAnnotation => 'Модели для аннотации данных';
+  String get modelsAnnotation => 'Модели аннотации данных';
 
   @override
   String get modelDescriptionSamMobile =>

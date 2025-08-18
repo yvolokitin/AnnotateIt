@@ -178,6 +178,8 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   @override
   void didUpdateWidget(covariant EditorCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Update adjustment panel visibility based on editorAction
     if (widget.editorAction != oldWidget.editorAction) {
       if (widget.editorAction == EditorAction.brightness) {
         if (!_showAdjustmentPanel || !_isBrightnessMode) {
@@ -200,6 +202,46 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
           });
         }
       }
+    }
+
+    // Handle reset zoom requests
+    if (widget.resetZoomCount != _lastResetCount) {
+      _lastResetCount = widget.resetZoomCount;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          matrix = setTransformToFit(_modifiedImage ?? widget.image);
+        });
+        widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
+      });
+    }
+
+    // Initialize crop rect when crop action is selected
+    if (oldWidget.editorAction != widget.editorAction &&
+        widget.editorAction == EditorAction.crop) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await _ensureCommittedTransformsBeforeCrop();
+        if (!mounted) return;
+        setState(() {
+          // Initialize crop rect to the entire image
+          _cropRect = _getImageRect();
+          _activeResizeHandle = null;
+          _dragStartPosition = null;
+          _originalCropRect = null;
+        });
+        // ensure we can capture keyboard modifiers
+        _focusNode.requestFocus();
+      });
+    }
+
+    // Clear hover/active when leaving crop mode
+    if (oldWidget.editorAction == EditorAction.crop &&
+        widget.editorAction != EditorAction.crop) {
+      setState(() {
+        _hoverResizeHandle = null;
+        _activeResizeHandle = null;
+      });
     }
   }
   
@@ -480,49 +522,6 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     });
   }
 
-  @override
-  void didUpdateWidget(covariant EditorCanvas oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.resetZoomCount != _lastResetCount) {
-      _lastResetCount = widget.resetZoomCount;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          matrix = setTransformToFit(_modifiedImage ?? widget.image);
-        });
-        widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
-      });
-    }
-    
-    // Initialize crop rect when crop action is selected
-    if (oldWidget.editorAction != widget.editorAction && 
-        widget.editorAction == EditorAction.crop) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        await _ensureCommittedTransformsBeforeCrop();
-        if (!mounted) return;
-        setState(() {
-          // Initialize crop rect to the entire image
-          _cropRect = _getImageRect();
-          _activeResizeHandle = null;
-          _dragStartPosition = null;
-          _originalCropRect = null;
-        });
-        // ensure we can capture keyboard modifiers
-        _focusNode.requestFocus();
-      });
-    }
-
-    // Clear hover/active when leaving crop mode
-    if (oldWidget.editorAction == EditorAction.crop &&
-        widget.editorAction != EditorAction.crop) {
-      setState(() {
-        _hoverResizeHandle = null;
-        _activeResizeHandle = null;
-      });
-    }
-  }
 
   void notifyZoomChanged(double zoom) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
