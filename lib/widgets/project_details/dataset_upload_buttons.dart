@@ -182,15 +182,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               Future<void> runQuickCheck() async {
                 setState2(() => checking = true);
                 String? candidate;
-                // 1) cached
-                if (_ffmpegPathCache != null) {
-                  try {
-                    final ver = await Process.run(_ffmpegPathCache!, ['-version']);
-                    if (ver.exitCode == 0) candidate = _ffmpegPathCache!;
-                  } catch (_) {}
-                }
-                // 2) user setting
-                if (candidate == null) {
+                // 1) user setting
+                {
                   final saved = UserSession.instance.getUser().ffmpegPath;
                   if (saved != null && saved.isNotEmpty) {
                     try {
@@ -198,6 +191,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       if (ver.exitCode == 0) candidate = saved;
                     } catch (_) {}
                   }
+                }
+                // 2) cached
+                if (candidate == null && _ffmpegPathCache != null) {
+                  try {
+                    final ver = await Process.run(_ffmpegPathCache!, ['-version']);
+                    if (ver.exitCode == 0) candidate = _ffmpegPathCache!;
+                  } catch (_) {}
                 }
                 // 3) PATH
                 if (candidate == null) {
@@ -863,22 +863,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   Future<String?> _resolveFfmpegPath({
     required void Function(String) log,
   }) async {
-    // If cached and valid, use it
-    if (_ffmpegPathCache != null) {
-      final p = _ffmpegPathCache!;
-      try {
-        final ver = await Process.run(p, ['-version']);
-        if (ver.exitCode == 0) {
-          log('Using cached ffmpeg: ' + p);
-          return p;
-        } else {
-          log('Cached ffmpeg path invalid (exit ${ver.exitCode}).');
-        }
-      } catch (e) {
-        log('Cached ffmpeg path failed: ' + e.toString());
-      }
-    }
-
     // Try persisted user setting first
     try {
       final saved = UserSession.instance.getUser().ffmpegPath;
@@ -894,6 +878,22 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
     } catch (e) {
       log('Failed to validate ffmpeg from settings: ' + e.toString());
+    }
+
+    // If cached and valid, use it
+    if (_ffmpegPathCache != null) {
+      final p = _ffmpegPathCache!;
+      try {
+        final ver = await Process.run(p, ['-version']);
+        if (ver.exitCode == 0) {
+          log('Using cached ffmpeg: ' + p);
+          return p;
+        } else {
+          log('Cached ffmpeg path invalid (exit ${ver.exitCode}).');
+        }
+      } catch (e) {
+        log('Cached ffmpeg path failed: ' + e.toString());
+      }
     }
 
     // Try PATH

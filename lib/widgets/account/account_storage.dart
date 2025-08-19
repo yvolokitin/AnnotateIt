@@ -162,9 +162,13 @@ class _AccountStorageState extends State<AccountStorage> {
                   if (ver.exitCode == 0) {
                     await UserSession.instance.setFfmpegPath(p);
                     widget.onUserChange(widget.user.copyWith(ffmpegPath: p));
-                    AppSnackbar.show(context, 'FFmpeg saved');
+                    AppSnackbar.show(context, 'FFmpeg saved', saveToDb: false);
                   } else {
-                    AppSnackbar.show(context, 'Not a valid ffmpeg executable (exit ${ver.exitCode})');
+                    AppSnackbar.show(
+		      context,
+                      'Not a valid ffmpeg executable (exit ${ver.exitCode})',
+		      saveToDb: false,
+		    );
                   }
                 } catch (e) {
                   AppSnackbar.show(context, 'Failed to run ffmpeg: $e');
@@ -180,7 +184,7 @@ class _AccountStorageState extends State<AccountStorage> {
                 _ffmpegController.text = '';
                 await UserSession.instance.setFfmpegPath(null);
                 widget.onUserChange(widget.user.copyWith(ffmpegPath: null));
-                AppSnackbar.show(context, 'FFmpeg path cleared');
+                AppSnackbar.show(context, 'FFmpeg path cleared', saveToDb: false,);
               },
             ),
           ],
@@ -377,7 +381,7 @@ class _AccountStorageState extends State<AccountStorage> {
               isWide: isWide,
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: controller.text));
-                AppSnackbar.show(context, l10n.accountStorage_copySuccess);
+                AppSnackbar.show(context, l10n.accountStorage_copySuccess, saveToDb: false,);
               },
             ),
             _actionButton(
@@ -388,7 +392,7 @@ class _AccountStorageState extends State<AccountStorage> {
               onPressed: () async {
                 final folder = controller.text;
                 if (folder.isEmpty) {
-                  AppSnackbar.show(context, l10n.accountStorage_pathEmpty);
+                  AppSnackbar.show(context, l10n.accountStorage_pathEmpty, saveToDb: false,);
                   return;
                 }
                 
@@ -397,13 +401,13 @@ class _AccountStorageState extends State<AccountStorage> {
                   if (!await Directory(folder).exists()) {
                     final errorMessage = 'Directory does not exist: $folder';
                     _logger.warning(errorMessage);
-                    AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder));
+                    AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder), saveToDb: false,);
                     return;
                   }
                 } catch (e, stack) {
                   final errorMessage = 'Failed to check if directory exists: $folder';
                   _logger.severe(errorMessage, e, stack);
-                  AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder));
+                  AppSnackbar.show(context, l10n.accountStorage_openError.replaceFirst('{path}', folder), saveToDb: false,);
                   return;
                 }
                 
@@ -437,7 +441,7 @@ class _AccountStorageState extends State<AccountStorage> {
                     
                     if (retryCount >= maxRetries) {
                       _logger.severe('All attempts to open folder failed: $folder', e, stack);
-                      AppSnackbar.show(context, l10n.accountStorage_openFailed.replaceFirst('{error}', e.toString()));
+                      AppSnackbar.show(context, l10n.accountStorage_openFailed.replaceFirst('{error}', e.toString()), saveToDb: false,);
                       
                       // Show more detailed error dialog for persistent failures
                       AlertErrorDialog.show(

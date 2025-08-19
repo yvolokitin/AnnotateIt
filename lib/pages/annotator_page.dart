@@ -122,6 +122,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           'Selected SAM2 model is not available. Please download it first from the Models page.',
           backgroundColor: Colors.orangeAccent,
           textColor: Colors.black,
+	  saveToDb: false,
         );
         setState(() => _samModelKey = 'mobile');
         _samService.setModelVariant(SamModelVariant.mobile);
@@ -596,6 +597,15 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       // Clear selection when changing images
       _selectedAnnotation = null;
     });
+
+    // Ensure the current page's media is loaded when navigating (e.g., wrap-around jumps)
+    if (!_mediaCache.containsKey(index)) {
+      _loadMedia(index);
+    } else if (!_imageCache.containsKey(index) && !_invalidMediaCache.containsKey(index)) {
+      // In case media is cached but image wasn't decoded yet
+      _loadImage(index, _mediaCache[index]!.mediaItem.filePath);
+    }
+
     _preloadAdjacentImages(index);
   }
 
@@ -1203,6 +1213,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     
                     // Show loading indicator if media is not loaded yet
                     if (media == null) {
+                      // Ensure media starts loading for this page (handles wrap-around jumps)
+                      _loadMedia(index);
                       return const Center(child: CircularProgressIndicator());
                     }
                     
@@ -1259,6 +1271,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     
                     // Show loading indicator if image is not loaded yet
                     if (image == null) {
+                      // Decode/load image for already-loaded media
+                      _loadImage(index, media.mediaItem.filePath);
                       return const Center(child: CircularProgressIndicator());
                     }
                     
