@@ -203,4 +203,15 @@ class UserSession {
     _currentUser = updated;
     _logger.info('Updated models folder to: $p');
   }
+
+  //==================================================
+  // External tools
+  //==================================================
+  Future<void> setFfmpegPath(String? newPath) async {
+    final user = getUser();
+    final updated = user.copyWith(ffmpegPath: newPath?.trim().isEmpty == true ? null : newPath?.trim(), updatedAt: DateTime.now());
+    await UserDatabase.instance.update(updated);
+    _currentUser = updated;
+    _logger.info('Updated ffmpegPath to: \'${updated.ffmpegPath ?? '(null)'}\'');
+  }
 }

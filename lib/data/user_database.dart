@@ -18,14 +18,24 @@ class UserDatabase {
     throw Exception("Database not set.");
   }
   
+  Future<void> _ensureFfmpegPathColumn(Database db) async {
+    final info = await db.rawQuery("PRAGMA table_info(users)");
+    final hasCol = info.any((row) => (row['name'] as String?) == 'ffmpegPath');
+    if (!hasCol) {
+      await db.execute("ALTER TABLE users ADD COLUMN ffmpegPath TEXT");
+    }
+  }
+  
   Future<User> create(User user) async {
     final db = await database;
+    await _ensureFfmpegPathColumn(db);
     final id = await db.insert('users', user.toMap());
     return user.copyWith(id: id);
   }
 
   Future<User?> getUser() async {
     final db = await database;
+    await _ensureFfmpegPathColumn(db);
 
     final maps = await db.query(
       'users',
@@ -115,6 +125,7 @@ class UserDatabase {
 
   Future<int> update(User user) async {
     final db = await database;
+    await _ensureFfmpegPathColumn(db);
     return db.update(
       'users',
       user.toMap(),

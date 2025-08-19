@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:image/image.dart' as img;
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:video_player/video_player.dart' as vp;
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/project.dart';
@@ -54,6 +57,9 @@ class DatasetUploadButtons extends StatefulWidget {
 }
 
 class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
+  // Session-scoped cache for a user-selected ffmpeg executable on Windows
+  static String? _ffmpegPathCache;
+
   bool _hoveringDelete = false;
   late int _currentItemsPerPage;
 
@@ -146,6 +152,846 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     } catch (e) {
       print("_uploadMedia: Upload error: $e");
       widget.onUploadError?.call();
+    }
+  }
+  
+  Future<void> _uploadVideoAsFrames(BuildContext context) async {
+    // Collect debug logs to show in UI if needed
+    final List<String> _logs = [];
+    void logMsg(String msg) {
+      final line = '[VIDEO_IMPORT] ' + DateTime.now().toIso8601String() + ' ' + msg;
+      _logs.add(line);
+      print(line);
+    }
+
+    try {
+      logMsg('Platform: ' + Platform.operatingSystem + ' ' + Platform.version.split('\n').first);
+
+      // Step wizard: Ensure FFmpeg is available before selecting video (Windows)
+      if (Platform.isWindows) {
+        final bool? proceed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) {
+            bool initialized = false;
+            bool checking = false;
+            bool resolved = false;
+            String? ffmpegPath;
+
+            return StatefulBuilder(builder: (context2, setState2) {
+              Future<void> runQuickCheck() async {
+                setState2(() => checking = true);
+                String? candidate;
+                // 1) cached
+                if (_ffmpegPathCache != null) {
+                  try {
+                    final ver = await Process.run(_ffmpegPathCache!, ['-version']);
+                    if (ver.exitCode == 0) candidate = _ffmpegPathCache!;
+                  } catch (_) {}
+                }
+                // 2) user setting
+                if (candidate == null) {
+                  final saved = UserSession.instance.getUser().ffmpegPath;
+                  if (saved != null && saved.isNotEmpty) {
+                    try {
+                      final ver = await Process.run(saved, ['-version']);
+                      if (ver.exitCode == 0) candidate = saved;
+                    } catch (_) {}
+                  }
+                }
+                // 3) PATH
+                if (candidate == null) {
+                  try {
+                    final ver = await Process.run('ffmpeg', ['-version']);
+                    if (ver.exitCode == 0) candidate = 'ffmpeg';
+                  } catch (_) {}
+                }
+                setState2(() {
+                  ffmpegPath = candidate;
+                  resolved = ffmpegPath != null;
+                  checking = false;
+                });
+              }
+
+              if (!initialized) {
+                initialized = true;
+                Future.microtask(() => runQuickCheck());
+              }
+
+              return AlertDialog(
+                backgroundColor: Colors.grey[800],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.orangeAccent, width: 1),
+                ),
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.movie_creation_outlined,
+                      size: (MediaQuery.of(context2).size.width > 1200) ? 34 : 26,
+                      color: Colors.orangeAccent,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Video import',
+                      style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(color: Colors.orangeAccent),
+                    Row(children: [
+                      Icon(resolved ? Icons.check_circle : Icons.error_outline,
+                          color: resolved ? Colors.greenAccent : Colors.orangeAccent),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text('Step 1: Check FFmpeg',
+                            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                      ),
+                    ]),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'FFmpeg is required on Windows to extract frames.',
+                      style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                    ),
+                    const SizedBox(height: 6),
+                    if (checking) const LinearProgressIndicator(),
+                    if (!checking)
+                      Text(
+                        resolved
+                            ? 'Using: ' + (ffmpegPath ?? '')
+                            : 'FFmpeg not available. Select ffmpeg.exe first.',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
+                      ),
+                    const SizedBox(height: 12),
+                    Row(children: [
+                      TextButton(
+                        onPressed: checking
+                            ? null
+                            : () async {
+                                final p = await _resolveFfmpegPath(log: (_) {});
+                                setState2(() {
+                                  ffmpegPath = p;
+                                  resolved = p != null;
+                                });
+                              },
+                        child: const Text('Select FFmpeg', style: TextStyle(fontFamily: 'CascadiaCode')),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: checking ? null : () async => runQuickCheck(),
+                        child: const Text('Re-check', style: TextStyle(fontFamily: 'CascadiaCode')),
+                      ),
+                    ]),
+                    const Divider(height: 20, color: Colors.orangeAccent),
+                    Row(children: [
+                      const Icon(Icons.video_file_outlined, color: Colors.white70),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text('Step 2: Select video file',
+                            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                      ),
+                    ]),
+                    const SizedBox(height: 6),
+                    const Text('After FFmpeg is resolved, click Continue to choose a video to import.',
+                        style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode')),
+                  ],
+                ),
+                actions: [
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: (!resolved) ? null : () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                          ),
+                        ),
+                        child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            });
+          },
+        );
+        if (proceed != true) {
+          logMsg('User cancelled pre-check wizard.');
+          return;
+        }
+      }
+
+      // Android/iOS info dialog (built-in extraction, no FFmpeg needed)
+      if (Platform.isAndroid || Platform.isIOS) {
+        final bool? proceedMobile = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) {
+            final screenWidth = MediaQuery.of(ctx).size.width;
+            return AlertDialog(
+              backgroundColor: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.orangeAccent, width: 1),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.movie_creation_outlined,
+                    size: (screenWidth > 1200) ? 34 : 26,
+                    color: Colors.orangeAccent,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Video import',
+                    style: TextStyle(
+                      color: Colors.orangeAccent,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Divider(color: Colors.orangeAccent),
+                  SizedBox(height: 4),
+                  Text(
+                    'Frames will be extracted using built-in capabilities of your device (no FFmpeg required).',
+                    style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Tap Continue to choose a video file to import and extract frames as images.',
+                    style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                        ),
+                      ),
+                      child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+        if (proceedMobile != true) {
+          logMsg('User cancelled mobile pre-info dialog.');
+          return;
+        }
+      }
+
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov'],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        logMsg('User cancelled file picking.');
+        return;
+      }
+
+      final picked = result.files.first;
+      final videoPath = picked.path!;
+      final fileName = picked.name;
+      logMsg('Selected file: ' + videoPath);
+
+      widget.onUploadingChanged(true);
+
+      // Inform user we started working on the selected file
+      widget.onFileProgress?.call('Selected: ' + fileName, 0, 1);
+
+      // Determine target frames count (fallback if metadata is unavailable)
+      final meta = await getVideoMetadata(videoPath);
+      final double durationStub = (meta['duration'] ?? 0.0) as double;
+      final double fpsStub = (meta['fps'] ?? 0.0) as double;
+      int totalFrames;
+      if (durationStub > 0 && fpsStub > 0) {
+        totalFrames = (durationStub * fpsStub).round().clamp(1, 600);
+      } else {
+        totalFrames = 60; // fallback default
+      }
+      logMsg('Stub metadata -> duration: ' + durationStub.toString() + ', fps: ' + fpsStub.toString() + ', fallback totalFrames: ' + totalFrames.toString());
+
+      // Prepare output directory (next to the video)
+      final videoFile = File(videoPath);
+      if (!await videoFile.exists()) {
+        throw Exception('Selected video file not found');
+      }
+      final parentDir = videoFile.parent;
+      final fileSize = await videoFile.length();
+      logMsg('Video exists. Size: ' + fileSize.toString() + ' bytes. Parent dir: ' + parentDir.path);
+
+      // Ensure directory writable
+      final testFile = File(path.join(parentDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
+      try {
+        await testFile.writeAsString('test');
+        await testFile.delete();
+        logMsg('Write test in parent directory succeeded.');
+      } catch (e) {
+        logMsg('Write test failed for ' + parentDir.path + ': ' + e.toString());
+        throw Exception('Cannot write to directory: ${parentDir.path}');
+      }
+
+      final baseName = path.basenameWithoutExtension(videoFile.path);
+      final framesDir = Directory(path.join(parentDir.path, baseName + '_frames'));
+      if (!framesDir.existsSync()) {
+        framesDir.createSync(recursive: true);
+        logMsg('Created frames directory: ' + framesDir.path);
+      } else {
+        logMsg('Using existing frames directory: ' + framesDir.path);
+      }
+
+      // Extract frames and insert into dataset
+      final currentUser = UserSession.instance.getUser();
+      if (currentUser.id == null) {
+        logMsg('Current user is not set (id == null). Aborting.');
+        widget.onUploadingChanged(false);
+        widget.onUploadError?.call();
+        return;
+      }
+
+      // Initialize a video controller to get accurate duration
+      double videoSeconds = 0.0;
+      String? controllerError;
+      try {
+        final controller = vp.VideoPlayerController.file(File(videoPath));
+        await controller.initialize();
+        videoSeconds = controller.value.duration.inMilliseconds / 1000.0;
+        logMsg('video_player initialize OK. Duration: ' + videoSeconds.toString() + ' s, aspectRatio: ' + controller.value.aspectRatio.toString());
+        await controller.dispose();
+      } catch (e) {
+        controllerError = e.toString();
+        logMsg('video_player initialize FAILED: ' + controllerError);
+      }
+
+      // Choose an extraction fps (keep modest to limit count)
+      final double extractFps = 2.0; // 2 frames per second
+      int expectedFrames = (videoSeconds > 0 ? (videoSeconds * extractFps) : totalFrames).round();
+      if (expectedFrames <= 0) expectedFrames = totalFrames > 0 ? totalFrames : 60;
+      expectedFrames = expectedFrames.clamp(1, 1200); // safety cap
+      logMsg('Extraction fps: ' + extractFps.toString() + ', expectedFrames: ' + expectedFrames.toString());
+
+      // Prepare variables for extraction
+      String? firstThumbError;
+      final List<File> frameFiles = [];
+
+      // On Windows, skip video_thumbnail (no plugin implementation) and rely on FFmpeg fallback below
+      if (!Platform.isWindows) {
+        try {
+          final probe = await VideoThumbnail.thumbnailData(
+            video: videoPath,
+            timeMs: 0,
+            imageFormat: ImageFormat.PNG,
+            quality: 100,
+          );
+          logMsg('video_thumbnail probe@0ms -> bytes: ' + (probe?.length ?? 0).toString());
+        } catch (e) {
+          firstThumbError = e.toString();
+          logMsg('video_thumbnail probe FAILED: ' + firstThumbError);
+        }
+
+        // Generate frames using video_thumbnail at regular intervals
+        final int intervalMs = (1000 / extractFps).round();
+        for (int i = 0; i < expectedFrames; i++) {
+          if (widget.cancelUpload) {
+            logMsg('User requested cancel during extraction loop at frame ' + (i + 1).toString());
+            widget.onUploadingChanged(false);
+            widget.onUploadError?.call();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Upload stopped')),
+            );
+            return;
+          }
+
+          final timeMs = i * intervalMs;
+          try {
+            final bytes = await VideoThumbnail.thumbnailData(
+              video: videoPath,
+              timeMs: timeMs,
+              imageFormat: ImageFormat.PNG,
+              quality: 100,
+            );
+            if (bytes != null && bytes.isNotEmpty) {
+              final framePath = path.join(
+                framesDir.path,
+                baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
+              );
+              final frameFile = File(framePath);
+              await frameFile.writeAsBytes(bytes);
+              frameFiles.add(frameFile);
+            } else {
+              if (i == 0) {
+                logMsg('video_thumbnail returned empty bytes at first frame.');
+              }
+            }
+          } catch (e) {
+            if (i == 0) {
+              logMsg('video_thumbnail threw at frame 1: ' + e.toString());
+            }
+            // Skip frame on error
+          }
+          widget.onFileProgress?.call('Extracting frames: ' + (i + 1).toString() + '/' + expectedFrames.toString(), i + 1, expectedFrames);
+        }
+      }
+
+      int totalExtracted = frameFiles.length;
+      if (!Platform.isWindows) {
+        logMsg('video_thumbnail extracted frames: ' + totalExtracted.toString());
+      }
+
+      // Windows fallback with FFmpeg if no frames extracted
+      bool usedFfmpeg = false;
+      bool ffmpegResolved = false;
+      String? ffmpegError;
+      String? ffmpegPathUsed;
+      if (totalExtracted == 0 && Platform.isWindows) {
+        logMsg('No frames via video_thumbnail and running on Windows. Trying FFmpeg extraction...');
+
+        // Clean stale frames first to avoid mixing from previous runs
+        try {
+          final stale = framesDir
+              .listSync()
+              .whereType<File>()
+              .where((f) => f.path.toLowerCase().endsWith('.png'))
+              .toList();
+          for (final f in stale) {
+            await f.delete();
+          }
+          logMsg('Cleaned existing PNG frames in: ' + framesDir.path + ' (deleted ' + stale.length.toString() + ')');
+        } catch (e) {
+          logMsg('Failed to clean frames directory: ' + e.toString());
+        }
+
+        final ffmpegPath = await _resolveFfmpegPath(log: logMsg);
+        if (ffmpegPath != null) {
+          ffmpegResolved = true;
+          ffmpegPathUsed = ffmpegPath;
+          final ok = await _tryExtractFramesWithFfmpeg(
+            ffmpegPath: ffmpegPath,
+            videoPath: videoPath,
+            framesDir: framesDir.path,
+            baseName: baseName,
+            fps: extractFps,
+            log: logMsg,
+          );
+          usedFfmpeg = ok;
+          if (ok) {
+            // Collect generated frames
+            final all = framesDir
+                .listSync()
+                .whereType<File>()
+                .where((f) => f.path.toLowerCase().endsWith('.png'))
+                .toList()
+              ..sort((a, b) => a.path.compareTo(b.path));
+            frameFiles.addAll(all);
+            totalExtracted = frameFiles.length;
+            logMsg('FFmpeg extracted frames: ' + totalExtracted.toString());
+          } else {
+            ffmpegError = 'FFmpeg run did not produce frames (see logs above).';
+          }
+        } else {
+          ffmpegError = 'FFmpeg not available on PATH and user did not provide a valid ffmpeg.exe.';
+        }
+      }
+
+      if (totalExtracted == 0) {
+        // Gracefully handle platforms where extraction is not supported and show diagnostics
+        widget.onUploadingChanged(false);
+        final String diag = [
+          'Platform: ' + Platform.operatingSystem,
+          'video path: ' + videoPath,
+          if (controllerError != null) 'video_player error: ' + controllerError!,
+          if (firstThumbError != null) 'video_thumbnail error: ' + firstThumbError!,
+          if (Platform.isWindows) 'ffmpeg resolved: ' + (ffmpegResolved ? 'YES' : 'NO'),
+          if (Platform.isWindows && ffmpegPathUsed != null) 'ffmpeg path: ' + ffmpegPathUsed!,
+          if (ffmpegError != null) ffmpegError!,
+          'frames dir: ' + framesDir.path,
+        ].join('\n');
+
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                backgroundColor: Colors.grey[800],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.orangeAccent, width: 1),
+                ),
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: (MediaQuery.of(ctx).size.width > 1200) ? 34 : 26,
+                      color: Colors.orangeAccent,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Import not completed',
+                      style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Divider(color: Colors.orangeAccent),
+                      const SizedBox(height: 6),
+                      SelectableText(
+                        'Could not extract frames from the selected video.\n\nDiagnostics:\n' + diag,
+                        style: const TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        return;
+      }
+
+      // Read size from first image (optional metadata)
+      int? frameWidth;
+      int? frameHeight;
+      try {
+        final firstBytes = await frameFiles.first.readAsBytes();
+        final decoded = img.decodeImage(firstBytes);
+        if (decoded != null) {
+          frameWidth = decoded.width;
+          frameHeight = decoded.height;
+          logMsg('First frame dimensions: ' + frameWidth.toString() + 'x' + frameHeight.toString());
+        }
+      } catch (e) {
+        logMsg('Failed to read first frame size: ' + e.toString());
+      }
+
+      // Insert extracted frames into DB with progress
+      int inserted = 0;
+      for (final f in frameFiles) {
+        if (widget.cancelUpload) {
+          logMsg('User requested cancel during DB insert at item ' + (inserted + 1).toString());
+          widget.onUploadingChanged(false);
+          widget.onUploadError?.call();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Upload stopped')),
+          );
+          return;
+        }
+
+        await DatasetDatabase.instance.insertMediaItem(
+          widget.datasetId,
+          f.path,
+          'png',
+          ownerId: currentUser.id!,
+          width: frameWidth,
+          height: frameHeight,
+          source: 'video_frames',
+        );
+
+        inserted++;
+        widget.onFileProgress?.call('Adding to dataset: ' + inserted.toString() + '/' + totalExtracted.toString(), inserted, totalExtracted);
+      }
+
+      // Update project icon using the first frame if project still has default icon
+      if (widget.project.icon.contains('default_project_image') || widget.project.icon.contains('folder')) {
+        final firstFramePath = frameFiles.first.path;
+        final thumb = await generateThumbnailFromImage(File(firstFramePath), widget.project.id.toString());
+        if (thumb != null) {
+          await ProjectDatabase.instance.updateProjectIcon(widget.project.id!, thumb.path);
+        }
+      }
+
+      await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+      widget.onUploadingChanged(false);
+      widget.onUploadSuccess();
+
+      // Show summary dialog
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              backgroundColor: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.orangeAccent, width: 1),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: (MediaQuery.of(ctx).size.width > 1200) ? 34 : 26,
+                    color: Colors.orangeAccent,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Import complete',
+                    style: TextStyle(
+                      color: Colors.orangeAccent,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(color: Colors.orangeAccent),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Extracted ' + totalExtracted.toString() + ' frame' + (totalExtracted == 1 ? '' : 's') + ' and added to dataset.' + (usedFfmpeg ? ' (via FFmpeg)' : ' (via video_thumbnail)'),
+                    style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e, st) {
+      print('_uploadVideoAsFrames error: ' + e.toString());
+      print(st.toString());
+      widget.onUploadingChanged(false);
+      widget.onUploadError?.call();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Video to frames failed: ' + e.toString())),
+      );
+    }
+  }
+
+  Future<String?> _resolveFfmpegPath({
+    required void Function(String) log,
+  }) async {
+    // If cached and valid, use it
+    if (_ffmpegPathCache != null) {
+      final p = _ffmpegPathCache!;
+      try {
+        final ver = await Process.run(p, ['-version']);
+        if (ver.exitCode == 0) {
+          log('Using cached ffmpeg: ' + p);
+          return p;
+        } else {
+          log('Cached ffmpeg path invalid (exit ${ver.exitCode}).');
+        }
+      } catch (e) {
+        log('Cached ffmpeg path failed: ' + e.toString());
+      }
+    }
+
+    // Try persisted user setting first
+    try {
+      final saved = UserSession.instance.getUser().ffmpegPath;
+      if (saved != null && saved.isNotEmpty) {
+        final ver = await Process.run(saved, ['-version']);
+        if (ver.exitCode == 0) {
+          _ffmpegPathCache = saved;
+          log('Using ffmpeg from settings: ' + saved);
+          return saved;
+        } else {
+          log('ffmpeg from settings invalid (exit ${ver.exitCode}).');
+        }
+      }
+    } catch (e) {
+      log('Failed to validate ffmpeg from settings: ' + e.toString());
+    }
+
+    // Try PATH
+    try {
+      final ver = await Process.run('ffmpeg', ['-version']);
+      if (ver.exitCode == 0) {
+        log('ffmpeg found on PATH.');
+        return 'ffmpeg';
+      } else {
+        log('ffmpeg on PATH returned exit: ' + ver.exitCode.toString());
+      }
+    } catch (e) {
+      log('ffmpeg not found on PATH: ' + e.toString());
+    }
+
+    // Prompt user to select ffmpeg.exe (Windows)
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: Platform.isWindows ? ['exe'] : null,
+        dialogTitle: 'Select ffmpeg executable',
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final picked = result.files.first.path!;
+        final file = File(picked);
+        if (await file.exists()) {
+          final ver = await Process.run(picked, ['-version']);
+          if (ver.exitCode == 0) {
+            _ffmpegPathCache = picked;
+            try {
+              // Persist for future sessions on desktop platforms
+              if (!Platform.isAndroid && !Platform.isIOS) {
+                await UserSession.instance.setFfmpegPath(picked);
+              }
+            } catch (_) {}
+            log('User-selected ffmpeg validated: ' + picked);
+            return picked;
+          } else {
+            log('Selected ffmpeg returned exit: ' + ver.exitCode.toString());
+          }
+        } else {
+          log('Selected ffmpeg file does not exist: ' + picked);
+        }
+      } else {
+        log('User cancelled ffmpeg selection.');
+      }
+    } catch (e) {
+      log('Error during ffmpeg selection: ' + e.toString());
+    }
+
+    return null;
+  }
+
+  Future<bool> _tryExtractFramesWithFfmpeg({
+    required String ffmpegPath,
+    required String videoPath,
+    required String framesDir,
+    required String baseName,
+    required double fps,
+    required void Function(String) log,
+  }) async {
+    try {
+      final String outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
+      log('Running ffmpeg to extract frames at ' + fps.toString() + ' fps. Using: ' + ffmpegPath);
+      final result = await Process.run(
+        ffmpegPath,
+        [
+          '-y',
+          '-hide_banner',
+          '-loglevel', 'error',
+          '-i', videoPath,
+          '-vf', 'fps=' + fps.toString(),
+          outPattern,
+        ],
+        runInShell: true,
+      );
+      log('ffmpeg exitCode: ' + result.exitCode.toString());
+      if ((result.stdout as Object?) != null) {
+        final s = result.stdout.toString();
+        if (s.isNotEmpty) log('ffmpeg stdout: ' + s);
+      }
+      if ((result.stderr as Object?) != null) {
+        final s = result.stderr.toString();
+        if (s.isNotEmpty) log('ffmpeg stderr: ' + s);
+      }
+
+      final dir = Directory(framesDir);
+      final produced = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.toLowerCase().endsWith('.png'))
+          .length;
+      log('ffmpeg produced PNG files: ' + produced.toString());
+      return produced > 0;
+    } catch (e) {
+      log('FFmpeg execution failed: ' + e.toString());
+      return false;
     }
   }
   
@@ -400,6 +1246,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             onPressed: () async {
               await _uploadMedia(context);
             },
+          ),
+          
+          SizedBox(width: smallScreen ? 10 : 20),
+          _buildButton(
+            context,
+            buttonName: 'Upload video',
+            buttonIcon: Icons.movie_creation_outlined,
+            borderColor: Colors.orange,
+            screenWidth: screenWidth,
+            smallScreen: smallScreen,
+            onPressed: () async {
+              await _uploadVideoAsFrames(context);
+            },
+            tooltip: 'Extract frames to images',
           ),
           
           SizedBox(width: smallScreen ? 10 : 20),

@@ -32,6 +32,9 @@ class User {
   final String preferredSamModelKey; // e.g., 'sam2_hiera_base_plus' or 'mobile'
   final bool samRememberChoice;
 
+  // Optional external tools
+  final String? ffmpegPath;
+
   static final List<String> fields = [
     'id',
     'firstName',
@@ -62,6 +65,7 @@ class User {
     'annotationOpacity',
     'preferredSamModelKey',
     'samRememberChoice',
+    'ffmpegPath',
   ];
 
   const User({
@@ -94,6 +98,7 @@ class User {
     required this.annotationOpacity,
     required this.preferredSamModelKey,
     required this.samRememberChoice,
+    this.ffmpegPath,
   });
 
   User copyWith({
@@ -126,6 +131,7 @@ class User {
     double? annotationOpacity,
     String? preferredSamModelKey,
     bool? samRememberChoice,
+    String? ffmpegPath,
   }) {
     return User(
       id: id ?? this.id,
@@ -157,6 +163,7 @@ class User {
       annotationOpacity: annotationOpacity ?? this.annotationOpacity,
       preferredSamModelKey: preferredSamModelKey ?? this.preferredSamModelKey,
       samRememberChoice: samRememberChoice ?? this.samRememberChoice,
+      ffmpegPath: ffmpegPath ?? this.ffmpegPath,
     );
   }
 
@@ -190,6 +197,7 @@ class User {
         'annotationOpacity': annotationOpacity,
         'preferredSamModelKey': preferredSamModelKey,
         'samRememberChoice': samRememberChoice ? 1 : 0,
+        'ffmpegPath': ffmpegPath,
       };
 
   static User fromMap(Map<String, dynamic> map) => User(
@@ -222,6 +230,7 @@ class User {
         annotationOpacity: (map['annotationOpacity'] as num?)?.toDouble() ?? 0.35,
         preferredSamModelKey: (map['preferredSamModelKey'] as String?) ?? 'sam2_hiera_base_plus',
         samRememberChoice: map['samRememberChoice'] == null ? false : map['samRememberChoice'] == 1,
+        ffmpegPath: map['ffmpegPath'] as String?,
       );
 
   @override

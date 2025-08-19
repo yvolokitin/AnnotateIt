@@ -36,7 +36,8 @@ Future<void> createInitialSchema(Database db, int version) async {
         showExportLabelsButton INTEGER NOT NULL DEFAULT 1,
         annotationOpacity REAL NOT NULL DEFAULT 0.35,
         preferredSamModelKey TEXT NOT NULL DEFAULT 'sam2_hiera_base_plus',
-        samRememberChoice INTEGER NOT NULL DEFAULT 0
+        samRememberChoice INTEGER NOT NULL DEFAULT 0,
+        ffmpegPath TEXT
       )
     ''');
 

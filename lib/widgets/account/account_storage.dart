@@ -32,6 +32,7 @@ class _AccountStorageState extends State<AccountStorage> {
   late TextEditingController _datasetExportController;
   late TextEditingController _thumbnailController;
   late TextEditingController _modelsController;
+  late TextEditingController _ffmpegController;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetExportController = TextEditingController(text: widget.user.datasetExportFolder);
     _thumbnailController = TextEditingController(text: widget.user.thumbnailFolder);
     _modelsController = TextEditingController(text: widget.user.modelsFolder);
+    _ffmpegController = TextEditingController(text: widget.user.ffmpegPath ?? '');
     _loadAbsolutePaths();
   }
 
@@ -68,6 +70,7 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetExportController.text = widget.user.datasetExportFolder;
     _thumbnailController.text = widget.user.thumbnailFolder;
     _modelsController.text = widget.user.modelsFolder;
+    _ffmpegController.text = widget.user.ffmpegPath ?? '';
     _loadAbsolutePaths();
   }
 
@@ -77,7 +80,118 @@ class _AccountStorageState extends State<AccountStorage> {
     _datasetExportController.dispose();
     _thumbnailController.dispose();
     _modelsController.dispose();
+    _ffmpegController.dispose();
     super.dispose();
+  }
+
+  Widget _ffmpegPathField({required bool isWide}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.file_open),
+              tooltip: 'Browse ffmpeg executable',
+              onPressed: () async {
+                try {
+                  final typeGroup = XTypeGroup(
+                    label: 'Executable',
+                    extensions: Platform.isWindows ? ['exe'] : null,
+                  );
+                  final file = await openFile(
+                    acceptedTypeGroups: Platform.isWindows ? <XTypeGroup>[typeGroup] : <XTypeGroup>[],
+                  );
+                  if (file != null) {
+                    _ffmpegController.text = file.path;
+                  }
+                } catch (e, st) {
+                  _logger.warning('ffmpeg browse failed', e, st);
+                  AppSnackbar.show(context, 'Failed to open file picker');
+                }
+              },
+            ),
+            SizedBox(width: isWide ? 16 : 6),
+            Expanded(
+              child: TextFormField(
+                controller: _ffmpegController,
+                readOnly: false,
+                enableInteractiveSelection: true,
+                decoration: InputDecoration(
+                  hintText: Platform.isWindows ? 'e.g. C:\\ffmpeg\\bin\\ffmpeg.exe' : 'ffmpeg binary path',
+                  hintStyle: const TextStyle(color: Colors.white38),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white24, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isWide ? 24 : 18,
+                  fontFamily: 'CascadiaCode',
+                ),
+                maxLines: 2,
+                minLines: 1,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _actionButton(
+              icon: Icons.check_circle_outline,
+              label: 'Validate & Save',
+              tooltip: 'Validate with "ffmpeg -version" and save',
+              isWide: isWide,
+              onPressed: () async {
+                final p = _ffmpegController.text.trim();
+                if (p.isEmpty) {
+                  AppSnackbar.show(context, 'Path is empty');
+                  return;
+                }
+                try {
+                  final ver = await Process.run(p, ['-version']);
+                  if (ver.exitCode == 0) {
+                    await UserSession.instance.setFfmpegPath(p);
+                    widget.onUserChange(widget.user.copyWith(ffmpegPath: p));
+                    AppSnackbar.show(context, 'FFmpeg saved');
+                  } else {
+                    AppSnackbar.show(context, 'Not a valid ffmpeg executable (exit ${ver.exitCode})');
+                  }
+                } catch (e) {
+                  AppSnackbar.show(context, 'Failed to run ffmpeg: $e');
+                }
+              },
+            ),
+            _actionButton(
+              icon: Icons.clear,
+              label: 'Clear',
+              tooltip: 'Clear saved path',
+              isWide: isWide,
+              onPressed: () async {
+                _ffmpegController.text = '';
+                await UserSession.instance.setFfmpegPath(null);
+                widget.onUserChange(widget.user.copyWith(ffmpegPath: null));
+                AppSnackbar.show(context, 'FFmpeg path cleared');
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'On Windows, select ffmpeg.exe. On macOS/Linux, provide the ffmpeg binary if not on PATH.',
+          style: TextStyle(color: Colors.white70, fontSize: 12),
+        ),
+      ],
+    );
   }
 
   @override
@@ -143,6 +257,12 @@ class _AccountStorageState extends State<AccountStorage> {
                 isWide: isWide,
               ),
             ),
+            const SizedBox(height: 16),
+            if (!(Platform.isAndroid || Platform.isIOS))
+              _buildSection(
+                'FFmpeg path (desktop only)',
+                _ffmpegPathField(isWide: isWide),
+              ),
           ],
         ),
       ),
