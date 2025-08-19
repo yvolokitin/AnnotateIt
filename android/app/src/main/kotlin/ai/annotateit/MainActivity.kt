@@ -1,4 +1,4 @@
-package com.example.vap
+package ai.annotateit
 
 import io.flutter.embedding.android.FlutterActivity
 
