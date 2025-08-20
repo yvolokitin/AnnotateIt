@@ -111,8 +111,6 @@
   "rename": "Renomear",
   "delete": "Excluir",
   "setAsDefault": "Definir como Padrão",
-  "labelDefault": "Padrão",
-  "labelUndefault": "Remover padrão",
 
   "paginationPageFromTotal": "Página {current} de {total}",
   "@paginationPageFromTotal": {
@@ -155,7 +153,6 @@
   "menuSortLastUpdated": "Última atualização",
   "menuSortNewestOldest": "Mais recente-Mais antigo",
   "menuSortOldestNewest": "Mais antigo-Mais recente",
-  "menuSortType": "Tipo de Projeto",
   "menuSortAz": "A-Z",
   "menuSortZa": "Z-A",
 
