@@ -1262,7 +1262,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível inicializar o arquivo de log do aplicativo. Verifique as permissões do arquivo.';
 
   @override
-  String get buttonContinue => 'Continue';
+  String get buttonContinue => 'Continuar';
 
   @override
   String get videoImportTitle => 'Importação de vídeo';

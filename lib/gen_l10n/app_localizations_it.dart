@@ -1251,7 +1251,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Impossibile inizializzare il file di log dell\'applicazione. Verificare i permessi sui file.';
 
   @override
-  String get buttonContinue => 'Continue';
+  String get buttonContinue => 'Continua';
 
   @override
   String get videoImportTitle => 'Importazione video';

@@ -1243,7 +1243,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось инициализировать файл журнала приложения. Проверьте разрешения на файлы.';
 
   @override
-  String get buttonContinue => 'Continue';
+  String get buttonContinue => 'Продолжить';
 
   @override
   String get videoImportTitle => 'Импорт видео';

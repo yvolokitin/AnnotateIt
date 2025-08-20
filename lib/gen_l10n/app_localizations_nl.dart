@@ -1240,7 +1240,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Het logbestand van de applicatie kon niet worden geïnitialiseerd. Controleer de bestandsmachtigingen.';
 
   @override
-  String get buttonContinue => 'Continue';
+  String get buttonContinue => 'Doorgaan';
 
   @override
   String get videoImportTitle => 'Video-import';

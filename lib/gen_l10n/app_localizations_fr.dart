@@ -1270,7 +1270,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible d’initialiser le fichier journal de l’application. Vérifiez les autorisations sur les fichiers.';
 
   @override
-  String get buttonContinue => 'Continue';
+  String get buttonContinue => 'Continuer';
 
   @override
   String get videoImportTitle => 'Importation de vidéo';
