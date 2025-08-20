@@ -1268,4 +1268,101 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'Impossible d’initialiser le fichier journal de l’application. Vérifiez les autorisations sur les fichiers.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Importation de vidéo';
+
+  @override
+  String get ffmpegStep1Title => 'Étape 1 : Vérifier FFmpeg';
+
+  @override
+  String get ffmpegDescription =>
+      'FFmpeg est une suite gratuite et open source pour traiter la vidéo et l’audio. AnnotateIt utilise FFmpeg sous Windows pour extraire des images individuelles de votre vidéo à des fins d’annotation.';
+
+  @override
+  String get ffmpegWebsite => 'Site web de FFmpeg';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Versions Windows';
+
+  @override
+  String get ffmpegTip =>
+      'Astuce : Après l’installation, ajoutez ffmpeg.exe à votre PATH ou cliquez sur \"Sélectionner FFmpeg\" pour choisir l’exécutable.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Utilisation : $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg non disponible. Sélectionnez d’abord ffmpeg.exe.';
+
+  @override
+  String get ffmpegSelectButton => 'Sélectionner FFmpeg';
+
+  @override
+  String get ffmpegRecheckButton => 'Vérifier à nouveau';
+
+  @override
+  String get videoStep2Title => 'Étape 2 : Sélectionner le fichier vidéo';
+
+  @override
+  String get videoStep2Text =>
+      'Une fois FFmpeg disponible, cliquez sur Continuer pour choisir une vidéo à importer.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Les images seront extraites avec les capacités intégrées de votre appareil (FFmpeg non requis).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Touchez Continuer pour choisir un fichier vidéo à importer et extraire les images en tant qu’images.';
+
+  @override
+  String get importNotCompletedTitle => 'Importation non terminée';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'Impossible d’extraire les images de la vidéo sélectionnée.\n\nDiagnostic :\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Téléchargement arrêté';
+
+  @override
+  String get importCompleteTitle => 'Importation terminée';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Extraits';
+
+  @override
+  String get importCompleteFrame => 'image';
+
+  @override
+  String get importCompleteFrames => 'images';
+
+  @override
+  String get importCompleteAndAdded => 'et ajoutés au jeu de données.';
+
+  @override
+  String get viaFfmpeg => '(via FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(via video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'La fonctionnalité de caméra n’est pas prise en charge sous Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Échec de la conversion de la vidéo en images : $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'Sélectionner l’exécutable ffmpeg';
 }

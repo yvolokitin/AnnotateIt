@@ -2249,6 +2249,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The application log file could not be initialized. Check file permissions.'**
   String get accountStorageLogFileInitError;
+
+  /// No description provided for @buttonContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get buttonContinue;
+
+  /// No description provided for @videoImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video import'**
+  String get videoImportTitle;
+
+  /// No description provided for @ffmpegStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1: Check FFmpeg'**
+  String get ffmpegStep1Title;
+
+  /// No description provided for @ffmpegDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.'**
+  String get ffmpegDescription;
+
+  /// No description provided for @ffmpegWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'FFmpeg website'**
+  String get ffmpegWebsite;
+
+  /// No description provided for @ffmpegWindowsBuilds.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows builds'**
+  String get ffmpegWindowsBuilds;
+
+  /// No description provided for @ffmpegTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: After installing, either add ffmpeg.exe to your PATH or click \"Select FFmpeg\" to choose the executable.'**
+  String get ffmpegTip;
+
+  /// No description provided for @ffmpegUsingPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Using: {path}'**
+  String ffmpegUsingPath(Object path);
+
+  /// No description provided for @ffmpegUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'FFmpeg not available. Select ffmpeg.exe first.'**
+  String get ffmpegUnavailable;
+
+  /// No description provided for @ffmpegSelectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Select FFmpeg'**
+  String get ffmpegSelectButton;
+
+  /// No description provided for @ffmpegRecheckButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-check'**
+  String get ffmpegRecheckButton;
+
+  /// No description provided for @videoStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2: Select video file'**
+  String get videoStep2Title;
+
+  /// No description provided for @videoStep2Text.
+  ///
+  /// In en, this message translates to:
+  /// **'After FFmpeg is resolved, click Continue to choose a video to import.'**
+  String get videoStep2Text;
+
+  /// No description provided for @mobileFramesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames will be extracted using built-in capabilities of your device (no FFmpeg required).'**
+  String get mobileFramesInfo;
+
+  /// No description provided for @mobileTapContinueInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Continue to choose a video file to import and extract frames as images.'**
+  String get mobileTapContinueInfo;
+
+  /// No description provided for @importNotCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import not completed'**
+  String get importNotCompletedTitle;
+
+  /// No description provided for @importNotCompletedDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not extract frames from the selected video.\n\nDiagnostics:\n{diag}'**
+  String importNotCompletedDiagnostics(Object diag);
+
+  /// No description provided for @uploadStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload stopped'**
+  String get uploadStopped;
+
+  /// No description provided for @importCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete'**
+  String get importCompleteTitle;
+
+  /// No description provided for @importCompleteExtractedPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted'**
+  String get importCompleteExtractedPrefix;
+
+  /// No description provided for @importCompleteFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'frame'**
+  String get importCompleteFrame;
+
+  /// No description provided for @importCompleteFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'frames'**
+  String get importCompleteFrames;
+
+  /// No description provided for @importCompleteAndAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'and added to dataset.'**
+  String get importCompleteAndAdded;
+
+  /// No description provided for @viaFfmpeg.
+  ///
+  /// In en, this message translates to:
+  /// **'(via FFmpeg)'**
+  String get viaFfmpeg;
+
+  /// No description provided for @viaVideoThumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'(via video_thumbnail)'**
+  String get viaVideoThumbnail;
+
+  /// No description provided for @cameraLinuxUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera functionality is not supported on Linux'**
+  String get cameraLinuxUnsupported;
+
+  /// No description provided for @videoToFramesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Video to frames failed: {error}'**
+  String videoToFramesFailed(Object error);
+
+  /// No description provided for @selectFfmpegDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ffmpeg executable'**
+  String get selectFfmpegDialogTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -482,4 +482,40 @@
   "accountStorageLogFileHelp": "Нажмите, чтобы открыть папку, содержащую файл журнала приложения. Этот файл включает все журналы приложения, включая возможные аварийные завершения.",
   "accountStorageLogFileNotAvailable": "Файл журнала недоступен",
   "accountStorageLogFileInitError": "Не удалось инициализировать файл журнала приложения. Проверьте разрешения на файлы."
+  ,
+  "uploadStopped": "Загрузка остановлена",
+  "videoImportTitle": "Импорт видео",
+  "ffmpegStep1Title": "Шаг 1: Проверка FFmpeg",
+  "ffmpegDescription": "FFmpeg — бесплатный набор инструментов с открытым исходным кодом для обработки видео и аудио. AnnotateIt использует FFmpeg в Windows, чтобы извлекать отдельные кадры из вашего видео для разметки.",
+  "ffmpegWebsite": "Сайт FFmpeg",
+  "ffmpegWindowsBuilds": "Сборки для Windows",
+  "ffmpegTip": "Совет: после установки добавьте ffmpeg.exe в PATH или нажмите \"Выбрать FFmpeg\", чтобы указать исполняемый файл.",
+  "ffmpegUsingPath": "Используется: {path}",
+  "@ffmpegUsingPath": { "placeholders": { "path": {} } },
+  "ffmpegUnavailable": "FFmpeg недоступен. Сначала выберите ffmpeg.exe.",
+  "ffmpegSelectButton": "Выбрать FFmpeg",
+  "ffmpegRecheckButton": "Проверить ещё раз",
+
+  "videoStep2Title": "Шаг 2: Выберите видеофайл",
+  "videoStep2Text": "После настройки FFmpeg нажмите «Продолжить», чтобы выбрать видео для импорта.",
+
+  "mobileFramesInfo": "Кадры будут извлекаться с помощью встроенных возможностей вашего устройства (FFmpeg не требуется).",
+  "mobileTapContinueInfo": "Нажмите «Продолжить», чтобы выбрать видеофайл и извлечь кадры как изображения.",
+
+  "importNotCompletedTitle": "Импорт не завершён",
+  "importNotCompletedDiagnostics": "Не удалось извлечь кадры из выбранного видео.\n\nДиагностика:\n{diag}",
+  "@importNotCompletedDiagnostics": { "placeholders": { "diag": {} } },
+
+  "importCompleteTitle": "Импорт завершён",
+  "importCompleteExtractedPrefix": "Извлечено",
+  "importCompleteFrame": "кадр",
+  "importCompleteFrames": "кадров",
+  "importCompleteAndAdded": "и добавлено в датасет.",
+  "viaFfmpeg": "(через FFmpeg)",
+  "viaVideoThumbnail": "(через video_thumbnail)",
+
+  "cameraLinuxUnsupported": "Функция камеры не поддерживается в Linux",
+  "videoToFramesFailed": "Не удалось преобразовать видео в кадры: {error}",
+  "@videoToFramesFailed": { "placeholders": { "error": {} } },
+  "selectFfmpegDialogTitle": "Выбор исполняемого файла ffmpeg"
 }

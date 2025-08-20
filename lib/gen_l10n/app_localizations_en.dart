@@ -1231,4 +1231,101 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'The application log file could not be initialized. Check file permissions.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Video import';
+
+  @override
+  String get ffmpegStep1Title => 'Step 1: Check FFmpeg';
+
+  @override
+  String get ffmpegDescription =>
+      'FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.';
+
+  @override
+  String get ffmpegWebsite => 'FFmpeg website';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Windows builds';
+
+  @override
+  String get ffmpegTip =>
+      'Tip: After installing, either add ffmpeg.exe to your PATH or click \"Select FFmpeg\" to choose the executable.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Using: $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg not available. Select ffmpeg.exe first.';
+
+  @override
+  String get ffmpegSelectButton => 'Select FFmpeg';
+
+  @override
+  String get ffmpegRecheckButton => 'Re-check';
+
+  @override
+  String get videoStep2Title => 'Step 2: Select video file';
+
+  @override
+  String get videoStep2Text =>
+      'After FFmpeg is resolved, click Continue to choose a video to import.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Frames will be extracted using built-in capabilities of your device (no FFmpeg required).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Tap Continue to choose a video file to import and extract frames as images.';
+
+  @override
+  String get importNotCompletedTitle => 'Import not completed';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'Could not extract frames from the selected video.\n\nDiagnostics:\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Upload stopped';
+
+  @override
+  String get importCompleteTitle => 'Import complete';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Extracted';
+
+  @override
+  String get importCompleteFrame => 'frame';
+
+  @override
+  String get importCompleteFrames => 'frames';
+
+  @override
+  String get importCompleteAndAdded => 'and added to dataset.';
+
+  @override
+  String get viaFfmpeg => '(via FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(via video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'Camera functionality is not supported on Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Video to frames failed: $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'Select ffmpeg executable';
 }

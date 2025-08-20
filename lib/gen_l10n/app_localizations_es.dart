@@ -1263,4 +1263,101 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'No se pudo inicializar el archivo de registro de la aplicación. Verifique los permisos del archivo.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Importación de video';
+
+  @override
+  String get ffmpegStep1Title => 'Paso 1: Verificar FFmpeg';
+
+  @override
+  String get ffmpegDescription =>
+      'FFmpeg es un conjunto gratuito y de código abierto para procesar video y audio. AnnotateIt usa FFmpeg en Windows para extraer fotogramas individuales de tu video para su anotación.';
+
+  @override
+  String get ffmpegWebsite => 'Sitio web de FFmpeg';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Compilaciones para Windows';
+
+  @override
+  String get ffmpegTip =>
+      'Consejo: Después de instalar, añade ffmpeg.exe a tu PATH o haz clic en \"Seleccionar FFmpeg\" para elegir el ejecutable.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Usando: $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg no disponible. Primero selecciona ffmpeg.exe.';
+
+  @override
+  String get ffmpegSelectButton => 'Seleccionar FFmpeg';
+
+  @override
+  String get ffmpegRecheckButton => 'Revisar de nuevo';
+
+  @override
+  String get videoStep2Title => 'Paso 2: Seleccionar archivo de video';
+
+  @override
+  String get videoStep2Text =>
+      'Después de resolver FFmpeg, haz clic en Continuar para elegir un video a importar.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Los fotogramas se extraerán con las capacidades integradas de tu dispositivo (no se requiere FFmpeg).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Toca Continuar para elegir un archivo de video e importar y extraer los fotogramas como imágenes.';
+
+  @override
+  String get importNotCompletedTitle => 'Importación no completada';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'No se pudieron extraer fotogramas del video seleccionado.\n\nDiagnóstico:\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Carga detenida';
+
+  @override
+  String get importCompleteTitle => 'Importación completada';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Extraídos';
+
+  @override
+  String get importCompleteFrame => 'fotograma';
+
+  @override
+  String get importCompleteFrames => 'fotogramas';
+
+  @override
+  String get importCompleteAndAdded => 'y añadidos al conjunto de datos.';
+
+  @override
+  String get viaFfmpeg => '(vía FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(vía video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'La funcionalidad de cámara no es compatible en Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Error al convertir video a fotogramas: $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'Seleccionar ejecutable de ffmpeg';
 }

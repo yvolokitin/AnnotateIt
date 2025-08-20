@@ -34,22 +34,6 @@ class ProjectDetailsAppBar extends StatelessWidget {
             margin: EdgeInsets.only(left: screenWidth > 550 ? 16 : 10),
             onPressed: onBackPressed,
           ),
-          /// disabled help button for now
-/*
-          HoverIconButton(
-            icon: Icons.help_outline,
-            margin: EdgeInsets.only(right: screenWidth > 550 ? 16 : 10),
-            onPressed: () {
-              final l10n = AppLocalizations.of(context)!;
-              AlertErrorDialog.show(
-                context,
-                l10n.projectHelpTitle,
-                l10n.projectHelpMessage,
-                tips: l10n.projectHelpTips,
-              );
-            }
-          ),
-*/          
         ],
       ),
     );

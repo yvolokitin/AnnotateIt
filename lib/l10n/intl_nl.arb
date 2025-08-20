@@ -524,4 +524,40 @@
   "accountStorageLogFileHelp": "Klik om de map met het logbestand van de applicatie te openen. Dit bestand bevat alle app‑logboeken, inclusief eventuele crashes.",
   "accountStorageLogFileNotAvailable": "Logbestand niet beschikbaar",
   "accountStorageLogFileInitError": "Het logbestand van de applicatie kon niet worden geïnitialiseerd. Controleer de bestandsmachtigingen."
+  ,
+  "uploadStopped": "Upload gestopt",
+  "videoImportTitle": "Video-import",
+  "ffmpegStep1Title": "Stap 1: FFmpeg controleren",
+  "ffmpegDescription": "FFmpeg is een gratis opensource‑suite voor het verwerken van video en audio. AnnotateIt gebruikt FFmpeg op Windows om afzonderlijke frames uit je video te halen voor annotatie.",
+  "ffmpegWebsite": "FFmpeg‑website",
+  "ffmpegWindowsBuilds": "Windows‑builds",
+  "ffmpegTip": "Tip: Voeg na installatie ffmpeg.exe toe aan je PATH of klik op \"FFmpeg selecteren\" om het uitvoerbare bestand te kiezen.",
+  "ffmpegUsingPath": "Gebruikt: {path}",
+  "@ffmpegUsingPath": { "placeholders": { "path": {} } },
+  "ffmpegUnavailable": "FFmpeg niet beschikbaar. Selecteer eerst ffmpeg.exe.",
+  "ffmpegSelectButton": "FFmpeg selecteren",
+  "ffmpegRecheckButton": "Opnieuw controleren",
+
+  "videoStep2Title": "Stap 2: Videobestand selecteren",
+  "videoStep2Text": "Nadat FFmpeg is opgelost, klik op Doorgaan om een video te kiezen om te importeren.",
+
+  "mobileFramesInfo": "Frames worden geëxtraheerd met de ingebouwde mogelijkheden van je apparaat (geen FFmpeg vereist).",
+  "mobileTapContinueInfo": "Tik op Doorgaan om een videobestand te kiezen en frames als afbeeldingen te extraheren.",
+
+  "importNotCompletedTitle": "Import niet voltooid",
+  "importNotCompletedDiagnostics": "Kon geen frames extraheren uit de geselecteerde video.\n\nDiagnostiek:\n{diag}",
+  "@importNotCompletedDiagnostics": { "placeholders": { "diag": {} } },
+
+  "importCompleteTitle": "Import voltooid",
+  "importCompleteExtractedPrefix": "Geëxtraheerd",
+  "importCompleteFrame": "frame",
+  "importCompleteFrames": "frames",
+  "importCompleteAndAdded": "en toegevoegd aan dataset.",
+  "viaFfmpeg": "(via FFmpeg)",
+  "viaVideoThumbnail": "(via video_thumbnail)",
+
+  "cameraLinuxUnsupported": "Camerafunctionaliteit wordt niet ondersteund op Linux",
+  "videoToFramesFailed": "Video naar frames mislukt: {error}",
+  "@videoToFramesFailed": { "placeholders": { "error": {} } },
+  "selectFfmpegDialogTitle": "ffmpeg‑uitvoerbaar bestand selecteren"
 }

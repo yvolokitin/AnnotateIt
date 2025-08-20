@@ -1241,4 +1241,101 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'Не удалось инициализировать файл журнала приложения. Проверьте разрешения на файлы.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Импорт видео';
+
+  @override
+  String get ffmpegStep1Title => 'Шаг 1: Проверка FFmpeg';
+
+  @override
+  String get ffmpegDescription =>
+      'FFmpeg — бесплатный набор инструментов с открытым исходным кодом для обработки видео и аудио. AnnotateIt использует FFmpeg в Windows, чтобы извлекать отдельные кадры из вашего видео для разметки.';
+
+  @override
+  String get ffmpegWebsite => 'Сайт FFmpeg';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Сборки для Windows';
+
+  @override
+  String get ffmpegTip =>
+      'Совет: после установки добавьте ffmpeg.exe в PATH или нажмите \"Выбрать FFmpeg\", чтобы указать исполняемый файл.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Используется: $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg недоступен. Сначала выберите ffmpeg.exe.';
+
+  @override
+  String get ffmpegSelectButton => 'Выбрать FFmpeg';
+
+  @override
+  String get ffmpegRecheckButton => 'Проверить ещё раз';
+
+  @override
+  String get videoStep2Title => 'Шаг 2: Выберите видеофайл';
+
+  @override
+  String get videoStep2Text =>
+      'После настройки FFmpeg нажмите «Продолжить», чтобы выбрать видео для импорта.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Кадры будут извлекаться с помощью встроенных возможностей вашего устройства (FFmpeg не требуется).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Нажмите «Продолжить», чтобы выбрать видеофайл и извлечь кадры как изображения.';
+
+  @override
+  String get importNotCompletedTitle => 'Импорт не завершён';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'Не удалось извлечь кадры из выбранного видео.\n\nДиагностика:\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Загрузка остановлена';
+
+  @override
+  String get importCompleteTitle => 'Импорт завершён';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Извлечено';
+
+  @override
+  String get importCompleteFrame => 'кадр';
+
+  @override
+  String get importCompleteFrames => 'кадров';
+
+  @override
+  String get importCompleteAndAdded => 'и добавлено в датасет.';
+
+  @override
+  String get viaFfmpeg => '(через FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(через video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'Функция камеры не поддерживается в Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Не удалось преобразовать видео в кадры: $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'Выбор исполняемого файла ffmpeg';
 }

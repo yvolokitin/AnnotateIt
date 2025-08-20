@@ -524,4 +524,40 @@
   "accountStorageLogFileHelp": "Cliquez pour ouvrir le dossier contenant le fichier journal de l’application. Ce fichier contient tous les journaux de l’app, y compris d’éventuels plantages.",
   "accountStorageLogFileNotAvailable": "Fichier journal indisponible",
   "accountStorageLogFileInitError": "Impossible d’initialiser le fichier journal de l’application. Vérifiez les autorisations sur les fichiers."
+  ,
+  "uploadStopped": "Téléchargement arrêté",
+  "videoImportTitle": "Importation de vidéo",
+  "ffmpegStep1Title": "Étape 1 : Vérifier FFmpeg",
+  "ffmpegDescription": "FFmpeg est une suite gratuite et open source pour traiter la vidéo et l’audio. AnnotateIt utilise FFmpeg sous Windows pour extraire des images individuelles de votre vidéo à des fins d’annotation.",
+  "ffmpegWebsite": "Site web de FFmpeg",
+  "ffmpegWindowsBuilds": "Versions Windows",
+  "ffmpegTip": "Astuce : Après l’installation, ajoutez ffmpeg.exe à votre PATH ou cliquez sur \"Sélectionner FFmpeg\" pour choisir l’exécutable.",
+  "ffmpegUsingPath": "Utilisation : {path}",
+  "@ffmpegUsingPath": { "placeholders": { "path": {} } },
+  "ffmpegUnavailable": "FFmpeg non disponible. Sélectionnez d’abord ffmpeg.exe.",
+  "ffmpegSelectButton": "Sélectionner FFmpeg",
+  "ffmpegRecheckButton": "Vérifier à nouveau",
+
+  "videoStep2Title": "Étape 2 : Sélectionner le fichier vidéo",
+  "videoStep2Text": "Une fois FFmpeg disponible, cliquez sur Continuer pour choisir une vidéo à importer.",
+
+  "mobileFramesInfo": "Les images seront extraites avec les capacités intégrées de votre appareil (FFmpeg non requis).",
+  "mobileTapContinueInfo": "Touchez Continuer pour choisir un fichier vidéo à importer et extraire les images en tant qu’images.",
+
+  "importNotCompletedTitle": "Importation non terminée",
+  "importNotCompletedDiagnostics": "Impossible d’extraire les images de la vidéo sélectionnée.\n\nDiagnostic :\n{diag}",
+  "@importNotCompletedDiagnostics": { "placeholders": { "diag": {} } },
+
+  "importCompleteTitle": "Importation terminée",
+  "importCompleteExtractedPrefix": "Extraits",
+  "importCompleteFrame": "image",
+  "importCompleteFrames": "images",
+  "importCompleteAndAdded": "et ajoutés au jeu de données.",
+  "viaFfmpeg": "(via FFmpeg)",
+  "viaVideoThumbnail": "(via video_thumbnail)",
+
+  "cameraLinuxUnsupported": "La fonctionnalité de caméra n’est pas prise en charge sous Linux",
+  "videoToFramesFailed": "Échec de la conversion de la vidéo en images : {error}",
+  "@videoToFramesFailed": { "placeholders": { "error": {} } },
+  "selectFfmpegDialogTitle": "Sélectionner l’exécutable ffmpeg"
 }

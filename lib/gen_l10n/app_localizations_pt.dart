@@ -1260,4 +1260,101 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'Não foi possível inicializar o arquivo de log do aplicativo. Verifique as permissões do arquivo.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Importação de vídeo';
+
+  @override
+  String get ffmpegStep1Title => 'Etapa 1: Verificar o FFmpeg';
+
+  @override
+  String get ffmpegDescription =>
+      'O FFmpeg é uma suíte gratuita e de código aberto para processamento de vídeo e áudio. O AnnotateIt usa o FFmpeg no Windows para extrair quadros individuais do seu vídeo para anotação.';
+
+  @override
+  String get ffmpegWebsite => 'Site do FFmpeg';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Compilações para Windows';
+
+  @override
+  String get ffmpegTip =>
+      'Dica: Após a instalação, adicione o ffmpeg.exe ao PATH ou clique em \"Selecionar FFmpeg\" para escolher o executável.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Usando: $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg não disponível. Selecione primeiro o ffmpeg.exe.';
+
+  @override
+  String get ffmpegSelectButton => 'Selecionar FFmpeg';
+
+  @override
+  String get ffmpegRecheckButton => 'Verificar novamente';
+
+  @override
+  String get videoStep2Title => 'Etapa 2: Selecionar arquivo de vídeo';
+
+  @override
+  String get videoStep2Text =>
+      'Depois que o FFmpeg estiver resolvido, clique em Continuar para escolher um vídeo para importar.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Os quadros serão extraídos usando os recursos integrados do seu dispositivo (FFmpeg não é necessário).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Toque em Continuar para escolher um arquivo de vídeo para importar e extrair os quadros como imagens.';
+
+  @override
+  String get importNotCompletedTitle => 'Importação não concluída';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'Não foi possível extrair quadros do vídeo selecionado.\n\nDiagnóstico:\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Upload interrompido';
+
+  @override
+  String get importCompleteTitle => 'Importação concluída';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Extraídos';
+
+  @override
+  String get importCompleteFrame => 'quadro';
+
+  @override
+  String get importCompleteFrames => 'quadros';
+
+  @override
+  String get importCompleteAndAdded => 'e adicionados ao conjunto de dados.';
+
+  @override
+  String get viaFfmpeg => '(via FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(via video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'A funcionalidade de câmera não é compatível no Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Falha ao converter vídeo em quadros: $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'Selecionar executável do ffmpeg';
 }

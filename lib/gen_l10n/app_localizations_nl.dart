@@ -1238,4 +1238,101 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get accountStorageLogFileInitError =>
       'Het logbestand van de applicatie kon niet worden geïnitialiseerd. Controleer de bestandsmachtigingen.';
+
+  @override
+  String get buttonContinue => 'Continue';
+
+  @override
+  String get videoImportTitle => 'Video-import';
+
+  @override
+  String get ffmpegStep1Title => 'Stap 1: FFmpeg controleren';
+
+  @override
+  String get ffmpegDescription =>
+      'FFmpeg is een gratis opensource‑suite voor het verwerken van video en audio. AnnotateIt gebruikt FFmpeg op Windows om afzonderlijke frames uit je video te halen voor annotatie.';
+
+  @override
+  String get ffmpegWebsite => 'FFmpeg‑website';
+
+  @override
+  String get ffmpegWindowsBuilds => 'Windows‑builds';
+
+  @override
+  String get ffmpegTip =>
+      'Tip: Voeg na installatie ffmpeg.exe toe aan je PATH of klik op \"FFmpeg selecteren\" om het uitvoerbare bestand te kiezen.';
+
+  @override
+  String ffmpegUsingPath(Object path) {
+    return 'Gebruikt: $path';
+  }
+
+  @override
+  String get ffmpegUnavailable =>
+      'FFmpeg niet beschikbaar. Selecteer eerst ffmpeg.exe.';
+
+  @override
+  String get ffmpegSelectButton => 'FFmpeg selecteren';
+
+  @override
+  String get ffmpegRecheckButton => 'Opnieuw controleren';
+
+  @override
+  String get videoStep2Title => 'Stap 2: Videobestand selecteren';
+
+  @override
+  String get videoStep2Text =>
+      'Nadat FFmpeg is opgelost, klik op Doorgaan om een video te kiezen om te importeren.';
+
+  @override
+  String get mobileFramesInfo =>
+      'Frames worden geëxtraheerd met de ingebouwde mogelijkheden van je apparaat (geen FFmpeg vereist).';
+
+  @override
+  String get mobileTapContinueInfo =>
+      'Tik op Doorgaan om een videobestand te kiezen en frames als afbeeldingen te extraheren.';
+
+  @override
+  String get importNotCompletedTitle => 'Import niet voltooid';
+
+  @override
+  String importNotCompletedDiagnostics(Object diag) {
+    return 'Kon geen frames extraheren uit de geselecteerde video.\n\nDiagnostiek:\n$diag';
+  }
+
+  @override
+  String get uploadStopped => 'Upload gestopt';
+
+  @override
+  String get importCompleteTitle => 'Import voltooid';
+
+  @override
+  String get importCompleteExtractedPrefix => 'Geëxtraheerd';
+
+  @override
+  String get importCompleteFrame => 'frame';
+
+  @override
+  String get importCompleteFrames => 'frames';
+
+  @override
+  String get importCompleteAndAdded => 'en toegevoegd aan dataset.';
+
+  @override
+  String get viaFfmpeg => '(via FFmpeg)';
+
+  @override
+  String get viaVideoThumbnail => '(via video_thumbnail)';
+
+  @override
+  String get cameraLinuxUnsupported =>
+      'Camerafunctionaliteit wordt niet ondersteund op Linux';
+
+  @override
+  String videoToFramesFailed(Object error) {
+    return 'Video naar frames mislukt: $error';
+  }
+
+  @override
+  String get selectFfmpegDialogTitle => 'ffmpeg‑uitvoerbaar bestand selecteren';
 }

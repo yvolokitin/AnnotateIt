@@ -524,4 +524,40 @@
   "accountStorageLogFileHelp": "Haga clic para abrir la carpeta que contiene el archivo de registro de la aplicación. Este archivo contiene todos los registros de la app, incluidas posibles fallas.",
   "accountStorageLogFileNotAvailable": "Archivo de registro no disponible",
   "accountStorageLogFileInitError": "No se pudo inicializar el archivo de registro de la aplicación. Verifique los permisos del archivo."
+  ,
+  "uploadStopped": "Carga detenida",
+  "videoImportTitle": "Importación de video",
+  "ffmpegStep1Title": "Paso 1: Verificar FFmpeg",
+  "ffmpegDescription": "FFmpeg es un conjunto gratuito y de código abierto para procesar video y audio. AnnotateIt usa FFmpeg en Windows para extraer fotogramas individuales de tu video para su anotación.",
+  "ffmpegWebsite": "Sitio web de FFmpeg",
+  "ffmpegWindowsBuilds": "Compilaciones para Windows",
+  "ffmpegTip": "Consejo: Después de instalar, añade ffmpeg.exe a tu PATH o haz clic en \"Seleccionar FFmpeg\" para elegir el ejecutable.",
+  "ffmpegUsingPath": "Usando: {path}",
+  "@ffmpegUsingPath": { "placeholders": { "path": {} } },
+  "ffmpegUnavailable": "FFmpeg no disponible. Primero selecciona ffmpeg.exe.",
+  "ffmpegSelectButton": "Seleccionar FFmpeg",
+  "ffmpegRecheckButton": "Revisar de nuevo",
+
+  "videoStep2Title": "Paso 2: Seleccionar archivo de video",
+  "videoStep2Text": "Después de resolver FFmpeg, haz clic en Continuar para elegir un video a importar.",
+
+  "mobileFramesInfo": "Los fotogramas se extraerán con las capacidades integradas de tu dispositivo (no se requiere FFmpeg).",
+  "mobileTapContinueInfo": "Toca Continuar para elegir un archivo de video e importar y extraer los fotogramas como imágenes.",
+
+  "importNotCompletedTitle": "Importación no completada",
+  "importNotCompletedDiagnostics": "No se pudieron extraer fotogramas del video seleccionado.\n\nDiagnóstico:\n{diag}",
+  "@importNotCompletedDiagnostics": { "placeholders": { "diag": {} } },
+
+  "importCompleteTitle": "Importación completada",
+  "importCompleteExtractedPrefix": "Extraídos",
+  "importCompleteFrame": "fotograma",
+  "importCompleteFrames": "fotogramas",
+  "importCompleteAndAdded": "y añadidos al conjunto de datos.",
+  "viaFfmpeg": "(vía FFmpeg)",
+  "viaVideoThumbnail": "(vía video_thumbnail)",
+
+  "cameraLinuxUnsupported": "La funcionalidad de cámara no es compatible en Linux",
+  "videoToFramesFailed": "Error al convertir video a fotogramas: {error}",
+  "@videoToFramesFailed": { "placeholders": { "error": {} } },
+  "selectFfmpegDialogTitle": "Seleccionar ejecutable de ffmpeg"
 }

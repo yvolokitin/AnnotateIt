@@ -523,5 +523,50 @@
   },
   "accountStorageLogFileHelp": "Klicken Sie, um den Ordner mit der Anwendungsprotokolldatei zu öffnen. Diese Datei enthält alle App‑Protokolle, einschließlich möglicher Abstürze.",
   "accountStorageLogFileNotAvailable": "Protokolldatei nicht verfügbar",
-  "accountStorageLogFileInitError": "Die Anwendungsprotokolldatei konnte nicht initialisiert werden. Überprüfen Sie die Dateiberechtigungen."
+  "accountStorageLogFileInitError": "Die Anwendungsprotokolldatei konnte nicht initialisiert werden. Überprüfen Sie die Dateiberechtigungen.",
+  
+  "uploadStopped": "Upload gestoppt",
+  "videoImportTitle": "Videoimport"
+  ,
+  "ffmpegStep1Title": "Schritt 1: FFmpeg prüfen",
+  "ffmpegDescription": "FFmpeg ist eine kostenlose, Open‑Source‑Suite zur Verarbeitung von Video und Audio. AnnotateIt verwendet FFmpeg unter Windows, um einzelne Frames aus Ihrem Video zur Annotation zu extrahieren.",
+  "ffmpegWebsite": "FFmpeg‑Webseite",
+  "ffmpegWindowsBuilds": "Windows‑Builds",
+  "ffmpegTip": "Tipp: Nach der Installation fügen Sie entweder ffmpeg.exe zu Ihrem PATH hinzu oder klicken Sie auf „FFmpeg auswählen“, um die ausführbare Datei zu wählen.",
+  "ffmpegUsingPath": "Verwendet: {path}",
+  "@ffmpegUsingPath": {
+    "placeholders": {"path": {}}
+  },
+  "ffmpegUnavailable": "FFmpeg nicht verfügbar. Wählen Sie zuerst ffmpeg.exe.",
+  "ffmpegSelectButton": "FFmpeg auswählen",
+  "ffmpegRecheckButton": "Erneut prüfen",
+
+  "videoStep2Title": "Schritt 2: Videodatei auswählen",
+  "videoStep2Text": "Nachdem FFmpeg gefunden wurde, klicken Sie auf Weiter, um ein Video zum Importieren auszuwählen.",
+
+  "mobileFramesInfo": "Frames werden mit den integrierten Funktionen Ihres Geräts extrahiert (kein FFmpeg erforderlich).",
+  "mobileTapContinueInfo": "Tippen Sie auf Weiter, um eine Videodatei auszuwählen und die Frames als Bilder zu extrahieren.",
+
+  "importNotCompletedTitle": "Import nicht abgeschlossen",
+  "importNotCompletedDiagnostics": "Konnte keine Frames aus dem ausgewählten Video extrahieren.\n\nDiagnose:\n{diag}",
+  "@importNotCompletedDiagnostics": {
+    "placeholders": {"diag": {}}
+  },
+
+  "importCompleteTitle": "Import abgeschlossen",
+  "importCompleteExtractedPrefix": "Extrahiert",
+  "importCompleteFrame": "Frame",
+  "importCompleteFrames": "Frames",
+  "importCompleteAndAdded": "und zum Datensatz hinzugefügt.",
+  "viaFfmpeg": "(über FFmpeg)",
+  "viaVideoThumbnail": "(via video_thumbnail)",
+
+  "cameraLinuxUnsupported": "Kamerafunktion ist unter Linux nicht unterstützt",
+  "videoToFramesFailed": "Umwandlung von Video in Frames fehlgeschlagen: {error}",
+  "@videoToFramesFailed": {
+    "placeholders": {"error": {}}
+  },
+  "selectFfmpegDialogTitle": "ffmpeg‑Programm auswählen"
+  ,
+  "buttonContinue": "Weiter"
 }

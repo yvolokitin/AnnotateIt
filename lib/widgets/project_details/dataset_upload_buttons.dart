@@ -13,6 +13,7 @@ import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 import '../../session/user_session.dart';
 import '../dialogs/camera_capture_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
   final Project project;
@@ -220,6 +221,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
               return AlertDialog(
                 backgroundColor: Colors.grey[800],
+                insetPadding: const EdgeInsets.symmetric(horizontal: 160, vertical: 80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -241,69 +243,114 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         fontSize: 20,
                       ),
                     ),
+                    const Spacer(),
+                    Tooltip(
+                      message: 'Close',
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white70),
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                      ),
+                    ),
                   ],
                 ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Divider(color: Colors.orangeAccent),
-                    Row(children: [
-                      Icon(resolved ? Icons.check_circle : Icons.error_outline,
-                          color: resolved ? Colors.greenAccent : Colors.orangeAccent),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text('Step 1: Check FFmpeg',
-                            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                      ),
-                    ]),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'FFmpeg is required on Windows to extract frames.',
-                      style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
-                    ),
-                    const SizedBox(height: 6),
-                    if (checking) const LinearProgressIndicator(),
-                    if (!checking)
-                      Text(
-                        resolved
-                            ? 'Using: ' + (ffmpegPath ?? '')
-                            : 'FFmpeg not available. Select ffmpeg.exe first.',
-                        style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
-                      ),
-                    const SizedBox(height: 12),
-                    Row(children: [
-                      TextButton(
-                        onPressed: checking
-                            ? null
-                            : () async {
-                                final p = await _resolveFfmpegPath(log: (_) {});
-                                setState2(() {
-                                  ffmpegPath = p;
-                                  resolved = p != null;
-                                });
+                content: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 820),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(color: Colors.orangeAccent),
+                        Row(children: [
+                          Icon(resolved ? Icons.check_circle : Icons.error_outline,
+                              color: resolved ? Colors.greenAccent : Colors.orangeAccent),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text('Step 1: Check FFmpeg',
+                                style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                          ),
+                        ]),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            TextButton.icon(
+                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
+                              onPressed: () async {
+                                final uri = Uri.parse('https://ffmpeg.org/download.html');
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
                               },
-                        child: const Text('Select FFmpeg', style: TextStyle(fontFamily: 'CascadiaCode')),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: checking ? null : () async => runQuickCheck(),
-                        child: const Text('Re-check', style: TextStyle(fontFamily: 'CascadiaCode')),
-                      ),
-                    ]),
-                    const Divider(height: 20, color: Colors.orangeAccent),
-                    Row(children: [
-                      const Icon(Icons.video_file_outlined, color: Colors.white70),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text('Step 2: Select video file',
-                            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                      ),
-                    ]),
-                    const SizedBox(height: 6),
-                    const Text('After FFmpeg is resolved, click Continue to choose a video to import.',
-                        style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode')),
-                  ],
+                              icon: const Icon(Icons.open_in_new),
+                              label: const Text('FFmpeg website', style: TextStyle(fontFamily: 'CascadiaCode')),
+                            ),
+                            TextButton.icon(
+                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
+                              onPressed: () async {
+                                final uri = Uri.parse('https://www.gyan.dev/ffmpeg/builds/');
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              },
+                              icon: const Icon(Icons.download),
+                              label: const Text('Windows builds', style: TextStyle(fontFamily: 'CascadiaCode')),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Tip: After installing, either add ffmpeg.exe to your PATH or click "Select FFmpeg" to choose the executable.',
+                          style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
+                        ),
+                        const SizedBox(height: 10),
+                        if (checking) const LinearProgressIndicator(),
+                        if (!checking)
+                          Text(
+                            resolved
+                                ? 'Using: ' + (ffmpegPath ?? '')
+                                : 'FFmpeg not available. Select ffmpeg.exe first.',
+                            style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
+                          ),
+                        const SizedBox(height: 12),
+                        Row(children: [
+                          TextButton(
+                            onPressed: checking
+                                ? null
+                                : () async {
+                                    final p = await _resolveFfmpegPath(log: (_) {});
+                                    setState2(() {
+                                      ffmpegPath = p;
+                                      resolved = p != null;
+                                    });
+                                  },
+                            style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
+                            child: const Text('Select FFmpeg', style: TextStyle(fontFamily: 'CascadiaCode')),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: checking ? null : () async => runQuickCheck(),
+                            style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
+                            child: const Text('Re-check', style: TextStyle(fontFamily: 'CascadiaCode')),
+                          ),
+                        ]),
+                        const Divider(height: 20, color: Colors.orangeAccent),
+                        Row(children: [
+                          const Icon(Icons.video_file_outlined, color: Colors.white70),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text('Step 2: Select video file',
+                                style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                          ),
+                        ]),
+                        const SizedBox(height: 6),
+                        const Text('After FFmpeg is resolved, click Continue to choose a video to import.',
+                            style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode')),
+                      ],
+                    ),
+                  ),
                 ),
                 actions: [
                   Row(
@@ -320,18 +367,19 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
                       ),
                       const Spacer(),
-                      ElevatedButton(
-                        onPressed: (!resolved) ? null : () => Navigator.of(ctx).pop(true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                      if (resolved)
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(ctx).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[800],
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                            ),
                           ),
+                          child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
                         ),
-                        child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                      ),
                     ],
                   ),
                 ],

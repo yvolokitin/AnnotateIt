@@ -524,4 +524,40 @@
   "accountStorageLogFileHelp": "Clique para abrir a pasta que contém o arquivo de log do aplicativo. Este arquivo contém todos os logs do app, incluindo possíveis falhas.",
   "accountStorageLogFileNotAvailable": "Arquivo de log indisponível",
   "accountStorageLogFileInitError": "Não foi possível inicializar o arquivo de log do aplicativo. Verifique as permissões do arquivo."
+  ,
+  "uploadStopped": "Upload interrompido",
+  "videoImportTitle": "Importação de vídeo",
+  "ffmpegStep1Title": "Etapa 1: Verificar o FFmpeg",
+  "ffmpegDescription": "O FFmpeg é uma suíte gratuita e de código aberto para processamento de vídeo e áudio. O AnnotateIt usa o FFmpeg no Windows para extrair quadros individuais do seu vídeo para anotação.",
+  "ffmpegWebsite": "Site do FFmpeg",
+  "ffmpegWindowsBuilds": "Compilações para Windows",
+  "ffmpegTip": "Dica: Após a instalação, adicione o ffmpeg.exe ao PATH ou clique em \"Selecionar FFmpeg\" para escolher o executável.",
+  "ffmpegUsingPath": "Usando: {path}",
+  "@ffmpegUsingPath": { "placeholders": { "path": {} } },
+  "ffmpegUnavailable": "FFmpeg não disponível. Selecione primeiro o ffmpeg.exe.",
+  "ffmpegSelectButton": "Selecionar FFmpeg",
+  "ffmpegRecheckButton": "Verificar novamente",
+
+  "videoStep2Title": "Etapa 2: Selecionar arquivo de vídeo",
+  "videoStep2Text": "Depois que o FFmpeg estiver resolvido, clique em Continuar para escolher um vídeo para importar.",
+
+  "mobileFramesInfo": "Os quadros serão extraídos usando os recursos integrados do seu dispositivo (FFmpeg não é necessário).",
+  "mobileTapContinueInfo": "Toque em Continuar para escolher um arquivo de vídeo para importar e extrair os quadros como imagens.",
+
+  "importNotCompletedTitle": "Importação não concluída",
+  "importNotCompletedDiagnostics": "Não foi possível extrair quadros do vídeo selecionado.\n\nDiagnóstico:\n{diag}",
+  "@importNotCompletedDiagnostics": { "placeholders": { "diag": {} } },
+
+  "importCompleteTitle": "Importação concluída",
+  "importCompleteExtractedPrefix": "Extraídos",
+  "importCompleteFrame": "quadro",
+  "importCompleteFrames": "quadros",
+  "importCompleteAndAdded": "e adicionados ao conjunto de dados.",
+  "viaFfmpeg": "(via FFmpeg)",
+  "viaVideoThumbnail": "(via video_thumbnail)",
+
+  "cameraLinuxUnsupported": "A funcionalidade de câmera não é compatível no Linux",
+  "videoToFramesFailed": "Falha ao converter vídeo em quadros: {error}",
+  "@videoToFramesFailed": { "placeholders": { "error": {} } },
+  "selectFfmpegDialogTitle": "Selecionar executável do ffmpeg"
 }

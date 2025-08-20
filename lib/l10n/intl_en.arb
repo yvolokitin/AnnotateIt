@@ -514,5 +514,56 @@
   },
   "accountStorageLogFileHelp": "Click to open the folder containing the application log file. This file contains all app logs including potential crashes.",
   "accountStorageLogFileNotAvailable": "Log file not available",
-  "accountStorageLogFileInitError": "The application log file could not be initialized. Check file permissions."
+  "accountStorageLogFileInitError": "The application log file could not be initialized. Check file permissions.",
+
+  "buttonContinue": "Continue",
+
+  "videoImportTitle": "Video import",
+  "ffmpegStep1Title": "Step 1: Check FFmpeg",
+  "ffmpegDescription": "FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.",
+  "ffmpegWebsite": "FFmpeg website",
+  "ffmpegWindowsBuilds": "Windows builds",
+  "ffmpegTip": "Tip: After installing, either add ffmpeg.exe to your PATH or click \"Select FFmpeg\" to choose the executable.",
+  "ffmpegUsingPath": "Using: {path}",
+  "@ffmpegUsingPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "ffmpegUnavailable": "FFmpeg not available. Select ffmpeg.exe first.",
+  "ffmpegSelectButton": "Select FFmpeg",
+  "ffmpegRecheckButton": "Re-check",
+
+  "videoStep2Title": "Step 2: Select video file",
+  "videoStep2Text": "After FFmpeg is resolved, click Continue to choose a video to import.",
+
+  "mobileFramesInfo": "Frames will be extracted using built-in capabilities of your device (no FFmpeg required).",
+  "mobileTapContinueInfo": "Tap Continue to choose a video file to import and extract frames as images.",
+
+  "importNotCompletedTitle": "Import not completed",
+  "importNotCompletedDiagnostics": "Could not extract frames from the selected video.\n\nDiagnostics:\n{diag}",
+  "@importNotCompletedDiagnostics": {
+    "placeholders": {
+      "diag": {}
+    }
+  },
+
+  "uploadStopped": "Upload stopped",
+
+  "importCompleteTitle": "Import complete",
+  "importCompleteExtractedPrefix": "Extracted",
+  "importCompleteFrame": "frame",
+  "importCompleteFrames": "frames",
+  "importCompleteAndAdded": "and added to dataset.",
+  "viaFfmpeg": "(via FFmpeg)",
+  "viaVideoThumbnail": "(via video_thumbnail)",
+
+  "cameraLinuxUnsupported": "Camera functionality is not supported on Linux",
+  "videoToFramesFailed": "Video to frames failed: {error}",
+  "@videoToFramesFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "selectFfmpegDialogTitle": "Select ffmpeg executable"
 }
