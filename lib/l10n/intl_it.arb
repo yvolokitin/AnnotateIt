@@ -111,8 +111,6 @@
   "rename": "Rinomina",
   "delete": "Elimina",
   "setAsDefault": "Imposta come Predefinito",
-  "labelDefault": "Predefinito",
-  "labelUndefault": "Rimuovi predefinito",
 
   "paginationPageFromTotal": "Pagina {current} di {total}",
   "@paginationPageFromTotal": {
@@ -155,7 +153,6 @@
   "menuSortLastUpdated": "Ultimo aggiornamento",
   "menuSortNewestOldest": "Più recente-Più vecchio",
   "menuSortOldestNewest": "Più vecchio-Più recente",
-  "menuSortType": "Tipo di Progetto",
   "menuSortAz": "A-Z",
   "menuSortZa": "Z-A",
 

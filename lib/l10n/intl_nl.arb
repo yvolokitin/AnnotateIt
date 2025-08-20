@@ -111,8 +111,6 @@
   "rename": "Hernoemen",
   "delete": "Verwijderen",
   "setAsDefault": "Als Standaard Instellen",
-  "labelDefault": "Standaard",
-  "labelUndefault": "Standaard opheffen",
 
   "paginationPageFromTotal": "Pagina {current} van {total}",
   "@paginationPageFromTotal": {
@@ -155,7 +153,6 @@
   "menuSortLastUpdated": "Laatst bijgewerkt",
   "menuSortNewestOldest": "Nieuwste-Oudste",
   "menuSortOldestNewest": "Oudste-Nieuwste",
-  "menuSortType": "Projecttype",
   "menuSortAz": "A-Z",
   "menuSortZa": "Z-A",
 

@@ -99,11 +99,11 @@
   "emptyProjectImportDatasetShort": "Импорт датасета",
   "dialogBack": "<- Назад",
   "dialogNext": "Далее ->",
+
   "rename": "Переименовать",
   "delete": "Удалить",
   "setAsDefault": "Установить по умолчанию",
-  "labelDefault": "По умолчанию",
-  "labelUndefault": "Отменить по умолчанию",
+
   "paginationPageFromTotal": "Страница {current} из {total}",
   "@paginationPageFromTotal": {
     "placeholders": {
@@ -144,9 +144,9 @@
   "menuSortLastUpdated": "Последнее обновление",
   "menuSortNewestOldest": "Сначала новые",
   "menuSortOldestNewest": "Сначала старые",
-  "menuSortType": "Тип проекта",
   "menuSortAz": "А-Я",
   "menuSortZa": "Я-А",
+
   "projectNameLabel": "Название проекта",
   "tabDetection": "Обнаружение",
   "tabClassification": "Классификация",
