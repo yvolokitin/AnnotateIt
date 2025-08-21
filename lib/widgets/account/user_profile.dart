@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../data/project_database.dart';
@@ -100,6 +101,18 @@ class _TopPortion extends StatelessWidget {
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(50),
               bottomRight: Radius.circular(50),
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 50),
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50),
+                bottomRight: Radius.circular(50),
+              ),
+              child: _FlyingBoxesBackground(),
             ),
           ),
         ),
@@ -231,4 +244,151 @@ class ProfileInfoItem {
   final String title;
   final int? value;
   const ProfileInfoItem(this.title, this.value);
+}
+
+// Animated flying bounding boxes background for the top portion
+class _FlyingBoxesBackground extends StatefulWidget {
+  const _FlyingBoxesBackground({Key? key}) : super(key: key);
+
+  @override
+  State<_FlyingBoxesBackground> createState() => _FlyingBoxesBackgroundState();
+}
+
+class _FlyingBoxesBackgroundState extends State<_FlyingBoxesBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final List<_BoxSpec> _boxes;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 12))
+      ..repeat();
+
+    // Deterministic random for stable layout across rebuilds
+    final rnd = math.Random(42);
+    final count = 16; // keep it light for performance
+    _boxes = List.generate(count, (i) {
+      final fx = rnd.nextDouble();
+      final fy = rnd.nextDouble();
+      final angle = rnd.nextDouble() * math.pi * 2;
+      final speed = 0.05 + rnd.nextDouble() * 0.25; // units per second fraction of width/height
+      final base = 18.0 + rnd.nextDouble() * 48.0; // px
+      final phase = rnd.nextDouble();
+      final stroke = 1.0 + rnd.nextDouble() * 1.5;
+      final radius = 4.0 + rnd.nextDouble() * 10.0;
+      final opacity = 0.06 + rnd.nextDouble() * 0.08; // subtle
+      return _BoxSpec(
+        fx: fx,
+        fy: fy,
+        dirAngle: angle,
+        speed: speed,
+        baseSize: base,
+        phase: phase,
+        stroke: stroke,
+        corner: radius,
+        opacity: opacity,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final elapsedSec = (_controller.lastElapsedDuration?.inMilliseconds ?? 0) / 1000.0;
+          return CustomPaint(
+            painter: _BoxesPainter(_boxes, elapsedSec),
+            isComplex: true,
+            willChange: true,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _BoxSpec {
+  final double fx; // base x in [0,1]
+  final double fy; // base y in [0,1]
+  final double dirAngle; // movement direction in radians
+  final double speed; // fraction per second
+  final double baseSize; // px
+  final double phase; // [0,1]
+  final double stroke;
+  final double corner;
+  final double opacity; // 0..1
+
+  const _BoxSpec({
+    required this.fx,
+    required this.fy,
+    required this.dirAngle,
+    required this.speed,
+    required this.baseSize,
+    required this.phase,
+    required this.stroke,
+    required this.corner,
+    required this.opacity,
+  });
+}
+
+class _BoxesPainter extends CustomPainter {
+  final List<_BoxSpec> boxes;
+  final double t; // elapsed seconds
+
+  _BoxesPainter(this.boxes, this.t);
+
+  double _fract(double v) => v - v.floorToDouble();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final minSide = math.min(size.width, size.height);
+    for (final b in boxes) {
+      // Smooth size oscillation between 0.8x and 1.2x base
+      final scale = 1.0 + 0.2 * math.sin((t + b.phase) * math.pi * 2.0);
+      final boxSize = (b.baseSize * scale).clamp(10.0, minSide * 0.35);
+
+      // Movement across the area with wrap-around
+      final dirX = math.cos(b.dirAngle);
+      final dirY = math.sin(b.dirAngle);
+      final travel = b.speed * t; // fraction of canvas per second
+      // add slight curved drift using sin/cos for organic motion
+      final driftX = 0.03 * math.sin((t + b.phase) * 0.7 * math.pi * 2.0);
+      final driftY = 0.03 * math.cos((t + b.phase) * 0.6 * math.pi * 2.0);
+      final fx = _fract(b.fx + dirX * travel + driftX);
+      final fy = _fract(b.fy + dirY * travel + driftY);
+
+      final cx = fx * size.width;
+      final cy = fy * size.height;
+
+      final rect = Rect.fromCenter(center: Offset(cx, cy), width: boxSize, height: boxSize);
+
+      // Pulsing opacity for subtle breathing
+      final alphaPulse = 0.5 + 0.5 * math.sin((t + b.phase) * math.pi * 2.0);
+      final color = Colors.white.withOpacity((b.opacity * (0.7 + 0.3 * alphaPulse)).clamp(0.02, 0.16));
+
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = color
+        ..strokeWidth = b.stroke;
+
+      final rrect = RRect.fromRectAndRadius(rect, Radius.circular(b.corner));
+      canvas.drawRRect(rrect, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BoxesPainter oldDelegate) {
+    return oldDelegate.t != t || oldDelegate.boxes != boxes;
+  }
 }
