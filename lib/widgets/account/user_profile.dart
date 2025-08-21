@@ -189,15 +189,28 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: items
-            .map((item) => Expanded(
-                  child: Row(
-                    children: [
-                      if (items.indexOf(item) != 0) const VerticalDivider(),
-                      Expanded(child: _singleItem(context, item)),
-                    ],
-                  ),
-                ))
-            .toList(),
+            .asMap()
+            .entries
+            .map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Expanded(
+                child: Row(
+                  children: [
+                    if (index != 0) const VerticalDivider(),
+                    Expanded(
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) => Opacity(opacity: value, child: child),
+                        child: _singleItem(context, item),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
       ),
     );
   }
