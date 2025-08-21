@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../gen_l10n/app_localizations.dart';
 import '../widgets/responsive/responsive_layout.dart';
 import '../widgets/responsive/responsive_text.dart';
+import '../widgets/animated/responsive_flying_words_text.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutWidget extends StatelessWidget {
@@ -30,7 +31,7 @@ class AboutWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 30),
-                  ResponsiveText(
+                  ResponsiveFlyingWordsText(
                     l10n.aboutTitle,
                     maxSize: 26,
                     minSize: 16,
@@ -44,14 +45,14 @@ class AboutWidget extends StatelessWidget {
                       desktop: 24,
                     ),
                   ),
-                  ResponsiveText(
+                  ResponsiveFlyingWordsText(
                     l10n.aboutDescription,
                     maxSize: 22,
                     minSize: 16,
                     themeStyle: 'bodyLarge',
                   ),
                   const SizedBox(height: 30),
-                  ResponsiveText(
+                  ResponsiveFlyingWordsText(
                     l10n.aboutFeaturesTitle,
                     maxSize: 22,
                     minSize: 16,
@@ -65,14 +66,14 @@ class AboutWidget extends StatelessWidget {
                       desktop: 24,
                     ),
                   ),
-                  ResponsiveText(
+                  ResponsiveFlyingWordsText(
                     l10n.aboutFeatures,
                     maxSize: 22,
                     minSize: 16,
                     themeStyle: 'bodyLarge',
                   ),
                   const SizedBox(height: 35),
-                  ResponsiveText(
+                  ResponsiveFlyingWordsText(
                     l10n.aboutCallToAction,
                     maxSize: 24,
                     minSize: 16,
