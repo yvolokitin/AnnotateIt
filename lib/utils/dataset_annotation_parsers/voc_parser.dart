@@ -23,10 +23,16 @@ class VOCParser {
     required int projectId,
     required int annotatorId,
   }) async {
-    final annotationsDir = Directory('$datasetPath/Annotations');
-    if (!await annotationsDir.exists()) {
-      _logger.warning('[VOC] No VOC annotations folder found: ${annotationsDir.path}');
-      return 0;
+    final annotationsDirPrimary = Directory('$datasetPath/Annotations');
+    Directory annotationsDir = annotationsDirPrimary;
+    if (!await annotationsDirPrimary.exists()) {
+      final alt = Directory('$datasetPath/annotations');
+      if (await alt.exists()) {
+        annotationsDir = alt;
+      } else {
+        _logger.warning('[VOC] No VOC annotations folder found: ${annotationsDirPrimary.path}');
+        return 0;
+      }
     }
 
     final Map<String, Label> labelNameMap = {

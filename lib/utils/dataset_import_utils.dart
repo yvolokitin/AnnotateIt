@@ -454,23 +454,41 @@ Future<String> detectDatasetType(
         }
       } else if (name.endsWith('.xml')) {
         final text = await file.readAsString();
-        if (text.contains('<annotation') && text.contains('<object>') && text.contains('<bndbox>')) {
-          isVOC = true;
-        } else if (text.contains('<annotations>') &&
-                   text.contains('<image>') &&
-                   text.contains('<box') &&
-                   text.contains('label=')) {
+        // Detect CVAT first
+        if (text.contains('<annotations>') &&
+            text.contains('<image>') &&
+            text.contains('<box') &&
+            text.contains('label=')) {
           isCVAT = true;
         }
-      } else if (name.endsWith('.txt')) {
-        // YOLO format heuristic
-        final lines = await file.readAsLines();
-        if (file.uri.pathSegments.last.toLowerCase() == 'labelmap.txt') {
+        // Detect VOC even if there are no <object>/<bndbox> elements
+        else if (text.contains('<annotation')) {
           isVOC = true;
-        } else if (lines.isNotEmpty) {
-          final parts = lines.first.trim().split(' ');
-          if (parts.length == 5 && parts.every((p) => double.tryParse(p) != null)) {
-            isYOLO = true;
+        }
+      } else if (name.endsWith('.txt')) {
+        // Fast checks by filename
+        final base = file.uri.pathSegments.last.toLowerCase();
+        if (base == 'labelmap.txt') {
+          isVOC = true;
+        } else if (base == 'format.txt') {
+          try {
+            final text = (await file.readAsString()).trim().toLowerCase();
+            if (text == 'voc') {
+              isVOC = true;
+            } else if (text == 'yolo') {
+              isYOLO = true;
+            } else if (text == 'coco') {
+              isCOCO = true;
+            }
+          } catch (_) {}
+        } else {
+          // YOLO format heuristic
+          final lines = await file.readAsLines();
+          if (lines.isNotEmpty) {
+            final parts = lines.first.trim().split(' ');
+            if (parts.length == 5 && parts.every((p) => double.tryParse(p) != null)) {
+              isYOLO = true;
+            }
           }
         }
       }

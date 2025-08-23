@@ -5,6 +5,7 @@ import 'coco_exporter.dart';
 import 'yolo_exporter.dart';
 import 'datumaro_exporter.dart';
 import 'zip_exporter.dart';
+import 'voc_exporter.dart';
 
 class ExporterFactory {
   static BaseDatasetExporter createExporter({
@@ -34,6 +35,12 @@ class ExporterFactory {
         );
       case 'ZIP':
         return ZipExporter(
+          project: project,
+          exportLabels: exportLabels,
+          exportAnnotations: exportAnnotations,
+        );
+      case 'VOC':
+        return VOCExporter(
           project: project,
           exportLabels: exportLabels,
           exportAnnotations: exportAnnotations,

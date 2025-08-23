@@ -1,6 +1,7 @@
 import 'dart:io';
 import "package:flutter/material.dart";
 import '../gen_l10n/app_localizations.dart';
+import '../utils/theme.dart';
 
 import '../session/user_session.dart';
 import "../data/project_database.dart";
@@ -224,7 +225,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
               Text(
                 l10n.loadingProjects,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Theme.of(context).colorScheme.muted,
                   fontFamily: 'CascadiaCode',
                 ),
               ),
@@ -322,7 +323,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ListTile(
                   leading: Icon(
                     Icons.edit_note_outlined,
-                    color: Colors.white70,
+                    color: Theme.of(context).colorScheme.info,
                     size: 30,
                   ),
                   title: Text(
@@ -331,7 +332,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
                       fontFamily: 'CascadiaCode',
-                      color: Colors.white70
+                      color: Theme.of(context).colorScheme.info
                     ),
                   ),
                   onTap: () {
@@ -343,7 +344,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ListTile(
                   leading: Icon(
                     Icons.build_circle_outlined,
-                    color: Colors.white70,
+                    color: Theme.of(context).colorScheme.warning,
                     size: 30,
                   ),
                   title: Text(
@@ -352,7 +353,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
                       fontFamily: 'CascadiaCode',
-                      color: Colors.white70,
+                      color: Theme.of(context).colorScheme.warning,
                       ),
                   ),
                   onTap: () {
@@ -364,7 +365,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ListTile(
                   leading: Icon(
                     Icons.save_alt_rounded,
-                    color: Colors.white70,
+                    color: Theme.of(context).colorScheme.success,
                     size: 30,
                   ),
                   title: Text(
@@ -373,7 +374,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
                       fontFamily: 'CascadiaCode',
-                      color: Colors.white70,
+                      color: Theme.of(context).colorScheme.success,
                     ),
                   ),
                   onTap: () {
@@ -387,7 +388,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   ListTile(
                     leading: Icon(
                       Icons.auto_awesome,
-                      color: Colors.white70,
+                      color: Theme.of(context).colorScheme.purple,
                       size: 30,
                     ),
                     title: Text(
@@ -397,7 +398,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                         fontSize: 24,
                         fontWeight: FontWeight.normal,
                         fontFamily: 'CascadiaCode',
-                        color: Colors.white70,
+                        color: Theme.of(context).colorScheme.purple,
                       ),
                     ),
                     onTap: () {
@@ -410,7 +411,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                 ListTile(
                   leading: Icon(
                     Icons.delete_sweep_outlined,
-                    color: Colors.white70,
+                    color: Theme.of(context).colorScheme.error,
                     size: 30,
                   ),
                   title: Text(
@@ -419,7 +420,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
                       fontFamily: 'CascadiaCode',
-                      color: Colors.white70,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                   onTap: () {

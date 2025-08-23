@@ -127,3 +127,30 @@ final Map<String, ThemeData> themeRegistry = {
 void switchTheme(bool isDarkMode) {
   useDarkTheme = isDarkMode;
 }
+
+
+// Semantic color extensions to enrich the palette across the app
+extension AppColorSchemeExt on ColorScheme {
+  // Muted text/icons for secondary emphasis
+  Color get muted => onSurface.withOpacity(0.7);
+
+  // Informational/primary accent (harmonizes with existing blue primary)
+  Color get info => brightness == Brightness.light
+      ? const Color(0xFF1E88E5) // Blue 600
+      : const Color(0xFF64B5F6); // Blue 300
+
+  // Success/positive actions
+  Color get success => brightness == Brightness.light
+      ? const Color(0xFF2E7D32) // Green 800
+      : const Color(0xFF81C784); // Green 300
+
+  // Warning/attention
+  Color get warning => brightness == Brightness.light
+      ? const Color(0xFFF9A825) // Amber 700
+      : const Color(0xFFFFE082); // Amber 200
+
+  // Purple accent (used for AI/pre-label type actions)
+  Color get purple => brightness == Brightness.light
+      ? const Color(0xFF8E24AA) // Purple 600
+      : const Color(0xFFBA68C8); // Purple 300
+}

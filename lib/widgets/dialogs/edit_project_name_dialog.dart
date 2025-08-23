@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/project.dart';
 import '../../data/project_database.dart';
+import '../../utils/theme.dart';
 
 class EditProjectNameDialog extends StatefulWidget {
   final Project project;
@@ -52,20 +53,20 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
       backgroundColor: Colors.grey[800],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.orangeAccent, width: 1),
+        side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
       ),
       title: Row(
         children: [
           Icon(
             Icons.edit_note_outlined,
             size: (screenWidth > 1200) ? 34 : 26,
-            color: Colors.orangeAccent,
+            color: Theme.of(context).colorScheme.info,
           ),
           const SizedBox(width: 12),
           Text(
             l10n.editProjectTitle,
             style: TextStyle(
-              color: Colors.orangeAccent,
+              color: Theme.of(context).colorScheme.info,
               fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
@@ -78,13 +79,13 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: Colors.orangeAccent),
+          Divider(color: Theme.of(context).colorScheme.info),
           Padding(
             padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
             child: Text(
               l10n.editProjectDescription,
               style: TextStyle(
-                color: Colors.white70,
+                color: Theme.of(context).colorScheme.muted,
                 fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: (screenWidth > 1200) ? 24 : 20,
@@ -101,7 +102,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 }),
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
-                    color: Colors.white54,
+                    color: Theme.of(context).colorScheme.muted,
                     fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: screenWidth > 1200 ? 22 : 18,
@@ -113,11 +114,11 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                   filled: false,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
                   ),
                 ),
                 style: TextStyle(
@@ -146,7 +147,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
               child: Text(
                 l10n.buttonClose,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Theme.of(context).colorScheme.muted,
                   fontWeight: FontWeight.normal,
                   fontFamily: 'CascadiaCode',
                   fontSize: (screenWidth > 1200) ? 22 : 20,
@@ -163,7 +164,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.orangeAccent, width: 2),
+                  side: BorderSide(color: Theme.of(context).colorScheme.info, width: 2),
                 ),
               ),
               child: Row(

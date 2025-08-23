@@ -18,6 +18,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../data/dataset_database.dart';
 import '../../data/annotation_database.dart';
 import '../../utils/dataset_exporters/exporter_factory.dart';
+import '../../utils/theme.dart';
 
 class ExportProjectDialog extends StatefulWidget {
   final Project project;
@@ -86,7 +87,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                     children: [
                       _buildHeader(screenWidth),
                       const SizedBox(height: 12),
-                      const Divider(color: Colors.white70),
+                      Divider(color: Theme.of(context).colorScheme.success),
                       const SizedBox(height: 12),
                       Expanded(child: _buildExportOptions(screenWidth)),
                       const SizedBox(height: 12),
@@ -98,7 +99,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                   top: 5,
                   right: 5,
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white70),
+                    icon: Icon(Icons.close, color: Theme.of(context).colorScheme.muted),
                     tooltip: l10n.buttonClose,
                     onPressed: _isExporting ? null : () => Navigator.of(context).pop(),
                   ),
@@ -122,7 +123,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             Icon(
               Icons.upload_file,
               size: screenWidth >= 1600 ? 34 : 30,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.success,
             ),
             const SizedBox(width: 12),
             Text(
@@ -131,7 +132,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                 fontSize: screenWidth >= 1600 ? 26 : 22,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'CascadiaCode',
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.success,
               ),
             ),
           ],
@@ -144,7 +145,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
               fontSize: screenWidth >= 1600 ? 22 : (screenWidth > 660) ? 18 : 12,
               fontWeight: FontWeight.normal,
               fontFamily: 'CascadiaCode',
-              color: Colors.white24,
+              color: Theme.of(context).colorScheme.muted,
             ),
           ),
         ],
@@ -173,6 +174,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             children: [
               _buildDatasetTypeCard('COCO', 'Common Objects in Context', Icons.photo_library),
               _buildDatasetTypeCard('YOLO', 'You Only Look Once', Icons.view_in_ar),
+              _buildDatasetTypeCard('VOC', 'Pascal VOC (XML)', Icons.description),
               _buildDatasetTypeCard('Datumaro', 'Universal Dataset Format', Icons.data_object),
               _buildDatasetTypeCard('ZIP', 'Simple ZIP Archive', Icons.folder_zip),
             ],
@@ -192,15 +194,21 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             _buildExportToggle(
               'Export All Labels',
               exportLabels,
-              (value) => setState(() => exportLabels = value),
+              (value) => setState(() {
+                exportLabels = value;
+                if (!exportLabels) {
+                  exportAnnotations = false;
+                }
+              }),
               screenWidth,
             ),
-          _buildExportToggle(
-            'Export All Annotations',
-            exportAnnotations,
-            (value) => setState(() => exportAnnotations = value),
-            screenWidth,
-          ),
+          if (!_showExportLabelsButton || exportLabels)
+            _buildExportToggle(
+              'Export All Annotations',
+              exportAnnotations,
+              (value) => setState(() => exportAnnotations = value),
+              screenWidth,
+            ),
         ],
       ),
     );
@@ -212,45 +220,55 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     return InkWell(
       onTap: () => setState(() => selectedDatasetType = type),
       child: Container(
-        width: 200,
+        width: 220,
+        height: 160,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.red.withOpacity(0.2) : Colors.grey[800],
+          color: isSelected ? Theme.of(context).colorScheme.success.withOpacity(0.2) : Colors.grey[800],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.red : Colors.transparent,
+            color: isSelected ? Theme.of(context).colorScheme.success : Colors.transparent,
             width: 2,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
                 Icon(
                   icon,
-                  color: isSelected ? Colors.red : Colors.white70,
-                  size: 24,
+                  color: isSelected ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.muted,
+                  size: 28,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  type,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'CascadiaCode',
-                    color: isSelected ? Colors.red : Colors.white,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    type,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'CascadiaCode',
+                      color: isSelected ? Theme.of(context).colorScheme.success : Colors.white,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'CascadiaCode',
-                color: Colors.white70,
+            Expanded(
+              child: Text(
+                description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: 'CascadiaCode',
+                  color: Theme.of(context).colorScheme.muted,
+                ),
               ),
             ),
           ],
@@ -276,7 +294,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
       ),
       value: value,
       onChanged: _isExporting ? null : onChanged,
-      activeColor: Colors.red,
+      activeColor: Theme.of(context).colorScheme.success,
     );
   }
 
@@ -289,7 +307,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
           child: Text(
             l10n.buttonCancel,
             style: TextStyle(
-              color: Colors.white54,
+              color: Theme.of(context).colorScheme.muted,
               fontFamily: 'CascadiaCode',
             ),
           ),
@@ -301,7 +319,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
-              side: const BorderSide(color: Colors.red, width: 2),
+              side: BorderSide(color: Theme.of(context).colorScheme.success, width: 2),
             ),
           ),
           child: Text(
@@ -344,6 +362,10 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     // If the export labels button is hidden, ensure exportLabels is true
     if (!_showExportLabelsButton) {
       exportLabels = true;
+    }
+    // If labels are not exported, annotations cannot be exported
+    if (!exportLabels) {
+      exportAnnotations = false;
     }
 
     setState(() => _isExporting = true);

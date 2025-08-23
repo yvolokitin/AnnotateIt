@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 import '../../models/project.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
@@ -74,7 +75,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                   Icon(
                                     Icons.build_circle_outlined,
                                     size: isLargeScreen ? 34 : 30,
-                                    color: Colors.white,
+                                    color: Theme.of(context).colorScheme.warning,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -83,7 +84,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                       fontSize: isLargeScreen ? 26 : 22,
                                       fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Theme.of(context).colorScheme.warning,
                                     ),
                                   ),
                                 ]
@@ -100,7 +101,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                                         fontSize: screenWidth > 1200 ? 22 : 18,
                                         fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
-                                        color: Colors.white24,
+                                        color: Theme.of(context).colorScheme.muted,
                                       ),
                                     ),
                                   ],
@@ -111,7 +112,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                         ),
 
                         SizedBox(height: screenWidth > 700 ? 12 : 6),
-                        const Divider(color: Colors.white70),
+                        Divider(color: Theme.of(context).colorScheme.warning),
 
                         Expanded(
                           child: Padding(
@@ -130,7 +131,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                     top: 5,
                     right: 5,
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white70),
+                      icon: Icon(Icons.close, color: Theme.of(context).colorScheme.muted),
                       tooltip: l10n.buttonClose,
                       onPressed: () => {
                         if (currentStep != 3) {
@@ -170,11 +171,11 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: Colors.redAccent),
+              CircularProgressIndicator(color: Theme.of(context).colorScheme.warning),
               SizedBox(height: 20),
               Text(
                 l10n.changeProjectTypeMigrating,
-                style: TextStyle(color: Colors.white70, fontSize: 18),
+                style: TextStyle(color: Theme.of(context).colorScheme.muted, fontSize: 18),
               ),
             ],
           ),
@@ -198,8 +199,8 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
           },
           child: Text(
             l10n.buttonCancel,
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.muted,
               fontFamily: 'CascadiaCode',
             ),
           ),
@@ -211,8 +212,8 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                 onPressed: () => setState(() => currentStep--),
                 child: Text(
                   l10n.buttonBack,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.muted,
                     fontFamily: 'CascadiaCode',
                   ),
                 ),
@@ -225,7 +226,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
-                  side: BorderSide(color: Colors.red, width: 2),
+                  side: BorderSide(color: Theme.of(context).colorScheme.warning, width: 2),
                 ),
               ),
               child: Text(
