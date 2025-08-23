@@ -6,8 +6,8 @@
 
 // The application's name. By default this is also the title of the Flutter window.
 PRODUCT_NAME = AnnotateIt
-
 PRODUCT_MODULE_NAME = $(PRODUCT_NAME:c99extidentifier)
+SWIFT_MODULE_NAME = $(PRODUCT_MODULE_NAME)
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = ai.annotateit
