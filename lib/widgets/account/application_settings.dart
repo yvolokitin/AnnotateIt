@@ -32,7 +32,7 @@ class ApplicationSettings extends StatelessWidget {
               _buildCountrySelection(context, isWide, isTablet),
               /// theme selection does not work yet
               /// _buildThemeSelection(context),
-            ], isWide),
+            ], isWide, initiallyExpanded: true),
 
             _buildSection(l10n.settingsProjectCreationTitle, [
               _buildSwitchWithNote(
@@ -137,7 +137,7 @@ class ApplicationSettings extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children, bool isWide) {
+  Widget _buildSection(String title, List<Widget> children, bool isWide, {bool initiallyExpanded = false}) {
     final padding = isWide ? const EdgeInsets.all(18) : const EdgeInsets.all(8);
     final titlePadding = isWide ? const EdgeInsets.only(left: 18, top: 10) : const EdgeInsets.only(left: 8, top: 5);
 
@@ -147,22 +147,30 @@ class ApplicationSettings extends StatelessWidget {
         color: Colors.grey[850],
         borderRadius: BorderRadius.circular(7),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: titlePadding,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontFamily: 'CascadiaCode',
-                color: Colors.white,
-              ),
+      child: ExpansionTileTheme(
+        data: const ExpansionTileThemeData(
+          iconColor: Colors.white70,
+          collapsedIconColor: Colors.white70,
+          textColor: Colors.white,
+          collapsedTextColor: Colors.white,
+          backgroundColor: Colors.transparent,
+          collapsedBackgroundColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          tilePadding: titlePadding,
+          initiallyExpanded: initiallyExpanded,
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 24,
+              fontFamily: 'CascadiaCode',
+              color: Colors.white,
             ),
           ),
-          ...children.map((child) => Padding(padding: padding, child: child)).toList(),
-        ],
+          children: [
+            ...children.map((child) => Padding(padding: padding, child: child)).toList(),
+          ],
+        ),
       ),
     );
   }
