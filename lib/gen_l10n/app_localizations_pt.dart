@@ -123,11 +123,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Dicas:\n• Melhores comandos: comece com uma caixa ou 1–2 cliques positivos, depois adicione cliques negativos para excluir áreas.\n• Refine, não redesenhe: continue adicionando comandos para atualizar a mesma máscara.\n• Desempenho: o codificador é a etapa pesada; reutilize-o em vários comandos na mesma imagem.\n• Imagens grandes: aproxime antes de marcar para bordas mais limpas.\n• Quantizado vs. precisão total: quantizado é mais rápido e usa menos memória, mas pode perder detalhes finos.';
 
   @override
-  String get aboutTitle => 'Sobre o Annot@It';
+  String get aboutTitle => 'Sobre o AnnotateIt';
 
   @override
   String get aboutDescription =>
-      'Annot@It é um aplicativo de anotação projetado para simplificar o processo de anotação para projetos de visão computacional. Seja trabalhando em classificação de imagens, detecção de objetos, segmentação ou outras tarefas de visão, o Annot@It oferece a flexibilidade e precisão necessárias para rotulagem de dados de alta qualidade.';
+      'AnnotateIt é um aplicativo de anotação projetado para simplificar o processo de anotação para projetos de visão computacional. Seja trabalhando em classificação de imagens, detecção de objetos, segmentação ou outras tarefas de visão, o AnnotateIt oferece a flexibilidade e precisão necessárias para rotulagem de dados de alta qualidade.';
 
   @override
   String get aboutFeaturesTitle => 'Recursos principais:';

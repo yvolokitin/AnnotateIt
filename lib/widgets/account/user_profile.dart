@@ -2,11 +2,55 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../data/project_database.dart';
+import '../../data/user_database.dart';
+import '../../session/user_session.dart';
+import '../../utils/theme.dart';
+import '../app_snackbar.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 
-class UserProfile extends StatelessWidget {
+class UserProfile extends StatefulWidget {
   const UserProfile({
     super.key,
   });
+
+  @override
+  State<UserProfile> createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<UserProfile> {
+  void _showBoltOverlay() {
+    final overlay = Overlay.of(context);
+    if (overlay == null) return;
+    final entry = OverlayEntry(
+      builder: (ctx) => Positioned.fill(
+        child: IgnorePointer(
+          child: Center(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 700),
+              builder: (ctx, value, child) => Opacity(
+                opacity: 1.0 - (value * 0.8),
+                child: Transform.scale(
+                  scale: 0.8 + value * 0.7,
+                  child: Icon(
+                    Icons.bolt,
+                    size: 120,
+                    color: Theme.of(ctx).colorScheme.info,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(entry);
+    Future.delayed(const Duration(milliseconds: 700)).then((_) {
+      try { entry.remove(); } catch (_) {}
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +71,16 @@ class UserProfile extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Captain Annotator",
+                    (() {
+                      try {
+                        if (UserSession.instance.isInitialized) {
+                          final u = UserSession.instance.getUser();
+                          final name = '${u.firstName} ${u.lastName}'.trim();
+                          return name.isEmpty ? 'Captain Annotator' : name;
+                        }
+                      } catch (_) {}
+                      return 'Captain Annotator';
+                    })(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenWidth > 1200 ? 24 : 18,
@@ -40,7 +93,20 @@ class UserProfile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FloatingActionButton.extended(
-                        onPressed: () {},
+                        onPressed: () async {
+                          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+                            final uri = Uri.parse('https://apps.microsoft.com/detail/9N640T6RLT89?hl=en-us&gl=NL&ocid=pdpshare');
+                            final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            if (!ok) {
+                              AppSnackbar.show(
+                                context,
+                                'Could not open Microsoft Store.',
+                                backgroundColor: Colors.redAccent,
+                                textColor: Colors.white,
+                              );
+                            }
+                          }
+                        },
                         elevation: 0,
                         backgroundColor: Colors.grey.shade300,
                         foregroundColor: Colors.black87,
@@ -55,7 +121,219 @@ class UserProfile extends StatelessWidget {
                       ),
                       const SizedBox(width: 16.0),
                       FloatingActionButton.extended(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final existingUser = await UserDatabase.instance.getUser();
+                          if (existingUser == null) {
+                            AppSnackbar.show(
+                              context,
+                              'No user found to edit.',
+                              backgroundColor: Colors.redAccent,
+                              textColor: Colors.white,
+                            );
+                            return;
+                          }
+
+                          final firstController = TextEditingController(text: existingUser.firstName);
+                          final lastController = TextEditingController(text: existingUser.lastName);
+
+                          final screenWidth = MediaQuery.of(context).size.width;
+
+                          final saved = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) {
+                              return StatefulBuilder(
+                                builder: (context, setState) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.grey[800],
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+                                    ),
+                                    title: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.person_outline,
+                                          size: (screenWidth > 1200) ? 34 : 26,
+                                          color: Theme.of(context).colorScheme.info,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          AppLocalizations.of(context)!.userProfileEditProfileButton,
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.info,
+                                            fontFamily: 'CascadiaCode',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: (screenWidth > 1200) ? 26 : 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Divider(color: Theme.of(context).colorScheme.info),
+                                        Padding(
+                                          padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+                                          child: TextField(
+                                            controller: firstController,
+                                            inputFormatters: [LengthLimitingTextInputFormatter(32)],
+                                            decoration: InputDecoration(
+                                              hintText: 'First name',
+                                              hintStyle: TextStyle(
+                                                color: Theme.of(context).colorScheme.muted,
+                                                fontFamily: 'CascadiaCode',
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: screenWidth > 1200 ? 22 : 18,
+                                              ),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                              filled: false,
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+                                              ),
+                                            ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontFamily: 'CascadiaCode',
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+                                          child: TextField(
+                                            controller: lastController,
+                                            inputFormatters: [LengthLimitingTextInputFormatter(32)],
+                                            decoration: InputDecoration(
+                                              hintText: 'Last name',
+                                              hintStyle: TextStyle(
+                                                color: Theme.of(context).colorScheme.muted,
+                                                fontFamily: 'CascadiaCode',
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: screenWidth > 1200 ? 22 : 18,
+                                              ),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                              filled: false,
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+                                              ),
+                                            ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontFamily: 'CascadiaCode',
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      Row(
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () => Navigator.pop(dialogContext, false),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.grey[800],
+                                              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              AppLocalizations.of(context)!.buttonClose,
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.muted,
+                                                fontWeight: FontWeight.normal,
+                                                fontFamily: 'CascadiaCode',
+                                                fontSize: (screenWidth > 1200) ? 22 : 20,
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              final firstRaw = firstController.text.trim();
+                                              final lastRaw = lastController.text.trim();
+                                              final first = firstRaw.length > 32 ? firstRaw.substring(0, 32) : firstRaw;
+                                              final last = lastRaw.length > 32 ? lastRaw.substring(0, 32) : lastRaw;
+                                              if (first.isEmpty || last.isEmpty) {
+                                                AppSnackbar.show(
+                                                  context,
+                                                  'Please enter both first and last name.',
+                                                  backgroundColor: Colors.redAccent,
+                                                  textColor: Colors.white,
+                                                );
+                                                return;
+                                              }
+                                              final updated = existingUser.copyWith(
+                                                firstName: first,
+                                                lastName: last,
+                                                updatedAt: DateTime.now(),
+                                              );
+                                              _showBoltOverlay();
+                                              await UserDatabase.instance.update(updated);
+                                              UserSession.instance.setUser(updated);
+                                              if (context.mounted) {
+                                                Navigator.pop(dialogContext, true);
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.grey[800],
+                                              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                side: BorderSide(color: Theme.of(context).colorScheme.info, width: 2),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  AppLocalizations.of(context)!.buttonSave,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontFamily: 'CascadiaCode',
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: (screenWidth > 1200) ? 22 : 20,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+
+                          firstController.dispose();
+                          lastController.dispose();
+
+                          if (saved == true && context.mounted) {
+                            setState(() {});
+                            AppSnackbar.show(
+                              context,
+                              'Profile updated.',
+                              backgroundColor: Colors.greenAccent,
+                              textColor: Colors.black,
+                            );
+                          }
+                        },
                         elevation: 0,
                         backgroundColor: Colors.redAccent,
                         label: Text(

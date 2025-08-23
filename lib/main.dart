@@ -200,7 +200,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Annot@It",
+      title: "AnnotateIt",
       theme: theme,
 
       home: SafeArea(

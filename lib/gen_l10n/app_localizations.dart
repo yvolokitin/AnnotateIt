@@ -329,13 +329,13 @@ abstract class AppLocalizations {
   /// No description provided for @aboutTitle.
   ///
   /// In en, this message translates to:
-  /// **'About Annot@It'**
+  /// **'About AnnotateIt'**
   String get aboutTitle;
 
   /// No description provided for @aboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.'**
+  /// **'AnnotateIt is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, AnnotateIt provides the flexibility and precision needed for high-quality data labeling.'**
   String get aboutDescription;
 
   /// No description provided for @aboutFeaturesTitle.

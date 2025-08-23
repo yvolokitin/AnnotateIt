@@ -123,11 +123,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tips:\n• Best prompts: start with a box or 1–2 positive clicks, then add negative clicks to exclude extras.\n• Refine, don’t redraw: keep adding prompts to update the same mask.\n• Performance: the encoder is the heavy step; reuse it for many prompts on the same image.\n• Large images: zoom in before prompting for cleaner edges.\n• Quantized vs full precision: quantized runs faster with lower memory, but may lose fine detail.';
 
   @override
-  String get aboutTitle => 'About Annot@It';
+  String get aboutTitle => 'About AnnotateIt';
 
   @override
   String get aboutDescription =>
-      'Annot@It is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, Annot@It provides the flexibility and precision needed for high-quality data labeling.';
+      'AnnotateIt is an annotation application designed to streamline the annotation process for computer vision projects. Whether you\'re working on image classification, object detection, segmentation, or other vision tasks, AnnotateIt provides the flexibility and precision needed for high-quality data labeling.';
 
   @override
   String get aboutFeaturesTitle => 'Key Features:';

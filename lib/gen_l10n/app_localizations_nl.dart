@@ -123,11 +123,11 @@ class AppLocalizationsNl extends AppLocalizations {
       'Tips:\n• Beste invoer: begin met een kader of 1–2 positieve klikken, voeg daarna negatieve klikken toe om extra’s uit te sluiten.\n• Verfijnen, niet opnieuw tekenen: blijf invoer toevoegen om hetzelfde masker bij te werken.\n• Prestaties: de encoder is de zware stap; hergebruik hem voor meerdere invoeren op dezelfde afbeelding.\n• Grote afbeeldingen: zoom in voordat u een prompt geeft voor scherpere randen.\n• Kwantisatie vs volledige precisie: kwantisatie is sneller en gebruikt minder geheugen, maar kan fijne details verliezen.';
 
   @override
-  String get aboutTitle => 'Over Annot@It';
+  String get aboutTitle => 'Over AnnotateIt';
 
   @override
   String get aboutDescription =>
-      'Annot@It is een annotatie-applicatie ontworpen om het annotatieproces voor computervisieprojecten te stroomlijnen. Of je nu werkt aan beeldclassificatie, objectdetectie, segmentatie of andere visietaken, Annot@It biedt de flexibiliteit en precisie die nodig zijn voor hoogwaardige gegevenslabeling.';
+      'AnnotateIt is een annotatie-applicatie ontworpen om het annotatieproces voor computervisieprojecten te stroomlijnen. Of je nu werkt aan beeldclassificatie, objectdetectie, segmentatie of andere visietaken, AnnotateIt biedt de flexibiliteit en precisie die nodig zijn voor hoogwaardige gegevenslabeling.';
 
   @override
   String get aboutFeaturesTitle => 'Belangrijkste functies:';

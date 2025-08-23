@@ -123,11 +123,11 @@ class AppLocalizationsIt extends AppLocalizations {
       'Suggerimenti:\n• Input migliori: inizia con un riquadro o 1–2 clic positivi, quindi aggiungi clic negativi per escludere elementi.\n• Raffina, non ridisegnare: continua ad aggiungere input per aggiornare la stessa maschera.\n• Prestazioni: l’encoder è la parte più pesante; riutilizzalo per molti input sulla stessa immagine.\n• Immagini grandi: ingrandisci prima di dare input per ottenere bordi più netti.\n• Quantizzato vs piena precisione: il quantizzato è più veloce e usa meno memoria, ma può perdere dettagli fini.';
 
   @override
-  String get aboutTitle => 'Informazioni su Annot@It';
+  String get aboutTitle => 'Informazioni su AnnotateIt';
 
   @override
   String get aboutDescription =>
-      'Annot@It è un\'applicazione di annotazione progettata per semplificare il processo di annotazione per progetti di computer vision. Che tu stia lavorando su classificazione di immagini, rilevamento di oggetti, segmentazione o altre attività di visione, Annot@It offre la flessibilità e la precisione necessarie per un\'etichettatura di dati di alta qualità.';
+      'AnnotateIt è un\'applicazione di annotazione progettata per semplificare il processo di annotazione per progetti di computer vision. Che tu stia lavorando su classificazione di immagini, rilevamento di oggetti, segmentazione o altre attività di visione, AnnotateIt offre la flessibilità e la precisione necessarie per un\'etichettatura di dati di alta qualità.';
 
   @override
   String get aboutFeaturesTitle => 'Funzionalità principali:';
