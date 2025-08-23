@@ -106,7 +106,7 @@ class AppHeaderState extends State<AppHeader> {
                 IconButton(
                   onPressed: _showNotifications,
                   icon: Icon(
-                    Icons.notifications_outlined,
+                    Icons.mail_outline_rounded,
                     size: screenWidth > 1200 ? 28 : 24,
                     color: Colors.white,
                   ),

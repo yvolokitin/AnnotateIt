@@ -158,7 +158,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.notifications, color: Colors.white, size: 24),
+                  const Icon(Icons.mail_outline_rounded, color: Colors.white, size: 24),
                   const SizedBox(width: 12),
                   const Text(
                     'Notifications',

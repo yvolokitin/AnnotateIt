@@ -110,6 +110,10 @@
   "dialogNext": "Suivant ->",
 
   "rename": "Renommer",
+
+  "betaDialogTitle": "Modèles de segmentation (Bêta)",
+  "betaDialogMessage": "Pourquoi SAM Mobile, SAM2 Hiera Base+ et SAM2 Hiera Large donnent-ils souvent des résultats similaires?\n\nCompilations non Web (Windows/macOS/Linux/Android/iOS) : l'inférence SAM réelle n'est pas encore activée. L'application a recours à une heuristique basée sur le contenu (croissance de région avec graine + extraction de contours). Changer de modèle ne modifie pas cette heuristique, donc les résultats sont similaires.\n\nCompilations Web : une véritable inférence ONNX est utilisée lorsque le modèle se charge correctement, mais les résultats sont toujours post-traités de la même manière : masque du décodeur en 256×256 → seuillage (Otsu), filtrage du composant connecté au clic, comblement des trous, lissage et simplification du polygone. Cela peut supprimer des détails fins et rapprocher les modèles plus que prévu.\n\nLimites connues dans cette bêta :\n • Indications à un seul point uniquement (pas de boîtes/indices multi-points).\n • L'image est prétraitée à 1024 px et le masque du décodeur est 256×256 → perte de détails sur les petits objets/bords.\n • Le seuillage/le lissage peut sur- ou sous-segmenter selon le contraste/le bruit de l'image.\n • Sur les plateformes non Web, le changement de modèle affecte surtout les libellés/l'UI, pas le backend réel de segmentation.",
+  "betaDialogTips": "Conseils pour améliorer les résultats dès maintenant :\n • Zoomez et cliquez bien à l'intérieur de l'objet d'intérêt.\n • Privilégiez des images avec un bon contraste local et peu d'artefacts de compression.\n • Si possible, essayez la version Web pour une inférence SAM réelle.\n • Affinez manuellement les contours après l'auto-segmentation si nécessaire.",
   "delete": "Supprimer",
   "setAsDefault": "Définir par Défaut",
 

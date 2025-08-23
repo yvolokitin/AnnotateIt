@@ -15,6 +15,16 @@ class ModelsTopBar extends StatelessWidget {
     );
   }
 
+  void _showBetaDetailsDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    AlertErrorDialog.show(
+      context,
+      l10n.betaDialogTitle,
+      l10n.betaDialogMessage,
+      tips: l10n.betaDialogTips,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -34,6 +44,23 @@ class ModelsTopBar extends StatelessWidget {
               color: Colors.white,
               fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => _showBetaDetailsDialog(context),
+            child: Chip(
+              label: Text(
+                'Beta',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: Colors.orange,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              visualDensity: VisualDensity.compact,
             ),
           ),
           const Spacer(),

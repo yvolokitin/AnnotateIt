@@ -316,6 +316,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rename => 'Renombrar';
 
   @override
+  String get betaDialogTitle => 'Modelos de segmentación (Beta)';
+
+  @override
+  String get betaDialogMessage =>
+      '¿Por qué SAM Mobile, SAM2 Hiera Base+ y SAM2 Hiera Large a menudo se ven similares?\n\nCompilaciones no web (Windows/macOS/Linux/Android/iOS): la inferencia real de SAM aún no está habilitada. La app recurre a una heurística basada en el contenido (crecimiento de regiones con semilla + extracción de contornos). Cambiar de modelo no modifica esta heurística, por lo que los resultados son similares.\n\nCompilaciones web: se usa inferencia ONNX real cuando el modelo se carga correctamente, pero los resultados se posprocesan de la misma forma: máscara del decodificador a 256×256 → umbral (Otsu), filtrado del componente conectado al toque, rellenado de huecos, suavizado y simplificación del polígono. Esto puede eliminar detalles finos y hacer que los modelos se parezcan más de lo esperado.\n\nLimitaciones conocidas en esta beta:\n • Solo indicaciones de un punto (sin cajas/indicaciones de varios puntos).\n • La imagen se preprocesa a 1024 px y la máscara del decodificador es de 256×256 → pérdida de detalle en objetos/bordes diminutos.\n • El umbral/suavizado puede sobre/infra-segmentar según el contraste/ruido de la imagen.\n • En plataformas no web, cambiar de modelo afecta principalmente a las etiquetas/la IU, no al backend real de segmentación.';
+
+  @override
+  String get betaDialogTips =>
+      'Consejos para mejorar los resultados ahora:\n • Acércate y haz clic bien dentro del objeto de interés.\n • Prefiere imágenes con buen contraste local y pocos artefactos de compresión.\n • Si es posible, prueba la versión web para obtener inferencia real de SAM.\n • Refina los contornos manualmente tras la auto-segmentación cuando sea necesario.';
+
+  @override
   String get delete => 'Eliminar';
 
   @override

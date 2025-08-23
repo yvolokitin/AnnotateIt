@@ -316,6 +316,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rename => 'Umbenennen';
 
   @override
+  String get betaDialogTitle => 'Segmentierungsmodelle (Beta)';
+
+  @override
+  String get betaDialogMessage =>
+      'Warum wirken SAM Mobile, SAM2 Hiera Base+ und SAM2 Hiera Large oft ähnlich?\n\nNicht-Web-Builds (Windows/macOS/Linux/Android/iOS): echtes SAM-Inferencing ist noch nicht aktiviert. Die App greift auf eine inhaltsbasierte Heuristik zurück (Seeded Region Growing + Konturextraktion). Ein Modellwechsel ändert diese Heuristik nicht, daher sind die Ergebnisse ähnlich.\n\nWeb-Builds: echte ONNX-Inferenz wird verwendet, wenn das Modell erfolgreich geladen wurde, die Ergebnisse werden jedoch identisch nachverarbeitet: Decodermaske in 256×256 → Schwellwert (Otsu), Komponentenfilterung zum Tipp, Lochfüllung, Glättung und Polygonsimplifizierung. Das kann feine Details entfernen und Modelle näher beieinander erscheinen lassen, als erwartet.\n\nBekannte Einschränkungen in dieser Beta:\n • Nur Ein-Punkt-Prompts (keine Boxen/Mehrpunkt-Hinweise).\n • Bild wird auf 1024 px vorverarbeitet und die Decodermaske ist 256×256 → Detailverlust bei sehr kleinen Objekten/Kanten.\n • Schwellwert/Glättung kann je nach Bildkontrast/Rauschen über- oder untersegmentieren.\n • Auf Nicht-Web-Plattformen beeinflusst der Modellwechsel hauptsächlich Labels/UI, nicht das eigentliche Segmentierungs-Backend.';
+
+  @override
+  String get betaDialogTips =>
+      'Tipps zur sofortigen Ergebnisverbesserung:\n • Heranzoomen und deutlich innerhalb des Zielobjekts klicken.\n • Bilder mit gutem lokalen Kontrast und wenigen Kompressionsartefakten bevorzugen.\n • Wenn möglich, die Web-Version für echtes SAM-Inferencing verwenden.\n • Grenzen nach der Auto-Segmentierung bei Bedarf manuell nachziehen.';
+
+  @override
   String get delete => 'Löschen';
 
   @override
