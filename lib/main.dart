@@ -22,6 +22,7 @@ import "data/notification_database.dart";
 import 'gen_l10n/app_localizations.dart';
 import 'package:window_size/window_size.dart';
 import 'services/file_logger.dart';
+import 'widgets/animated/puzzle_reveal_overlay.dart';
 
 ThemeData themeData = getSystemTheme();
 
@@ -203,9 +204,15 @@ class AnnotateItAppState extends State<AnnotateItApp> {
       theme: theme,
 
       home: SafeArea(
-        child: Container(
-          color: Colors.black,
-          child: MainPage(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              color: Colors.black,
+              child: MainPage(),
+            ),
+            const PuzzleRevealOverlay(),
+          ],
         ),
       ),
 
