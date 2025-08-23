@@ -1,3 +1,6 @@
 #include? "../../Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"
 #include "../../Flutter/Flutter-Profile.xcconfig"
 #include "Warnings.xcconfig"
+PRODUCT_NAME = AnnotateIt
+PRODUCT_MODULE_NAME = $(PRODUCT_NAME:c99extidentifier)
+SWIFT_MODULE_NAME = $(PRODUCT_MODULE_NAME)
