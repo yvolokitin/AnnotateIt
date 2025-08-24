@@ -22,13 +22,11 @@ class StepDatasetTaskConfirmation extends StatefulWidget {
 class StepDatasetTaskConfirmationState
     extends State<StepDatasetTaskConfirmation> {
   static const tasks = [
-    {'title': 'Detection bounding box', 'image': 'assets/images/detection_bounding_box.jpg'},
-    {'title': 'Detection oriented', 'image': 'assets/images/detection_oriented.jpg'},
-    // {'title': 'Anomaly detection', 'image': 'assets/images/anomaly_detection.jpg'}, - UNSUPPORTED UP TO NOW
+    {'title': 'Detection Bounding Box', 'image': 'assets/images/detection_bounding_box.jpg'},
+    {'title': 'Detection Rotated', 'image': 'assets/images/detection_oriented.jpg'},
     {'title': 'Binary Classification', 'image': 'assets/images/classification_binary.jpg'},
     {'title': 'Multi-class Classification', 'image': 'assets/images/classification_multi_class.jpg'},
     {'title': 'Multi-label Classification', 'image': 'assets/images/anomaly_detection.jpg'},
-    // {'title': 'Hierarchical Classification', 'image': 'assets/images/anomaly_detection.jpg'}, - UNSUPPORTED UP TO NOW
     {'title': 'Instance Segmentation', 'image': 'assets/images/instance_segmentation.jpg'},
     {'title': 'Semantic Segmentation', 'image': 'assets/images/semantic_segmentation.jpg'},
   ];

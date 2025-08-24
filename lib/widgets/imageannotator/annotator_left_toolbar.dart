@@ -131,9 +131,9 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      width: Constants.toolbarWidth,
+      width: 62,
       decoration: BoxDecoration(
-        color: Constants.toolbarBackgroundColor,
+        color: Color(0xFF424242),
         border: const Border(
           right: BorderSide(color: Colors.black, width: 2),
         ),

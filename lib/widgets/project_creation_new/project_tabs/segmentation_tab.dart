@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../gen_l10n/app_localizations.dart';
-import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
+import '../dataset_task_type_grid.dart';
 
 class SegmentationTab extends StatelessWidget {
   final String selectedTaskType;
@@ -23,11 +23,13 @@ class SegmentationTab extends StatelessWidget {
       tasks: [
         {
           'title': l10n.projectTypeInstanceSegmentation,
+          'value': 'Instance Segmentation',
           'description': l10n.projectTypeInstanceSegmentationDescription,
           'image': 'assets/images/instance_segmentation.jpg',
         },
         {
           'title': l10n.projectTypeSemanticSegmentation,
+          'value': 'Semantic Segmentation',
           'description': l10n.projectTypeSemanticSegmentationDescription,
           'image': 'assets/images/semantic_segmentation.jpg',
         },

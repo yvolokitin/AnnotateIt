@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../gen_l10n/app_localizations.dart';
-import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
+import '../dataset_task_type_grid.dart';
 
 class DetectionTab extends StatelessWidget {
   final String selectedTaskType;
@@ -23,11 +23,13 @@ class DetectionTab extends StatelessWidget {
       tasks: [
         {
           'title': l10n.projectTypeDetectionBoundingBox,
+          'value': 'Detection Bounding Box',
           'description': l10n.projectTypeDetectionBoundingBoxDescription,
           'image': 'assets/images/detection_bounding_box.jpg',
         },
         {
           'title': l10n.projectTypeDetectionOriented,
+          'value': 'Detection Rotated',
           'description': l10n.projectTypeDetectionOrientedDescription,
           'image': 'assets/images/detection_oriented.jpg',
         },

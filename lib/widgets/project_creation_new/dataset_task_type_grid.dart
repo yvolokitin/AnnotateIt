@@ -41,8 +41,9 @@ class DatasetTaskTypeGrid extends StatelessWidget {
           itemCount: tasks.length,
           itemBuilder: (context, index) {
             final task = tasks[index];
-            final isSelected = selectedTaskType == task['title'];
-            
+            // final isSelected = selectedTaskType == task['title'];
+            final isSelected = selectedTaskType == task['value'];
+
             return Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -55,7 +56,8 @@ class DatasetTaskTypeGrid extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: () => onTaskSelected(task['title']!),
+                // onTap: () => onTaskSelected(task['title']!),
+                onTap: () => onTaskSelected(task['value']!),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

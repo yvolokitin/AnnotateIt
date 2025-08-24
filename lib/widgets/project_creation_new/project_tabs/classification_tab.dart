@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../gen_l10n/app_localizations.dart';
-import '../../project_creation_from_dataset/dataset_task_type_grid.dart';
+import '../dataset_task_type_grid.dart';
 
 class ClassificationTab extends StatelessWidget {
   final String selectedTaskType;
@@ -23,18 +23,21 @@ class ClassificationTab extends StatelessWidget {
       tasks: [
         {
           'title': l10n.projectTypeBinaryClassification,
+          'value': 'Binary Classification',
           'description': l10n.projectTypeBinaryClassificationDescription,
           'image': 'assets/images/classification_binary.jpg',
         },
         {
           'title': l10n.projectTypeMultiClassClassification,
+          'value': 'Multi-class Classification',
           'description': l10n.projectTypeMultiClassClassificationDescription,
           'image': 'assets/images/classification_multi_class.jpg',
         },
         {
           'title': l10n.projectTypeMultiLabelClassification,
+          'value': 'Multi-label Classification',
           'description': l10n.projectTypeMultiLabelClassificationDescription,
-          'image': 'assets/images/anomaly_detection.jpg', // 'assets/images/classification_multi_label.jpg',
+          'image': 'assets/images/anomaly_detection.jpg',
         },
         /*
         not implemented yet
