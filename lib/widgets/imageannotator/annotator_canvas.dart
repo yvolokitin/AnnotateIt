@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:vector_math/vector_math_64.dart' show Vector3;
@@ -80,6 +81,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   Matrix4 matrix = Matrix4.identity()..scale(0.9);
   Matrix4 inverse = Matrix4.identity();
 
+  // Throttle zoom change notifications to parent to avoid frequent heavy rebuilds
+  Timer? _zoomNotifyTimer;
+  double? _queuedZoom;
+  static const Duration _zoomNotifyInterval = Duration(milliseconds: 16);
+
   Annotation? _draggingAnnotation;
   Offset? _dragStartPosition;
 
@@ -133,7 +139,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         setState(() {
           matrix = setTransformToFit(widget.image);
         });
-        widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
+        notifyZoomChanged(matrix.getMaxScaleOnAxis());
       });
     }
 
@@ -155,8 +161,18 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   }
 
   void notifyZoomChanged(double zoom) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.onZoomChanged?.call(zoom);
+    _queuedZoom = zoom;
+    // If a timer is already running, we just update the queued value
+    if (_zoomNotifyTimer?.isActive ?? false) return;
+    // Start a timer to coalesce multiple zoom updates into one notification
+    _zoomNotifyTimer = Timer(_zoomNotifyInterval, () {
+      final z = _queuedZoom;
+      _queuedZoom = null;
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onZoomChanged?.call(z ?? zoom);
+      });
     });
   }
 
@@ -607,6 +623,12 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       }
     }
     return null;
+  }
+
+  @override
+  void dispose() {
+    _zoomNotifyTimer?.cancel();
+    super.dispose();
   }
 
   @override
