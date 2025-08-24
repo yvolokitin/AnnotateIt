@@ -1338,9 +1338,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                     selectedAnnotation: _selectedAnnotation,
                                     requestedZoom: _currentZoom,
                                     onZoomChanged: (zoom) {
-                                      if (mounted) {
-                                        setState(() => _currentZoom = zoom);
-                                      }
+                                      if (!mounted) return;
+                                      if ((_currentZoom - zoom).abs() < 0.0005) return;
+                                      setState(() => _currentZoom = zoom);
                                     },
                                     onAnnotationUpdated: _handleAnnotationUpdated,
                                     onAnnotationSelected: _handleAnnotationSelected,
