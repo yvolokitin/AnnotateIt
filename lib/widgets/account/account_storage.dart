@@ -34,6 +34,41 @@ class _AccountStorageState extends State<AccountStorage> {
   late TextEditingController _modelsController;
   late TextEditingController _ffmpegController;
 
+  Future<bool> _isLikelyExecutableMachO(String path) async {
+    try {
+      final f = File(path);
+      if (!await f.exists()) return false;
+      // Check executable permission bits where available
+      try {
+        final stat = await f.stat();
+        final mode = stat.mode;
+        final hasExec = (mode & 0x49) != 0; // any of user/group/other exec bits
+        if (!hasExec) {
+          // Still continue to check magic in case permissions are lax
+        }
+      } catch (_) {}
+
+      // Read first 4 bytes to identify Mach-O or fat binary
+      final raf = await f.open();
+      final header = await raf.read(4);
+      await raf.close();
+      if (header.length < 4) return false;
+      final b0 = header[0], b1 = header[1], b2 = header[2], b3 = header[3];
+      final isMachO =
+          // Mach-O 32/64 little-endian
+          (b0 == 0xCE && b1 == 0xFA && b2 == 0xED && b3 == 0xFE) ||
+          (b0 == 0xCF && b1 == 0xFA && b2 == 0xED && b3 == 0xFE) ||
+          // Mach-O 32/64 big-endian
+          (b0 == 0xFE && b1 == 0xED && b2 == 0xFA && b3 == 0xCE) ||
+          (b0 == 0xFE && b1 == 0xED && b2 == 0xFA && b3 == 0xCF) ||
+          // Fat/universal binaries (32/64)
+          (b0 == 0xCA && b1 == 0xFE && b2 == 0xBA && (b3 == 0xBE || b3 == 0xBF));
+      return isMachO;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<String?> _findFfmpegOnMac() async {
     if (!Platform.isMacOS) return null;
     try {
@@ -43,27 +78,24 @@ class _AccountStorageState extends State<AccountStorage> {
         '/opt/homebrew/bun/ffmpeg', // as requested fallback path
         '/opt/local/bin/ffmpeg', // MacPorts (optional)
       ];
+
+      // Also scan PATH directories for 'ffmpeg'
+      final pathEnv = Platform.environment['PATH'];
+      if (pathEnv != null && pathEnv.isNotEmpty) {
+        for (final dir in pathEnv.split(':')) {
+          if (dir.trim().isEmpty) continue;
+          final p = dir.endsWith('/') ? dir + 'ffmpeg' : dir + '/ffmpeg';
+          candidates.add(p);
+        }
+      }
+
       for (final c in candidates) {
         try {
-          if (await File(c).exists()) {
-            final res = await Process.run(c, ['-version']).timeout(const Duration(seconds: 5));
-            if (res.exitCode == 0) {
-              return c;
-            }
+          if (await _isLikelyExecutableMachO(c)) {
+            return c;
           }
         } catch (_) {/* continue */}
       }
-      // Try which ffmpeg
-      try {
-        final which = await Process.run('/usr/bin/which', ['ffmpeg']).timeout(const Duration(seconds: 5));
-        if (which.exitCode == 0) {
-          final path = which.stdout.toString().trim();
-          if (path.isNotEmpty) {
-            final res = await Process.run(path, ['-version']).timeout(const Duration(seconds: 5));
-            if (res.exitCode == 0) return path;
-          }
-        }
-      } catch (_) {/* ignore */}
     } catch (_) {/* ignore */}
     return null;
   }
@@ -225,7 +257,24 @@ class _AccountStorageState extends State<AccountStorage> {
                     return;
                   }
 
-                  // Validate selected path with a timeout to avoid hangs
+                  // On macOS, avoid executing external processes to prevent app termination.
+                  if (Platform.isMacOS) {
+                    final isValid = await _isLikelyExecutableMachO(p);
+                    if (isValid) {
+                      await UserSession.instance.setFfmpegPath(p);
+                      widget.onUserChange(widget.user.copyWith(ffmpegPath: p));
+                      AppSnackbar.show(context, 'FFmpeg path saved', saveToDb: false);
+                    } else {
+                      AppSnackbar.show(
+                        context,
+                        'Not a valid ffmpeg binary at: ' + p,
+                        saveToDb: false,
+                      );
+                    }
+                    return;
+                  }
+
+                  // Other platforms: validate by running "ffmpeg -version" with a timeout
                   final ver = await Process.run(p, ['-version']).timeout(const Duration(seconds: 8));
                   if (ver.exitCode == 0) {
                     await UserSession.instance.setFfmpegPath(p);
