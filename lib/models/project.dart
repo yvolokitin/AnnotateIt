@@ -11,6 +11,9 @@ class Project {
   final String? defaultDatasetId;
   final int ownerId;
 
+  /// Order of the project in the list (persisted as project_order in DB)
+  final int order;
+
   /// Labels are attached after fetching, not stored in DB
   final List<Label> labels;
 
@@ -24,6 +27,7 @@ class Project {
     required this.lastUpdated,
     this.defaultDatasetId,
     required this.ownerId,
+    this.order = 0,
     this.labels = const [], // default to empty list
   });
 
@@ -38,6 +42,7 @@ class Project {
       'lastUpdated': lastUpdated.toIso8601String(),
       'defaultDatasetId': defaultDatasetId,
       'ownerId': ownerId,
+      'project_order': order,
       // Do not include labels here because they are stored in a separate table.
     };
   }
@@ -53,6 +58,7 @@ class Project {
       lastUpdated: DateTime.parse(map['lastUpdated']),
       defaultDatasetId: map['defaultDatasetId'],
       ownerId: map['ownerId'],
+      order: map['project_order'] ?? 0,
       labels: const [], // always provide default empty list
     );
   }
@@ -67,6 +73,7 @@ class Project {
     DateTime? lastUpdated,
     String? defaultDatasetId,
     int? ownerId,
+    int? order,
     List<Label>? labels,
   }) {
     return Project(
@@ -79,6 +86,7 @@ class Project {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       defaultDatasetId: defaultDatasetId ?? this.defaultDatasetId,
       ownerId: ownerId ?? this.ownerId,
+      order: order ?? this.order,
       labels: labels ?? this.labels,
     );
   }
@@ -97,6 +105,7 @@ class Project {
         lastUpdated: $lastUpdated,
         defaultDatasetId: $defaultDatasetId,
         ownerId: $ownerId,
+        order: $order,
         labels: [$labelPreview]
     )''';
   }

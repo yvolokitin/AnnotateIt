@@ -50,7 +50,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _sortOption = l10n.menuSortLastUpdated;
+          _sortOption = 'Custom order';
         });
       }
     });
@@ -149,6 +149,9 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     
     // Sort options
     switch (_sortOption) {
+      case 'Custom order':
+        filtered.sort((a, b) => a.order.compareTo(b.order));
+        break;
       case String option when option == l10n.menuSortLastUpdated:
         filtered.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
         break;
@@ -278,30 +281,83 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   ),
                 ),
               )
-              : ListView.builder(
-                itemCount: _filteredProjects.length,
-                itemBuilder: (context, index) {
-                  final project = _filteredProjects[index];
-                  return ProjectTile(
-                    project: project,
-                    onMorePressed: () {
-                      _showProjectOptions(context, project);
-                    },
-                    onTap: () async {
-                      final projectWithLabels = await ProjectDatabase.instance.fetchProjectWithLabelsById(project.id!);
-                      if (projectWithLabels != null) {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProjectDetailsPage(projectWithLabels),
+              : ((_sortOption == 'Custom order') && _searchQuery.isEmpty && !sortDetection && !sortClassification && !sortSegmentation)
+                  ? ReorderableListView.builder(
+                      buildDefaultDragHandles: false,
+                      proxyDecorator: (child, index, animation) {
+                        return MouseRegion(
+                          cursor: SystemMouseCursors.grabbing,
+                          child: child,
+                        );
+                      },
+                      itemCount: _filteredProjects.length,
+                      onReorder: (oldIndex, newIndex) {
+                        setState(() {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final moved = _filteredProjects.removeAt(oldIndex);
+                          _filteredProjects.insert(newIndex, moved);
+                          // Update order locally to match new positions
+                          for (int i = 0; i < _filteredProjects.length; i++) {
+                            _filteredProjects[i] = _filteredProjects[i].copyWith(order: i);
+                          }
+                          _allProjects = List<Project>.from(_filteredProjects);
+                        });
+                        // Persist order (fire-and-forget)
+                        final ids = _filteredProjects.map((p) => p.id!).toList();
+                        ProjectDatabase.instance.reorderProjects(ids);
+                      },
+                      itemBuilder: (context, index) {
+                        final project = _filteredProjects[index];
+                        return ReorderableDragStartListener(
+                          key: ValueKey('project_${project.id}'),
+                          index: index,
+                          child: ProjectTile(
+                            key: ValueKey('project_tile_${project.id}'),
+                            project: project,
+                            onMorePressed: () {
+                              _showProjectOptions(context, project);
+                            },
+                            onTap: () async {
+                              final projectWithLabels = await ProjectDatabase.instance.fetchProjectWithLabelsById(project.id!);
+                              if (projectWithLabels != null) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProjectDetailsPage(projectWithLabels),
+                                  ),
+                                );
+                                loadProjectsWithLabels();
+                              }
+                            },
                           ),
                         );
-                        loadProjectsWithLabels();
-                      }
-                    },
-                  );
-                },
-              ),
+                      },
+                    )
+                  : ListView.builder(
+                      itemCount: _filteredProjects.length,
+                      itemBuilder: (context, index) {
+                        final project = _filteredProjects[index];
+                        return ProjectTile(
+                          key: ValueKey('project_tile_${project.id}'),
+                          project: project,
+                          onMorePressed: () {
+                            _showProjectOptions(context, project);
+                          },
+                          onTap: () async {
+                            final projectWithLabels = await ProjectDatabase.instance.fetchProjectWithLabelsById(project.id!);
+                            if (projectWithLabels != null) {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProjectDetailsPage(projectWithLabels),
+                                ),
+                              );
+                              loadProjectsWithLabels();
+                            }
+                          },
+                        );
+                      },
+                    ),
           ),
         ],
       ),

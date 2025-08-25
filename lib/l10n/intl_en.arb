@@ -154,6 +154,7 @@
   "menuCreateNewProject": "Create new project",
   "menuCreateFromDataset": "Create from Dataset",
   "menuImportDataset": "Create project from Dataset Import",
+  "menuSortCustomOrder": "Custom order",
   "menuSortLastUpdated": "Last updated",
   "menuSortNewestOldest": "Newest-Oldest",
   "menuSortOldestNewest": "Oldest-Newest",

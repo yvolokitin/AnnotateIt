@@ -374,6 +374,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuImportDataset => 'Импортировать проект из датасета';
 
   @override
+  String get menuSortCustomOrder => 'Пользовательский порядок';
+
+  @override
   String get menuSortLastUpdated => 'Последнее обновление';
 
   @override

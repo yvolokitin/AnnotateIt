@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Create project from Dataset Import'**
   String get menuImportDataset;
 
+  /// No description provided for @menuSortCustomOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom order'**
+  String get menuSortCustomOrder;
+
   /// No description provided for @menuSortLastUpdated.
   ///
   /// In en, this message translates to:

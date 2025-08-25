@@ -146,6 +146,7 @@
   "menuCreateNewProject": "Создать новый проект",
   "menuCreateFromDataset": "Создать из датасета",
   "menuImportDataset": "Импортировать проект из датасета",
+  "menuSortCustomOrder": "Пользовательский порядок",
   "menuSortLastUpdated": "Последнее обновление",
   "menuSortNewestOldest": "Сначала новые",
   "menuSortOldestNewest": "Сначала старые",

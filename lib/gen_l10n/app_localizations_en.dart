@@ -373,6 +373,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuImportDataset => 'Create project from Dataset Import';
 
   @override
+  String get menuSortCustomOrder => 'Custom order';
+
+  @override
   String get menuSortLastUpdated => 'Last updated';
 
   @override

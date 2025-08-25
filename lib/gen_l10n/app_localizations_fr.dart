@@ -378,6 +378,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Créer un projet à partir de l\'Importation d\'un Ensemble de Données';
 
   @override
+  String get menuSortCustomOrder => 'Ordre personnalisé';
+
+  @override
   String get menuSortLastUpdated => 'Dernière Mise à Jour';
 
   @override

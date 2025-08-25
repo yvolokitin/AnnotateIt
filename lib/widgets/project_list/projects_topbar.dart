@@ -119,6 +119,7 @@ class ProjectsTopBar extends StatelessWidget {
                 side: const BorderSide(color: Colors.white70, width: 1),
               ),
               itemBuilder: (context) => [
+                PopupMenuItem(value: "Custom order", child: Text(l10n.menuSortCustomOrder, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
                 PopupMenuItem(value: "Last updated", child: Text(l10n.menuSortLastUpdated, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
                 PopupMenuItem(value: "Newest-Oldest", child: Text(l10n.menuSortNewestOldest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
                 PopupMenuItem(value: "Oldest-Newest", child: Text(l10n.menuSortOldestNewest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),

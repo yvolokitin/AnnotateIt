@@ -23,6 +23,27 @@ class ProjectDatabase {
   final _log = Logger('ProjectDatabase');
   final uuid = Uuid();
 
+  Future<void> _migrateAddProjectOrder(Database db) async {
+    try {
+      final columns = await db.rawQuery("PRAGMA table_info(projects)");
+      final hasOrder = columns.any((row) => row['name'] == 'project_order');
+      if (!hasOrder) {
+        await db.execute('ALTER TABLE projects ADD COLUMN project_order INTEGER NOT NULL DEFAULT 0');
+        final ids = await db.rawQuery('SELECT id FROM projects ORDER BY id ASC');
+        final batch = db.batch();
+        int idx = 0;
+        for (final row in ids) {
+          final id = row['id'] as int;
+          batch.update('projects', {'project_order': idx++}, where: 'id = ?', whereArgs: [id]);
+        }
+        await batch.commit(noResult: true);
+        _log.info('Migration: project_order column added and initialized.');
+      }
+    } catch (e, stack) {
+      _log.severe('Migration _migrateAddProjectOrder failed', e, stack);
+    }
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     
@@ -42,7 +63,15 @@ class ProjectDatabase {
     final returnPath = path.join(dbDir.path, fileName);
     _log.info('Opening database at: $returnPath');
     try {
-      return await openDatabase(returnPath, version: 1, onCreate: createInitialSchema, singleInstance: true);
+      return await openDatabase(
+        returnPath,
+        version: 1,
+        onCreate: createInitialSchema,
+        onOpen: (db) async {
+          await _migrateAddProjectOrder(db);
+        },
+        singleInstance: true,
+      );
     } catch (e, stack) {
       _log.severe('Failed to open database at $returnPath', e, stack);
       rethrow;
@@ -59,6 +88,12 @@ Future<Project> createProject(Project project) async {
   final now = DateTime.now();
 
   return await db.transaction<Project>((txn) async {
+    // Determine next order
+    final List<Map<String, Object?>> maxRes = await txn.rawQuery('SELECT COALESCE(MAX(project_order), -1) + 1 as nextOrder FROM projects');
+    final int nextOrder = (maxRes.isNotEmpty && maxRes.first['nextOrder'] is int)
+        ? maxRes.first['nextOrder'] as int
+        : 0;
+
     // Insert project without defaultDatasetId
     final projectId = await txn.insert('projects', {
       'name': projectName,
@@ -67,6 +102,7 @@ Future<Project> createProject(Project project) async {
       'creationDate': now.toIso8601String(),
       'lastUpdated': now.toIso8601String(),
       'ownerId': project.ownerId,
+      'project_order': nextOrder,
     });
 
     // Create default dataset
@@ -333,13 +369,13 @@ Future<Project> createProject(Project project) async {
 
   Future<List<Project>> fetchProjects() async {
     final db = await database;
-    final result = await db.query('projects');
+    final result = await db.query('projects', orderBy: 'project_order ASC');
     return result.map((map) => Project.fromMap(map)).toList();
   }
 
   Future<List<Project>> fetchProjectsWithLabels() async {
     final db = await database;
-    final projectMaps = await db.query('projects');
+    final projectMaps = await db.query('projects', orderBy: 'project_order ASC');
     final projects = projectMaps.map((map) => Project.fromMap(map)).toList();
 
     final labelMaps = await db.query('labels');
@@ -383,6 +419,7 @@ Future<Project> createProject(Project project) async {
       'projects',
       where: 'ownerId = ?',
       whereArgs: [userId],
+      orderBy: 'project_order ASC',
     );
     return result.map((map) => Project.fromMap(map)).toList();
   }
@@ -412,6 +449,22 @@ Future<Project> createProject(Project project) async {
     final db = await instance.database;
     final result = await db.rawQuery('SELECT COUNT(*) FROM projects');
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<void> reorderProjects(List<int> orderedProjectIds) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (int i = 0; i < orderedProjectIds.length; i++) {
+        batch.update(
+          'projects',
+          {'project_order': i, 'lastUpdated': DateTime.now().toIso8601String()},
+          where: 'id = ?',
+          whereArgs: [orderedProjectIds[i]],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
   }
 
   Future<int> getLabelCount() async {

@@ -662,8 +662,13 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                 onSecondaryTapDown: _handleSecondaryTapDown,
                 onScaleStart: (_) => prevScale = 1,
                 onDoubleTap: () {
-                  setState(() => matrix = setTransformToFit(widget.image));
-                  notifyZoomChanged(matrix.getMaxScaleOnAxis());
+                  // Disable double-tap zoom reset in annotation modes to avoid accidental resets while drawing
+                  if (widget.userAction != UserAction.bbox_annotation &&
+                      widget.userAction != UserAction.sam_annotation &&
+                      widget.userAction != UserAction.polygon_annotation) {
+                    setState(() => matrix = setTransformToFit(widget.image));
+                    notifyZoomChanged(matrix.getMaxScaleOnAxis());
+                  }
                 },
                 onScaleUpdate: (d) {
                   final scale = 1 - (prevScale - d.scale);

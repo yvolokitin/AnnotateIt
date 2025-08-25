@@ -23,6 +23,7 @@ class ProjectTile extends StatefulWidget {
 
 class ProjectTileState extends State<ProjectTile> {
   bool _isHovered = false;
+  bool _isMouseDown = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +39,16 @@ class ProjectTileState extends State<ProjectTile> {
     final double labelFontSize = screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0;
   
     return MouseRegion(
-      // Change cursor to hand when hovering
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true), // Hover start
-      onExit: (_) => setState(() => _isHovered = false), // Hover end
-
-      child: GestureDetector(
+      cursor: _isMouseDown
+          ? SystemMouseCursors.grabbing
+          : (_isHovered ? SystemMouseCursors.grab : SystemMouseCursors.basic),
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Listener(
+        onPointerDown: (_) => setState(() => _isMouseDown = true),
+        onPointerUp: (_) => setState(() => _isMouseDown = false),
+        onPointerCancel: (_) => setState(() => _isMouseDown = false),
+        child: GestureDetector(
         onTap: widget.onTap,
         child: Card(
           color: Colors.grey.shade800,
@@ -184,6 +189,7 @@ class ProjectTileState extends State<ProjectTile> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

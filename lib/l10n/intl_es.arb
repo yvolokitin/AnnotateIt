@@ -155,6 +155,7 @@
   "menuCreateNewProject": "Crear nuevo proyecto",
   "menuCreateFromDataset": "Crear desde Conjunto de Datos",
   "menuImportDataset": "Crear proyecto desde Importación de Conjunto de Datos",
+  "menuSortCustomOrder": "Orden personalizado",
   "menuSortLastUpdated": "Última actualización",
   "menuSortNewestOldest": "Más reciente-Más antiguo",
   "menuSortOldestNewest": "Más antiguo-Más reciente",

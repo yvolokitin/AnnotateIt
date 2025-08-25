@@ -376,6 +376,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuImportDataset => 'Project aanmaken vanuit Dataset-import';
 
   @override
+  String get menuSortCustomOrder => 'Aangepaste volgorde';
+
+  @override
   String get menuSortLastUpdated => 'Laatst Bijgewerkt';
 
   @override

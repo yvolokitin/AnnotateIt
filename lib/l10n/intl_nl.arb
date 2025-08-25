@@ -155,6 +155,7 @@
   "menuCreateNewProject": "Nieuw project aanmaken",
   "menuCreateFromDataset": "Aanmaken vanuit Dataset",
   "menuImportDataset": "Project aanmaken vanuit Dataset-import",
+  "menuSortCustomOrder": "Aangepaste volgorde",
   "menuSortLastUpdated": "Laatst bijgewerkt",
   "menuSortNewestOldest": "Nieuwste-Oudste",
   "menuSortOldestNewest": "Oudste-Nieuwste",

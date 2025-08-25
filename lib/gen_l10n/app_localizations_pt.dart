@@ -376,6 +376,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Criar projeto a partir da Importação de Conjunto de Dados';
 
   @override
+  String get menuSortCustomOrder => 'Ordem personalizada';
+
+  @override
   String get menuSortLastUpdated => 'Última Atualização';
 
   @override

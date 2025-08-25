@@ -113,6 +113,7 @@ Future<void> createInitialSchema(Database db, int version) async {
         lastUpdated TEXT NOT NULL,
         defaultDatasetId TEXT,
         ownerId INTEGER NOT NULL,
+        project_order INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
       )
     ''');
