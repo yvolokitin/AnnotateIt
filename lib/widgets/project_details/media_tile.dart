@@ -1,13 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart' as vthumb;
+import 'package:path/path.dart' as path;
+import 'package:image/image.dart' as img;
+import 'package:file_picker/file_picker.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
+import '../../data/dataset_database.dart';
+import '../../session/user_session.dart';
 import 'image_tile/select_checkbox_overlay.dart';
 import '../dialogs/image_details_dialog.dart';
 import '../dialogs/delete_image_dialog.dart';
+import '../app_snackbar.dart';
 
 class MediaTile extends StatefulWidget {
   final AnnotatedLabeledMedia mediaItem;
@@ -151,6 +158,12 @@ class _MediaTileState extends State<MediaTile> {
                             builder: (_) => ImageDetailsDialog(media: widget.mediaItem),
                           );
                           break;
+                        case 'open_in_folder':
+                          await _openInFolder(context);
+                          break;
+                        case 'extract_frames':
+                          await _extractFramesFromThisVideo(context);
+                          break;
                         case 'delete':
                           final deleted = await showDialog<List<String>>(
                             context: context,
@@ -173,7 +186,7 @@ class _MediaTileState extends State<MediaTile> {
                         fontSize: screenWidth > 1200 ? 22 : 18,
                         fontFamily: 'CascadiaCode',
                       );
-                      return [
+                      final items = <PopupMenuEntry<String>>[
                         PopupMenuItem(
                           value: 'details',
                           child: Row(
@@ -184,6 +197,34 @@ class _MediaTileState extends State<MediaTile> {
                             ],
                           ),
                         ),
+                      ];
+                      items.add(
+                        PopupMenuItem(
+                          value: 'open_in_folder',
+                          child: Row(
+                            children: [
+                              Icon(Icons.folder_open, size: screenWidth > 1200 ? 26 : 22),
+                              SizedBox(width: screenWidth > 1200 ? 8 : 4),
+                              Text('Open in folder', style: textStyle),
+                            ],
+                          ),
+                        ),
+                      );
+                      if (media.type == MediaType.video) {
+                        items.add(
+                          PopupMenuItem(
+                            value: 'extract_frames',
+                            child: Row(
+                              children: [
+                                Icon(Icons.movie_creation_outlined, size: screenWidth > 1200 ? 26 : 22),
+                                SizedBox(width: screenWidth > 1200 ? 8 : 4),
+                                Text('Extract frames', style: textStyle),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      items.add(
                         PopupMenuItem(
                           value: 'delete',
                           child: Row(
@@ -194,7 +235,8 @@ class _MediaTileState extends State<MediaTile> {
                             ],
                           ),
                         ),
-                      ];
+                      );
+                      return items;
                     },
                   ),
                 ),
@@ -204,6 +246,304 @@ class _MediaTileState extends State<MediaTile> {
         ),
       ),
     );
+  }
+
+  Future<void> _openInFolder(BuildContext context) async {
+    final media = widget.mediaItem.mediaItem;
+    final filePath = media.filePath;
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      AppSnackbar.show(context, 'File not found: ' + filePath);
+      return;
+    }
+
+    try {
+      if (Platform.isWindows) {
+        final winPath = path.windows.normalize(filePath);
+        final result = await Process.run('explorer', ['/select,' + winPath]);
+        if (result.exitCode != 0) {
+          AppSnackbar.show(context, 'Failed to open Explorer');
+        }
+      } else if (Platform.isMacOS) {
+        final result = await Process.run('open', ['-R', filePath]);
+        if (result.exitCode != 0) {
+          AppSnackbar.show(context, 'Failed to reveal in Finder');
+        }
+      } else if (Platform.isLinux) {
+        final dirPath = path.dirname(filePath);
+        final result = await Process.run('xdg-open', [dirPath]);
+        if (result.exitCode != 0) {
+          AppSnackbar.show(context, 'Failed to open folder');
+        }
+      } else {
+        AppSnackbar.show(context, 'Open in folder is not supported on this platform');
+      }
+    } catch (e) {
+      AppSnackbar.show(context, 'Failed to open folder: ' + e.toString());
+    }
+  }
+
+  // Extract frames from this video and insert into current dataset
+  Future<void> _extractFramesFromThisVideo(BuildContext context) async {
+    final media = widget.mediaItem.mediaItem;
+    if (media.type != MediaType.video) {
+      AppSnackbar.show(context, 'Not a video item');
+      return;
+    }
+
+    final videoPath = media.filePath;
+    final file = File(videoPath);
+    if (!file.existsSync()) {
+      AppSnackbar.show(context, 'File not found: $videoPath');
+      return;
+    }
+
+    final logPrefix = '[MEDIA_TILE_VIDEO] ';
+    void log(String msg) => print(logPrefix + msg);
+
+    try {
+      final currentUser = UserSession.instance.getUser();
+      if (currentUser.id == null) {
+        AppSnackbar.show(context, 'User not set');
+        return;
+      }
+
+      AppSnackbar.show(context, 'Extracting frames...', saveToDb: false);
+
+      // Determine duration (best effort)
+      double durationSec = 0.0;
+      try {
+        final tmp = VideoPlayerController.file(File(videoPath));
+        await tmp.initialize();
+        durationSec = tmp.value.duration.inMilliseconds / 1000.0;
+        await tmp.dispose();
+      } catch (e) {
+        log('video_player init failed: ' + e.toString());
+      }
+
+      const double extractFps = 2.0;
+      int expectedFrames = (durationSec > 0 ? (durationSec * extractFps) : 60).round();
+      expectedFrames = expectedFrames.clamp(1, 1200);
+
+      // Prepare frames directory inside Dataset import folder
+      final baseName = path.basenameWithoutExtension(videoPath);
+      final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+      int? projectId;
+      try {
+        final ds = await DatasetDatabase.instance.loadDatasetWithFolderIds(media.datasetId);
+        projectId = ds?.projectId;
+      } catch (_) {}
+      final List<String> segments = [];
+      if (projectId != null) {
+        segments.addAll(['project_' + projectId.toString()]);
+      }
+      segments.addAll(['dataset_' + media.datasetId, baseName + '_frames']);
+      final framesDir = Directory(path.join(importRoot, path.joinAll(segments)));
+      if (!framesDir.existsSync()) {
+        framesDir.createSync(recursive: true);
+      }
+
+      final List<File> frameFiles = [];
+
+      // Try video_thumbnail first on non-Windows
+      if (!Platform.isWindows) {
+        try {
+          final intervalMs = (1000 / extractFps).round();
+          for (int i = 0; i < expectedFrames; i++) {
+            final timeMs = i * intervalMs;
+            final bytes = await vthumb.VideoThumbnail.thumbnailData(
+              video: videoPath,
+              timeMs: timeMs,
+              imageFormat: vthumb.ImageFormat.PNG,
+              quality: 100,
+            );
+            if (bytes != null && bytes.isNotEmpty) {
+              final framePath = path.join(
+                framesDir.path,
+                baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
+              );
+              final out = File(framePath);
+              await out.writeAsBytes(bytes);
+              frameFiles.add(out);
+            }
+          }
+        } catch (e) {
+          log('video_thumbnail failed: ' + e.toString());
+        }
+      }
+
+      // Windows fallback or if nothing extracted
+      if (frameFiles.isEmpty && Platform.isWindows) {
+        final ffmpegPath = await _resolveFfmpegPath(log: log);
+        if (ffmpegPath != null) {
+          final ok = await _tryExtractFramesWithFfmpeg(
+            ffmpegPath: ffmpegPath,
+            videoPath: videoPath,
+            framesDir: framesDir.path,
+            baseName: baseName,
+            fps: extractFps,
+            log: log,
+          );
+          if (ok) {
+            final all = framesDir
+                .listSync()
+                .whereType<File>()
+                .where((f) => f.path.toLowerCase().endsWith('.png'))
+                .toList()
+              ..sort((a, b) => a.path.compareTo(b.path));
+            frameFiles.addAll(all);
+          }
+        }
+      }
+
+      if (frameFiles.isEmpty) {
+        AppSnackbar.show(context, 'No frames extracted');
+        return;
+      }
+
+      // Optional: read size from first frame
+      int? frameWidth;
+      int? frameHeight;
+      try {
+        final firstBytes = await frameFiles.first.readAsBytes();
+        final decoded = img.decodeImage(firstBytes);
+        if (decoded != null) {
+          frameWidth = decoded.width;
+          frameHeight = decoded.height;
+        }
+      } catch (_) {}
+
+      // Insert frames into dataset
+      int inserted = 0;
+      for (final f in frameFiles) {
+        await DatasetDatabase.instance.insertMediaItem(
+          media.datasetId,
+          f.path,
+          'png',
+          ownerId: currentUser.id!,
+          width: frameWidth,
+          height: frameHeight,
+          source: 'video_frames',
+        );
+        inserted++;
+      }
+
+      AppSnackbar.show(context, 'Extracted and added $inserted frame${inserted == 1 ? '' : 's'}');
+
+      widget.onRefreshNeeded?.call();
+    } catch (e, st) {
+      log('Extraction error: ' + e.toString());
+      log(st.toString());
+      AppSnackbar.show(context, 'Extraction failed: ' + e.toString());
+    }
+  }
+
+  static String? _ffmpegPathCache;
+  Future<String?> _resolveFfmpegPath({
+    required void Function(String) log,
+  }) async {
+    try {
+      final saved = UserSession.instance.getUser().ffmpegPath;
+      if (saved != null && saved.isNotEmpty) {
+        final ver = await Process.run(saved, ['-version']);
+        if (ver.exitCode == 0) {
+          _ffmpegPathCache = saved;
+          log('Using ffmpeg from settings: ' + saved);
+          return saved;
+        }
+      }
+    } catch (e) {
+      log('Failed to validate ffmpeg from settings: ' + e.toString());
+    }
+
+    if (_ffmpegPathCache != null) {
+      try {
+        final ver = await Process.run(_ffmpegPathCache!, ['-version']);
+        if (ver.exitCode == 0) {
+          log('Using cached ffmpeg: ' + _ffmpegPathCache!);
+          return _ffmpegPathCache!;
+        }
+      } catch (e) {
+        log('Cached ffmpeg path failed: ' + e.toString());
+      }
+    }
+
+    try {
+      final ver = await Process.run('ffmpeg', ['-version']);
+      if (ver.exitCode == 0) {
+        log('ffmpeg found on PATH');
+        return 'ffmpeg';
+      }
+    } catch (e) {
+      log('ffmpeg not found on PATH: ' + e.toString());
+    }
+
+    // Ask user (mainly for Windows)
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: Platform.isWindows ? ['exe'] : null,
+        dialogTitle: 'Select ffmpeg executable',
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final picked = result.files.first.path!;
+        final f = File(picked);
+        if (await f.exists()) {
+          final ver = await Process.run(picked, ['-version']);
+          if (ver.exitCode == 0) {
+            _ffmpegPathCache = picked;
+            try {
+              if (!Platform.isAndroid && !Platform.isIOS) {
+                await UserSession.instance.setFfmpegPath(picked);
+              }
+            } catch (_) {}
+            log('User-selected ffmpeg validated: ' + picked);
+            return picked;
+          }
+        }
+      }
+    } catch (e) {
+      log('ffmpeg selection error: ' + e.toString());
+    }
+
+    return null;
+  }
+
+  Future<bool> _tryExtractFramesWithFfmpeg({
+    required String ffmpegPath,
+    required String videoPath,
+    required String framesDir,
+    required String baseName,
+    required double fps,
+    required void Function(String) log,
+  }) async {
+    try {
+      final outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
+      log('Running ffmpeg to extract frames at ' + fps.toString() + ' fps. Using: ' + ffmpegPath);
+      final result = await Process.run(
+        ffmpegPath,
+        [
+          '-y',
+          '-i',
+          videoPath,
+          '-vf',
+          'fps=$fps',
+          outPattern,
+        ],
+      );
+      log('ffmpeg exitCode: ' + result.exitCode.toString());
+      if (result.stdout is String && (result.stdout as String).isNotEmpty) {
+        log('ffmpeg stdout: ' + (result.stdout as String).split('\n').take(5).join(' | '));
+      }
+      if (result.stderr is String && (result.stderr as String).isNotEmpty) {
+        log('ffmpeg stderr: ' + (result.stderr as String).split('\n').take(5).join(' | '));
+      }
+      return result.exitCode == 0;
+    } catch (e) {
+      log('ffmpeg run error: ' + e.toString());
+      return false;
+    }
   }
 
   Widget _buildBrokenTile() {

@@ -16,6 +16,7 @@ import '../widgets/imageeditor/editor_top_toolbar.dart';
 import '../widgets/imageeditor/editor_canvas.dart';
 import '../widgets/imageeditor/editor_action.dart';
 import 'annotator_page.dart';
+import '../widgets/app_snackbar.dart';
 
 class ImageEditorPage extends StatefulWidget {
   final Project project;
@@ -285,11 +286,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           Navigator.of(context).pop();
           
           // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Image saved successfully'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackbar.show(
+            context,
+            'Image saved successfully',
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
           );
           return;
         }
@@ -300,11 +301,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       Navigator.of(context).pop();
       
       // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save image: Could not crop the image'),
-          backgroundColor: Colors.red,
-        ),
+      AppSnackbar.show(
+        context,
+        'Failed to save image: Could not crop the image',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     } catch (e) {
       // Close the loading indicator if it's showing
@@ -313,11 +314,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       }
       
       // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save image: $e'),
-          backgroundColor: Colors.red,
-        ),
+      AppSnackbar.show(
+        context,
+        'Failed to save image: $e',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     }
   }

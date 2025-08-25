@@ -34,6 +34,40 @@ class _AccountStorageState extends State<AccountStorage> {
   late TextEditingController _modelsController;
   late TextEditingController _ffmpegController;
 
+  Future<String?> _findFfmpegOnMac() async {
+    if (!Platform.isMacOS) return null;
+    try {
+      final candidates = <String>[
+        '/opt/homebrew/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+        '/opt/homebrew/bun/ffmpeg', // as requested fallback path
+        '/opt/local/bin/ffmpeg', // MacPorts (optional)
+      ];
+      for (final c in candidates) {
+        try {
+          if (await File(c).exists()) {
+            final res = await Process.run(c, ['-version']).timeout(const Duration(seconds: 5));
+            if (res.exitCode == 0) {
+              return c;
+            }
+          }
+        } catch (_) {/* continue */}
+      }
+      // Try which ffmpeg
+      try {
+        final which = await Process.run('/usr/bin/which', ['ffmpeg']).timeout(const Duration(seconds: 5));
+        if (which.exitCode == 0) {
+          final path = which.stdout.toString().trim();
+          if (path.isNotEmpty) {
+            final res = await Process.run(path, ['-version']).timeout(const Duration(seconds: 5));
+            if (res.exitCode == 0) return path;
+          }
+        }
+      } catch (_) {/* ignore */}
+    } catch (_) {/* ignore */}
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,12 +130,30 @@ class _AccountStorageState extends State<AccountStorage> {
               tooltip: 'Browse ffmpeg executable',
               onPressed: () async {
                 try {
-                  final typeGroup = XTypeGroup(
-                    label: 'Executable',
-                    extensions: Platform.isWindows ? ['exe'] : null,
-                  );
+                  XTypeGroup? typeGroup;
+                  List<XTypeGroup> groups = [];
+                  if (Platform.isWindows) {
+                    typeGroup = XTypeGroup(
+                      label: 'Executable',
+                      extensions: ['exe'],
+                    );
+                    groups = <XTypeGroup>[typeGroup];
+                  } else if (Platform.isMacOS) {
+                    // Allow selecting Unix executables on macOS
+                    typeGroup = XTypeGroup(
+                      label: 'Executable',
+                      uniformTypeIdentifiers: ['public.unix-executable', 'public.executable', 'public.data'],
+                    );
+                    groups = <XTypeGroup>[typeGroup];
+                  } else {
+                    // Linux and others: allow any file
+                    typeGroup = XTypeGroup(
+                      label: 'Any',
+                    );
+                    groups = <XTypeGroup>[typeGroup];
+                  }
                   final file = await openFile(
-                    acceptedTypeGroups: Platform.isWindows ? <XTypeGroup>[typeGroup] : <XTypeGroup>[],
+                    acceptedTypeGroups: groups,
                   );
                   if (file != null) {
                     _ffmpegController.text = file.path;
@@ -152,26 +204,43 @@ class _AccountStorageState extends State<AccountStorage> {
               tooltip: 'Validate with "ffmpeg -version" and save',
               isWide: isWide,
               onPressed: () async {
-                final p = _ffmpegController.text.trim();
-                if (p.isEmpty) {
-                  AppSnackbar.show(context, 'Path is empty');
-                  return;
-                }
+                String p = _ffmpegController.text.trim();
+
                 try {
-                  final ver = await Process.run(p, ['-version']);
+                  // macOS: try to auto-detect when empty or a bare command name
+                  if (Platform.isMacOS) {
+                    bool isBareName = p.isNotEmpty && !p.startsWith('/');
+                    if (p.isEmpty || p == 'ffmpeg' || isBareName) {
+                      final found = await _findFfmpegOnMac();
+                      if (found != null) {
+                        p = found;
+                        _ffmpegController.text = p;
+                        AppSnackbar.show(context, 'Detected ffmpeg at: ' + p, saveToDb: false);
+                      }
+                    }
+                  }
+
+                  if (p.isEmpty) {
+                    AppSnackbar.show(context, 'Path is empty');
+                    return;
+                  }
+
+                  // Validate selected path with a timeout to avoid hangs
+                  final ver = await Process.run(p, ['-version']).timeout(const Duration(seconds: 8));
                   if (ver.exitCode == 0) {
                     await UserSession.instance.setFfmpegPath(p);
                     widget.onUserChange(widget.user.copyWith(ffmpegPath: p));
                     AppSnackbar.show(context, 'FFmpeg saved', saveToDb: false);
                   } else {
                     AppSnackbar.show(
-		      context,
+                      context,
                       'Not a valid ffmpeg executable (exit ${ver.exitCode})',
-		      saveToDb: false,
-		    );
+                      saveToDb: false,
+                    );
                   }
-                } catch (e) {
-                  AppSnackbar.show(context, 'Failed to run ffmpeg: $e');
+                } catch (e, st) {
+                  _logger.warning('FFmpeg validate failed', e, st);
+                  AppSnackbar.show(context, 'Failed to run ffmpeg: ' + e.toString());
                 }
               },
             ),

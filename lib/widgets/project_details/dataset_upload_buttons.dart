@@ -514,33 +514,38 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
       logMsg('Stub metadata -> duration: ' + durationStub.toString() + ', fps: ' + fpsStub.toString() + ', fallback totalFrames: ' + totalFrames.toString());
 
-      // Prepare output directory (next to the video)
+      // Prepare output directory inside Dataset import folder
       final videoFile = File(videoPath);
       if (!await videoFile.exists()) {
         throw Exception('Selected video file not found');
       }
-      final parentDir = videoFile.parent;
       final fileSize = await videoFile.length();
-      logMsg('Video exists. Size: ' + fileSize.toString() + ' bytes. Parent dir: ' + parentDir.path);
+      logMsg('Video exists. Size: ' + fileSize.toString() + ' bytes.');
 
-      // Ensure directory writable
-      final testFile = File(path.join(parentDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
-      try {
-        await testFile.writeAsString('test');
-        await testFile.delete();
-        logMsg('Write test in parent directory succeeded.');
-      } catch (e) {
-        logMsg('Write test failed for ' + parentDir.path + ': ' + e.toString());
-        throw Exception('Cannot write to directory: ${parentDir.path}');
-      }
-
+      final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
       final baseName = path.basenameWithoutExtension(videoFile.path);
-      final framesDir = Directory(path.join(parentDir.path, baseName + '_frames'));
+      final framesDir = Directory(path.join(
+        importRoot,
+        'project_' + ((widget.project.id ?? 0).toString()),
+        'dataset_' + widget.datasetId,
+        baseName + '_frames',
+      ));
       if (!framesDir.existsSync()) {
         framesDir.createSync(recursive: true);
         logMsg('Created frames directory: ' + framesDir.path);
       } else {
         logMsg('Using existing frames directory: ' + framesDir.path);
+      }
+
+      // Ensure directory writable
+      final testFile = File(path.join(framesDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
+      try {
+        await testFile.writeAsString('test');
+        await testFile.delete();
+        logMsg('Write test in frames directory succeeded.');
+      } catch (e) {
+        logMsg('Write test failed for ' + framesDir.path + ': ' + e.toString());
+        throw Exception('Cannot write to directory: ${framesDir.path}');
       }
 
       // Extract frames and insert into dataset
