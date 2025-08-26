@@ -1,11 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-<<<<<<< Updated upstream
-=======
-// import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
->>>>>>> Stashed changes
 
 import '../session/user_session.dart';
 
