@@ -13,6 +13,8 @@ import '../../data/dataset_database.dart';
 import '../../session/user_session.dart';
 import 'image_tile/select_checkbox_overlay.dart';
 import '../dialogs/image_details_dialog.dart';
+import '../dialogs/ffmpeg_check_dialog.dart';
+import '../../services/video_frame_extractor.dart';
 import '../dialogs/delete_image_dialog.dart';
 import '../app_snackbar.dart';
 
@@ -321,11 +323,11 @@ class _MediaTileState extends State<MediaTile> {
         log('video_player init failed: ' + e.toString());
       }
 
-      const double extractFps = 2.0;
+      double extractFps = FfmpegCheckDialog.lastSelectedFps;
       int expectedFrames = (durationSec > 0 ? (durationSec * extractFps) : 60).round();
       expectedFrames = expectedFrames.clamp(1, 1200);
 
-      // Prepare frames directory inside Dataset import folder
+      // Prepare frames base directory and a unique run directory inside Dataset import folder
       final baseName = path.basenameWithoutExtension(videoPath);
       final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
       int? projectId;
@@ -338,9 +340,14 @@ class _MediaTileState extends State<MediaTile> {
         segments.addAll(['project_' + projectId.toString()]);
       }
       segments.addAll(['dataset_' + media.datasetId, baseName + '_frames']);
-      final framesDir = Directory(path.join(importRoot, path.joinAll(segments)));
-      if (!framesDir.existsSync()) {
-        framesDir.createSync(recursive: true);
+      final framesBaseDir = Directory(path.join(importRoot, path.joinAll(segments)));
+      if (!framesBaseDir.existsSync()) {
+        framesBaseDir.createSync(recursive: true);
+      }
+      final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+      final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+      if (!runDir.existsSync()) {
+        runDir.createSync(recursive: true);
       }
 
       final List<File> frameFiles = [];
@@ -359,7 +366,7 @@ class _MediaTileState extends State<MediaTile> {
             );
             if (bytes != null && bytes.isNotEmpty) {
               final framePath = path.join(
-                framesDir.path,
+                runDir.path,
                 baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
               );
               final out = File(framePath);
@@ -374,25 +381,42 @@ class _MediaTileState extends State<MediaTile> {
 
       // Windows fallback or if nothing extracted
       if (frameFiles.isEmpty && Platform.isWindows) {
-        final ffmpegPath = await _resolveFfmpegPath(log: log);
-        if (ffmpegPath != null) {
-          final ok = await _tryExtractFramesWithFfmpeg(
-            ffmpegPath: ffmpegPath,
-            videoPath: videoPath,
-            framesDir: framesDir.path,
-            baseName: baseName,
-            fps: extractFps,
-            log: log,
-          );
-          if (ok) {
-            final all = framesDir
+        final ffmpegPath = await FfmpegCheckDialog.show(
+          context,
+          existingVideoPath: videoPath,
+          initialFps: extractFps,
+          onContinueExtract: (String ffPath, double fps) async {
+            // Extract into unique run directory (do not modify previous runs)
+            final ok = await VideoFrameExtractor().extractFramesWithFfmpeg(
+              ffmpegPath: ffPath,
+              videoPath: videoPath,
+              framesDir: runDir.path,
+              baseName: baseName,
+              fps: fps,
+              log: log,
+            );
+
+            if (!ok) {
+              throw Exception('FFmpeg did not produce frames');
+            }
+
+            // Return number of produced frames from runDir
+            final produced = runDir
                 .listSync()
                 .whereType<File>()
                 .where((f) => f.path.toLowerCase().endsWith('.png'))
-                .toList()
-              ..sort((a, b) => a.path.compareTo(b.path));
-            frameFiles.addAll(all);
-          }
+                .length;
+            return produced;
+          },
+        );
+        if (ffmpegPath != null) {
+          final all = runDir
+              .listSync()
+              .whereType<File>()
+              .where((f) => f.path.toLowerCase().endsWith('.png'))
+              .toList()
+            ..sort((a, b) => a.path.compareTo(b.path));
+          frameFiles.addAll(all);
         }
       }
 
@@ -442,72 +466,8 @@ class _MediaTileState extends State<MediaTile> {
   Future<String?> _resolveFfmpegPath({
     required void Function(String) log,
   }) async {
-    try {
-      final saved = UserSession.instance.getUser().ffmpegPath;
-      if (saved != null && saved.isNotEmpty) {
-        final ver = await Process.run(saved, ['-version']);
-        if (ver.exitCode == 0) {
-          _ffmpegPathCache = saved;
-          log('Using ffmpeg from settings: ' + saved);
-          return saved;
-        }
-      }
-    } catch (e) {
-      log('Failed to validate ffmpeg from settings: ' + e.toString());
-    }
-
-    if (_ffmpegPathCache != null) {
-      try {
-        final ver = await Process.run(_ffmpegPathCache!, ['-version']);
-        if (ver.exitCode == 0) {
-          log('Using cached ffmpeg: ' + _ffmpegPathCache!);
-          return _ffmpegPathCache!;
-        }
-      } catch (e) {
-        log('Cached ffmpeg path failed: ' + e.toString());
-      }
-    }
-
-    try {
-      final ver = await Process.run('ffmpeg', ['-version']);
-      if (ver.exitCode == 0) {
-        log('ffmpeg found on PATH');
-        return 'ffmpeg';
-      }
-    } catch (e) {
-      log('ffmpeg not found on PATH: ' + e.toString());
-    }
-
-    // Ask user (mainly for Windows)
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.custom,
-        allowedExtensions: Platform.isWindows ? ['exe'] : null,
-        dialogTitle: 'Select ffmpeg executable',
-      );
-      if (result != null && result.files.isNotEmpty) {
-        final picked = result.files.first.path!;
-        final f = File(picked);
-        if (await f.exists()) {
-          final ver = await Process.run(picked, ['-version']);
-          if (ver.exitCode == 0) {
-            _ffmpegPathCache = picked;
-            try {
-              if (!Platform.isAndroid && !Platform.isIOS) {
-                await UserSession.instance.setFfmpegPath(picked);
-              }
-            } catch (_) {}
-            log('User-selected ffmpeg validated: ' + picked);
-            return picked;
-          }
-        }
-      }
-    } catch (e) {
-      log('ffmpeg selection error: ' + e.toString());
-    }
-
-    return null;
+    // Delegate to the shared service (non-UI)
+    return await VideoFrameExtractor().resolveFfmpegPath(log: log);
   }
 
   Future<bool> _tryExtractFramesWithFfmpeg({

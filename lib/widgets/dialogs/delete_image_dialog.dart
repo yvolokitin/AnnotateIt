@@ -24,6 +24,13 @@ class DeleteImageDialog extends StatefulWidget {
 class _DeleteImageDialogState extends State<DeleteImageDialog> {
   bool _isDeleting = false;
   final List<String> _successfullyDeleted = [];
+  late bool _dbOnly;
+
+  @override
+  void initState() {
+    super.initState();
+    _dbOnly = widget.dbOnly;
+  }
 
   Future<void> _deleteFiles() async {
     final l10n = AppLocalizations.of(context)!;
@@ -36,7 +43,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
       for (final mediaItem in widget.mediaItems) {
         if (mediaItem.id == null) continue;
 
-        if (widget.dbOnly) {
+        if (_dbOnly) {
           // Delete only from DB, keep physical files intact
           try {
             await DatasetDatabase.instance.deleteMediaItemWithAnnotations(mediaItem.id!);
@@ -187,7 +194,24 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          if (widget.dbOnly)
+                          CheckboxListTile(
+                            value: !_dbOnly,
+                            onChanged: (v) => setState(() => _dbOnly = !(v ?? false)),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            activeColor: Colors.redAccent,
+                            checkColor: Colors.black,
+                            title: Text(
+                              l10n.deleteProjectOptionDeleteFromDisk,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontFamily: 'CascadiaCode',
+                                fontSize: isLargeScreen ? 20 : 16,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          const SizedBox(height: 8),
+                          if (_dbOnly)
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -204,7 +228,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                 ),
                               ],
                             ),
-                          if (widget.dbOnly) const SizedBox(height: 16),
+                          if (_dbOnly) const SizedBox(height: 16),
                           ...widget.mediaItems.map((item) {
                             final fileName = File(item.filePath).uri.pathSegments.last;
                             return Padding(

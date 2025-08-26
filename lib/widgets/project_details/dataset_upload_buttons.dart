@@ -13,6 +13,8 @@ import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
 import '../../session/user_session.dart';
 import '../dialogs/camera_capture_dialog.dart';
+import '../dialogs/ffmpeg_check_dialog.dart';
+import '../../services/video_frame_extractor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
@@ -168,60 +170,153 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     try {
       logMsg('Platform: ' + Platform.operatingSystem + ' ' + Platform.version.split('\n').first);
 
-      // Step wizard: Ensure FFmpeg is available before selecting video (Windows)
+      // Windows-only: Use FfmpegCheckDialog to show progress and perform selection + extraction
       if (Platform.isWindows) {
-        final bool? proceed = await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) {
-            bool initialized = false;
-            bool checking = false;
-            bool resolved = false;
-            String? ffmpegPath;
+        String? selectedVideoPath;
+        String? framesDirPath;
+        String? baseName;
+        int totalExtracted = 0;
 
-            return StatefulBuilder(builder: (context2, setState2) {
-              Future<void> runQuickCheck() async {
-                setState2(() => checking = true);
-                String? candidate;
-                // 1) user setting
-                {
-                  final saved = UserSession.instance.getUser().ffmpegPath;
-                  if (saved != null && saved.isNotEmpty) {
-                    try {
-                      final ver = await Process.run(saved, ['-version']);
-                      if (ver.exitCode == 0) candidate = saved;
-                    } catch (_) {}
-                  }
-                }
-                // 2) cached
-                if (candidate == null && _ffmpegPathCache != null) {
-                  try {
-                    final ver = await Process.run(_ffmpegPathCache!, ['-version']);
-                    if (ver.exitCode == 0) candidate = _ffmpegPathCache!;
-                  } catch (_) {}
-                }
-                // 3) PATH
-                if (candidate == null) {
-                  try {
-                    final ver = await Process.run('ffmpeg', ['-version']);
-                    if (ver.exitCode == 0) candidate = 'ffmpeg';
-                  } catch (_) {}
-                }
-                setState2(() {
-                  ffmpegPath = candidate;
-                  resolved = ffmpegPath != null;
-                  checking = false;
-                });
-              }
+        final ffmpegPath = await FfmpegCheckDialog.show(
+          context,
+          initialFps: FfmpegCheckDialog.lastSelectedFps,
+          onContinueExtract: (String ffPath, double fps) async {
+            // 1) Ask user to select a video
+            final pick = await FilePicker.platform.pickFiles(
+              allowMultiple: false,
+              type: FileType.custom,
+              allowedExtensions: ['mp4', 'mov'],
+            );
+            if (pick == null || pick.files.isEmpty) {
+              throw Exception('No video selected');
+            }
+            selectedVideoPath = pick.files.first.path!;
+            baseName = path.basenameWithoutExtension(selectedVideoPath!);
 
-              if (!initialized) {
-                initialized = true;
-                Future.microtask(() => runQuickCheck());
-              }
+            // 2) Prepare frames base directory inside Dataset import folder, then create unique run dir
+            final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+            final framesBaseDir = Directory(path.join(
+              importRoot,
+              'project_' + ((widget.project.id ?? 0).toString()),
+              'dataset_' + widget.datasetId,
+              baseName! + '_frames',
+            ));
+            if (!framesBaseDir.existsSync()) {
+              framesBaseDir.createSync(recursive: true);
+            }
+            final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+            final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+            if (!runDir.existsSync()) {
+              runDir.createSync(recursive: true);
+            }
+            framesDirPath = runDir.path;
 
+            // 3) Run FFmpeg extraction via service into runDir (do not touch previous runs)
+            final ok = await VideoFrameExtractor().extractFramesWithFfmpeg(
+              ffmpegPath: ffPath,
+              videoPath: selectedVideoPath!,
+              framesDir: runDir.path,
+              baseName: baseName!,
+              fps: fps,
+              log: logMsg,
+            );
+            if (!ok) {
+              throw Exception('FFmpeg did not produce frames');
+            }
+
+            // 4) Return produced count for dialog UI from runDir
+            final produced = runDir
+                .listSync()
+                .whereType<File>()
+                .where((f) => f.path.toLowerCase().endsWith('.png'))
+                .length;
+            totalExtracted = produced;
+            return produced;
+          },
+        );
+
+        if (ffmpegPath == null || selectedVideoPath == null || framesDirPath == null || baseName == null) {
+          logMsg('User cancelled FFmpeg dialog or no video selected.');
+          return;
+        }
+
+        // Collect generated frames
+        final framesDir = Directory(framesDirPath!);
+        final frameFiles = framesDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.toLowerCase().endsWith('.png'))
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
+
+        if (frameFiles.isEmpty) {
+          logMsg('No frames found after FFmpeg extraction.');
+          return;
+        }
+
+        // Read size from first frame (optional)
+        int? frameWidth;
+        int? frameHeight;
+        try {
+          final firstBytes = await frameFiles.first.readAsBytes();
+          final decoded = img.decodeImage(firstBytes);
+          if (decoded != null) {
+            frameWidth = decoded.width;
+            frameHeight = decoded.height;
+          }
+        } catch (_) {}
+
+        // Insert into DB with progress outside of dialog
+        final currentUser = UserSession.instance.getUser();
+        if (currentUser.id == null) {
+          widget.onUploadError?.call();
+          return;
+        }
+
+        widget.onUploadingChanged(true);
+        int inserted = 0;
+        for (final f in frameFiles) {
+          if (widget.cancelUpload) {
+            widget.onUploadingChanged(false);
+            widget.onUploadError?.call();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Upload stopped')),
+            );
+            return;
+          }
+
+          await DatasetDatabase.instance.insertMediaItem(
+            widget.datasetId,
+            f.path,
+            'png',
+            ownerId: currentUser.id!,
+            width: frameWidth,
+            height: frameHeight,
+            source: 'video_frames',
+          );
+          inserted++;
+        }
+
+        // Update project icon if default
+        if (widget.project.icon.contains('default_project_image') || widget.project.icon.contains('folder')) {
+          final firstFramePath = frameFiles.first.path;
+          final thumb = await generateThumbnailFromImage(File(firstFramePath), widget.project.id.toString());
+          if (thumb != null) {
+            await ProjectDatabase.instance.updateProjectIcon(widget.project.id!, thumb.path);
+          }
+        }
+
+        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+        widget.onUploadingChanged(false);
+        widget.onUploadSuccess();
+
+        // Show summary dialog
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (ctx) {
               return AlertDialog(
                 backgroundColor: Colors.grey[800],
-                insetPadding: const EdgeInsets.symmetric(horizontal: 160, vertical: 80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -229,13 +324,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                 title: Row(
                   children: [
                     Icon(
-                      Icons.movie_creation_outlined,
-                      size: (MediaQuery.of(context2).size.width > 1200) ? 34 : 26,
+                      Icons.check_circle_outline,
+                      size: (MediaQuery.of(ctx).size.width > 1200) ? 34 : 26,
                       color: Colors.orangeAccent,
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      'Video import',
+                      'Import complete',
                       style: TextStyle(
                         color: Colors.orangeAccent,
                         fontFamily: 'CascadiaCode',
@@ -243,120 +338,25 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         fontSize: 20,
                       ),
                     ),
-                    const Spacer(),
-                    Tooltip(
-                      message: 'Close',
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white70),
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                      ),
-                    ),
                   ],
                 ),
-                content: SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 820),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Divider(color: Colors.orangeAccent),
-                        Row(children: [
-                          Icon(resolved ? Icons.check_circle : Icons.error_outline,
-                              color: resolved ? Colors.greenAccent : Colors.orangeAccent),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Text('Step 1: Check FFmpeg',
-                                style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                          ),
-                        ]),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            TextButton.icon(
-                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                              onPressed: () async {
-                                final uri = Uri.parse('https://ffmpeg.org/download.html');
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              },
-                              icon: const Icon(Icons.open_in_new),
-                              label: const Text('FFmpeg website', style: TextStyle(fontFamily: 'CascadiaCode')),
-                            ),
-                            TextButton.icon(
-                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                              onPressed: () async {
-                                final uri = Uri.parse('https://www.gyan.dev/ffmpeg/builds/');
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              },
-                              icon: const Icon(Icons.download),
-                              label: const Text('Windows builds', style: TextStyle(fontFamily: 'CascadiaCode')),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Tip: After installing, either add ffmpeg.exe to your PATH or click "Select FFmpeg" to choose the executable.',
-                          style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
-                        ),
-                        const SizedBox(height: 10),
-                        if (checking) const LinearProgressIndicator(),
-                        if (!checking)
-                          Text(
-                            resolved
-                                ? 'Using: ' + (ffmpegPath ?? '')
-                                : 'FFmpeg not available. Select ffmpeg.exe first.',
-                            style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
-                          ),
-                        const SizedBox(height: 12),
-                        Row(children: [
-                          TextButton(
-                            onPressed: checking
-                                ? null
-                                : () async {
-                                    final p = await _resolveFfmpegPath(log: (_) {});
-                                    setState2(() {
-                                      ffmpegPath = p;
-                                      resolved = p != null;
-                                    });
-                                  },
-                            style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                            child: const Text('Select FFmpeg', style: TextStyle(fontFamily: 'CascadiaCode')),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: checking ? null : () async => runQuickCheck(),
-                            style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                            child: const Text('Re-check', style: TextStyle(fontFamily: 'CascadiaCode')),
-                          ),
-                        ]),
-                        const Divider(height: 20, color: Colors.orangeAccent),
-                        Row(children: [
-                          const Icon(Icons.video_file_outlined, color: Colors.white70),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Text('Step 2: Select video file',
-                                style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                          ),
-                        ]),
-                        const SizedBox(height: 6),
-                        const Text('After FFmpeg is resolved, click Continue to choose a video to import.',
-                            style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode')),
-                      ],
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(color: Colors.orangeAccent),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Extracted ' + totalExtracted.toString() + ' frame' + (totalExtracted == 1 ? '' : 's') + ' and added to dataset. (via FFmpeg)',
+                      style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
                     ),
-                  ),
+                  ],
                 ),
                 actions: [
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
+                        onPressed: () => Navigator.of(ctx).pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[800],
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -364,34 +364,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                        child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
                       ),
                       const Spacer(),
-                      if (resolved)
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(ctx).pop(true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[800],
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.orangeAccent, width: 2),
-                            ),
-                          ),
-                          child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
-                        ),
                     ],
                   ),
                 ],
               );
-            });
-          },
-        );
-        if (proceed != true) {
-          logMsg('User cancelled pre-check wizard.');
-          return;
+            },
+          );
         }
+
+        return;
       }
+
 
       // Android/iOS info dialog (built-in extraction, no FFmpeg needed)
       if (Platform.isAndroid || Platform.isIOS) {
@@ -500,7 +486,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       widget.onUploadingChanged(true);
 
       // Inform user we started working on the selected file
-      widget.onFileProgress?.call('Selected: ' + fileName, 0, 1);
 
       // Determine target frames count (fallback if metadata is unavailable)
       final meta = await getVideoMetadata(videoPath);
@@ -524,28 +509,34 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
       final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
       final baseName = path.basenameWithoutExtension(videoFile.path);
-      final framesDir = Directory(path.join(
+      final framesBaseDir = Directory(path.join(
         importRoot,
         'project_' + ((widget.project.id ?? 0).toString()),
         'dataset_' + widget.datasetId,
         baseName + '_frames',
       ));
-      if (!framesDir.existsSync()) {
-        framesDir.createSync(recursive: true);
-        logMsg('Created frames directory: ' + framesDir.path);
+      if (!framesBaseDir.existsSync()) {
+        framesBaseDir.createSync(recursive: true);
+        logMsg('Created frames base directory: ' + framesBaseDir.path);
       } else {
-        logMsg('Using existing frames directory: ' + framesDir.path);
+        logMsg('Using existing frames base directory: ' + framesBaseDir.path);
+      }
+      final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+      final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+      if (!runDir.existsSync()) {
+        runDir.createSync(recursive: true);
+        logMsg('Created run directory: ' + runDir.path);
       }
 
-      // Ensure directory writable
-      final testFile = File(path.join(framesDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
+      // Ensure run directory writable
+      final testFile = File(path.join(runDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
       try {
         await testFile.writeAsString('test');
         await testFile.delete();
-        logMsg('Write test in frames directory succeeded.');
+        logMsg('Write test in run directory succeeded.');
       } catch (e) {
-        logMsg('Write test failed for ' + framesDir.path + ': ' + e.toString());
-        throw Exception('Cannot write to directory: ${framesDir.path}');
+        logMsg('Write test failed for ' + runDir.path + ': ' + e.toString());
+        throw Exception('Cannot write to directory: ${runDir.path}');
       }
 
       // Extract frames and insert into dataset
@@ -571,8 +562,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         logMsg('video_player initialize FAILED: ' + controllerError);
       }
 
-      // Choose an extraction fps (keep modest to limit count)
-      final double extractFps = 2.0; // 2 frames per second
+      // Choose an extraction fps (configurable)
+      final double extractFps = FfmpegCheckDialog.lastSelectedFps; // configurable fps
       int expectedFrames = (videoSeconds > 0 ? (videoSeconds * extractFps) : totalFrames).round();
       if (expectedFrames <= 0) expectedFrames = totalFrames > 0 ? totalFrames : 60;
       expectedFrames = expectedFrames.clamp(1, 1200); // safety cap
@@ -620,7 +611,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             );
             if (bytes != null && bytes.isNotEmpty) {
               final framePath = path.join(
-                framesDir.path,
+                runDir.path,
                 baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
               );
               final frameFile = File(framePath);
@@ -637,7 +628,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             }
             // Skip frame on error
           }
-          widget.onFileProgress?.call('Extracting frames: ' + (i + 1).toString() + '/' + expectedFrames.toString(), i + 1, expectedFrames);
         }
       }
 
@@ -654,29 +644,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       if (totalExtracted == 0 && Platform.isWindows) {
         logMsg('No frames via video_thumbnail and running on Windows. Trying FFmpeg extraction...');
 
-        // Clean stale frames first to avoid mixing from previous runs
-        try {
-          final stale = framesDir
-              .listSync()
-              .whereType<File>()
-              .where((f) => f.path.toLowerCase().endsWith('.png'))
-              .toList();
-          for (final f in stale) {
-            await f.delete();
-          }
-          logMsg('Cleaned existing PNG frames in: ' + framesDir.path + ' (deleted ' + stale.length.toString() + ')');
-        } catch (e) {
-          logMsg('Failed to clean frames directory: ' + e.toString());
-        }
-
-        final ffmpegPath = await _resolveFfmpegPath(log: logMsg);
+        // Use the already-created unique runDir; do not clean previous runs
+        final ffmpegPath = await VideoFrameExtractor().resolveFfmpegPath(log: logMsg);
         if (ffmpegPath != null) {
           ffmpegResolved = true;
           ffmpegPathUsed = ffmpegPath;
-          final ok = await _tryExtractFramesWithFfmpeg(
+          final ok = await VideoFrameExtractor().extractFramesWithFfmpeg(
             ffmpegPath: ffmpegPath,
             videoPath: videoPath,
-            framesDir: framesDir.path,
+            framesDir: runDir.path,
             baseName: baseName,
             fps: extractFps,
             log: logMsg,
@@ -684,7 +660,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           usedFfmpeg = ok;
           if (ok) {
             // Collect generated frames
-            final all = framesDir
+            final all = runDir
                 .listSync()
                 .whereType<File>()
                 .where((f) => f.path.toLowerCase().endsWith('.png'))
@@ -712,7 +688,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           if (Platform.isWindows) 'ffmpeg resolved: ' + (ffmpegResolved ? 'YES' : 'NO'),
           if (Platform.isWindows && ffmpegPathUsed != null) 'ffmpeg path: ' + ffmpegPathUsed!,
           if (ffmpegError != null) ffmpegError!,
-          'frames dir: ' + framesDir.path,
+          'frames dir: ' + runDir.path,
         ].join('\n');
 
         if (mounted) {
@@ -822,7 +798,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         );
 
         inserted++;
-        widget.onFileProgress?.call('Adding to dataset: ' + inserted.toString() + '/' + totalExtracted.toString(), inserted, totalExtracted);
       }
 
       // Update project icon using the first frame if project still has default icon
@@ -1278,15 +1253,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               },
             ),
           ],
-
-          // disable dataset import button from proejct details page for now
-          /// SizedBox(width: screenWidth > 700 ? 20 : 10),
-          /// _buildButton(
-          ///  context,
-          ///  buttonName: l10n.importDataset,
-          ///  buttonIcon: Icons.upload,
-          ///  borderColor: Colors.white70,
-          ///),
 
           SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(

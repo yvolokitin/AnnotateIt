@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../models/media_item.dart';
@@ -9,6 +8,7 @@ import '../models/annotated_labeled_media.dart';
 
 import '../data/dataset_database.dart';
 import '../../data/annotation_database.dart';
+import '../session/user_session.dart';
 
 Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async {
   try {
@@ -21,11 +21,8 @@ Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async
     final thumbnailImage = img.copyResize(originalImage, width: 460);
     final thumbnailBytes = img.encodeJpg(thumbnailImage);
 
-    final directory = await getApplicationDocumentsDirectory();
-    final thumbnailsDir = Directory(path.join(directory.path, 'thumbnails'));
-    if (!thumbnailsDir.existsSync()) {
-      thumbnailsDir.createSync(recursive: true);
-    }
+    final thumbnailsFolder = await UserSession.instance.getCurrentUserThumbnailFolder();
+    final thumbnailsDir = Directory(thumbnailsFolder);
 
     // save thumbnail in the file system
     final thumbnailPath = path.join(thumbnailsDir.path, '$projectId.jpg');
