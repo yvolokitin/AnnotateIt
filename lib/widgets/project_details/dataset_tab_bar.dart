@@ -27,7 +27,7 @@ class DatasetTabBar extends StatelessWidget {
       tabs: List.generate(datasets.length, (i) {
         final dataset = datasets[i];
         final isSelected = controller.index == i;
-        final isDefault = dataset.id == defaultDatasetId;
+        final isDefault = dataset.defaultDataset;
         final isAddTab = dataset.id == 'add_new_tab';
 
         final l10n = AppLocalizations.of(context)!;

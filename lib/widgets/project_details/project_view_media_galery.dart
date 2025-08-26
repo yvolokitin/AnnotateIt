@@ -347,8 +347,18 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
 
     setState(() {
+      // Update in-memory default flags to reflect the change immediately in UI
+      datasets = datasets.map((d) {
+        if (d.id == 'add_new_tab') return d; // keep the "+" tab as-is
+        return d.id == dataset.id
+            ? d.copyWith(defaultDataset: true)
+            : d.copyWith(defaultDataset: false);
+      }).toList();
+
+      // Move the new default dataset to the first position
+      final updatedDefault = datasets.firstWhere((d) => d.id == dataset.id);
       datasets.removeWhere((d) => d.id == dataset.id);
-      datasets.insert(0, dataset);
+      datasets.insert(0, updatedDefault);
 
       _rebuildTabController();
       _tabController!.index = 0;
