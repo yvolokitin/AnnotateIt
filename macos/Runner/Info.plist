@@ -36,5 +36,8 @@
 	<string>This app needs access to your photos library for import/export.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
 </dict>
 </plist>
