@@ -379,9 +379,9 @@ class _AccountStorageState extends State<AccountStorage> {
               ),
             ),
             const SizedBox(height: 16),
-            if (Platform.isWindows || Platform.isLinux)
+            if (!(Platform.isAndroid || Platform.isIOS))
               _buildSection(
-                'FFmpeg path',
+                'FFmpeg path (desktop only)',
                 _ffmpegPathField(isWide: isWide),
               ),
           ],
