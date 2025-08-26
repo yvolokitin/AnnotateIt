@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'alert_error_dialog.dart';
 import '../../models/label.dart';
@@ -28,119 +29,131 @@ class NoLabelsDialog extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final smallScreen = (screenWidth < 700) || (screenHeight < 750);
 
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height,
-        ),
-        child: IntrinsicHeight(
-          child: Container(
-            padding: EdgeInsets.all(smallScreen ? 12 : 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: smallScreen ? 7 : 24),
-                Text(
-                  l10n.noLabelsTitle,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'CascadiaCode',
-                    fontWeight: FontWeight.bold,
-                    fontSize: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _importLabelsFromFile(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: BorderSide(color: Colors.lightGreenAccent, width: 1),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.buttonImportLabels,
-                    style: TextStyle(
-                      color: Colors.lightGreenAccent,
-                      fontSize: smallScreen ? 22 : 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20),
-                Text(
-                  l10n.noLabelsExplain1,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: screenWidth > 640 ? 18 : 14,
-                    fontFamily: 'CascadiaCode',
-                  ),
-                ),
-                Text(
-                  l10n.noLabelsExplain2,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: smallScreen ? 14 : 18,
-                    fontFamily: 'CascadiaCode',
-                  ),
-                ),
-                Text(
-                  l10n.noLabelsExplain3,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: smallScreen ? 14 : 18,
-                    fontFamily: 'CascadiaCode',
-                  ),
-                ),
-                SizedBox(
-                  height: screenWidth > 1450 ? 300 : smallScreen ? 140 : 200,
-                  child: Padding(
-                    padding: EdgeInsets.all(
-                      screenWidth > 1450 ? 45 : smallScreen ? 6 : 20,
-                    ),
-                    child: Image.asset(
-                      'assets/images/no_labels.png',
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                    ),
-                  ),
-                ),
-                if (!smallScreen) ...[
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.noLabelsExplain4,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
-                      fontSize: 18,
-                    ),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain5,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
-                      fontSize: 18,
-                    ),
-                  ),
-                  Text(
-                    l10n.noLabelsExplain6,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
-                      fontSize: 18,
-                    ),
-                  ),
-                ]
-              ],
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: true,
+            child: RepaintBoundary(
+              child: _LabelsStickersBackground(),
             ),
           ),
         ),
-      ),
+        SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
+            child: IntrinsicHeight(
+              child: Container(
+                padding: EdgeInsets.all(smallScreen ? 12 : 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: smallScreen ? 7 : 24),
+                    Text(
+                      l10n.noLabelsTitle,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => _importLabelsFromFile(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: BorderSide(color: Colors.lightGreenAccent, width: 1),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.buttonImportLabels,
+                        style: TextStyle(
+                          color: Colors.lightGreenAccent,
+                          fontSize: smallScreen ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20),
+                    Text(
+                      l10n.noLabelsExplain1,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: screenWidth > 640 ? 18 : 14,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),
+                    Text(
+                      l10n.noLabelsExplain2,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: smallScreen ? 14 : 18,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),
+                    Text(
+                      l10n.noLabelsExplain3,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: smallScreen ? 14 : 18,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),
+                    SizedBox(
+                      height: screenWidth > 1450 ? 300 : smallScreen ? 140 : 200,
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                          screenWidth > 1450 ? 45 : smallScreen ? 6 : 20,
+                        ),
+                        child: Image.asset(
+                          'assets/images/no_labels.png',
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ),
+                    if (!smallScreen) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.noLabelsExplain4,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        l10n.noLabelsExplain5,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        l10n.noLabelsExplain6,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -379,5 +392,181 @@ class NoLabelsDialog extends StatelessWidget {
         tips: l10n.importLabelsUnexpectedErrorTip,
       );
     }
+  }
+}
+
+
+class _LabelsStickersBackground extends StatefulWidget {
+  @override
+  State<_LabelsStickersBackground> createState() => _LabelsStickersBackgroundState();
+}
+
+class _LabelsStickersBackgroundState extends State<_LabelsStickersBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  final math.Random _rand = math.Random();
+  List<_Sticker> _stickers = [];
+  Size _lastSize = Size.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int _countFor(Size size) {
+    final area = size.width * size.height;
+    if (area < 600 * 700) return 10; // very small
+    if (area < 1200 * 900) return 16; // medium
+    return 26; // large
+  }
+
+  void _ensureStickers(Size size) {
+    if (size == _lastSize && _stickers.isNotEmpty) return;
+    _lastSize = size;
+    final count = _countFor(size);
+    _stickers = List.generate(count, (_) => _randomSticker());
+  }
+
+  _Sticker _randomSticker() {
+    // Base sticker sizes in logical px, will be scaled slightly during paint
+    final baseW = _rand.nextDouble() * 120 + 60; // 60..180
+    final baseH = _rand.nextDouble() * 40 + 20; // 20..60 (label-like)
+
+    // Palette with soft accents
+    final colors = <Color>[
+      Colors.lightGreenAccent,
+      Colors.cyanAccent,
+      Colors.amberAccent,
+      Colors.pinkAccent,
+      Colors.purpleAccent,
+    ];
+
+    final color = colors[_rand.nextInt(colors.length)];
+
+    return _Sticker(
+      nx: _rand.nextDouble(),
+      nyStart: _rand.nextDouble(),
+      width: baseW,
+      height: baseH,
+      rotation: (_rand.nextDouble() - 0.5) * 0.6, // -0.3..0.3 rad ~ -17..17 deg
+      speed: 0.2 + _rand.nextDouble() * 0.6, // fraction of screen per cycle
+      lifeOffset: _rand.nextDouble(),
+      color: color,
+      phase: _rand.nextDouble() * math.pi * 2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        _ensureStickers(size);
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            return CustomPaint(
+              painter: _StickersPainter(
+                stickers: _stickers,
+                tick: _controller.value,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _Sticker {
+  final double nx; // normalized x 0..1
+  final double nyStart; // normalized starting y 0..1
+  final double width;
+  final double height;
+  final double rotation; // radians
+  final double speed; // 0..1, fraction of screen per cycle
+  final double lifeOffset; // 0..1
+  final double phase; // for drift/scale
+  final Color color;
+
+  const _Sticker({
+    required this.nx,
+    required this.nyStart,
+    required this.width,
+    required this.height,
+    required this.rotation,
+    required this.speed,
+    required this.lifeOffset,
+    required this.color,
+    required this.phase,
+  });
+}
+
+class _StickersPainter extends CustomPainter {
+  final List<_Sticker> stickers;
+  final double tick; // 0..1
+
+  _StickersPainter({required this.stickers, required this.tick});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final Paint paint = Paint()..style = PaintingStyle.fill;
+
+    for (final s in stickers) {
+      // Progress of this sticker through its life 0..1
+      final p = (tick * s.speed + s.lifeOffset) % 1.0;
+
+      // Vertical travel (wraps around)
+      final y = ((s.nyStart + p) % 1.0) * size.height;
+      // Subtle horizontal drift
+      final drift = math.sin((p * 2 * math.pi) + s.phase) * 18.0;
+      final x = s.nx * size.width + drift;
+
+      // Scale pulsation
+      final scale = 0.85 + 0.15 * math.sin((p * 2 * math.pi) + s.phase);
+
+      // Fade in/out at start/end of life for appearance effect
+      double fade;
+      if (p < 0.15) {
+        fade = p / 0.15;
+      } else if (p > 0.85) {
+        fade = (1 - p) / 0.15;
+      } else {
+        fade = 1.0;
+      }
+
+      final w = s.width * scale;
+      final h = s.height * scale;
+
+      // Very low opacity to keep background subtle
+      final double targetOpacity = 0.11;
+      paint.color = s.color.withOpacity(targetOpacity * fade);
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(s.rotation);
+
+      final rect = Rect.fromCenter(center: Offset.zero, width: w, height: h);
+      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
+      canvas.drawRRect(rrect, paint);
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StickersPainter oldDelegate) {
+    return oldDelegate.tick != tick || oldDelegate.stickers != stickers;
   }
 }
