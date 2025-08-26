@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 
 import '../session/user_session.dart';
 
@@ -11,19 +12,68 @@ class VideoFrameExtractor {
   // Session-scoped cache for a user-selected ffmpeg executable path.
   static String? _ffmpegPathCache;
 
-  /// Try to resolve an ffmpeg executable path without any UI prompts.
-  ///
-  /// Resolution order:
-  /// 1) User setting persisted in UserSession
-  /// 2) In-memory cache for this session
-  /// 3) ffmpeg available on PATH
-  ///
-  /// Returns null if not found/validated.
+  /// Quick check to see if a given path is likely a macOS executable (Mach-O/fat).
+  /// Reads the first 4 bytes and matches against known Mach-O magic values.
+  Future<bool> _isLikelyExecutableMachO(String p) async {
+    try {
+      final f = File(p);
+      if (!await f.exists()) return false;
+      final raf = await f.open();
+      final header = await raf.read(4);
+      await raf.close();
+      if (header.length < 4) return false;
+      final b0 = header[0], b1 = header[1], b2 = header[2], b3 = header[3];
+      final isMachO =
+          (b0 == 0xCE && b1 == 0xFA && b2 == 0xED && b3 == 0xFE) ||
+          (b0 == 0xCF && b1 == 0xFA && b2 == 0xED && b3 == 0xFE) ||
+          (b0 == 0xFE && b1 == 0xED && b2 == 0xFA && b3 == 0xCE) ||
+          (b0 == 0xFE && b1 == 0xED && b2 == 0xFA && b3 == 0xCF) ||
+          (b0 == 0xCA && b1 == 0xFE && b2 == 0xBA && (b3 == 0xBE || b3 == 0xBF));
+      return isMachO;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<String?> resolveFfmpegPath({void Function(String)? log}) async {
     void _log(String m) {
       if (log != null) log(m);
     }
 
+    // Platform-specific quick checks (avoid executing binaries on macOS where not necessary)
+    if (Platform.isMacOS) {
+      // 1) User setting
+      try {
+        final saved = UserSession.instance.getUser().ffmpegPath;
+        if (saved != null && saved.isNotEmpty && await _isLikelyExecutableMachO(saved)) {
+          _ffmpegPathCache = saved;
+          _log('Using ffmpeg from settings (macOS): ' + saved);
+          return saved;
+        }
+      } catch (e) {
+        _log('Failed to check ffmpeg from settings (macOS): ' + e.toString());
+      }
+      // 2) Common Homebrew/MacPorts locations
+      for (final c in const ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/opt/local/bin/ffmpeg']) {
+        if (await _isLikelyExecutableMachO(c)) {
+          _log('Detected ffmpeg at: ' + c);
+          return c;
+        }
+      }
+      // 3) PATH as a last resort
+      try {
+        final ver = await Process.run('ffmpeg', ['-version']);
+        if (ver.exitCode == 0) {
+          _log('ffmpeg found on PATH (macOS).');
+          return 'ffmpeg';
+        }
+      } catch (e) {
+        _log('ffmpeg not found on PATH (macOS): ' + e.toString());
+      }
+      return null;
+    }
+
+    // Non-macOS: existing logic
     // 1) Check persisted user setting
     try {
       final saved = UserSession.instance.getUser().ffmpegPath;
@@ -149,4 +199,51 @@ class VideoFrameExtractor {
       _log('Failed to clean frames in ' + framesDir + ': ' + e.toString());
     }
   }
+
+  /// macOS-specific: use bundled ffmpeg via ffmpeg-kit to extract frames.
+  /// Returns true if at least one PNG was created.
+  Future<bool> extractFramesWithFfmpegKit({
+    required String videoPath,
+    required String framesDir,
+    required String baseName,
+    required double fps,
+    void Function(String)? log,
+  }) async {
+    void _log(String m) {
+      if (log != null) log(m);
+    }
+    if (!Platform.isMacOS) {
+      _log('extractFramesWithFfmpegKit called on non-macOS platform; skipping.');
+      return false;
+    }
+    try {
+      final String outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
+      // Quote paths to be safe with spaces
+      final String cmd = [
+        '-y',
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-i', '"' + videoPath + '"',
+        '-vf', 'fps=' + fps.toString(),
+        '"' + outPattern + '"',
+      ].join(' ');
+      _log('Running ffmpeg-kit (macOS) to extract frames at ' + fps.toString() + ' fps.');
+      final session = await FFmpegKit.execute(cmd);
+      final returnCode = await session.getReturnCode();
+      _log('ffmpeg-kit return code: ' + (returnCode?.getValue().toString() ?? 'null'));
+
+      final dir = Directory(framesDir);
+      final produced = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.toLowerCase().endsWith('.png'))
+          .length;
+      _log('ffmpeg-kit produced PNG files: ' + produced.toString());
+      return produced > 0;
+    } catch (e) {
+      _log('ffmpeg-kit execution failed: ' + e.toString());
+      return false;
+    }
+
+}
 }

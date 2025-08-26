@@ -29,6 +29,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  ffmpeg_kit_flutter: ^6.0.3
+
   flutter_localizations:
     sdk: flutter
 

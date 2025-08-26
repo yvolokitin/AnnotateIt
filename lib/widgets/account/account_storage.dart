@@ -75,7 +75,6 @@ class _AccountStorageState extends State<AccountStorage> {
       final candidates = <String>[
         '/opt/homebrew/bin/ffmpeg',
         '/usr/local/bin/ffmpeg',
-        '/opt/homebrew/bun/ffmpeg', // as requested fallback path
         '/opt/local/bin/ffmpeg', // MacPorts (optional)
       ];
 
@@ -380,9 +379,9 @@ class _AccountStorageState extends State<AccountStorage> {
               ),
             ),
             const SizedBox(height: 16),
-            if (!(Platform.isAndroid || Platform.isIOS))
+            if (Platform.isWindows || Platform.isLinux)
               _buildSection(
-                'FFmpeg path (desktop only)',
+                'FFmpeg path',
                 _ffmpegPathField(isWide: isWide),
               ),
           ],
