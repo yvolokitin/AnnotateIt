@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 
 import '../session/user_session.dart';
 
@@ -11,14 +12,8 @@ class VideoFrameExtractor {
   // Session-scoped cache for a user-selected ffmpeg executable path.
   static String? _ffmpegPathCache;
 
-  /// Try to resolve an ffmpeg executable path without any UI prompts.
-  ///
-  /// Resolution order:
-  /// 1) User setting persisted in UserSession
-  /// 2) In-memory cache for this session
-  /// 3) ffmpeg available on PATH
-  ///
-  /// Returns null if not found/validated.
+  /// Quick check to see if a given path is likely a macOS executable (Mach-O/fat).
+  /// Reads the first 4 bytes and matches against known Mach-O magic values.
   Future<bool> _isLikelyExecutableMachO(String p) async {
     try {
       final f = File(p);
@@ -204,4 +199,51 @@ class VideoFrameExtractor {
       _log('Failed to clean frames in ' + framesDir + ': ' + e.toString());
     }
   }
+
+  /// macOS-specific: use bundled ffmpeg via ffmpeg-kit to extract frames.
+  /// Returns true if at least one PNG was created.
+  Future<bool> extractFramesWithFfmpegKit({
+    required String videoPath,
+    required String framesDir,
+    required String baseName,
+    required double fps,
+    void Function(String)? log,
+  }) async {
+    void _log(String m) {
+      if (log != null) log(m);
+    }
+    if (!Platform.isMacOS) {
+      _log('extractFramesWithFfmpegKit called on non-macOS platform; skipping.');
+      return false;
+    }
+    try {
+      final String outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
+      // Quote paths to be safe with spaces
+      final String cmd = [
+        '-y',
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-i', '"' + videoPath + '"',
+        '-vf', 'fps=' + fps.toString(),
+        '"' + outPattern + '"',
+      ].join(' ');
+      _log('Running ffmpeg-kit (macOS) to extract frames at ' + fps.toString() + ' fps.');
+      final session = await FFmpegKit.execute(cmd);
+      final returnCode = await session.getReturnCode();
+      _log('ffmpeg-kit return code: ' + (returnCode?.getValue().toString() ?? 'null'));
+
+      final dir = Directory(framesDir);
+      final produced = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.toLowerCase().endsWith('.png'))
+          .length;
+      _log('ffmpeg-kit produced PNG files: ' + produced.toString());
+      return produced > 0;
+    } catch (e) {
+      _log('ffmpeg-kit execution failed: ' + e.toString());
+      return false;
+    }
+
+}
 }
