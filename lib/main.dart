@@ -120,6 +120,22 @@ void main() async {
       if (defaultUser != null) {
         UserSession.instance.setUser(defaultUser);
         log.info('Default user loaded into session');
+
+        // Auto-detect FFmpeg if not configured (Windows only)
+        if (Platform.isWindows) {
+          try {
+            final current = UserSession.instance.getUser().ffmpegPath;
+            if (current == null || current.isEmpty) {
+              final candidate = File(r'C:\ffmpeg\bin\ffmpeg.exe');
+              if (await candidate.exists()) {
+                await UserSession.instance.setFfmpegPath(candidate.path);
+                log.info('FFmpeg auto-detected and set to: ${candidate.path}');
+              }
+            }
+          } catch (e) {
+            log.warning('FFmpeg auto-detect failed: $e');
+          }
+        }
       } else {
         log.info('No default user found');
       }
