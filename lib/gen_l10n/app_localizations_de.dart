@@ -261,6 +261,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLanguageTitle => 'Land / Sprache';
 
   @override
+  String get settingsApplicationLogs => 'Anwendungsprotokolle';
+
+  @override
+  String get settingsLogsSaveInFile =>
+      'Anwendungsprotokolle in Datei speichern';
+
+  @override
   String get colorPickerTitle => 'Farbe auswählen';
 
   @override

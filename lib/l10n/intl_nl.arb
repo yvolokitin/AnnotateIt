@@ -88,6 +88,8 @@
   "settingsAnnotationAutoSave": "Annotatie altijd opslaan of verzenden bij het overgaan naar de volgende afbeelding",
   "settingsThemeTitle": "Themaselectie",
   "settingsLanguageTitle": "Land / Taal",
+  "settingsApplicationLogs": "Toepassingslogboeken",
+  "settingsLogsSaveInFile": "Toepassingslogboeken opslaan in bestand",
 
   "colorPickerTitle": "Kies een kleur",
   "colorPickerBasicColors": "Basiskleuren",

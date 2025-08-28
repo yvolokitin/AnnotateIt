@@ -50,7 +50,13 @@ void main() async {
     }
     
     // File output (new)
-    FileLogger.instance.writeLogRecord(record);
+    try {
+      if (UserSession.instance.isInitialized && UserSession.instance.getUser().saveApplicationLogInFile) {
+        FileLogger.instance.writeLogRecord(record);
+      }
+    } catch (_) {
+      // If UserSession isn't ready yet or any error occurs, skip file logging.
+    }
   });
 
   final log = Logger('main');

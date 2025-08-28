@@ -88,6 +88,8 @@
   "settingsAnnotationAutoSave": "Siempre guardar o enviar anotación al pasar a la siguiente imagen",
   "settingsThemeTitle": "Selección de tema",
   "settingsLanguageTitle": "País / Idioma",
+  "settingsApplicationLogs": "Registros de la aplicación",
+  "settingsLogsSaveInFile": "Guardar registros de la aplicación en un archivo",
 
   "colorPickerTitle": "Elegir un color",
   "colorPickerBasicColors": "Colores básicos",

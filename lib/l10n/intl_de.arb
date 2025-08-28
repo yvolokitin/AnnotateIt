@@ -88,6 +88,8 @@
   "settingsAnnotationAutoSave": "Annotation immer speichern oder übermitteln, wenn zum nächsten Bild gewechselt wird",
   "settingsThemeTitle": "Themenauswahl",
   "settingsLanguageTitle": "Land / Sprache",
+  "settingsApplicationLogs": "Anwendungsprotokolle",
+  "settingsLogsSaveInFile": "Anwendungsprotokolle in Datei speichern",
 
   "colorPickerTitle": "Farbe auswählen",
   "colorPickerBasicColors": "Grundfarben",

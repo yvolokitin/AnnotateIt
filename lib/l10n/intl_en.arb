@@ -87,6 +87,8 @@
   "settingsAnnotationAutoSave": "Always Save or Submit annotation when move to the next image",
   "settingsThemeTitle": "Theme selection",
   "settingsLanguageTitle": "Country / Language",
+  "settingsApplicationLogs": "Application Logs",
+  "settingsLogsSaveInFile": "Save application logs in file",
 
   "colorPickerTitle": "Pick a color",
   "colorPickerBasicColors": "Basic Colors",

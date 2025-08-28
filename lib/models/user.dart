@@ -32,6 +32,9 @@ class User {
   final String preferredSamModelKey; // e.g., 'sam2_hiera_base_plus' or 'mobile'
   final bool samRememberChoice;
 
+  // Logging settings
+  final bool saveApplicationLogInFile;
+
   // Optional external tools
   final String? ffmpegPath;
 
@@ -65,6 +68,7 @@ class User {
     'annotationOpacity',
     'preferredSamModelKey',
     'samRememberChoice',
+    'saveApplicationLogInFile',
     'ffmpegPath',
   ];
 
@@ -98,6 +102,7 @@ class User {
     required this.annotationOpacity,
     required this.preferredSamModelKey,
     required this.samRememberChoice,
+    required this.saveApplicationLogInFile,
     this.ffmpegPath,
   });
 
@@ -131,6 +136,7 @@ class User {
     double? annotationOpacity,
     String? preferredSamModelKey,
     bool? samRememberChoice,
+    bool? saveApplicationLogInFile,
     String? ffmpegPath,
   }) {
     return User(
@@ -163,6 +169,7 @@ class User {
       annotationOpacity: annotationOpacity ?? this.annotationOpacity,
       preferredSamModelKey: preferredSamModelKey ?? this.preferredSamModelKey,
       samRememberChoice: samRememberChoice ?? this.samRememberChoice,
+      saveApplicationLogInFile: saveApplicationLogInFile ?? this.saveApplicationLogInFile,
       ffmpegPath: ffmpegPath ?? this.ffmpegPath,
     );
   }
@@ -197,6 +204,7 @@ class User {
         'annotationOpacity': annotationOpacity,
         'preferredSamModelKey': preferredSamModelKey,
         'samRememberChoice': samRememberChoice ? 1 : 0,
+        'saveApplicationLogInFile': saveApplicationLogInFile ? 1 : 0,
         'ffmpegPath': ffmpegPath,
       };
 
@@ -230,6 +238,7 @@ class User {
         annotationOpacity: (map['annotationOpacity'] as num?)?.toDouble() ?? 0.35,
         preferredSamModelKey: (map['preferredSamModelKey'] as String?) ?? 'sam2_hiera_base_plus',
         samRememberChoice: map['samRememberChoice'] == null ? false : map['samRememberChoice'] == 1,
+        saveApplicationLogInFile: map['saveApplicationLogInFile'] == null ? true : map['saveApplicationLogInFile'] == 1,
         ffmpegPath: map['ffmpegPath'] as String?,
       );
 

@@ -261,6 +261,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguageTitle => 'Pays / Langue';
 
   @override
+  String get settingsApplicationLogs => 'Journaux d’application';
+
+  @override
+  String get settingsLogsSaveInFile =>
+      'Enregistrer les journaux de l’application dans un fichier';
+
+  @override
   String get colorPickerTitle => 'Choisir une couleur';
 
   @override

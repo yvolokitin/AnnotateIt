@@ -262,6 +262,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsLanguageTitle => 'Land / Taal';
 
   @override
+  String get settingsApplicationLogs => 'Toepassingslogboeken';
+
+  @override
+  String get settingsLogsSaveInFile =>
+      'Toepassingslogboeken opslaan in bestand';
+
+  @override
   String get colorPickerTitle => 'Kies een kleur';
 
   @override

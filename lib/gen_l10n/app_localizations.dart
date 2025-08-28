@@ -572,6 +572,18 @@ abstract class AppLocalizations {
   /// **'Country / Language'**
   String get settingsLanguageTitle;
 
+  /// No description provided for @settingsApplicationLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Logs'**
+  String get settingsApplicationLogs;
+
+  /// No description provided for @settingsLogsSaveInFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save application logs in file'**
+  String get settingsLogsSaveInFile;
+
   /// No description provided for @colorPickerTitle.
   ///
   /// In en, this message translates to:

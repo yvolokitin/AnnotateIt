@@ -37,6 +37,7 @@ Future<void> createInitialSchema(Database db, int version) async {
         annotationOpacity REAL NOT NULL DEFAULT 0.35,
         preferredSamModelKey TEXT NOT NULL DEFAULT 'sam2_hiera_base_plus',
         samRememberChoice INTEGER NOT NULL DEFAULT 0,
+        saveApplicationLogInFile INTEGER NOT NULL DEFAULT 1,
         ffmpegPath TEXT
       )
     ''');

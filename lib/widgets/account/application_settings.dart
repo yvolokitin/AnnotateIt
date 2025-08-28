@@ -128,8 +128,13 @@ class ApplicationSettings extends StatelessWidget {
               ),
             ], isWide),
 
-            _buildSection(l10n.accountStorage, [
-              _buildLogFileLink(context),
+            _buildSection(l10n.settingsApplicationLogs, [
+              _buildSwitch(
+                l10n.settingsLogsSaveInFile,
+                user.saveApplicationLogInFile,
+                (val) => onUserChange(user.copyWith(saveApplicationLogInFile: val)),
+              ),
+              if (user.saveApplicationLogInFile) _buildLogFileLink(context),
             ], isWide),
           ],
         ),
@@ -420,14 +425,35 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.accountStorageLogFileTitle,
-          style: const TextStyle(
-            fontSize: 20,
-            fontFamily: 'CascadiaCode',
-            fontWeight: FontWeight.normal,
-            color: Colors.white70,
-          ),
+        FutureBuilder<int>(
+          future: FileLogger.instance.getLogFileSize(),
+          builder: (context, snapshot) {
+            String sizeLabel = '';
+            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+              int bytes = snapshot.data ?? 0;
+              String _formatBytes(int bytes) {
+                const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                double size = bytes.toDouble();
+                int unitIndex = 0;
+                while (size >= 1024 && unitIndex < units.length - 1) {
+                  size /= 1024;
+                  unitIndex++;
+                }
+                String value = size >= 10 || size.floor() == size ? size.toStringAsFixed(0) : size.toStringAsFixed(1);
+                return '$value ${units[unitIndex]}';
+              }
+              sizeLabel = ' (' + _formatBytes(bytes) + ')';
+            }
+            return Text(
+              AppLocalizations.of(context)!.accountStorageLogFileTitle + sizeLabel,
+              style: const TextStyle(
+                fontSize: 20,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.normal,
+                color: Colors.white70,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 8),
         if (logFilePath != null) ...[

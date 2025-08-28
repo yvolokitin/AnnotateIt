@@ -260,6 +260,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageTitle => 'Country / Language';
 
   @override
+  String get settingsApplicationLogs => 'Application Logs';
+
+  @override
+  String get settingsLogsSaveInFile => 'Save application logs in file';
+
+  @override
   String get colorPickerTitle => 'Pick a color';
 
   @override

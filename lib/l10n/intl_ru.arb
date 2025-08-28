@@ -84,6 +84,9 @@
   "settingsAnnotationAutoSave": "Автоматически сохранять или отправлять аннотацию при переходе к следующему изображению",
   "settingsThemeTitle": "Выбор темы",
   "settingsLanguageTitle": "Страна / Язык",
+  "settingsApplicationLogs": "Журналы приложений",
+  "settingsLogsSaveInFile": "Сохранять журналы приложения в файл",
+
   "colorPickerTitle": "Выберите цвет",
   "colorPickerBasicColors": "Базовые цвета",
   "loadingProjects": "Загрузка проектов...",

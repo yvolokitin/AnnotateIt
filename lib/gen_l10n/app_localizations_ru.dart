@@ -261,6 +261,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsLanguageTitle => 'Страна / Язык';
 
   @override
+  String get settingsApplicationLogs => 'Журналы приложений';
+
+  @override
+  String get settingsLogsSaveInFile => 'Сохранять журналы приложения в файл';
+
+  @override
   String get colorPickerTitle => 'Выберите цвет';
 
   @override

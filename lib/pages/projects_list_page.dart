@@ -10,6 +10,7 @@ import "../models/project.dart";
 import "../widgets/project_list/empty_project_placeholder.dart";
 import "../widgets/project_list/project_tile.dart";
 import "../widgets/project_list/projects_topbar.dart";
+import "../widgets/project_list/crawling_snakes_footer.dart";
 
 import '../widgets/dialogs/delete_project_dialog.dart';
 import "../widgets/dialogs/edit_project_name_dialog.dart";
@@ -359,6 +360,14 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       },
                     ),
           ),
+
+          // Animated footer with colorful crawling lines (only when placeholder is shown)
+          _filteredProjects.isEmpty
+            ? SafeArea(
+                top: false,
+                child: CrawlingSnakesFooter(height: 72, snakeCount: 7),
+              )
+            : const SizedBox.shrink(),
         ],
       ),
     );
