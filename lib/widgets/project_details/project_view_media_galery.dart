@@ -384,12 +384,26 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 
   void _deleteDataset(Dataset dataset) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => DeleteDatasetDialog(dataset: dataset),
-    );
+    // Determine if dataset is empty
+    final mediaCount = await DatasetDatabase.instance.countMediaItemsInDataset(dataset.id);
+    final annotationCount = await DatasetDatabase.instance.countAnnotationsForDataset(dataset.id);
+    final isEmpty = (mediaCount == 0) && (annotationCount == 0);
 
-    if (confirmed == true) {
+    bool confirmed = false;
+    if (isEmpty) {
+      // Delete directly without asking user
+      await DatasetDatabase.instance.deleteDataset(dataset.id);
+      await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
+      confirmed = true;
+    } else {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => DeleteDatasetDialog(dataset: dataset),
+      );
+      confirmed = result == true;
+    }
+
+    if (confirmed) {
       setState(() {
         datasets.removeWhere((d) => d.id == dataset.id);
         annotatedMediaByDataset.remove(dataset.id);
@@ -401,7 +415,9 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
         _tabController!.index = datasets.length - 1;
       }
 
-      loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
+      if (datasets.isNotEmpty) {
+        loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
+      }
     }
   }
 
@@ -442,6 +458,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
         Expanded(
           child: TabBarView(
             controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
             children: datasets.map((dataset) {
               if (_datasetTabCache.containsKey(dataset.id)) {
                 return _datasetTabCache[dataset.id]!;
