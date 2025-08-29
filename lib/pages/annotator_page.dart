@@ -119,7 +119,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         // Fallback to mobile and inform the user
         AppSnackbar.show(
           context,
-          'Selected SAM2 model is not available. Please download it first from the Models page.',
+          'Selected SAM2 model is not available. Please download it first from the Model screen.',
           backgroundColor: Colors.orangeAccent,
           textColor: Colors.black,
 	  saveToDb: false,

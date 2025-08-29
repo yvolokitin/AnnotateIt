@@ -11,13 +11,15 @@ import '../../models/label.dart';
 import '../../models/media_item.dart';
 import '../../models/project.dart';
 import '../../services/ml_kit_image_labeling_service.dart';
+import '../../services/tflite_classification_service.dart';
 import '../../utils/color_utils.dart';
 import '../../widgets/dialogs/edit_labels_list_dialog.dart';
 
 class PreLabelProjectDialog extends StatefulWidget {
   final Project project;
+  final bool useTFLite;
 
-  const PreLabelProjectDialog({super.key, required this.project});
+  const PreLabelProjectDialog({super.key, required this.project, this.useTFLite = false});
 
   @override
   State<PreLabelProjectDialog> createState() => _PreLabelProjectDialogState();
@@ -38,8 +40,16 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   // Reviewed labels (as objects) after scan completes
   List<Label> _reviewLabels = [];
 
+  // Backend services (nullable, set during scanning)
+  MLKitImageLabelingService? _mlService;
+  TFLiteClassificationService? _tflService;
+
   // For EditLabelsListDialog
   final ScrollController _scrollController = ScrollController();
+
+  // Inline status/error message to display inside the dialog instead of SnackBars
+  String? _inlineMessage;
+  Color _inlineMessageColor = Colors.white70;
 
   @override
   void initState() {
@@ -55,17 +65,14 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       _totalImages = 0;
       _processed = 0;
       _suggested.clear();
+      _inlineMessage = null;
+      _inlineMessageColor = Colors.white70;
     });
 
-    // Initialize ML Kit service
-    final ml = MLKitImageLabelingService();
-    ml.initialize(confidenceThreshold: 0.6);
-
+    // First, check that project has at least one image across datasets
+    List<Dataset> datasets = const [];
     try {
-      // Fetch datasets for the project
-      final List<Dataset> datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
-
-      // Count total images first
+      datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
       for (final ds in datasets) {
         final media = await DatasetDatabase.instance.fetchMediaForDataset(ds.id);
         _totalImages += media.where((m) => m.isImage).length;
@@ -73,6 +80,58 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       if (!mounted) return;
       setState(() {});
 
+      if (_totalImages == 0) {
+        setState(() {
+          _isScanning = false;
+          _inlineMessage = 'No images found in project datasets. Please upload media first.';
+          _inlineMessageColor = Colors.orangeAccent;
+        });
+        return;
+      }
+    } catch (e, st) {
+      _log.severe('Failed to scan datasets', e, st);
+      if (mounted) {
+        setState(() {
+          _isScanning = false;
+          _inlineMessage = 'Failed to read datasets.';
+          _inlineMessageColor = Colors.redAccent;
+        });
+      }
+      return;
+    }
+
+    // Initialize labeling backend: ML Kit (mobile) or TFLite (cross-platform)
+    try {
+      if (widget.useTFLite) {
+        _tflService = TFLiteClassificationService();
+        final available = await _tflService!.isModelAvailableInUserFolder();
+        if (!available) {
+          setState(() {
+            _isScanning = false;
+            _inlineMessage = 'Classification model not found in your Models folder. Please download it from the Model screen.';
+            _inlineMessageColor = Colors.orangeAccent;
+          });
+          return;
+        }
+        await _tflService!.initializeFromUserFolder();
+      } else {
+        _mlService = MLKitImageLabelingService();
+        _mlService!.initialize(confidenceThreshold: 0.6);
+      }
+    } catch (e, st) {
+      _log.severe('Failed to initialize labeling backend', e, st);
+      if (mounted) {
+        setState(() {
+          _isScanning = false;
+          final details = e.toString();
+          _inlineMessage = 'Failed to initialize labeling backend. Check model files or permissions.' + (details.isNotEmpty ? '\n\nDetails: ' + details : '');
+          _inlineMessageColor = Colors.redAccent;
+        });
+      }
+      return;
+    }
+
+    try {
       // Process images dataset-by-dataset
       for (final ds in datasets) {
         if (_cancelRequested) break;
@@ -88,11 +147,21 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             if (!await file.exists()) {
               _log.warning('File not found: ${item.filePath}');
             } else {
-              final labels = await ml.processImageFile(file, projectType: widget.project.type);
-              for (final l in labels) {
-                final name = l.label.trim();
-                if (name.isNotEmpty) {
-                  _suggested.add(name);
+              if (widget.useTFLite) {
+                final result = await _tflService!.classifyImage(file);
+                if (result != null) {
+                  final name = result.label.trim();
+                  if (name.isNotEmpty) {
+                    _suggested.add(name);
+                  }
+                }
+              } else {
+                final labels = await _mlService!.processImageFile(file, projectType: widget.project.type);
+                for (final l in labels) {
+                  final name = l.label.trim();
+                  if (name.isNotEmpty) {
+                    _suggested.add(name);
+                  }
                 }
               }
             }
@@ -126,6 +195,12 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     } catch (e, st) {
       _log.severe('Pre-label scan failed', e, st);
     } finally {
+      try {
+        if (widget.useTFLite) {
+          await _tflService?.dispose();
+          _tflService = null;
+        }
+      } catch (_) {}
       if (!mounted) return;
       setState(() {
         _isScanning = false;
@@ -141,9 +216,10 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     } catch (e, st) {
       _log.severe('Failed to save labels', e, st);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save labels')),
-      );
+      setState(() {
+        _inlineMessage = 'Failed to save labels';
+        _inlineMessageColor = Colors.redAccent;
+      });
     }
   }
 
@@ -153,7 +229,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
-      backgroundColor: Colors.grey[900],
+      backgroundColor: Colors.grey[800],
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 900, maxHeight: 700),
         child: Padding(
@@ -174,7 +250,29 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      if (_isScanning && !_cancelRequested) {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Cancel pre-labeling?'),
+                            content: const Text('Scanning is in progress. Do you want to stop and close the dialog?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Continue'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Stop and Close'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm != true) return;
+                        setState(() => _cancelRequested = true);
+                      }
                       Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.close, color: Colors.white70),
@@ -182,36 +280,85 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                 ],
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.',
-                style: TextStyle(color: Colors.white70),
+              Text(
+                widget.useTFLite
+                  ? 'Automatically scan project images using a TensorFlow Lite model and propose label names. You can review and edit before saving.'
+                  : 'Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.',
+                style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 16),
 
               if (_isScanning) ...[
-                Row(
-                  children: [
-                    const SizedBox(width: 8),
-                    const CircularProgressIndicator(),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: LinearProgressIndicator(value: _totalImages > 0 ? progress : null),
+                // Centered progress section
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 8),
+                          CircularProgressIndicator(
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                            backgroundColor: Colors.grey[700],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _totalImages > 0
+                                ? 'Progress: ${(progress * 100).toStringAsFixed(0)}%'
+                                : 'Scanning images...'
+                            ,
+                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: _totalImages > 0 ? progress : null,
+                            backgroundColor: Colors.grey[700],
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                            minHeight: 6,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Processed $_processed of $_totalImages images',
+                            style: const TextStyle(color: Colors.white70),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Processed $_processed of $_totalImages images',
-                  style: const TextStyle(color: Colors.white70),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _cancelRequested = true;
-                        });
+                      onPressed: () async {
+                        if (_cancelRequested) return;
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Cancel pre-labeling?'),
+                            content: const Text('Do you want to stop scanning and review collected labels, or continue?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Continue'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Stop'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          setState(() {
+                            _cancelRequested = true;
+                          });
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
@@ -237,25 +384,35 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               ] else ...[
                 // After scanning completes or is cancelled, show the review UI
                 Expanded(
-                  child: _reviewLabels.isEmpty
-                      ? const Center(
+                  child: (_inlineMessage != null)
+                      ? Center(
                           child: Text(
-                            'No labels were suggested. You can close this dialog.',
-                            style: TextStyle(color: Colors.white70),
+                            _inlineMessage!,
+                            style: TextStyle(color: _inlineMessageColor),
+                            textAlign: TextAlign.center,
                           ),
                         )
-                      : EditLabelsListDialog(
-                          projectId: widget.project.id!,
-                          projectType: widget.project.type,
-                          labels: _reviewLabels,
-                          scrollController: _scrollController,
-                          onColorTap: (index) {},
-                          onLabelsChanged: (updated) {
-                            setState(() {
-                              _reviewLabels = updated;
-                            });
-                          },
-                        ),
+                      : (_reviewLabels.isEmpty
+                          ? Center(
+                              child: Text(
+                                _totalImages == 0
+                                    ? 'No images found in project datasets. Please upload media first.'
+                                    : 'No labels were suggested. You can close this dialog.',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            )
+                          : EditLabelsListDialog(
+                              projectId: widget.project.id!,
+                              projectType: widget.project.type,
+                              labels: _reviewLabels,
+                              scrollController: _scrollController,
+                              onColorTap: (index) {},
+                              onLabelsChanged: (updated) {
+                                setState(() {
+                                  _reviewLabels = updated;
+                                });
+                              },
+                            )),
                 ),
                 const SizedBox(height: 8),
                 Row(

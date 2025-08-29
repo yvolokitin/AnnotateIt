@@ -107,10 +107,10 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     }
   }
 
-  void _handlePreLabelProject(Project project) async {
+  void _handlePreLabelProject(Project project, {bool useTFLite = false}) async {
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => PreLabelProjectDialog(project: project),
+      builder: (context) => PreLabelProjectDialog(project: project, useTFLite: useTFLite),
     );
 
     if (result == 'refresh') {
@@ -448,8 +448,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   },
                 ),
 
-                // New: Pre-label Project option
-                if (Platform.isAndroid || Platform.isIOS)...[
+                // Unified: Pre-label Project (platform-aware, classification projects)
+                if (project.type.toLowerCase().contains('classification')) ...[
                   ListTile(
                     leading: Icon(
                       Icons.auto_awesome,
@@ -457,8 +457,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       size: 30,
                     ),
                     title: Text(
-                      // l10n.preLabelProject,
-                      "Pre-label Project with ML Kit",
+                      'Pre-label Project',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.normal,
@@ -466,9 +465,46 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                         color: Theme.of(context).colorScheme.purple,
                       ),
                     ),
-                    onTap: () {
+                    /*subtitle: Text(
+                      (Platform.isAndroid || Platform.isIOS)
+                        ? 'Choose ML Kit or TFLite'
+                        : 'Uses TFLite on this platform',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.muted,
+                        fontFamily: 'CascadiaCode',
+                      ),
+                    ),*/
+                    onTap: () async {
                       Navigator.pop(context);
-                      _handlePreLabelProject(project);
+                      if (Platform.isAndroid || Platform.isIOS) {
+                        final choice = await showDialog<String>(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Pre-label Project'),
+                            content: const Text('Choose the pre-labeling backend to use:'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop('mlkit'),
+                                child: const Text('ML Kit'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop('tflite'),
+                                child: const Text('TFLite'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(null),
+                                child: const Text('Cancel'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (choice == null) return;
+                        final useTFLite = choice == 'tflite';
+                        _handlePreLabelProject(project, useTFLite: useTFLite);
+                      } else {
+                        _handlePreLabelProject(project, useTFLite: true);
+                      }
                     },
                   ),
                 ],

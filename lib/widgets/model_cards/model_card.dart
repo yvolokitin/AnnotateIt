@@ -191,20 +191,28 @@ class _ModelCardState extends State<ModelCard> {
     }
   }
 
-  List<Uri> get _urls => [
-        Uri.parse(widget.urlEncoder),
-        Uri.parse(widget.urlDecoder),
-        Uri.parse(widget.urlConfig),
-      ];
+  List<Uri> get _urls {
+        final list = <Uri>[Uri.parse(widget.urlEncoder)];
+        if (widget.urlDecoder.trim().isNotEmpty) {
+          list.add(Uri.parse(widget.urlDecoder));
+        }
+        list.add(Uri.parse(widget.urlConfig));
+        return list;
+      }
+
+  List<String> get _shas {
+    final list = <String>[widget.shaEncoder];
+    if (widget.urlDecoder.trim().isNotEmpty) {
+      list.add(widget.shaDecoder);
+    }
+    list.add(widget.shaConfig);
+    return list;
+  }
 
   Future<List<File>> _targetFiles() async {
     final folder = await _modelsRoot();
     final names = _urls.map((u) => u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file').toList();
-    return [
-      File('${folder.path}/${names[0]}'), // encoder.onnx
-      File('${folder.path}/${names[1]}'), // decoder.onnx
-      File('${folder.path}/${names[2]}'), // *_config.yaml
-    ];
+    return names.map((n) => File('${folder.path}/$n')).toList();
   }
 
   // Common request headers to improve compatibility with hosting providers (e.g., GitHub Releases)
@@ -286,24 +294,35 @@ class _ModelCardState extends State<ModelCard> {
       });
 
       if (!allExist) {
-        // Fallback: accept legacy config filename (config.yaml) and robust presence
+        // Fallback that does not rely on positions and treats decoder as optional when URL is empty
         final folder = await _modelsRoot();
-        final encoder = files.isNotEmpty ? files[0] : null;
-        final decoder = files.length > 1 ? files[1] : null;
-        final config = files.length > 2 ? files[2] : null;
 
-        bool encOk = encoder != null && encoder.existsSync() && encoder.lengthSync() >= _minValidBytes(encoder.path);
-        bool decOk = decoder != null && decoder.existsSync() && decoder.lengthSync() >= _minValidBytes(decoder.path);
-        bool cfgOk = config != null && config.existsSync() && config.lengthSync() >= _minValidBytes(config.path);
-        if (!cfgOk) {
+        final needDecoder = widget.urlDecoder.trim().isNotEmpty;
+        final encUri = Uri.parse(widget.urlEncoder);
+        final cfgUri = Uri.parse(widget.urlConfig);
+        final decUri = needDecoder ? Uri.parse(widget.urlDecoder) : null;
+
+        final encName = encUri.pathSegments.isNotEmpty ? encUri.pathSegments.last : null;
+        final cfgName = cfgUri.pathSegments.isNotEmpty ? cfgUri.pathSegments.last : null;
+        final decName = (decUri != null && decUri.pathSegments.isNotEmpty) ? decUri.pathSegments.last : null;
+
+        final encFile = (encName != null) ? File('${folder.path}/$encName') : null;
+        final cfgFile = (cfgName != null) ? File('${folder.path}/$cfgName') : null;
+        final decFile = (decName != null) ? File('${folder.path}/$decName') : null;
+
+        bool encOk = encFile != null && encFile.existsSync() && encFile.lengthSync() >= _minValidBytes(encFile.path);
+        bool decOk = !needDecoder || (decFile != null && decFile.existsSync() && decFile.lengthSync() >= _minValidBytes(decFile.path));
+        bool cfgOk = false;
+        if (cfgFile != null && cfgFile.existsSync() && cfgFile.lengthSync() >= _minValidBytes(cfgFile.path)) {
+          cfgOk = true;
+        } else {
           final alt = File('${folder.path}/config.yaml');
           if (alt.existsSync() && alt.lengthSync() >= _minValidBytes(alt.path)) {
             cfgOk = true;
           }
         }
-        if (encOk && decOk && cfgOk) {
-          allExist = true;
-        }
+
+        allExist = encOk && decOk && cfgOk;
       }
 
       if (!mounted || myTicket != _checkCounter) return;
@@ -495,10 +514,7 @@ class _ModelCardState extends State<ModelCard> {
             return;
           }
 
-          String expectedSha = '';
-          if (i == 0) expectedSha = widget.shaEncoder;
-          if (i == 1) expectedSha = widget.shaDecoder;
-          if (i == 2) expectedSha = widget.shaConfig;
+          final expectedSha = (i >= 0 && i < _shas.length) ? _shas[i] : '';
 
           if (expectedSha.isNotEmpty) {
             final actual = await _sha256OfFile(tmp);
