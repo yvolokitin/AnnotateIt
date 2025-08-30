@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import '../app_snackbar.dart';
 import '../../session/user_session.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../dialogs/alert_error_dialog.dart';
 
 class ModelCard extends StatefulWidget {
   final String id;
@@ -654,11 +655,21 @@ class _ModelCardState extends State<ModelCard> {
                               style: compact
                                   ? theme.textTheme.titleSmall
                                   : (isNarrow ? theme.textTheme.titleMedium : theme.textTheme.titleLarge),
-                              maxLines: 1,
+                              softWrap: true,
+                              maxLines: compact ? 1 : 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
+                          IconButton(
+                            tooltip: l10n.menuAbout,
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () {
+                              AlertErrorDialog.show(context, widget.title, widget.description);
+                            },
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 4),
                           Chip(
                             label: Text(widget.modelSize),
                             backgroundColor: _downloaded ? Colors.green : theme.colorScheme.surfaceVariant,
@@ -677,8 +688,9 @@ class _ModelCardState extends State<ModelCard> {
                         child: Text(
                           widget.description,
                           style: theme.textTheme.bodyMedium,
-                          maxLines: compact ? 1 : (isNarrow ? 2 : 3),
-                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          maxLines: compact ? 1 : null,
+                          overflow: compact ? TextOverflow.ellipsis : TextOverflow.fade,
                         ),
                       ),
 
