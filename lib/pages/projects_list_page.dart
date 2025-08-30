@@ -448,8 +448,8 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                   },
                 ),
 
-                // Unified: Pre-label Project (platform-aware, classification projects)
-                if (project.type.toLowerCase().contains('classification')) ...[
+                // Unified: Pre-label Project (platform-aware, classification and detection projects)
+                if (project.type.toLowerCase().contains('classification') || project.type.toLowerCase().contains('detection')) ...[
                   ListTile(
                     leading: Icon(
                       Icons.auto_awesome,
@@ -465,15 +465,6 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                         color: Theme.of(context).colorScheme.purple,
                       ),
                     ),
-                    /*subtitle: Text(
-                      (Platform.isAndroid || Platform.isIOS)
-                        ? 'Choose ML Kit or TFLite'
-                        : 'Uses TFLite on this platform',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.muted,
-                        fontFamily: 'CascadiaCode',
-                      ),
-                    ),*/
                     onTap: () async {
                       Navigator.pop(context);
                       if (Platform.isAndroid || Platform.isIOS) {

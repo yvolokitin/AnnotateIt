@@ -12,6 +12,7 @@ import '../../models/media_item.dart';
 import '../../models/project.dart';
 import '../../services/ml_kit_image_labeling_service.dart';
 import '../../services/tflite_classification_service.dart';
+import '../../services/tflite_detection_service.dart';
 import '../../utils/color_utils.dart';
 import '../../widgets/dialogs/edit_labels_list_dialog.dart';
 
@@ -43,6 +44,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   // Backend services (nullable, set during scanning)
   MLKitImageLabelingService? _mlService;
   TFLiteClassificationService? _tflService;
+  TFLiteDetectionService? _tflDetService;
 
   // For EditLabelsListDialog
   final ScrollController _scrollController = ScrollController();
@@ -102,18 +104,33 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
     // Initialize labeling backend: ML Kit (mobile) or TFLite (cross-platform)
     try {
+      final isDetection = widget.project.type.toLowerCase().contains('detection');
       if (widget.useTFLite) {
-        _tflService = TFLiteClassificationService();
-        final available = await _tflService!.isModelAvailableInUserFolder();
-        if (!available) {
-          setState(() {
-            _isScanning = false;
-            _inlineMessage = 'Classification model not found in your Models folder. Please download it from the Model screen.';
-            _inlineMessageColor = Colors.orangeAccent;
-          });
-          return;
+        if (isDetection) {
+          _tflDetService = TFLiteDetectionService();
+          final available = await _tflDetService!.isModelAvailableInUserFolder();
+          if (!available) {
+            setState(() {
+              _isScanning = false;
+              _inlineMessage = 'Detection model not found in your Models folder. Please download it from the Model screen.';
+              _inlineMessageColor = Colors.orangeAccent;
+            });
+            return;
+          }
+          await _tflDetService!.initializeFromUserFolder();
+        } else {
+          _tflService = TFLiteClassificationService();
+          final available = await _tflService!.isModelAvailableInUserFolder();
+          if (!available) {
+            setState(() {
+              _isScanning = false;
+              _inlineMessage = 'Classification model not found in your Models folder. Please download it from the Model screen.';
+              _inlineMessageColor = Colors.orangeAccent;
+            });
+            return;
+          }
+          await _tflService!.initializeFromUserFolder();
         }
-        await _tflService!.initializeFromUserFolder();
       } else {
         _mlService = MLKitImageLabelingService();
         _mlService!.initialize(confidenceThreshold: 0.6);
@@ -148,11 +165,22 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               _log.warning('File not found: ${item.filePath}');
             } else {
               if (widget.useTFLite) {
-                final result = await _tflService!.classifyImage(file);
-                if (result != null) {
-                  final name = result.label.trim();
-                  if (name.isNotEmpty) {
-                    _suggested.add(name);
+                final isDetection = widget.project.type.toLowerCase().contains('detection');
+                if (isDetection) {
+                  final dets = await _tflDetService!.detectImage(file);
+                  for (final d in dets) {
+                    final name = d.label.trim();
+                    if (name.isNotEmpty) {
+                      _suggested.add(name);
+                    }
+                  }
+                } else {
+                  final result = await _tflService!.classifyImage(file);
+                  if (result != null) {
+                    final name = result.label.trim();
+                    if (name.isNotEmpty) {
+                      _suggested.add(name);
+                    }
                   }
                 }
               } else {
@@ -199,6 +227,8 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
         if (widget.useTFLite) {
           await _tflService?.dispose();
           _tflService = null;
+          await _tflDetService?.dispose();
+          _tflDetService = null;
         }
       } catch (_) {}
       if (!mounted) return;

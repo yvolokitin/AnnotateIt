@@ -661,14 +661,6 @@ class _ModelCardState extends State<ModelCard> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          IconButton(
-                            tooltip: l10n.menuAbout,
-                            icon: const Icon(Icons.info_outline),
-                            onPressed: () {
-                              AlertErrorDialog.show(context, widget.title, widget.description);
-                            },
-                            visualDensity: VisualDensity.compact,
-                          ),
                           const SizedBox(width: 4),
                           Chip(
                             label: Text(widget.modelSize),
@@ -724,6 +716,14 @@ class _ModelCardState extends State<ModelCard> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
+                                  tooltip: l10n.menuAbout,
+                                  icon: const Icon(Icons.info_outline),
+                                  onPressed: () {
+                                    AlertErrorDialog.show(context, widget.title, widget.description);
+                                  },
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                IconButton(
                                   tooltip: l10n.modelShowPath,
                                   icon: const Icon(Icons.folder),
                                   onPressed: () {
@@ -746,21 +746,35 @@ class _ModelCardState extends State<ModelCard> {
                       ] else ...[
                         Align(
                           alignment: Alignment.centerRight,
-                          child: ElevatedButton.icon(
-                            onPressed: _downloadModel,
-                            icon: const Icon(Icons.download),
-                            label: Text(l10n.modelDownload),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: compact ? 10 : 14,
-                                vertical: compact ? 8 : 10,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: l10n.menuAbout,
+                                icon: const Icon(Icons.info_outline),
+                                onPressed: () {
+                                  AlertErrorDialog.show(context, widget.title, widget.description);
+                                },
+                                visualDensity: VisualDensity.compact,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
+                              const SizedBox(width: 6),
+                              ElevatedButton.icon(
+                                onPressed: _downloadModel,
+                                icon: const Icon(Icons.download),
+                                label: Text(l10n.modelDownload),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: compact ? 10 : 14,
+                                    vertical: compact ? 8 : 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+                                ),
                               ),
-                              visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
-                            ),
+                            ],
                           ),
                         ),
                       ],
