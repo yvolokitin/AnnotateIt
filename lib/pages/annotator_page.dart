@@ -148,7 +148,20 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     // Initialize default SAM model from user preference
     try {
       final preferredSam = UserSession.instance.getUser().preferredSamModelKey;
-      _handleSamModelChanged(preferredSam);
+      if (preferredSam == 'mobile') {
+        _handleSamModelChanged(preferredSam);
+      } else {
+        SamModelUtils.isDownloaded(preferredSam).then((available) {
+          if (!mounted) return;
+          if (available) {
+            _handleSamModelChanged(preferredSam);
+          } else {
+            // Silently fallback to mobile on page open without notification
+            setState(() => _samModelKey = 'mobile');
+            _samService.setModelVariant(SamModelVariant.mobile);
+          }
+        });
+      }
     } catch (_) {
       // UserSession may not be initialized in some contexts; ignore
     }

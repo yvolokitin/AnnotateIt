@@ -6,9 +6,11 @@ import 'package:logging/logging.dart';
 
 import '../../data/dataset_database.dart';
 import '../../data/labels_database.dart';
+import '../../data/annotation_database.dart';
 import '../../models/dataset.dart';
 import '../../models/label.dart';
 import '../../models/media_item.dart';
+import '../../models/annotation.dart';
 import '../../models/project.dart';
 import '../../services/ml_kit_image_labeling_service.dart';
 import '../../services/tflite_classification_service.dart';
@@ -240,16 +242,213 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
   Future<void> _saveLabels() async {
     try {
+      // 1) Save labels and keep annotations consistent for removed/renamed labels
+      setState(() {
+        _inlineMessage = 'Saving labels...';
+        _inlineMessageColor = Colors.white70;
+      });
       await LabelsDatabase.instance.updateProjectLabels(widget.project.id!, _reviewLabels);
+
+      // 2) Fetch final labels with real IDs
+      final projectLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
+
+      // 3) Annotate all images in project with detected labels
+      await _annotateAllImages(projectLabels);
+
       if (!mounted) return;
       Navigator.of(context).pop('refresh');
     } catch (e, st) {
-      _log.severe('Failed to save labels', e, st);
+      _log.severe('Failed to save labels / annotate', e, st);
       if (!mounted) return;
       setState(() {
-        _inlineMessage = 'Failed to save labels';
+        _inlineMessage = 'Failed to save labels or annotate images';
         _inlineMessageColor = Colors.redAccent;
       });
+    }
+  }
+
+  Future<void> _annotateAllImages(List<Label> projectLabels) async {
+    // Build quick lookup map for labels by lowercased name
+    final Map<String, Label> labelByName = {
+      for (final l in projectLabels) l.name.toLowerCase(): l
+    };
+
+    setState(() {
+      _inlineMessage = 'Annotating images...';
+      _inlineMessageColor = Colors.white70;
+      _processed = 0;
+      _totalImages = 0;
+    });
+
+    // Prepare datasets and count images
+    final datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+    for (final ds in datasets) {
+      final media = await DatasetDatabase.instance.fetchMediaForDataset(ds.id);
+      _totalImages += media.where((m) => m.isImage).length;
+    }
+    if (mounted) setState(() {});
+
+    // Initialize backend if needed
+    final isDetection = widget.project.type.toLowerCase().contains('detection');
+    if (widget.useTFLite) {
+      if (isDetection) {
+        _tflDetService ??= TFLiteDetectionService();
+        final available = await _tflDetService!.isModelAvailableInUserFolder();
+        if (!available) {
+          setState(() {
+            _inlineMessage = 'Detection model not found in your Models folder. Please download it from the Model screen.';
+            _inlineMessageColor = Colors.orangeAccent;
+          });
+          return;
+        }
+        await _tflDetService!.initializeFromUserFolder();
+      } else {
+        _tflService ??= TFLiteClassificationService();
+        final available = await _tflService!.isModelAvailableInUserFolder();
+        if (!available) {
+          setState(() {
+            _inlineMessage = 'Classification model not found in your Models folder. Please download it from the Model screen.';
+            _inlineMessageColor = Colors.orangeAccent;
+          });
+          return;
+        }
+        await _tflService!.initializeFromUserFolder();
+      }
+    } else {
+      _mlService ??= MLKitImageLabelingService();
+      _mlService!.initialize(confidenceThreshold: 0.6);
+    }
+
+    try {
+      for (final ds in datasets) {
+        final media = await DatasetDatabase.instance.fetchMediaForDataset(ds.id);
+        for (final item in media) {
+          if (!item.isImage) continue;
+          final file = File(item.filePath);
+          if (!await file.exists()) {
+            _log.warning('File not found during annotation: ${item.filePath}');
+            if (mounted) setState(() { _processed += 1; });
+            continue;
+          }
+
+          try {
+            // Fetch existing annotations to avoid duplicates (by labelId + type)
+            final existing = await AnnotationDatabase.instance.fetchAnnotations(item.id!);
+            final Set<String> existingKeys = existing
+              .map((a) => '${a.labelId ?? -1}|${a.annotationType}')
+              .toSet();
+
+            final now = DateTime.now();
+            final List<Annotation> toInsert = [];
+
+            if (widget.useTFLite) {
+              if (isDetection) {
+                final dets = await _tflDetService!.detectImage(file);
+                for (final d in dets) {
+                  final label = labelByName[d.label.toLowerCase()];
+                  if (label == null) continue;
+
+                  Map<String, dynamic> data;
+                  if (d.box != null && item.width != null && item.height != null) {
+                    final ymin = d.box![0];
+                    final xmin = d.box![1];
+                    final ymax = d.box![2];
+                    final xmax = d.box![3];
+                    final iw = item.width!.toDouble();
+                    final ih = item.height!.toDouble();
+                    data = {
+                      'x': (xmin * iw),
+                      'y': (ymin * ih),
+                      'width': ((xmax - xmin) * iw),
+                      'height': ((ymax - ymin) * ih),
+                    };
+                  } else {
+                    data = {
+                      'x': 50.0,
+                      'y': 50.0,
+                      'width': 100.0,
+                      'height': 100.0,
+                    };
+                  }
+
+                  final key = '${label.id}|bbox';
+                  if (existingKeys.contains(key)) continue;
+
+                  toInsert.add(Annotation(
+                    mediaItemId: item.id!,
+                    labelId: label.id,
+                    annotationType: 'bbox',
+                    data: data,
+                    confidence: d.score,
+                    annotatorId: 1,
+                    comment: 'Generated by TFLite',
+                    status: 'auto_generated',
+                    createdAt: now,
+                    updatedAt: now,
+                  )..name = 'AI: ${label.name}');
+                }
+              } else {
+                final result = await _tflService!.classifyImage(file);
+                if (result != null) {
+                  final label = labelByName[result.label.toLowerCase()];
+                  if (label != null) {
+                    final key = '${label.id}|classification';
+                    if (!existingKeys.contains(key)) {
+                      toInsert.add(Annotation(
+                        mediaItemId: item.id!,
+                        labelId: label.id,
+                        annotationType: 'classification',
+                        data: {'label': label.name},
+                        confidence: result.score,
+                        annotatorId: 1,
+                        comment: 'Generated by TFLite',
+                        status: 'auto_generated',
+                        createdAt: now,
+                        updatedAt: now,
+                      )..name = 'AI: ${label.name}');
+                    }
+                  }
+                }
+              }
+            } else {
+              final labels = await _mlService!.processImageFile(file, projectType: widget.project.type);
+              final anns = _mlService!.convertLabelsToAnnotations(
+                labels: labels,
+                mediaItemId: item.id!,
+                projectLabels: projectLabels,
+                annotatorId: 1,
+                projectType: widget.project.type,
+                imageWidth: item.width,
+                imageHeight: item.height,
+              );
+              for (final a in anns) {
+                final key = '${a.labelId ?? -1}|${a.annotationType}';
+                if (!existingKeys.contains(key)) {
+                  toInsert.add(a);
+                }
+              }
+            }
+
+            if (toInsert.isNotEmpty) {
+              await AnnotationDatabase.instance.insertAnnotationsBatch(toInsert);
+            }
+          } catch (e, st) {
+            _log.warning('Failed to annotate image ${item.filePath}', e, st);
+          } finally {
+            if (mounted) {
+              setState(() { _processed += 1; });
+            }
+          }
+        }
+      }
+    } finally {
+      // Dispose TFLite services if used
+      if (widget.useTFLite) {
+        try { await _tflService?.dispose(); } catch (_) {}
+        try { await _tflDetService?.dispose(); } catch (_) {}
+        _tflService = null;
+        _tflDetService = null;
+      }
     }
   }
 
