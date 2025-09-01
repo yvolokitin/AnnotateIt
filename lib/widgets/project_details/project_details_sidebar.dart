@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../utils/date_utils.dart';
 import '../../models/project.dart';
@@ -47,7 +46,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    bool isSvg = widget.project.icon.toLowerCase().endsWith('.svg');
     return Container(
       padding: const EdgeInsets.all(25.0),
       color: Colors.grey[850],
@@ -100,25 +98,15 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
           ),
 
           const SizedBox(height: 15),
-          // Project Icon
-          isSvg
-              ? SvgPicture.asset(
-                widget.project.icon,
-                height: 140,
-                fit: BoxFit.cover,
-                // color: Colors.white,
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              )
-              : Image.file(
-                  File(widget.project.icon),
-                  height: 140,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.broken_image, size: 80, color: Colors.white54);
-                  },
-                ),
-
+          Image.file(
+            File(widget.project.icon),
+            height: 140,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.broken_image, size: 80, color: Colors.white54);
+            },
+          ),
           const SizedBox(height: 15),
           Text(
             "Type: ${widget.project.type}", // Project Type
