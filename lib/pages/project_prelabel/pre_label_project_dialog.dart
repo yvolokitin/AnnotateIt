@@ -71,6 +71,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   bool _hasImages = false;
   bool? _modelAvailable; // null = not applicable or not checked yet
 
+  // Thumbnails to orbit during scanning
+  List<ImageProvider> _orbitImages = [];
+
   bool get _isDetection => widget.project.type.toLowerCase().contains('detection');
 
   @override
@@ -205,12 +208,27 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     List<Dataset> datasets = const [];
     try {
       datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+      final List<ImageProvider> orbit = [];
       for (final ds in datasets) {
         final media = await DatasetDatabase.instance.fetchMediaForDataset(ds.id);
         _totalImages += media.where((m) => m.isImage).length;
+        // Collect up to 8 thumbnails for orbit animation
+        if (orbit.length < 8) {
+          for (final item in media) {
+            if (!item.isImage) continue;
+            try {
+              final f = File(item.filePath);
+              if (f.existsSync()) {
+                orbit.add(FileImage(f));
+                if (orbit.length >= 8) break;
+              }
+            } catch (_) {}
+          }
+        }
+        if (orbit.length >= 8) break;
       }
       if (!mounted) return;
-      setState(() {});
+      setState(() { _orbitImages = orbit; });
 
       if (_totalImages == 0) {
         setState(() {
@@ -723,6 +741,67 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                     ],
                                   ),
                               ],
+                              if (_hasImages && (!widget.useTFLite || (_modelAvailable ?? false))) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.10),
+                                    border: Border.all(color: Colors.lightGreenAccent.withOpacity(0.8)),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.verified, color: Colors.lightGreenAccent, size: 28),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'All prerequisites are met',
+                                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Wrap(
+                                              spacing: 8,
+                                              runSpacing: 8,
+                                              children: [
+                                                Chip(
+                                                  label: Text('Images: ' + _totalImages.toString()),
+                                                  backgroundColor: Colors.green,
+                                                  labelStyle: const TextStyle(color: Colors.white),
+                                                  visualDensity: VisualDensity.compact,
+                                                ),
+                                                if (widget.useTFLite)
+                                                  Chip(
+                                                    label: Text(_isDetection ? 'Backend: TFLite Detection' : 'Backend: TFLite Classification'),
+                                                    backgroundColor: Colors.green,
+                                                    labelStyle: const TextStyle(color: Colors.white),
+                                                    visualDensity: VisualDensity.compact,
+                                                  )
+                                                else
+                                                  const Chip(
+                                                    label: Text('Backend: ML Kit'),
+                                                    backgroundColor: Colors.green,
+                                                    labelStyle: TextStyle(color: Colors.white),
+                                                    visualDensity: VisualDensity.compact,
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            const Text(
+                                              'You can proceed with pre-labeling when ready.',
+                                              style: TextStyle(color: Colors.white70),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               if (_inlineMessage != null) ...[
                                 const SizedBox(height: 12),
                                 Text(_inlineMessage!, style: TextStyle(color: _inlineMessageColor)),
@@ -862,10 +941,33 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 8),
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
-                            backgroundColor: Colors.grey[700],
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: 240,
+                            height: 240,
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: OrbitingThumbnails(
+                                    images: _orbitImages,
+                                    itemSize: 28,
+                                    minRadius: 56,
+                                    maxRadius: 104,
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: 56,
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
+                                      backgroundColor: Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -973,13 +1075,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    /*if (!(_inlineMessage?.toLowerCase().startsWith('annotating images') ?? false) && !(_inlineMessage?.toLowerCase().startsWith('saving labels') ?? false)) ...[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Close'),
-                      ),
-                      const SizedBox(width: 12),
-                    ],*/
                     if (_reviewLabels.isNotEmpty && !(_inlineMessage?.toLowerCase().startsWith('annotating images') ?? false) && !(_inlineMessage?.toLowerCase().startsWith('saving labels') ?? false))
                       ElevatedButton(
                         onPressed: _saveLabels,
@@ -1156,5 +1251,184 @@ class _OrbitingBoxPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.minRadius != minRadius ||
         oldDelegate.maxRadius != maxRadius;
+  }
+}
+
+
+// Animated orbiting thumbnails used during the pre-labeling scan phase
+class OrbitingThumbnails extends StatefulWidget {
+  final List<ImageProvider> images;
+  final double itemSize;
+  final double minRadius;
+  final double maxRadius;
+  final Duration duration;
+  final Color color; // used for placeholders & accents
+
+  const OrbitingThumbnails({
+    super.key,
+    required this.images,
+    this.itemSize = 28,
+    this.minRadius = 56,
+    this.maxRadius = 104,
+    this.duration = const Duration(seconds: 8),
+    this.color = Colors.purpleAccent,
+  });
+
+  @override
+  State<OrbitingThumbnails> createState() => _OrbitingThumbnailsState();
+}
+
+class _OrbitingThumbnailsState extends State<OrbitingThumbnails> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration)..repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant OrbitingThumbnails oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) {
+      _controller.duration = widget.duration;
+      if (!_controller.isAnimating) _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RepaintBoundary(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final center = Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+          final images = widget.images;
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final t = _controller.value; // 0..1
+              final List<Widget> stackChildren = [];
+
+              void addOrbitItems({required int count, required double radius, required double speed, required double sizeFactor, required int offsetIndex, required bool useImages}) {
+                for (int i = 0; i < count; i++) {
+                  final angleBase = 2 * math.pi * (i / count);
+                  final angle = angleBase + 2 * math.pi * t * speed + (offsetIndex * 0.37);
+                  final dx = center.dx + radius * math.cos(angle);
+                  final dy = center.dy + radius * math.sin(angle);
+                  final pos = Offset(dx, dy);
+                  final w = widget.itemSize * sizeFactor;
+                  final h = w;
+
+                  Widget child;
+                  if (useImages && images.isNotEmpty) {
+                    final imgIdx = (i + offsetIndex) % images.length;
+                    child = ClipOval(
+                      child: Image(
+                        image: images[imgIdx],
+                        width: w,
+                        height: h,
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.low,
+                      ),
+                    );
+                    child = Container(
+                      width: w,
+                      height: h,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.colorScheme.purple.withOpacity(0.9), width: 1.2),
+                        boxShadow: [
+                          BoxShadow(color: theme.colorScheme.purple.withOpacity(0.25), blurRadius: 4, spreadRadius: 0.5),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: child,
+                    );
+                  } else {
+                    // Placeholder: glowing dot
+                    child = Container(
+                      width: w * 0.6,
+                      height: h * 0.6,
+                      decoration: BoxDecoration(
+                        color: widget.color.withOpacity(0.85),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(color: widget.color.withOpacity(0.35), blurRadius: 6, spreadRadius: 1),
+                        ],
+                      ),
+                    );
+                  }
+
+                  stackChildren.add(Positioned(
+                    left: pos.dx - w / 2,
+                    top: pos.dy - h / 2,
+                    child: child,
+                  ));
+                }
+              }
+
+              if (images.length <= 4) {
+                // Single ring
+                final r = (widget.minRadius + widget.maxRadius) / 2;
+                final count = images.isNotEmpty ? images.length : 6;
+                addOrbitItems(count: count, radius: r, speed: 1.0, sizeFactor: 1.0, offsetIndex: 0, useImages: images.isNotEmpty);
+              } else {
+                // Two rings: inner and outer
+                final half = (images.length / 2).ceil();
+                final inner = images.isNotEmpty ? half : 6;
+                final outer = images.isNotEmpty ? (images.length - half) : 6;
+                addOrbitItems(count: inner, radius: widget.minRadius, speed: 1.2, sizeFactor: 0.95, offsetIndex: 0, useImages: images.isNotEmpty);
+                addOrbitItems(count: outer, radius: widget.maxRadius, speed: 0.8, sizeFactor: 1.1, offsetIndex: half, useImages: images.isNotEmpty);
+              }
+
+              // Optional faint orbit rings
+              stackChildren.add(Positioned.fill(
+                child: CustomPaint(
+                  painter: _OrbitRingPainter(
+                    color: theme.colorScheme.purple.withOpacity(0.18),
+                    minRadius: widget.minRadius,
+                    maxRadius: widget.maxRadius,
+                  ),
+                ),
+              ));
+
+              return Stack(children: stackChildren);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _OrbitRingPainter extends CustomPainter {
+  final Color color;
+  final double minRadius;
+  final double maxRadius;
+
+  _OrbitRingPainter({required this.color, required this.minRadius, required this.maxRadius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = color;
+    canvas.drawCircle(center, minRadius, paint);
+    canvas.drawCircle(center, (minRadius + maxRadius) / 2, paint);
+    canvas.drawCircle(center, maxRadius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _OrbitRingPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.minRadius != minRadius || oldDelegate.maxRadius != maxRadius;
   }
 }
