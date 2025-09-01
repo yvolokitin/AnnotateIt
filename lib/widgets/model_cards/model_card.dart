@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:crypto/crypto.dart';
 
 import '../app_snackbar.dart';
@@ -174,7 +175,7 @@ class _ModelCardState extends State<ModelCard> {
     try {
       // Use user-configured models root folder
       final modelsRoot = await UserSession.instance.getCurrentUserModelsFolder();
-      final base = Directory('$modelsRoot/${widget.id}');
+      final base = Directory(p.join(modelsRoot, widget.id));
       if (!base.existsSync()) {
         base.createSync(recursive: true);
       }
@@ -183,7 +184,7 @@ class _ModelCardState extends State<ModelCard> {
     } catch (_) {
       // Fallback to legacy default location if UserSession is not initialized
       final dir = await getApplicationDocumentsDirectory();
-      final base = Directory('${dir.path}/AnnotateIt/models/${widget.id}');
+      final base = Directory(p.join(dir.path, 'AnnotateIt', 'models', widget.id));
       if (!base.existsSync()) {
         base.createSync(recursive: true);
       }
@@ -213,7 +214,7 @@ class _ModelCardState extends State<ModelCard> {
   Future<List<File>> _targetFiles() async {
     final folder = await _modelsRoot();
     final names = _urls.map((u) => u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file').toList();
-    return names.map((n) => File('${folder.path}/$n')).toList();
+    return names.map((n) => File(p.join(folder.path, n))).toList();
   }
 
   // Common request headers to improve compatibility with hosting providers (e.g., GitHub Releases)
@@ -307,9 +308,9 @@ class _ModelCardState extends State<ModelCard> {
         final cfgName = cfgUri.pathSegments.isNotEmpty ? cfgUri.pathSegments.last : null;
         final decName = (decUri != null && decUri.pathSegments.isNotEmpty) ? decUri.pathSegments.last : null;
 
-        final encFile = (encName != null) ? File('${folder.path}/$encName') : null;
-        final cfgFile = (cfgName != null) ? File('${folder.path}/$cfgName') : null;
-        final decFile = (decName != null) ? File('${folder.path}/$decName') : null;
+        final encFile = (encName != null) ? File(p.join(folder.path, encName)) : null;
+        final cfgFile = (cfgName != null) ? File(p.join(folder.path, cfgName)) : null;
+        final decFile = (decName != null) ? File(p.join(folder.path, decName)) : null;
 
         bool encOk = encFile != null && encFile.existsSync() && encFile.lengthSync() >= _minValidBytes(encFile.path);
         bool decOk = !needDecoder || (decFile != null && decFile.existsSync() && decFile.lengthSync() >= _minValidBytes(decFile.path));
@@ -317,7 +318,7 @@ class _ModelCardState extends State<ModelCard> {
         if (cfgFile != null && cfgFile.existsSync() && cfgFile.lengthSync() >= _minValidBytes(cfgFile.path)) {
           cfgOk = true;
         } else {
-          final alt = File('${folder.path}/config.yaml');
+          final alt = File(p.join(folder.path, 'config.yaml'));
           if (alt.existsSync() && alt.lengthSync() >= _minValidBytes(alt.path)) {
             cfgOk = true;
           }

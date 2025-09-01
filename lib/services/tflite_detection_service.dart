@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 import '../session/user_session.dart';
@@ -33,7 +34,7 @@ class TFLiteDetectionService {
       return await UserSession.instance.getCurrentUserModelsFolder();
     } catch (_) {
       final dir = await getApplicationDocumentsDirectory();
-      return dir.path + '/AnnotateIt/models';
+      return p.join(dir.path, 'AnnotateIt', 'models');
     }
   }
 
@@ -43,10 +44,10 @@ class TFLiteDetectionService {
     String labelsFileName = defaultLabelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final folder = Directory('$root/$modelId');
+    final folder = Directory(p.join(root, modelId));
     if (!await folder.exists()) return false;
-    final model = File('$root/$modelId/$modelFileName');
-    final labels = File('$root/$modelId/$labelsFileName');
+    final model = File(p.join(root, modelId, modelFileName));
+    final labels = File(p.join(root, modelId, labelsFileName));
     final modelOk = await model.exists() && (await model.length()) > 1024;
     final labelsOk = await labels.exists() && (await labels.length()) > 0;
     return modelOk && labelsOk;
@@ -58,8 +59,8 @@ class TFLiteDetectionService {
     String labelsFileName = defaultLabelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final modelPath = '$root/$modelId/$modelFileName';
-    final labelsPath = '$root/$modelId/$labelsFileName';
+    final modelPath = p.join(root, modelId, modelFileName);
+    final labelsPath = p.join(root, modelId, labelsFileName);
 
     final model = File(modelPath);
     final labels = File(labelsPath);

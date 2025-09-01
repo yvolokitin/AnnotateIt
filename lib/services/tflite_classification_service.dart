@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import '../session/user_session.dart';
 
 class ClassificationResult {
@@ -22,9 +23,9 @@ class TFLiteClassificationService {
     try {
       return await UserSession.instance.getCurrentUserModelsFolder();
     } catch (_) {
-      // Fallback: use Documents/AnnotateIt/models
+      // Fallback: use Documents/AnnotateIt/models (platform-safe)
       final dir = await getApplicationDocumentsDirectory();
-      return dir.path + '/AnnotateIt/models';
+      return p.join(dir.path, 'AnnotateIt', 'models');
     }
   }
 
@@ -34,14 +35,14 @@ class TFLiteClassificationService {
     String? labelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final folder = Directory('$root/$modelId');
+    final folder = Directory(p.join(root, modelId));
 
     print('folder path: ${folder.path}');
 
     if (!await folder.exists()) return false;
 
-    final model = File('$root/$modelId/${modelFileName ?? '$modelId.tflite'}');
-    final labels = File('$root/$modelId/${labelsFileName ?? '${modelId}_labels.txt'}');
+    final model = File(p.join(root, modelId, modelFileName ?? '$modelId.tflite'));
+    final labels = File(p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt'));
 
     print('model path: ${model.path}, labels path: ${labels.path}');
 
@@ -57,8 +58,8 @@ class TFLiteClassificationService {
     String? labelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final modelPath = '$root/$modelId/${modelFileName ?? '$modelId.tflite'}';
-    final labelsPath = '$root/$modelId/${labelsFileName ?? '${modelId}_labels.txt'}';
+    final modelPath = p.join(root, modelId, modelFileName ?? '$modelId.tflite');
+    final labelsPath = p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt');
 
     final model = File(modelPath);
     final labels = File(labelsPath);
