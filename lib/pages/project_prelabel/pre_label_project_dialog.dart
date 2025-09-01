@@ -18,6 +18,10 @@ import '../../services/tflite_classification_service.dart';
 import '../../services/tflite_detection_service.dart';
 import '../../utils/color_utils.dart';
 import '../../widgets/dialogs/edit_labels_list_dialog.dart';
+import '../../utils/theme.dart';
+import '../../widgets/dialogs/prelabel_cancel_confirmation_dialog.dart';
+import '../models_page.dart';
+import '../../widgets/model_cards/model_card.dart';
 
 class PreLabelProjectDialog extends StatefulWidget {
   final Project project;
@@ -59,11 +63,131 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   String? _inlineMessage;
   Color _inlineMessageColor = Colors.white70;
 
+  // UI step: 0 = intro, 1 = preflight checks, 2 = scanning/review
+  int _uiStep = 1;
+
+  bool _preflightLoading = false;
+  bool _preflightChecked = false;
+  bool _hasImages = false;
+  bool? _modelAvailable; // null = not applicable or not checked yet
+
+  bool get _isDetection => widget.project.type.toLowerCase().contains('detection');
+
   @override
   void initState() {
     super.initState();
-    // kick off scanning on first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startScan());
+    // Start at Step 1 (preflight checks)
+    // Trigger preflight checks as soon as dialog opens
+    scheduleMicrotask(() {
+      if (mounted) {
+        _runPreflightChecks();
+      }
+    });
+  }
+
+  Future<void> _runPreflightChecks() async {
+    setState(() {
+      _preflightLoading = true;
+      _preflightChecked = false;
+      _hasImages = false;
+      _modelAvailable = widget.useTFLite ? null : true; // MLKit path doesn't need model
+      _inlineMessage = null;
+      _totalImages = 0;
+    });
+
+    try {
+      final datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+      int count = 0;
+      for (final ds in datasets) {
+        final media = await DatasetDatabase.instance.fetchMediaForDataset(ds.id);
+        count += media.where((m) => m.isImage).length;
+      }
+      if (!mounted) return;
+      setState(() {
+        _totalImages = count;
+        _hasImages = count > 0;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _inlineMessage = 'Failed to read datasets. Please try again.';
+        _inlineMessageColor = Colors.redAccent;
+      });
+    }
+
+    if (widget.useTFLite) {
+      try {
+        if (_isDetection) {
+          final det = TFLiteDetectionService();
+          final ok = await det.isModelAvailableInUserFolder();
+          if (mounted) setState(() { _modelAvailable = ok; });
+        } else {
+          final cls = TFLiteClassificationService();
+          final ok = await cls.isModelAvailableInUserFolder();
+          if (mounted) setState(() { _modelAvailable = ok; });
+        }
+      } catch (e) {
+        if (mounted) setState(() {
+          _modelAvailable = false;
+          _inlineMessage = 'Failed to check model availability.';
+          _inlineMessageColor = Colors.orangeAccent;
+        });
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _preflightLoading = false;
+        _preflightChecked = true;
+      });
+    }
+  }
+
+  Future<void> _openModelsPage() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          body: SafeArea(child: const ModelPage()),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    await _runPreflightChecks();
+  }
+
+  // Build an inline model card for downloading the required TFLite model
+  Widget _buildInlineModelCard() {
+    if (_isDetection) {
+      // EfficientDet-Lite4 (Detection)
+      return ModelCard(
+        id: 'efficientdet-tflite-lite4-detection-metadata-v2',
+        title: 'EfficientDet-Lite4',
+        description: "EfficientDet-Lite4 is an object detection model optimized for mobile and edge devices. It uses an EfficientNet-Lite4 backbone with a BiFPN feature network to achieve strong accuracy while keeping the model size small and inference fast.     Task: Object detection (bounding boxes + labels) Dataset: Trained on COCO (90 common object classes). Format: TensorFlow Lite with metadata (easy integration and standardized input/output). Input: 320×320 RGB image (normalized to 0–1). Output: Bounding boxes, class IDs (0–89), and confidence scores",
+        imageAsset: 'assets/images/efficientnet-tflite-lite4-detection.jpg',
+        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientdet-tflite-lite4-detection-metadata-v2.tflite',
+        urlDecoder: '',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/coco_labels.txt',
+        shaEncoder: '0d9b3ffe97d6d9e78ac1632f4b63630f35e39c87d20349b648268d671c7730c5',
+        shaDecoder: '',
+        shaConfig: '4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930',
+        modelSize: '20Mb',
+      );
+    } else {
+      // EfficientNet-Lite4 FP32v2 (Classification)
+      return ModelCard(
+        id: 'classification_efficientnet-tflite-lite4-fp32-v2',
+        title: 'EfficientNet-Lite4',
+        description: "EfficientNet-Lite4 FP32v2 is a convolutional neural network (CNN) from the EfficientNet-Lite family, designed for image classification on mobile and edge devices. EfficientNet-Lite models provide a strong balance of accuracy and efficiency, using fewer parameters and computations than many traditional CNNs. The FP32v2 variant is distributed in TensorFlow Lite format, making it directly usable in mobile and embedded applications for real-time image classification. While FP32 ensures maximum accuracy, smaller quantized versions (e.g., INT8) offer lower latency and power consumption on constrained hardware.",
+        imageAsset: 'assets/images/efficientnet-tflite-lite4-classification.jpg',
+        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientnet-tflite-lite4-fp32-v2.tflite',
+        urlDecoder: '',
+        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/classification_efficientnet-tflite-lite0-int8-v2_labels.txt',
+        shaEncoder: 'f0d69132ee9759f2d98e817f7a96a28e40384d3c1894f222c4e6653d9e285586',
+        shaDecoder: '',
+        shaConfig: 'ff830819b4418bc52ce12b81398e2d7f6fbf09f98584cd83f3f92629a3074eb7',
+        modelSize: '50Mb',
+      );
+    }
   }
 
   Future<void> _startScan() async {
@@ -469,12 +593,23 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   @override
   Widget build(BuildContext context) {
     final progress = _totalImages == 0 ? 0.0 : _processed / (_totalImages.toDouble());
+    final screenSize = MediaQuery.of(context).size;
+    final bool isWide = screenSize.width > 1600;
+    final double targetWidth = isWide ? screenSize.width * 0.9 : screenSize.width;
+    final double targetHeight = isWide ? screenSize.height * 0.9 : screenSize.height;
 
     return Dialog(
-      insetPadding: const EdgeInsets.all(16),
+      insetPadding: EdgeInsets.zero,
       backgroundColor: Colors.grey[800],
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 700),
+      shape: isWide
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Theme.of(context).colorScheme.purple, width: 1),
+            )
+          : null,
+      child: SizedBox(
+        width: targetWidth,
+        height: targetHeight,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -483,36 +618,19 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Pre-label Project',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.purple,
                       fontFamily: 'CascadiaCode',
                     ),
                   ),
                   IconButton(
                     onPressed: () async {
                       if (_isScanning && !_cancelRequested) {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Cancel pre-labeling?'),
-                            content: const Text('Scanning is in progress. Do you want to stop and close the dialog?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(false),
-                                child: const Text('Continue'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(true),
-                                child: const Text('Stop and Close'),
-                              ),
-                            ],
-                          ),
-                        );
+                        final confirm = await PreLabelCancelConfirmationDialog.show(context);
                         if (confirm != true) return;
                         setState(() => _cancelRequested = true);
                       }
@@ -522,6 +640,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                   )
                 ],
               ),
+              Divider(color: Theme.of(context).colorScheme.purple),
               const SizedBox(height: 12),
               Text(
                 widget.useTFLite
@@ -531,7 +650,209 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               ),
               const SizedBox(height: 16),
 
-              if (_isScanning) ...[
+              if (_uiStep == 1) ...[
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Step 1: Check prerequisites',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.purple,
+                                fontFamily: 'CascadiaCode',
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (_preflightLoading) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(Colors.white70)),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Checking project and models...', style: TextStyle(color: Colors.white70)),
+                                ],
+                              ),
+                            ] else ...[
+                              Row(
+                                children: [
+                                  Icon(_hasImages ? Icons.check_circle : Icons.error, color: _hasImages ? Colors.lightGreenAccent : Colors.orangeAccent),
+                                  const SizedBox(width: 8),
+                                  Text('Images in project datasets: $_totalImages', style: const TextStyle(color: Colors.white70)),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              if (widget.useTFLite) ...[
+                                Row(
+                                  children: [
+                                    Icon((_modelAvailable ?? false) ? Icons.check_circle : Icons.download, color: (_modelAvailable ?? false) ? Colors.lightGreenAccent : Colors.orangeAccent),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      (_modelAvailable ?? false) ? 'Model available in your Models folder' : 'Model is missing. Please download it first.',
+                                      style: const TextStyle(color: Colors.white70),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                if (!(_modelAvailable ?? false))
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(minHeight: 160, maxHeight: 260),
+                                        child: _buildInlineModelCard(),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: TextButton(
+                                          onPressed: _runPreflightChecks,
+                                          style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                                          child: const Text('Recheck'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                              if (_inlineMessage != null) ...[
+                                const SizedBox(height: 12),
+                                Text(_inlineMessage!, style: TextStyle(color: _inlineMessageColor)),
+                              ],
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                      child: const Text('Cancel'),
+                    ),
+                    Row(
+                      children: [
+                        if (!_preflightLoading)
+                          TextButton(
+                            onPressed: _runPreflightChecks,
+                            style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                            child: const Text('Recheck'),
+                          ),
+                        const SizedBox(width: 8),
+                        Builder(builder: (context) {
+                          final canStart = _hasImages && (!widget.useTFLite || (_modelAvailable ?? false));
+                          return ElevatedButton(
+                            onPressed: (!_preflightLoading && canStart) ? () {
+                              setState(() { _uiStep = 2; });
+                              _startScan();
+                            } : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.purple,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            ),
+                            child: const Text('Start pre-labeling', style: TextStyle(color: Colors.white)),
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ] else if (_uiStep == 0) ...[
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Step 0: What will happen next',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.purple,
+                                fontFamily: 'CascadiaCode',
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.useTFLite
+                                  ? '• The project images will be scanned using your TensorFlow Lite model.'
+                                  : '• The project images will be scanned using Google ML Kit on this device.',
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '• We will propose label names found across images. You can review and edit them.',
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '• When you click "Start pre-annotation", labels will be saved to the project.',
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.project.type.toLowerCase().contains('detection')
+                                  ? '• Images will then be auto-annotated with bounding boxes for the detected labels.'
+                                  : '• Images will then be auto-annotated with classification labels.',
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              '• Existing annotations are respected and duplicates are avoided.',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              '• You can cancel at any time. Progress may take a while on large projects.',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() { _uiStep = 1; });
+                        _startScan();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.purple,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: const Text('Next', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ] else if (_isScanning) ...[
                 // Centered progress section
                 Expanded(
                   child: Center(
@@ -543,7 +864,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                         children: [
                           const SizedBox(height: 8),
                           CircularProgressIndicator(
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
                             backgroundColor: Colors.grey[700],
                           ),
                           const SizedBox(height: 16),
@@ -559,7 +880,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           LinearProgressIndicator(
                             value: _totalImages > 0 ? progress : null,
                             backgroundColor: Colors.grey[700],
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
                             minHeight: 6,
                           ),
                           const SizedBox(height: 8),
@@ -590,8 +911,8 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                           width: 240,
                                           height: 240,
                                           child: OrbitingBoundingBoxes(
-                                            color: Colors.blueAccent,
-                                            secondaryColor: Colors.lightBlueAccent,
+                                            color: Theme.of(context).colorScheme.purple,
+                                            secondaryColor: Theme.of(context).colorScheme.purple.withOpacity(0.7),
                                             boxCount: 5,
                                           ),
                                         ),
@@ -605,7 +926,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                         LinearProgressIndicator(
                                           value: _totalImages > 0 ? (_processed / (_totalImages.toDouble())) : null,
                                           backgroundColor: Colors.grey[700],
-                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
                                           minHeight: 6,
                                         ),
                                         const SizedBox(height: 8),
@@ -652,23 +973,25 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
-                    ),
-                    const SizedBox(width: 12),
-                    if (_reviewLabels.isNotEmpty)
+                    /*if (!(_inlineMessage?.toLowerCase().startsWith('annotating images') ?? false) && !(_inlineMessage?.toLowerCase().startsWith('saving labels') ?? false)) ...[
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Close'),
+                      ),
+                      const SizedBox(width: 12),
+                    ],*/
+                    if (_reviewLabels.isNotEmpty && !(_inlineMessage?.toLowerCase().startsWith('annotating images') ?? false) && !(_inlineMessage?.toLowerCase().startsWith('saving labels') ?? false))
                       ElevatedButton(
                         onPressed: _saveLabels,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
+                          backgroundColor: Theme.of(context).colorScheme.purple,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
-                            side: const BorderSide(color: Colors.redAccent, width: 2),
                           ),
                         ),
                         child: const Text(
-                          'Save Labels',
+                          'Start pre-annotation',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
