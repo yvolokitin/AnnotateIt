@@ -39,7 +39,7 @@ class DatasetImportProjectCreation {
         Project(
           name: archive.zipFileName,
           type: archive.selectedTaskType ?? 'Unknown',
-          icon: "assets/images/default_project_image.svg",
+          icon: "assets/images/empty_project_folder.png",
           creationDate: DateTime.now(),
           lastUpdated: DateTime.now(),
           defaultDatasetId: null,

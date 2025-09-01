@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import 'alert_error_dialog.dart';
@@ -31,8 +30,8 @@ class NoMediaDialogState extends State<NoMediaDialog> {
         final smallScreen = (screenWidth < 700) || (screenHeight < 750);
 
         final double padding = smallScreen ? 8 : 24;
-        final bool showSvg = screenWidth >= 600;
-        final double svgHeight = showSvg
+        final bool showImage = screenWidth >= 600;
+        final double imageHeight = showImage
             ? math.min(360, math.max(120, screenHeight * 0.35))
             : 0;
 
@@ -74,12 +73,12 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                               fontSize: titleSize,
                             ),
                           ),
-                          if (showSvg) ...[
+                          if (showImage) ...[
                             SizedBox(height: gapLarge),
                             SizedBox(
-                              height: svgHeight,
-                              child: SvgPicture.asset(
-                                'assets/images/media_upload.svg',
+                              height: imageHeight,
+                              child: Image.asset(
+                                'assets/images/media_upload.png',
                                 fit: BoxFit.contain,
                               ),
                             ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
 
 class ProjectIcon extends StatelessWidget {
@@ -10,24 +9,23 @@ class ProjectIcon extends StatelessWidget {
     required this.iconPath,
   });
 
-  bool get isSvg => iconPath.toLowerCase().endsWith('.svg');
+  bool get isDefault => iconPath.contains('empty_project_folder.png');
 
   @override
   Widget build(BuildContext context) {
     if (iconPath.isEmpty) return _placeholder();
 
     try {
-      if (isSvg) {
-        return SizedBox(
-          width: 45,
-          height: 45,
-          child: SvgPicture.file(
-            File(iconPath),
-            colorFilter: const ColorFilter.mode(Colors.white54, BlendMode.srcIn),
-            fit: BoxFit.contain,
-            placeholderBuilder: (context) => _placeholder(),
-          ),
-        );
+      if (isDefault) {
+      	return SizedBox(
+	        width: 35,
+	        height: 35,
+	        child: Image.file(
+	          File(iconPath),
+	          fit: BoxFit.contain,
+	          errorBuilder: (context, error, stackTrace) => _placeholder(),
+	        ),
+	      );
       } else {
         return Image.file(
           File(iconPath),
@@ -44,8 +42,8 @@ class ProjectIcon extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      width: isSvg ? 45 : double.infinity,
-      height: isSvg ? 45 : double.infinity,
+      width: isDefault ? 35 : double.infinity,
+      height: isDefault ? 35 : double.infinity,
       color: Colors.grey[700],
       child: const Center(
         child: Icon(Icons.image_not_supported, color: Colors.white54),

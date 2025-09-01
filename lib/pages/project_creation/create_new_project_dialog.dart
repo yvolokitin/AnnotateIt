@@ -286,7 +286,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         final newProject = Project(
           name: nameController.text.trim(),
           type: selectedTaskType,
-          icon: "assets/images/default_project_image.svg",
+          icon: "assets/images/empty_project_folder.png",
           creationDate: DateTime.now(),
           lastUpdated: DateTime.now(),
           defaultDatasetId: null,

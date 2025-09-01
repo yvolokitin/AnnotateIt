@@ -96,15 +96,16 @@ flutter:
   generate: true
 
   # To add assets to your application, add an assets section, like this:
+  #  - assets/images/default_project_image.svg
+  #  - assets/images/media_upload.svg
   assets:
      - assets/logo/annotateit.png
      - assets/logo/annotateit_white.png
-     - assets/images/media_upload.svg
+     - assets/images/media_upload.png
      - assets/icons/icons8-gallery-96.png
      - assets/icons/icons8-label-64.png
      - assets/icons/icons8-folder-64.png
      - assets/icons/avataaars.png
-     - assets/images/default_project_image.svg
      - assets/images/detection_bounding_box.jpg
      - assets/images/detection_oriented.jpg
      - assets/images/anomaly_detection.jpg
@@ -119,6 +120,7 @@ flutter:
      - assets/images/sam_example.jpg
      - assets/images/no_labels.png
      - assets/images/start_first_project.jpg
+     - assets/images/empty_project_folder.png
      - assets/sam_mobile/mobile_sam.encoder.onnx
      - assets/sam_mobile/mobile_sam.decoder.onnx
      - assets/sam_mobile/models.ts
