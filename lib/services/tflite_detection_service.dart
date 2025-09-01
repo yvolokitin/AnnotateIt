@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:math' as math;
 
 import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
@@ -84,8 +85,13 @@ class TFLiteDetectionService {
     }
 
     try {
-      _interpreter = Interpreter.fromFile(File(modelFilePath));
-      _log.info('TFLite detection model loaded from file: $modelFilePath');
+      // Configure interpreter with multiple threads to improve performance
+      final cpuCount = Platform.numberOfProcessors;
+      int threads = cpuCount > 4 ? 4 : (cpuCount - 1);
+      if (threads < 1) threads = 1;
+      final options = InterpreterOptions()..threads = threads;
+      _interpreter = Interpreter.fromFile(File(modelFilePath), options: options);
+      _log.info('TFLite detection model loaded from file: $modelFilePath (threads=$threads)');
     } catch (e) {
       _log.warning('Failed to load detection model from file ($modelFilePath): $e');
       final msg = e.toString();
@@ -144,47 +150,58 @@ class TFLiteDetectionService {
     dynamic input;
     if (isFloat) {
       if (channelsLast) {
-        input = List.generate(1, (_) =>
-            List.generate(h, (y) =>
-              List.generate(w, (x) =>
-                [
-                  resized.getPixel(x, y).r.toDouble() / 255.0,
-                  resized.getPixel(x, y).g.toDouble() / 255.0,
-                  resized.getPixel(x, y).b.toDouble() / 255.0,
-                ]
-              )
-            )
-        );
+        // NHWC float32
+        final data = List.generate(1, (_) => List.generate(h, (_) => List.generate(w, (_) => List<double>.filled(c, 0.0, growable: false), growable: false), growable: false), growable: false);
+        for (int y = 0; y < h; y++) {
+          for (int x = 0; x < w; x++) {
+            final px = resized.getPixel(x, y);
+            final r = px.r.toDouble() / 255.0;
+            final g = px.g.toDouble() / 255.0;
+            final b = px.b.toDouble() / 255.0;
+            data[0][y][x][0] = r;
+            if (c > 1) data[0][y][x][1] = g;
+            if (c > 2) data[0][y][x][2] = b;
+          }
+        }
+        input = data;
       } else {
-        input = List.generate(1, (_) =>
-            [
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).r.toDouble() / 255.0)),
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).g.toDouble() / 255.0)),
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).b.toDouble() / 255.0)),
-            ]
-        );
+        // NCHW float32
+        final data = List.generate(1, (_) => List.generate(c, (_) => List.generate(h, (_) => List<double>.filled(w, 0.0, growable: false), growable: false), growable: false), growable: false);
+        for (int y = 0; y < h; y++) {
+          for (int x = 0; x < w; x++) {
+            final px = resized.getPixel(x, y);
+            data[0][0][y][x] = px.r.toDouble() / 255.0;
+            if (c > 1) data[0][1][y][x] = px.g.toDouble() / 255.0;
+            if (c > 2) data[0][2][y][x] = px.b.toDouble() / 255.0;
+          }
+        }
+        input = data;
       }
     } else {
       if (channelsLast) {
-        input = List.generate(1, (_) =>
-            List.generate(h, (y) =>
-              List.generate(w, (x) =>
-                [
-                  resized.getPixel(x, y).r,
-                  resized.getPixel(x, y).g,
-                  resized.getPixel(x, y).b,
-                ]
-              )
-            )
-        );
+        // NHWC uint8
+        final data = List.generate(1, (_) => List.generate(h, (_) => List.generate(w, (_) => List<int>.filled(c, 0, growable: false), growable: false), growable: false), growable: false);
+        for (int y = 0; y < h; y++) {
+          for (int x = 0; x < w; x++) {
+            final px = resized.getPixel(x, y);
+            data[0][y][x][0] = px.r.toInt();
+            if (c > 1) data[0][y][x][1] = px.g.toInt();
+            if (c > 2) data[0][y][x][2] = px.b.toInt();
+          }
+        }
+        input = data;
       } else {
-        input = List.generate(1, (_) =>
-            [
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).r)),
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).g)),
-              List.generate(h, (y) => List.generate(w, (x) => resized.getPixel(x, y).b)),
-            ]
-        );
+        // NCHW uint8
+        final data = List.generate(1, (_) => List.generate(c, (_) => List.generate(h, (_) => List<int>.filled(w, 0, growable: false), growable: false), growable: false), growable: false);
+        for (int y = 0; y < h; y++) {
+          for (int x = 0; x < w; x++) {
+            final px = resized.getPixel(x, y);
+            data[0][0][y][x] = px.r.toInt();
+            if (c > 1) data[0][1][y][x] = px.g.toInt();
+            if (c > 2) data[0][2][y][x] = px.b.toInt();
+          }
+        }
+        input = data;
       }
     }
 
@@ -254,7 +271,10 @@ class TFLiteDetectionService {
       // Some models provide an explicit count
       if (countBuf is List && countBuf.isNotEmpty) {
         final raw = countBuf is List<double> ? countBuf[0] : (countBuf[0] as num).toDouble();
-        numDetections = raw.round().clamp(0, scoresList.length);
+        int n = raw.round();
+        if (n < 0) n = 0;
+        if (n > scoresList.length) n = scoresList.length;
+        numDetections = n;
       }
     }
 

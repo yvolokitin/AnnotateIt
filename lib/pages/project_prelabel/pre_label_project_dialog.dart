@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -50,6 +51,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
   // For EditLabelsListDialog
   final ScrollController _scrollController = ScrollController();
+  
+  // Throttle UI progress updates to avoid UI hang on large scans
+  DateTime _lastUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   // Inline status/error message to display inside the dialog instead of SnackBars
   String? _inlineMessage;
@@ -198,10 +202,20 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
           } catch (e, st) {
             _log.warning('Failed to process image: ${item.filePath}', e, st);
           } finally {
+            _processed += 1;
             if (mounted) {
-              setState(() {
-                _processed += 1;
-              });
+              final now = DateTime.now();
+              final shouldRefresh = now.difference(_lastUiUpdate) > const Duration(milliseconds: 120)
+                  || (_processed % 10 == 0)
+                  || (_processed >= _totalImages);
+              if (shouldRefresh) {
+                setState(() {});
+                _lastUiUpdate = now;
+              }
+            }
+            // Yield to UI periodically to avoid long blocking loops
+            if ((_processed % 5) == 0) {
+              await Future<void>.delayed(const Duration(milliseconds: 1));
             }
           }
         }
@@ -559,67 +573,58 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (_cancelRequested) return;
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Cancel pre-labeling?'),
-                            content: const Text('Do you want to stop scanning and review collected labels, or continue?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(false),
-                                child: const Text('Continue'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(true),
-                                child: const Text('Stop'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true) {
-                          setState(() {
-                            _cancelRequested = true;
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          side: const BorderSide(color: Colors.white70, width: 1),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cancel Pre-labeling',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Note: Cancelling will stop scanning. You can review labels collected so far.',
-                        style: TextStyle(color: Colors.orangeAccent),
-                      ),
-                    )
-                  ],
-                ),
               ] else ...[
                 // After scanning completes or is cancelled, show the review UI
                 Expanded(
                   child: (_inlineMessage != null)
-                      ? Center(
-                          child: Text(
-                            _inlineMessage!,
-                            style: TextStyle(color: _inlineMessageColor),
-                            textAlign: TextAlign.center,
-                          ),
+                      ? (
+                          _inlineMessage!.toLowerCase().startsWith('annotating images')
+                              ? Center(
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: 520),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 240,
+                                          height: 240,
+                                          child: OrbitingBoundingBoxes(
+                                            color: Colors.blueAccent,
+                                            secondaryColor: Colors.lightBlueAccent,
+                                            boxCount: 5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          _inlineMessage!,
+                                          style: TextStyle(color: _inlineMessageColor, fontSize: 16, fontWeight: FontWeight.w600),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        LinearProgressIndicator(
+                                          value: _totalImages > 0 ? (_processed / (_totalImages.toDouble())) : null,
+                                          backgroundColor: Colors.grey[700],
+                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                                          minHeight: 6,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Processed $_processed of $_totalImages images',
+                                          style: const TextStyle(color: Colors.white70),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    _inlineMessage!,
+                                    style: TextStyle(color: _inlineMessageColor),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
                         )
                       : (_reviewLabels.isEmpty
                           ? Center(
@@ -675,5 +680,158 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
         ),
       ),
     );
+  }
+}
+
+// Animated orbiting bounding boxes used during the "Annotating images..." phase
+class OrbitingBoundingBoxes extends StatefulWidget {
+  final Color color;
+  final Color secondaryColor;
+  final int boxCount;
+  final double strokeWidth;
+  final double minRadius;
+  final double maxRadius;
+
+  const OrbitingBoundingBoxes({
+    super.key,
+    this.color = Colors.blueAccent,
+    this.secondaryColor = Colors.lightBlueAccent,
+    this.boxCount = 6,
+    this.strokeWidth = 2.0,
+    this.minRadius = 48,
+    this.maxRadius = 96,
+  });
+
+  @override
+  State<OrbitingBoundingBoxes> createState() => _OrbitingBoundingBoxesState();
+}
+
+class _OrbitingBoundingBoxesState extends State<OrbitingBoundingBoxes> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) => CustomPaint(
+          painter: _OrbitingBoxPainter(
+            progress: _controller.value,
+            color: widget.color,
+            secondaryColor: widget.secondaryColor,
+            boxCount: widget.boxCount,
+            strokeWidth: widget.strokeWidth,
+            minRadius: widget.minRadius,
+            maxRadius: widget.maxRadius,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrbitingBoxPainter extends CustomPainter {
+  final double progress; // 0..1
+  final Color color;
+  final Color secondaryColor;
+  final int boxCount;
+  final double strokeWidth;
+  final double minRadius;
+  final double maxRadius;
+
+  _OrbitingBoxPainter({
+    required this.progress,
+    required this.color,
+    required this.secondaryColor,
+    required this.boxCount,
+    required this.strokeWidth,
+    required this.minRadius,
+    required this.maxRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    // Subtle central sun-like circle
+    final sunPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = color.withOpacity(0.35)
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, 14, sunPaint);
+
+    // Orbits background rings
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = secondaryColor.withOpacity(0.20)
+      ..strokeWidth = 1.0;
+
+    for (int r = 0; r < 3; r++) {
+      final radius = minRadius + (maxRadius - minRadius) * (r + 1) / 3.5;
+      canvas.drawCircle(center, radius, ringPaint);
+    }
+
+    for (int i = 0; i < boxCount; i++) {
+      final angleBase = 2 * math.pi * (i / boxCount);
+      // Rotate all boxes around center
+      final orbitAngle = angleBase + 2 * math.pi * progress;
+
+      // Slight radial oscillation per box to feel "flying"
+      final oscillation = math.sin((angleBase + 4 * math.pi * progress) * 2.0) * 4.0;
+      final radius = ((i % 2 == 0) ? maxRadius : minRadius) - 6 + oscillation;
+
+      final dx = center.dx + radius * math.cos(orbitAngle);
+      final dy = center.dy + radius * math.sin(orbitAngle);
+      final position = Offset(dx, dy);
+
+      // Box size varies slightly
+      final baseW = 34.0 - (i % 3) * 4.0;
+      final baseH = 24.0 - (i % 2) * 3.0;
+
+      // Draw the box, rotated tangentially to the orbit
+      canvas.save();
+      canvas.translate(position.dx, position.dy);
+      canvas.rotate(orbitAngle + math.pi / 2);
+
+      final rect = Rect.fromCenter(center: Offset.zero, width: baseW, height: baseH);
+      final strokePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..color = (i % 2 == 0) ? color : secondaryColor;
+
+      // Outer glow effect by drawing a faint stroke first
+      final glowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth + 2
+        ..color = strokePaint.color.withOpacity(0.28);
+
+      canvas.drawRect(rect, glowPaint);
+      canvas.drawRect(rect, strokePaint);
+
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _OrbitingBoxPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.secondaryColor != secondaryColor ||
+        oldDelegate.boxCount != boxCount ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.minRadius != minRadius ||
+        oldDelegate.maxRadius != maxRadius;
   }
 }

@@ -35,21 +35,51 @@ class TFLiteClassificationService {
     String? labelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final folder = Directory(p.join(root, modelId));
 
-    print('folder path: ${folder.path}');
+    // If caller provided explicit file names or a non-default id, check exactly that.
+    final useExact = (modelFileName != null || labelsFileName != null || modelId != defaultClassificationModelId);
+    if (useExact) {
+      final folder = Directory(p.join(root, modelId));
+      if (!await folder.exists()) return false;
+      final model = File(p.join(root, modelId, modelFileName ?? '$modelId.tflite'));
+      final labels = File(p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt'));
+      final modelOk = await model.exists() && (await model.length()) > 1024; // >1KB
+      final labelsOk = await labels.exists() && (await labels.length()) > 0;
+      return modelOk && labelsOk;
+    }
 
-    if (!await folder.exists()) return false;
+    // Auto-discover supported classification model variants saved by ModelPage.
+    // Variant A: EfficientNet-Lite4 FP32v2 (folder id from ModelPage)
+    const idA = 'classification_efficientnet-tflite-lite4-fp32-v2';
+    const modelA = 'efficientnet-tflite-lite4-fp32-v2.tflite';
+    const labelsA = 'classification_efficientnet-tflite-lite0-int8-v2_labels.txt';
 
-    final model = File(p.join(root, modelId, modelFileName ?? '$modelId.tflite'));
-    final labels = File(p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt'));
+    // Variant B: Legacy EfficientNet-Lite0 INT8v2 (original default)
+    const idB = 'classification_efficientnet-tflite-lite0-int8-v2';
+    const modelB = 'classification_efficientnet-tflite-lite0-int8-v2.tflite';
+    const labelsB = 'classification_efficientnet-tflite-lite0-int8-v2_labels.txt';
 
-    print('model path: ${model.path}, labels path: ${labels.path}');
+    // Check A
+    final dirA = Directory(p.join(root, idA));
+    if (await dirA.exists()) {
+      final fModel = File(p.join(dirA.path, modelA));
+      final fLabels = File(p.join(dirA.path, labelsA));
+      final modelOk = await fModel.exists() && (await fModel.length()) > 1024;
+      final labelsOk = await fLabels.exists() && (await fLabels.length()) > 0;
+      if (modelOk && labelsOk) return true;
+    }
 
-    final modelOk = await model.exists() && (await model.length()) > 1024; // >1KB
-    final labelsOk = await labels.exists() && (await labels.length()) > 0;
+    // Check B
+    final dirB = Directory(p.join(root, idB));
+    if (await dirB.exists()) {
+      final fModel = File(p.join(dirB.path, modelB));
+      final fLabels = File(p.join(dirB.path, labelsB));
+      final modelOk = await fModel.exists() && (await fModel.length()) > 1024;
+      final labelsOk = await fLabels.exists() && (await fLabels.length()) > 0;
+      if (modelOk && labelsOk) return true;
+    }
 
-    return modelOk && labelsOk;
+    return false;
   }
 
   Future<void> initializeFromUserFolder({
@@ -58,16 +88,52 @@ class TFLiteClassificationService {
     String? labelsFileName,
   }) async {
     final root = await _modelsRoot();
-    final modelPath = p.join(root, modelId, modelFileName ?? '$modelId.tflite');
-    final labelsPath = p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt');
 
-    final model = File(modelPath);
-    final labels = File(labelsPath);
-
-    if (!await model.exists() || !await labels.exists()) {
-      throw Exception('TFLite model not found in user models folder. Please download it from the Model screen.');
+    // If explicit values provided (or non-default id), try exactly those first
+    final useExact = (modelFileName != null || labelsFileName != null || modelId != defaultClassificationModelId);
+    if (useExact) {
+      final modelPath = p.join(root, modelId, modelFileName ?? '$modelId.tflite');
+      final labelsPath = p.join(root, modelId, labelsFileName ?? '${modelId}_labels.txt');
+      final model = File(modelPath);
+      final labels = File(labelsPath);
+      if (!await model.exists() || !await labels.exists()) {
+        throw Exception('TFLite model not found in user models folder. Please download it from the Model screen.');
+      }
+      await initializeFromFiles(modelFilePath: modelPath, labelsFilePath: labelsPath);
+      return;
     }
-    await initializeFromFiles(modelFilePath: modelPath, labelsFilePath: labelsPath);
+
+    // Auto-discover supported classification model variants saved by ModelPage.
+    // Prefer Variant A, then fallback to Variant B.
+    const idA = 'classification_efficientnet-tflite-lite4-fp32-v2';
+    const modelA = 'efficientnet-tflite-lite4-fp32-v2.tflite';
+    const labelsA = 'classification_efficientnet-tflite-lite0-int8-v2_labels.txt';
+
+    const idB = 'classification_efficientnet-tflite-lite0-int8-v2';
+    const modelB = 'classification_efficientnet-tflite-lite0-int8-v2.tflite';
+    const labelsB = 'classification_efficientnet-tflite-lite0-int8-v2_labels.txt';
+
+    final dirA = Directory(p.join(root, idA));
+    if (await dirA.exists()) {
+      final modelPath = p.join(dirA.path, modelA);
+      final labelsPath = p.join(dirA.path, labelsA);
+      if (await File(modelPath).exists() && await File(labelsPath).exists()) {
+        await initializeFromFiles(modelFilePath: modelPath, labelsFilePath: labelsPath);
+        return;
+      }
+    }
+
+    final dirB = Directory(p.join(root, idB));
+    if (await dirB.exists()) {
+      final modelPath = p.join(dirB.path, modelB);
+      final labelsPath = p.join(dirB.path, labelsB);
+      if (await File(modelPath).exists() && await File(labelsPath).exists()) {
+        await initializeFromFiles(modelFilePath: modelPath, labelsFilePath: labelsPath);
+        return;
+      }
+    }
+
+    throw Exception('TFLite model not found in user models folder. Please download it from the Model screen.');
   }
   final _log = Logger('TFLiteClassificationService');
 
