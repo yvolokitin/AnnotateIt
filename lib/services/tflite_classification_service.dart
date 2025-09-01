@@ -365,4 +365,179 @@ class TFLiteClassificationService {
     final clamped = bestScore.isFinite ? math.max(0.0, math.min(1.0, bestScore)) : 0.0;
     return ClassificationResult(label, clamped);
   }
+
+  Future<List<ClassificationResult>> classifyImageMulti(
+    File file, {
+    double confidenceThreshold = 0.6,
+    int maxResults = 10,
+  }) async {
+    if (_interpreter == null) return [];
+
+    // Decode image
+    final bytes = await file.readAsBytes();
+    final original = img.decodeImage(bytes);
+    if (original == null) return [];
+
+    // Get input tensor shape
+    final inputTensor = _interpreter!.getInputTensor(0);
+    final inputShape = inputTensor.shape; // length 4
+    final inputType = inputTensor.type;
+
+    int batch = inputShape[0];
+    int h, w, c;
+    bool channelsLast = true; // NHWC
+    if (inputShape[1] == 3) {
+      // NCHW
+      channelsLast = false;
+      c = inputShape[1];
+      h = inputShape[2];
+      w = inputShape[3];
+    } else {
+      // NHWC
+      h = inputShape[1];
+      w = inputShape[2];
+      c = inputShape[3];
+    }
+    if (batch != 1) {
+      throw UnsupportedError('Only batch size 1 is supported. Got batch=$batch');
+    }
+
+    // Resize
+    final resized = img.copyResize(original, width: w, height: h);
+
+    // Prepare input buffer
+    final typeStr = inputType.toString().toLowerCase();
+    final isFloat = typeStr.contains('float32');
+    final isUint8 = typeStr.contains('uint8');
+    if (!isFloat && !isUint8) {
+      throw UnsupportedError('Unsupported input type: $inputType');
+    }
+
+    dynamic input;
+    if (isFloat) {
+      if (channelsLast) {
+        input = List.generate(1, (_) =>
+            List.generate(h, (y) =>
+              List.generate(w, (x) =>
+                List.generate(c, (ch) {
+                  final p = resized.getPixel(x, y);
+                  final r = p.r.toDouble() / 255.0;
+                  final g = p.g.toDouble() / 255.0;
+                  final b = p.b.toDouble() / 255.0;
+                  switch (ch) {
+                    case 0: return r;
+                    case 1: return g;
+                    default: return b;
+                  }
+                })
+              )
+            )
+        );
+      } else {
+        input = List.generate(1, (_) =>
+            List.generate(c, (ch) =>
+              List.generate(h, (y) =>
+                List.generate(w, (x) {
+                  final p = resized.getPixel(x, y);
+                  switch (ch) {
+                    case 0: return p.r.toDouble() / 255.0;
+                    case 1: return p.g.toDouble() / 255.0;
+                    default: return p.b.toDouble() / 255.0;
+                  }
+                })
+              )
+            )
+        );
+      }
+    } else {
+      if (channelsLast) {
+        input = List.generate(1, (_) =>
+            List.generate(h, (y) =>
+              List.generate(w, (x) =>
+                List.generate(c, (ch) {
+                  final p = resized.getPixel(x, y);
+                  switch (ch) {
+                    case 0: return p.r;
+                    case 1: return p.g;
+                    default: return p.b;
+                  }
+                })
+              )
+            )
+        );
+      } else {
+        input = List.generate(1, (_) =>
+            List.generate(c, (ch) =>
+              List.generate(h, (y) =>
+                List.generate(w, (x) {
+                  final p = resized.getPixel(x, y);
+                  switch (ch) {
+                    case 0: return p.r;
+                    case 1: return p.g;
+                    default: return p.b;
+                  }
+                })
+              )
+            )
+        );
+      }
+    }
+
+    // Prepare output
+    final outputTensor = _interpreter!.getOutputTensor(0);
+    final outShape = outputTensor.shape; // [1, numClasses] or similar
+    int numClasses = outShape.reduce((a, b) => a * b) ~/ 1; // usually 1 * N
+    if (outShape.length == 2) {
+      numClasses = outShape[1];
+    }
+
+    final outTypeStr = outputTensor.type.toString().toLowerCase();
+    final outIsFloat = outTypeStr.contains('float32');
+    final outIsUint8 = outTypeStr.contains('uint8');
+
+    dynamic output;
+    if (outIsFloat) {
+      output = List.generate(1, (_) => List.filled(numClasses, 0.0));
+    } else if (outIsUint8) {
+      output = List.generate(1, (_) => List.filled(numClasses, 0));
+    } else {
+      throw UnsupportedError('Unsupported output type: ${outputTensor.type}');
+    }
+
+    // Inference
+    _interpreter!.run(input, output);
+
+    // Convert scores to doubles (dequantize if needed)
+    List<double> scores;
+    if (outIsFloat) {
+      scores = (output.first as List).cast<double>();
+    } else {
+      final ints = (output.first as List).cast<int>();
+      scores = List<double>.generate(ints.length, (i) => ints[i] / 255.0);
+    }
+
+    // Build results and filter by threshold
+    final List<ClassificationResult> results = [];
+    for (int i = 0; i < scores.length; i++) {
+      final s = scores[i];
+      final clamped = s.isFinite ? math.max(0.0, math.min(1.0, s)) : 0.0;
+      final name = (i < _labels.length) ? _labels[i] : 'class_$i';
+      results.add(ClassificationResult(name, clamped));
+    }
+
+    // Sort by score desc
+    results.sort((a, b) => b.score.compareTo(a.score));
+
+    // Filter by threshold
+    final filtered = results.where((r) => r.score >= confidenceThreshold).toList();
+
+    // Fallback to top-1 if none pass the threshold
+    final chosen = filtered.isNotEmpty ? filtered : (results.isNotEmpty ? [results.first] : <ClassificationResult>[]);
+
+    // Truncate to maxResults
+    if (chosen.length > maxResults) {
+      return chosen.sublist(0, maxResults);
+    }
+    return chosen;
+  }
 }
