@@ -35,11 +35,19 @@ class TFLiteClassificationService {
   }) async {
     final root = await _modelsRoot();
     final folder = Directory('$root/$modelId');
+
+    print('folder path: ${folder.path}');
+
     if (!await folder.exists()) return false;
+
     final model = File('$root/$modelId/${modelFileName ?? '$modelId.tflite'}');
     final labels = File('$root/$modelId/${labelsFileName ?? '${modelId}_labels.txt'}');
+
+    print('model path: ${model.path}, labels path: ${labels.path}');
+
     final modelOk = await model.exists() && (await model.length()) > 1024; // >1KB
     final labelsOk = await labels.exists() && (await labels.length()) > 0;
+
     return modelOk && labelsOk;
   }
 
