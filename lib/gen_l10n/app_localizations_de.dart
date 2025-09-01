@@ -815,7 +815,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bitte überprüfen Sie, ob das Projekt gültige Annotationen hat und versuchen Sie es erneut. Wenn das Problem weiterhin besteht, starten Sie die App neu oder kontaktieren Sie den Support.';
 
   @override
-  String get preLabelProject => 'Projekt mit ML Kit vorbeschriften';
+  String get preLabelProject => 'Projekt zur Vorbeschriftung';
 
   @override
   String get exportProjectAsDataset => 'Projekt als Datensatz exportieren';

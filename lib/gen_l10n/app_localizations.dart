@@ -1527,7 +1527,7 @@ abstract class AppLocalizations {
   /// No description provided for @preLabelProject.
   ///
   /// In en, this message translates to:
-  /// **'Pre-label Project with ML Kit'**
+  /// **'Pre-label project'**
   String get preLabelProject;
 
   /// No description provided for @exportProjectAsDataset.

@@ -812,7 +812,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Controleer of het project geldige annotaties heeft en probeer het opnieuw. Als het probleem aanhoudt, herstart de app of neem contact op met ondersteuning.';
 
   @override
-  String get preLabelProject => 'Project voorlabelen met ML Kit';
+  String get preLabelProject => 'Project voorvoorlabeling';
 
   @override
   String get exportProjectAsDataset => 'Project Exporteren als Dataset';

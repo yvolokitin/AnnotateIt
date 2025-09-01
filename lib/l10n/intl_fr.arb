@@ -336,7 +336,7 @@
   "changeProjectTypeErrorMessage": "Une erreur s'est produite lors du changement du type de projet. Les modifications n'ont pas pu être appliquées.",
   "changeProjectTypeErrorTips": "Veuillez vérifier si le projet a des annotations valides et réessayer. Si le problème persiste, redémarrez l'application ou contactez le support.",
 
-  "preLabelProject": "Pré-étiqueter le projet avec ML Kit",
+  "preLabelProject": "Projet de pré-annotation",
   "exportProjectAsDataset": "Exporter le Projet en tant qu'Ensemble de Données",
 
   "projectHelpTitle": "Comment Fonctionnent les Projets",

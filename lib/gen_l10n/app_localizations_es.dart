@@ -819,7 +819,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Por favor, verifique si el proyecto tiene anotaciones válidas e intente nuevamente. Si el problema persiste, reinicie la aplicación o contacte con soporte.';
 
   @override
-  String get preLabelProject => 'Pre-etiquetar proyecto con ML Kit';
+  String get preLabelProject => 'Proyecto de pre-etiquetado';
 
   @override
   String get exportProjectAsDataset =>

@@ -457,7 +457,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                       size: 30,
                     ),
                     title: Text(
-                      'Pre-label Project',
+                      l10n.preLabelProject, // 'Pre-label Project',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.normal,

@@ -808,8 +808,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Проверьте, есть ли в проекте допустимые аннотации, и повторите попытку. Если ошибка сохраняется — перезапустите приложение или обратитесь в поддержку.';
 
   @override
-  String get preLabelProject =>
-      'Предварительно разметить проект с помощью ML Kit';
+  String get preLabelProject => 'Предварительная разметка проекта';
 
   @override
   String get exportProjectAsDataset => 'Экспортировать проект как датасет';

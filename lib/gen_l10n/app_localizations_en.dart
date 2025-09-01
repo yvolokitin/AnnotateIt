@@ -804,7 +804,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please check if the project has valid annotations and try again. If the problem persists, restart the app or contact support.';
 
   @override
-  String get preLabelProject => 'Pre-label Project with ML Kit';
+  String get preLabelProject => 'Pre-label project';
 
   @override
   String get exportProjectAsDataset => 'Export Project as Dataset';
