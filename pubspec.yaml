@@ -163,14 +163,14 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/logo/annotateit_white_red.png"
 
-version: 3.5.0+13
+version: 4.1.0+17
 msix_config:
   display_name: AnnotateIt
   architecture: x64
   publisher_display_name: UmnoAI
   identity_name: UmnoAI.AnnotateIt
   publisher: CN=C115178E-F1D2-42DB-8DA3-3252207C04BB
-  msix_version: 3.5.0.0
+  msix_version: 4.1.0.0
   logo_path: assets/logo/annotateit_white_red.png
   sign_msix: false
   full_trust: false
