@@ -55,7 +55,6 @@ class AppHeaderState extends State<AppHeader> {
     return Container(
       height: headerHeight,
       color: Colors.red,
-      // padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -106,7 +105,8 @@ class AppHeaderState extends State<AppHeader> {
                 IconButton(
                   onPressed: _showNotifications,
                   icon: Icon(
-                    Icons.mail_outline_rounded,
+                    // Icons.mail_outline_rounded,
+                    Icons.article_outlined,
                     size: screenWidth > 1200 ? 28 : 24,
                     color: Colors.white,
                   ),
