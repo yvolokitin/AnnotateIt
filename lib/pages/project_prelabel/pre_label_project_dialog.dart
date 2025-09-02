@@ -22,6 +22,7 @@ import '../../utils/theme.dart';
 import '../../widgets/dialogs/prelabel_cancel_confirmation_dialog.dart';
 import '../models_page.dart';
 import '../../widgets/model_cards/model_card.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class PreLabelProjectDialog extends StatefulWidget {
   final Project project;
@@ -658,6 +659,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     final bool isWide = screenSize.width > 1600;
     final double targetWidth = isWide ? screenSize.width * 0.9 : screenSize.width;
     final double targetHeight = isWide ? screenSize.height * 0.9 : screenSize.height;
+    final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
       insetPadding: EdgeInsets.zero,
@@ -679,14 +681,24 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Pre-label Project',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.purple,
-                      fontFamily: 'CascadiaCode',
-                    ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: isWide ? 34 : 26,
+                        color: Theme.of(context).colorScheme.purple,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.preLabelProject,
+                        style: TextStyle(
+                          fontSize: isWide ? 26 : 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.purple,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
+                    ],
                   ),
                   IconButton(
                     onPressed: () async {
