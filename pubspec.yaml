@@ -96,8 +96,6 @@ flutter:
   generate: true
 
   # To add assets to your application, add an assets section, like this:
-  #  - assets/images/default_project_image.svg
-  #  - assets/images/media_upload.svg
   assets:
      - assets/logo/annotateit.png
      - assets/logo/annotateit_white.png
@@ -123,8 +121,6 @@ flutter:
      - assets/images/empty_project_folder.png
      - assets/sam_mobile/mobile_sam.encoder.onnx
      - assets/sam_mobile/mobile_sam.decoder.onnx
-     - assets/sam_mobile/models.ts
-     - assets/models/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
