@@ -135,23 +135,27 @@ Future<void> deleteProjectSafe(
     await ProjectDatabase.instance.deleteProject(project.id!);
     currentStep++;
 
-    // 7. Delete custom project icon if applicable
-    if (deleteFromDisk &&
-        project.icon.isNotEmpty &&
-        !project.icon.contains('default_project_image')) {
-      onProgress?.call('Deleting project icon...', currentStep / totalSteps);
-      final file = File(project.icon);
-      try {
-        await Future.any([
-          _deleteFileWithCheck(file),
-          Future.delayed(const Duration(seconds: 5), () => throw TimeoutException('Icon deletion timeout', const Duration(seconds: 5))),
-        ]);
-        _log.info('Deleted project icon: ${file.path}');
-      } catch (e) {
-        final errorMsg = 'Failed to delete project icon: ${file.path}, $e';
-        _log.warning(errorMsg);
-        onError?.call(errorMsg);
-        // Don't fail the entire operation for icon deletion
+    // 7. Delete custom project icon if applicable (skip default asset icon)
+    if (deleteFromDisk && project.icon.isNotEmpty) {
+      final normalizedIcon = project.icon.replaceAll('\\', '/');
+      final isAssetIcon = normalizedIcon.startsWith('assets/') || normalizedIcon.contains('empty_project_folder.png');
+      if (!isAssetIcon) {
+        onProgress?.call('Deleting project icon...', currentStep / totalSteps);
+        final file = File(project.icon);
+        try {
+          await Future.any([
+            _deleteFileWithCheck(file),
+            Future.delayed(const Duration(seconds: 5), () => throw TimeoutException('Icon deletion timeout', const Duration(seconds: 5))),
+          ]);
+          _log.info('Deleted project icon: ${file.path}');
+        } catch (e) {
+          final errorMsg = 'Failed to delete project icon: ${file.path}, $e';
+          _log.warning(errorMsg);
+          onError?.call(errorMsg);
+          // Don't fail the entire operation for icon deletion
+        }
+      } else {
+        _log.info('Skipping deletion of default/asset project icon: $normalizedIcon');
       }
     }
 
