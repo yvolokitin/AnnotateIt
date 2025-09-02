@@ -1377,4 +1377,154 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get selectFfmpegDialogTitle => 'ffmpeg‑Programm auswählen';
+
+  @override
+  String get preLabelIntroTflite =>
+      'Projektbilder automatisch mit einem TensorFlow‑Lite‑Modell scannen und Labelnamen vorschlagen. Sie können vor dem Speichern prüfen und bearbeiten.';
+
+  @override
+  String get preLabelIntroMlkit =>
+      'Projektbilder automatisch mit Google ML Kit scannen und Labelnamen vorschlagen. Sie können vor dem Speichern prüfen und bearbeiten.';
+
+  @override
+  String get preLabelErrorReadDatasetsTryAgain =>
+      'Datensätze konnten nicht gelesen werden. Bitte erneut versuchen.';
+
+  @override
+  String get preLabelErrorCheckModelAvailability =>
+      'Prüfung der Modellverfügbarkeit fehlgeschlagen.';
+
+  @override
+  String preLabelProcessedOfTotalImages(Object processed, Object total) {
+    return 'Verarbeitet $processed von $total Bildern';
+  }
+
+  @override
+  String get preLabelNoImagesUploadFirst =>
+      'Keine Bilder in den Projektdatensätzen gefunden. Bitte zuerst Medien hochladen.';
+
+  @override
+  String get preLabelNoLabelsSuggested =>
+      'Es wurden keine Labels vorgeschlagen. Sie können diesen Dialog schließen.';
+
+  @override
+  String get preLabelStep1Title => 'Schritt 1: Voraussetzungen prüfen';
+
+  @override
+  String get preLabelCheckingProjectAndModels =>
+      'Projekt und Modelle werden geprüft...';
+
+  @override
+  String preLabelImagesInProjectDatasets(Object count) {
+    return 'Bilder in Projektdatensätzen: $count';
+  }
+
+  @override
+  String get preLabelModelAvailableInFolder =>
+      'Modell im Ordner „Models“ vorhanden';
+
+  @override
+  String get preLabelModelMissingPleaseDownload =>
+      'Modell fehlt. Bitte zuerst herunterladen.';
+
+  @override
+  String get preLabelRecheck => 'Erneut prüfen';
+
+  @override
+  String get preLabelAllPrerequisitesMet => 'Alle Voraussetzungen erfüllt';
+
+  @override
+  String preLabelChipImages(Object count) {
+    return 'Bilder: $count';
+  }
+
+  @override
+  String get preLabelBackendTfliteDetection => 'Backend: TFLite‑Erkennung';
+
+  @override
+  String get preLabelBackendTfliteClassification =>
+      'Backend: TFLite‑Klassifizierung';
+
+  @override
+  String get preLabelBackendMlkit => 'Backend: ML Kit';
+
+  @override
+  String get preLabelYouCanProceed =>
+      'Sie können die Vorbeschriftung starten, sobald Sie bereit sind.';
+
+  @override
+  String get preLabelStartPreLabeling => 'Vorbeschriftung starten';
+
+  @override
+  String get preLabelStep0Title => 'Schritt 0: Was als Nächstes passiert';
+
+  @override
+  String get preLabelBulletScanTflite =>
+      '• Die Projektbilder werden mit Ihrem TensorFlow‑Lite‑Modell gescannt.';
+
+  @override
+  String get preLabelBulletScanMlkit =>
+      '• Die Projektbilder werden mit Google ML Kit auf diesem Gerät gescannt.';
+
+  @override
+  String get preLabelBulletProposeLabels =>
+      '• Wir schlagen gefundene Labelnamen vor. Sie können sie prüfen und bearbeiten.';
+
+  @override
+  String get preLabelBulletStartPreAnnotationSavesLabels =>
+      '• Wenn Sie „Vor‑Annotation starten“ klicken, werden die Labels im Projekt gespeichert.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateDetection =>
+      '• Bilder werden anschließend automatisch mit Begrenzungsrahmen für die erkannten Labels annotiert.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateClassification =>
+      '• Bilder werden anschließend automatisch mit Klassifikationslabels annotiert.';
+
+  @override
+  String get preLabelBulletRespectExisting =>
+      '• Vorhandene Annotationen werden respektiert, doppelte werden vermieden.';
+
+  @override
+  String get preLabelBulletCancelAnyTime =>
+      '• Sie können jederzeit abbrechen. Bei großen Projekten kann es länger dauern.';
+
+  @override
+  String preLabelProgressPercent(Object percent) {
+    return 'Fortschritt: $percent%';
+  }
+
+  @override
+  String get preLabelScanningImages => 'Bilder werden gescannt...';
+
+  @override
+  String get preLabelErrorReadDatasets =>
+      'Datensätze konnten nicht gelesen werden.';
+
+  @override
+  String get preLabelErrorDetectionModelMissing =>
+      'Erkennungsmodell nicht im Ordner „Models“ gefunden. Bitte auf der Modellseite herunterladen.';
+
+  @override
+  String get preLabelErrorClassificationModelMissing =>
+      'Klassifikationsmodell nicht im Ordner „Models“ gefunden. Bitte auf der Modellseite herunterladen.';
+
+  @override
+  String preLabelErrorInitBackendWithDetails(Object details) {
+    return 'Initialisierung des Beschriftungs‑Backends fehlgeschlagen. Prüfen Sie Modellsdateien oder Berechtigungen.\n\nDetails: $details';
+  }
+
+  @override
+  String get preLabelSavingLabels => 'Labels werden gespeichert...';
+
+  @override
+  String get preLabelErrorSaveLabelsOrAnnotate =>
+      'Labels konnten nicht gespeichert oder Bilder nicht annotiert werden';
+
+  @override
+  String get preLabelAnnotatingImages => 'Bilder werden annotiert...';
+
+  @override
+  String get preLabelStartPreAnnotation => 'Vor‑Annotation starten';
 }

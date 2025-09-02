@@ -10,7 +10,6 @@ import '../../data/labels_database.dart';
 import '../../data/annotation_database.dart';
 import '../../models/dataset.dart';
 import '../../models/label.dart';
-// import '../../models/media_item.dart';
 import '../../models/annotation.dart';
 import '../../models/project.dart';
 import '../../services/ml_kit_image_labeling_service.dart';
@@ -64,6 +63,10 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   String? _inlineMessage;
   Color _inlineMessageColor = Colors.white70;
 
+  // Status flags for UI (avoid relying on localized strings)
+  bool _isSaving = false;
+  bool _isAnnotating = false;
+
   // UI step: 0 = intro, 1 = preflight checks, 2 = scanning/review
   int _uiStep = 1;
 
@@ -113,8 +116,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       });
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _inlineMessage = 'Failed to read datasets. Please try again.';
+        _inlineMessage = l10n.preLabelErrorReadDatasetsTryAgain;
         _inlineMessageColor = Colors.redAccent;
       });
     }
@@ -133,7 +137,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       } catch (e) {
         if (mounted) setState(() {
           _modelAvailable = false;
-          _inlineMessage = 'Failed to check model availability.';
+          _inlineMessage = AppLocalizations.of(context)!.preLabelErrorCheckModelAvailability;
           _inlineMessageColor = Colors.orangeAccent;
         });
       }
@@ -232,9 +236,10 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       setState(() { _orbitImages = orbit; });
 
       if (_totalImages == 0) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
           _isScanning = false;
-          _inlineMessage = 'No images found in project datasets. Please upload media first.';
+          _inlineMessage = l10n.preLabelNoImagesUploadFirst;
           _inlineMessageColor = Colors.orangeAccent;
         });
         return;
@@ -717,8 +722,8 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               const SizedBox(height: 12),
               Text(
                 widget.useTFLite
-                  ? 'Automatically scan project images using a TensorFlow Lite model and propose label names. You can review and edit before saving.'
-                  : 'Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.',
+                  ? l10n.preLabelIntroTflite
+                  : l10n.preLabelIntroMlkit,
                 style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 16),
@@ -733,7 +738,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Step 1: Check prerequisites',
+                              l10n.preLabelStep1Title,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -752,7 +757,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                     child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(Colors.white70)),
                                   ),
                                   const SizedBox(width: 12),
-                                  const Text('Checking project and models...', style: TextStyle(color: Colors.white70)),
+                                  Text(l10n.preLabelCheckingProjectAndModels, style: const TextStyle(color: Colors.white70)),
                                 ],
                               ),
                             ] else ...[
@@ -760,7 +765,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                 children: [
                                   Icon(_hasImages ? Icons.check_circle : Icons.error, color: _hasImages ? Colors.lightGreenAccent : Colors.orangeAccent),
                                   const SizedBox(width: 8),
-                                  Text('Images in project datasets: $_totalImages', style: const TextStyle(color: Colors.white70)),
+                                  Text(l10n.preLabelImagesInProjectDatasets(_totalImages), style: const TextStyle(color: Colors.white70)),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -770,7 +775,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                     Icon((_modelAvailable ?? false) ? Icons.check_circle : Icons.download, color: (_modelAvailable ?? false) ? Colors.lightGreenAccent : Colors.orangeAccent),
                                     const SizedBox(width: 8),
                                     Text(
-                                      (_modelAvailable ?? false) ? 'Model available in your Models folder' : 'Model is missing. Please download it first.',
+                                      (_modelAvailable ?? false) ? l10n.preLabelModelAvailableInFolder : l10n.preLabelModelMissingPleaseDownload,
                                       style: const TextStyle(color: Colors.white70),
                                     ),
                                   ],
@@ -790,7 +795,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                         child: TextButton(
                                           onPressed: _runPreflightChecks,
                                           style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                                          child: const Text('Recheck'),
+                                          child: Text(l10n.preLabelRecheck),
                                         ),
                                       ),
                                     ],
@@ -814,9 +819,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
-                                              'All prerequisites are met',
-                                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                            Text(
+                                              l10n.preLabelAllPrerequisitesMet,
+                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                                             ),
                                             const SizedBox(height: 6),
                                             Wrap(
@@ -824,7 +829,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                               runSpacing: 8,
                                               children: [
                                                 Chip(
-                                                  label: Text('Images: ' + _totalImages.toString()),
+                                                  label: Text(l10n.preLabelChipImages(_totalImages)),
                                                   backgroundColor: Colors.green,
                                                   labelStyle: const TextStyle(color: Colors.white),
                                                   visualDensity: VisualDensity.compact,
@@ -875,7 +880,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.buttonCancel),
                     ),
                     Row(
                       children: [
@@ -883,7 +888,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           TextButton(
                             onPressed: _runPreflightChecks,
                             style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                            child: const Text('Recheck'),
+                            child: Text(l10n.ffmpegRecheckButton),
                           ),
                         const SizedBox(width: 8),
                         Builder(builder: (context) {
@@ -898,7 +903,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             ),
-                            child: const Text('Start pre-labeling', style: TextStyle(color: Colors.white)),
+                            child: Text(l10n.preLabelStartPreLabeling, style: TextStyle(color: Colors.white)),
                           );
                         }),
                       ],
@@ -1054,77 +1059,76 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               ] else ...[
                 // After scanning completes or is cancelled, show the review UI
                 Expanded(
-                  child: (_inlineMessage != null)
-                      ? (
-                          _inlineMessage!.toLowerCase().startsWith('annotating images')
-                              ? Center(
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: 520),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          width: 240,
-                                          height: 240,
-                                          child: OrbitingBoundingBoxes(
-                                            color: Theme.of(context).colorScheme.purple,
-                                            secondaryColor: Theme.of(context).colorScheme.purple.withOpacity(0.7),
-                                            boxCount: 5,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          _inlineMessage!,
-                                          style: TextStyle(color: _inlineMessageColor, fontSize: 16, fontWeight: FontWeight.w600),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        LinearProgressIndicator(
-                                          value: _totalImages > 0 ? (_processed / (_totalImages.toDouble())) : null,
-                                          backgroundColor: Colors.grey[700],
-                                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
-                                          minHeight: 6,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Processed $_processed of $_totalImages images',
-                                          style: const TextStyle(color: Colors.white70),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
+                  child: (_isAnnotating)
+                      ? Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 520),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 240,
+                                  height: 240,
+                                  child: OrbitingBoundingBoxes(
+                                    color: Theme.of(context).colorScheme.purple,
+                                    secondaryColor: Theme.of(context).colorScheme.purple.withOpacity(0.7),
+                                    boxCount: 5,
                                   ),
-                                )
-                              : Center(
-                                  child: Text(
+                                ),
+                                const SizedBox(height: 16),
+                                if (_inlineMessage != null)
+                                  Text(
                                     _inlineMessage!,
-                                    style: TextStyle(color: _inlineMessageColor),
+                                    style: TextStyle(color: _inlineMessageColor, fontSize: 16, fontWeight: FontWeight.w600),
                                     textAlign: TextAlign.center,
                                   ),
-                                )
+                                const SizedBox(height: 8),
+                                LinearProgressIndicator(
+                                  value: _totalImages > 0 ? (_processed / (_totalImages.toDouble())) : null,
+                                  backgroundColor: Colors.grey[700],
+                                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.purple),
+                                  minHeight: 6,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${AppLocalizations.of(context)!.preLabelProcessedOfTotalImages(_processed, _totalImages)}',
+                                  style: const TextStyle(color: Colors.white70),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
                         )
-                      : (_reviewLabels.isEmpty
+                      : (_inlineMessage != null
                           ? Center(
                               child: Text(
-                                _totalImages == 0
-                                    ? 'No images found in project datasets. Please upload media first.'
-                                    : 'No labels were suggested. You can close this dialog.',
-                                style: TextStyle(color: Colors.white70),
+                                _inlineMessage!,
+                                style: TextStyle(color: _inlineMessageColor),
+                                textAlign: TextAlign.center,
                               ),
                             )
-                          : EditLabelsListDialog(
-                              projectId: widget.project.id!,
-                              projectType: widget.project.type,
-                              labels: _reviewLabels,
-                              scrollController: _scrollController,
-                              onColorTap: (index) {},
-                              onLabelsChanged: (updated) {
-                                setState(() {
-                                  _reviewLabels = updated;
-                                });
-                              },
-                            )),
+                          : (_reviewLabels.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    _totalImages == 0
+                                        ? AppLocalizations.of(context)!.preLabelNoImagesUploadFirst
+                                        : AppLocalizations.of(context)!.preLabelNoLabelsSuggested,
+                                    style: const TextStyle(color: Colors.white70),
+                                  ),
+                                )
+                              : EditLabelsListDialog(
+                                  projectId: widget.project.id!,
+                                  projectType: widget.project.type,
+                                  labels: _reviewLabels,
+                                  scrollController: _scrollController,
+                                  onColorTap: (index) {},
+                                  onLabelsChanged: (updated) {
+                                    setState(() {
+                                      _reviewLabels = updated;
+                                    });
+                                  },
+                                )))
                 ),
                 const SizedBox(height: 8),
                 Row(

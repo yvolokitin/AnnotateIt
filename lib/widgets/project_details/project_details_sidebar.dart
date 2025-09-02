@@ -98,13 +98,30 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
           ),
 
           const SizedBox(height: 15),
-          Image.file(
-            File(widget.project.icon),
-            height: 140,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(Icons.broken_image, size: 80, color: Colors.white54);
+          Builder(
+            builder: (context) {
+              final iconPath = widget.project.icon;
+              final isAsset = iconPath.startsWith('assets/');
+              if (iconPath.isEmpty) {
+                return const Icon(Icons.broken_image, size: 80, color: Colors.white54);
+              }
+              if (isAsset) {
+                return Image.asset(
+                  iconPath,
+                  height: 140,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 80, color: Colors.white54),
+                );
+              } else {
+                return Image.file(
+                  File(iconPath),
+                  height: 140,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 80, color: Colors.white54),
+                );
+              }
             },
           ),
           const SizedBox(height: 15),

@@ -574,5 +574,62 @@
       "error": {}
     }
   },
-  "selectFfmpegDialogTitle": "Select ffmpeg executable"
+  "selectFfmpegDialogTitle": "Select ffmpeg executable",
+
+  "preLabelIntroTflite": "Automatically scan project images using a TensorFlow Lite model and propose label names. You can review and edit before saving.",
+  "preLabelIntroMlkit": "Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.",
+
+  "preLabelErrorReadDatasetsTryAgain": "Failed to read datasets. Please try again.",
+  "preLabelErrorCheckModelAvailability": "Failed to check model availability.",
+  "preLabelProcessedOfTotalImages": "Processed {processed} of {total} images",
+  "@preLabelProcessedOfTotalImages": {
+    "placeholders": {
+      "processed": {},
+      "total": {}
+    }
+  },
+  "preLabelNoImagesUploadFirst": "No images found in project datasets. Please upload media first.",
+  "preLabelNoLabelsSuggested": "No labels were suggested. You can close this dialog.",
+
+  "preLabelStep1Title": "Step 1: Check prerequisites",
+  "preLabelCheckingProjectAndModels": "Checking project and models...",
+  "preLabelImagesInProjectDatasets": "Images in project datasets: {count}",
+  "@preLabelImagesInProjectDatasets": {
+    "placeholders": { "count": {} }
+  },
+  "preLabelModelAvailableInFolder": "Model available in your Models folder",
+  "preLabelModelMissingPleaseDownload": "Model is missing. Please download it first.",
+  "preLabelRecheck": "Recheck",
+  "preLabelAllPrerequisitesMet": "All prerequisites are met",
+  "preLabelChipImages": "Images: {count}",
+  "@preLabelChipImages": { "placeholders": { "count": {} } },
+  "preLabelBackendTfliteDetection": "Backend: TFLite Detection",
+  "preLabelBackendTfliteClassification": "Backend: TFLite Classification",
+  "preLabelBackendMlkit": "Backend: ML Kit",
+  "preLabelYouCanProceed": "You can proceed with pre-labeling when ready.",
+  "preLabelStartPreLabeling": "Start pre-labeling",
+
+  "preLabelStep0Title": "Step 0: What will happen next",
+  "preLabelBulletScanTflite": "• The project images will be scanned using your TensorFlow Lite model.",
+  "preLabelBulletScanMlkit": "• The project images will be scanned using Google ML Kit on this device.",
+  "preLabelBulletProposeLabels": "• We will propose label names found across images. You can review and edit them.",
+  "preLabelBulletStartPreAnnotationSavesLabels": "• When you click \"Start pre-annotation\", labels will be saved to the project.",
+  "preLabelBulletThenAutoAnnotateDetection": "• Images will then be auto-annotated with bounding boxes for the detected labels.",
+  "preLabelBulletThenAutoAnnotateClassification": "• Images will then be auto-annotated with classification labels.",
+  "preLabelBulletRespectExisting": "• Existing annotations are respected and duplicates are avoided.",
+  "preLabelBulletCancelAnyTime": "• You can cancel at any time. Progress may take a while on large projects.",
+
+  "preLabelProgressPercent": "Progress: {percent}%",
+  "@preLabelProgressPercent": { "placeholders": { "percent": {} } },
+  "preLabelScanningImages": "Scanning images...",
+  "preLabelErrorReadDatasets": "Failed to read datasets.",
+  "preLabelErrorDetectionModelMissing": "Detection model not found in your Models folder. Please download it from the Model screen.",
+  "preLabelErrorClassificationModelMissing": "Classification model not found in your Models folder. Please download it from the Model screen.",
+  "preLabelErrorInitBackendWithDetails": "Failed to initialize labeling backend. Check model files or permissions.\n\nDetails: {details}",
+  "@preLabelErrorInitBackendWithDetails": { "placeholders": { "details": {} } },
+  "preLabelSavingLabels": "Saving labels...",
+  "preLabelErrorSaveLabelsOrAnnotate": "Failed to save labels or annotate images",
+  "preLabelAnnotatingImages": "Annotating images...",
+  "preLabelStartPreAnnotation": "Start pre-annotation"
+
 }

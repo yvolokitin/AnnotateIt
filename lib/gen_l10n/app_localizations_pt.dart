@@ -1384,4 +1384,154 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get selectFfmpegDialogTitle => 'Selecionar executável do ffmpeg';
+
+  @override
+  String get preLabelIntroTflite =>
+      'Digitalize automaticamente as imagens do projeto com um modelo TensorFlow Lite e proponha nomes de etiquetas. Você pode revisar e editar antes de salvar.';
+
+  @override
+  String get preLabelIntroMlkit =>
+      'Digitalize automaticamente as imagens do projeto com o Google ML Kit e proponha nomes de etiquetas. Você pode revisar e editar antes de salvar.';
+
+  @override
+  String get preLabelErrorReadDatasetsTryAgain =>
+      'Falha ao ler os conjuntos de dados. Tente novamente.';
+
+  @override
+  String get preLabelErrorCheckModelAvailability =>
+      'Falha ao verificar a disponibilidade do modelo.';
+
+  @override
+  String preLabelProcessedOfTotalImages(Object processed, Object total) {
+    return 'Processadas $processed de $total imagens';
+  }
+
+  @override
+  String get preLabelNoImagesUploadFirst =>
+      'Nenhuma imagem encontrada nos conjuntos de dados do projeto. Faça upload de mídia primeiro.';
+
+  @override
+  String get preLabelNoLabelsSuggested =>
+      'Nenhuma etiqueta foi sugerida. Você pode fechar este diálogo.';
+
+  @override
+  String get preLabelStep1Title => 'Etapa 1: Verificar pré‑requisitos';
+
+  @override
+  String get preLabelCheckingProjectAndModels =>
+      'Verificando projeto e modelos...';
+
+  @override
+  String preLabelImagesInProjectDatasets(Object count) {
+    return 'Imagens nos conjuntos de dados do projeto: $count';
+  }
+
+  @override
+  String get preLabelModelAvailableInFolder =>
+      'Modelo disponível na sua pasta Models';
+
+  @override
+  String get preLabelModelMissingPleaseDownload =>
+      'Modelo ausente. Baixe‑o primeiro.';
+
+  @override
+  String get preLabelRecheck => 'Verificar novamente';
+
+  @override
+  String get preLabelAllPrerequisitesMet =>
+      'Todos os pré‑requisitos foram atendidos';
+
+  @override
+  String preLabelChipImages(Object count) {
+    return 'Imagens: $count';
+  }
+
+  @override
+  String get preLabelBackendTfliteDetection => 'Backend: TFLite Detecção';
+
+  @override
+  String get preLabelBackendTfliteClassification =>
+      'Backend: TFLite Classificação';
+
+  @override
+  String get preLabelBackendMlkit => 'Backend: ML Kit';
+
+  @override
+  String get preLabelYouCanProceed =>
+      'Você pode prosseguir com a pré‑rotulagem quando estiver pronto.';
+
+  @override
+  String get preLabelStartPreLabeling => 'Iniciar pré‑rotulagem';
+
+  @override
+  String get preLabelStep0Title => 'Etapa 0: O que acontecerá a seguir';
+
+  @override
+  String get preLabelBulletScanTflite =>
+      '• As imagens do projeto serão analisadas com seu modelo TensorFlow Lite.';
+
+  @override
+  String get preLabelBulletScanMlkit =>
+      '• As imagens do projeto serão analisadas com o Google ML Kit neste dispositivo.';
+
+  @override
+  String get preLabelBulletProposeLabels =>
+      '• Proporemos nomes de etiquetas encontrados nas imagens. Você poderá revisar e editar.';
+
+  @override
+  String get preLabelBulletStartPreAnnotationSavesLabels =>
+      '• Ao clicar em \"Iniciar pré‑anotação\", as etiquetas serão salvas no projeto.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateDetection =>
+      '• Em seguida, as imagens serão anotadas automaticamente com caixas delimitadoras para as etiquetas detectadas.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateClassification =>
+      '• Em seguida, as imagens serão anotadas automaticamente com etiquetas de classificação.';
+
+  @override
+  String get preLabelBulletRespectExisting =>
+      '• Anotações existentes são respeitadas e duplicatas são evitadas.';
+
+  @override
+  String get preLabelBulletCancelAnyTime =>
+      '• Você pode cancelar a qualquer momento. Em projetos grandes, o progresso pode levar mais tempo.';
+
+  @override
+  String preLabelProgressPercent(Object percent) {
+    return 'Progresso: $percent%';
+  }
+
+  @override
+  String get preLabelScanningImages => 'Analisando imagens...';
+
+  @override
+  String get preLabelErrorReadDatasets => 'Falha ao ler os conjuntos de dados.';
+
+  @override
+  String get preLabelErrorDetectionModelMissing =>
+      'Modelo de detecção não encontrado na sua pasta Models. Baixe‑o na tela Modelos.';
+
+  @override
+  String get preLabelErrorClassificationModelMissing =>
+      'Modelo de classificação não encontrado na sua pasta Models. Baixe‑o na tela Modelos.';
+
+  @override
+  String preLabelErrorInitBackendWithDetails(Object details) {
+    return 'Falha ao inicializar o backend de rotulagem. Verifique os arquivos do modelo ou permissões.\n\nDetalhes: $details';
+  }
+
+  @override
+  String get preLabelSavingLabels => 'Salvando etiquetas...';
+
+  @override
+  String get preLabelErrorSaveLabelsOrAnnotate =>
+      'Falha ao salvar etiquetas ou anotar imagens';
+
+  @override
+  String get preLabelAnnotatingImages => 'Anotando imagens...';
+
+  @override
+  String get preLabelStartPreAnnotation => 'Iniciar pré‑anotação';
 }

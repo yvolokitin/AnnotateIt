@@ -2465,6 +2465,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select ffmpeg executable'**
   String get selectFfmpegDialogTitle;
+
+  /// No description provided for @preLabelIntroTflite.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically scan project images using a TensorFlow Lite model and propose label names. You can review and edit before saving.'**
+  String get preLabelIntroTflite;
+
+  /// No description provided for @preLabelIntroMlkit.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.'**
+  String get preLabelIntroMlkit;
+
+  /// No description provided for @preLabelErrorReadDatasetsTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read datasets. Please try again.'**
+  String get preLabelErrorReadDatasetsTryAgain;
+
+  /// No description provided for @preLabelErrorCheckModelAvailability.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to check model availability.'**
+  String get preLabelErrorCheckModelAvailability;
+
+  /// No description provided for @preLabelProcessedOfTotalImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Processed {processed} of {total} images'**
+  String preLabelProcessedOfTotalImages(Object processed, Object total);
+
+  /// No description provided for @preLabelNoImagesUploadFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'No images found in project datasets. Please upload media first.'**
+  String get preLabelNoImagesUploadFirst;
+
+  /// No description provided for @preLabelNoLabelsSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'No labels were suggested. You can close this dialog.'**
+  String get preLabelNoLabelsSuggested;
+
+  /// No description provided for @preLabelStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1: Check prerequisites'**
+  String get preLabelStep1Title;
+
+  /// No description provided for @preLabelCheckingProjectAndModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking project and models...'**
+  String get preLabelCheckingProjectAndModels;
+
+  /// No description provided for @preLabelImagesInProjectDatasets.
+  ///
+  /// In en, this message translates to:
+  /// **'Images in project datasets: {count}'**
+  String preLabelImagesInProjectDatasets(Object count);
+
+  /// No description provided for @preLabelModelAvailableInFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Model available in your Models folder'**
+  String get preLabelModelAvailableInFolder;
+
+  /// No description provided for @preLabelModelMissingPleaseDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Model is missing. Please download it first.'**
+  String get preLabelModelMissingPleaseDownload;
+
+  /// No description provided for @preLabelRecheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck'**
+  String get preLabelRecheck;
+
+  /// No description provided for @preLabelAllPrerequisitesMet.
+  ///
+  /// In en, this message translates to:
+  /// **'All prerequisites are met'**
+  String get preLabelAllPrerequisitesMet;
+
+  /// No description provided for @preLabelChipImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images: {count}'**
+  String preLabelChipImages(Object count);
+
+  /// No description provided for @preLabelBackendTfliteDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend: TFLite Detection'**
+  String get preLabelBackendTfliteDetection;
+
+  /// No description provided for @preLabelBackendTfliteClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend: TFLite Classification'**
+  String get preLabelBackendTfliteClassification;
+
+  /// No description provided for @preLabelBackendMlkit.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend: ML Kit'**
+  String get preLabelBackendMlkit;
+
+  /// No description provided for @preLabelYouCanProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'You can proceed with pre-labeling when ready.'**
+  String get preLabelYouCanProceed;
+
+  /// No description provided for @preLabelStartPreLabeling.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pre-labeling'**
+  String get preLabelStartPreLabeling;
+
+  /// No description provided for @preLabelStep0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 0: What will happen next'**
+  String get preLabelStep0Title;
+
+  /// No description provided for @preLabelBulletScanTflite.
+  ///
+  /// In en, this message translates to:
+  /// **'• The project images will be scanned using your TensorFlow Lite model.'**
+  String get preLabelBulletScanTflite;
+
+  /// No description provided for @preLabelBulletScanMlkit.
+  ///
+  /// In en, this message translates to:
+  /// **'• The project images will be scanned using Google ML Kit on this device.'**
+  String get preLabelBulletScanMlkit;
+
+  /// No description provided for @preLabelBulletProposeLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'• We will propose label names found across images. You can review and edit them.'**
+  String get preLabelBulletProposeLabels;
+
+  /// No description provided for @preLabelBulletStartPreAnnotationSavesLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'• When you click \"Start pre-annotation\", labels will be saved to the project.'**
+  String get preLabelBulletStartPreAnnotationSavesLabels;
+
+  /// No description provided for @preLabelBulletThenAutoAnnotateDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'• Images will then be auto-annotated with bounding boxes for the detected labels.'**
+  String get preLabelBulletThenAutoAnnotateDetection;
+
+  /// No description provided for @preLabelBulletThenAutoAnnotateClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'• Images will then be auto-annotated with classification labels.'**
+  String get preLabelBulletThenAutoAnnotateClassification;
+
+  /// No description provided for @preLabelBulletRespectExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'• Existing annotations are respected and duplicates are avoided.'**
+  String get preLabelBulletRespectExisting;
+
+  /// No description provided for @preLabelBulletCancelAnyTime.
+  ///
+  /// In en, this message translates to:
+  /// **'• You can cancel at any time. Progress may take a while on large projects.'**
+  String get preLabelBulletCancelAnyTime;
+
+  /// No description provided for @preLabelProgressPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {percent}%'**
+  String preLabelProgressPercent(Object percent);
+
+  /// No description provided for @preLabelScanningImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning images...'**
+  String get preLabelScanningImages;
+
+  /// No description provided for @preLabelErrorReadDatasets.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read datasets.'**
+  String get preLabelErrorReadDatasets;
+
+  /// No description provided for @preLabelErrorDetectionModelMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection model not found in your Models folder. Please download it from the Model screen.'**
+  String get preLabelErrorDetectionModelMissing;
+
+  /// No description provided for @preLabelErrorClassificationModelMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Classification model not found in your Models folder. Please download it from the Model screen.'**
+  String get preLabelErrorClassificationModelMissing;
+
+  /// No description provided for @preLabelErrorInitBackendWithDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to initialize labeling backend. Check model files or permissions.\n\nDetails: {details}'**
+  String preLabelErrorInitBackendWithDetails(Object details);
+
+  /// No description provided for @preLabelSavingLabels.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving labels...'**
+  String get preLabelSavingLabels;
+
+  /// No description provided for @preLabelErrorSaveLabelsOrAnnotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save labels or annotate images'**
+  String get preLabelErrorSaveLabelsOrAnnotate;
+
+  /// No description provided for @preLabelAnnotatingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotating images...'**
+  String get preLabelAnnotatingImages;
+
+  /// No description provided for @preLabelStartPreAnnotation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pre-annotation'**
+  String get preLabelStartPreAnnotation;
 }
 
 class _AppLocalizationsDelegate

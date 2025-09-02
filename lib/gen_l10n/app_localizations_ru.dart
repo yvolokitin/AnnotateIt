@@ -1303,7 +1303,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ffmpegSelectButton => 'Выбрать FFmpeg';
 
   @override
-  String get ffmpegRecheckButton => 'Проверить ещё раз';
+  String get ffmpegRecheckButton => 'Проверить';
 
   @override
   String get videoStep2Title => 'Шаг 2: Выберите видеофайл';
@@ -1363,4 +1363,153 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get selectFfmpegDialogTitle => 'Выбор исполняемого файла ffmpeg';
+
+  @override
+  String get preLabelIntroTflite =>
+      'Автоматически просканируйте изображения проекта с помощью модели TensorFlow Lite и получите предложения по именам меток. Перед сохранением вы сможете проверить и отредактировать их.';
+
+  @override
+  String get preLabelIntroMlkit =>
+      'Автоматически просканируйте изображения проекта с помощью Google ML Kit и получите предложения по именам меток. Перед сохранением вы сможете проверить и отредактировать их.';
+
+  @override
+  String get preLabelErrorReadDatasetsTryAgain =>
+      'Не удалось прочитать датасеты. Повторите попытку.';
+
+  @override
+  String get preLabelErrorCheckModelAvailability =>
+      'Не удалось проверить доступность модели.';
+
+  @override
+  String preLabelProcessedOfTotalImages(Object processed, Object total) {
+    return 'Обработано $processed из $total изображений';
+  }
+
+  @override
+  String get preLabelNoImagesUploadFirst =>
+      'В датасетах проекта не найдено изображений. Сначала загрузите медиафайлы.';
+
+  @override
+  String get preLabelNoLabelsSuggested =>
+      'Метки не были предложены. Вы можете закрыть этот диалог.';
+
+  @override
+  String get preLabelStep1Title => 'Шаг 1: Проверка условий';
+
+  @override
+  String get preLabelCheckingProjectAndModels =>
+      'Проверка проекта и моделей...';
+
+  @override
+  String preLabelImagesInProjectDatasets(Object count) {
+    return 'Изображений в датасетах проекта: $count';
+  }
+
+  @override
+  String get preLabelModelAvailableInFolder =>
+      'Модель доступна в вашей папке Models';
+
+  @override
+  String get preLabelModelMissingPleaseDownload =>
+      'Модель отсутствует. Сначала загрузите её.';
+
+  @override
+  String get preLabelRecheck => 'Проверить ещё раз';
+
+  @override
+  String get preLabelAllPrerequisitesMet => 'Все условия выполнены';
+
+  @override
+  String preLabelChipImages(Object count) {
+    return 'Изображения: $count';
+  }
+
+  @override
+  String get preLabelBackendTfliteDetection => 'Бэкенд: TFLite Обнаружение';
+
+  @override
+  String get preLabelBackendTfliteClassification =>
+      'Бэкенд: TFLite Классификация';
+
+  @override
+  String get preLabelBackendMlkit => 'Бэкенд: ML Kit';
+
+  @override
+  String get preLabelYouCanProceed =>
+      'Можно приступать к предварительной разметке, когда будете готовы.';
+
+  @override
+  String get preLabelStartPreLabeling => 'Начать предварительную разметку';
+
+  @override
+  String get preLabelStep0Title => 'Шаг 0: Что будет дальше';
+
+  @override
+  String get preLabelBulletScanTflite =>
+      '• Изображения проекта будут проанализированы вашей моделью TensorFlow Lite.';
+
+  @override
+  String get preLabelBulletScanMlkit =>
+      '• Изображения проекта будут проанализированы Google ML Kit на этом устройстве.';
+
+  @override
+  String get preLabelBulletProposeLabels =>
+      '• Мы предложим названия меток, найденные на изображениях. Вы сможете их проверить и отредактировать.';
+
+  @override
+  String get preLabelBulletStartPreAnnotationSavesLabels =>
+      '• При нажатии \"Начать предварительную аннотацию\" метки будут сохранены в проекте.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateDetection =>
+      '• Затем изображения будут автоматически аннотированы прямоугольными рамками для обнаруженных меток.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateClassification =>
+      '• Затем изображения будут автоматически аннотированы метками классификации.';
+
+  @override
+  String get preLabelBulletRespectExisting =>
+      '• Существующие аннотации сохраняются, дубликаты не создаются.';
+
+  @override
+  String get preLabelBulletCancelAnyTime =>
+      '• Вы можете отменить в любой момент. В больших проектах процесс может занять время.';
+
+  @override
+  String preLabelProgressPercent(Object percent) {
+    return 'Прогресс: $percent%';
+  }
+
+  @override
+  String get preLabelScanningImages => 'Сканирование изображений...';
+
+  @override
+  String get preLabelErrorReadDatasets => 'Не удалось прочитать датасеты.';
+
+  @override
+  String get preLabelErrorDetectionModelMissing =>
+      'Модель детекции не найдена в вашей папке Models. Загрузите её на экране «Модели».';
+
+  @override
+  String get preLabelErrorClassificationModelMissing =>
+      'Модель классификации не найдена в вашей папке Models. Загрузите её на экране «Модели».';
+
+  @override
+  String preLabelErrorInitBackendWithDetails(Object details) {
+    return 'Не удалось инициализировать бэкенд разметки. Проверьте файлы модели или разрешения.\n\nПодробности: $details';
+  }
+
+  @override
+  String get preLabelSavingLabels => 'Сохранение меток...';
+
+  @override
+  String get preLabelErrorSaveLabelsOrAnnotate =>
+      'Не удалось сохранить метки или аннотировать изображения';
+
+  @override
+  String get preLabelAnnotatingImages => 'Аннотирование изображений...';
+
+  @override
+  String get preLabelStartPreAnnotation => 'Начать предварительную аннотацию';
 }

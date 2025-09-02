@@ -1354,4 +1354,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectFfmpegDialogTitle => 'Select ffmpeg executable';
+
+  @override
+  String get preLabelIntroTflite =>
+      'Automatically scan project images using a TensorFlow Lite model and propose label names. You can review and edit before saving.';
+
+  @override
+  String get preLabelIntroMlkit =>
+      'Automatically scan project images using Google ML Kit and propose label names. You can review and edit before saving.';
+
+  @override
+  String get preLabelErrorReadDatasetsTryAgain =>
+      'Failed to read datasets. Please try again.';
+
+  @override
+  String get preLabelErrorCheckModelAvailability =>
+      'Failed to check model availability.';
+
+  @override
+  String preLabelProcessedOfTotalImages(Object processed, Object total) {
+    return 'Processed $processed of $total images';
+  }
+
+  @override
+  String get preLabelNoImagesUploadFirst =>
+      'No images found in project datasets. Please upload media first.';
+
+  @override
+  String get preLabelNoLabelsSuggested =>
+      'No labels were suggested. You can close this dialog.';
+
+  @override
+  String get preLabelStep1Title => 'Step 1: Check prerequisites';
+
+  @override
+  String get preLabelCheckingProjectAndModels =>
+      'Checking project and models...';
+
+  @override
+  String preLabelImagesInProjectDatasets(Object count) {
+    return 'Images in project datasets: $count';
+  }
+
+  @override
+  String get preLabelModelAvailableInFolder =>
+      'Model available in your Models folder';
+
+  @override
+  String get preLabelModelMissingPleaseDownload =>
+      'Model is missing. Please download it first.';
+
+  @override
+  String get preLabelRecheck => 'Recheck';
+
+  @override
+  String get preLabelAllPrerequisitesMet => 'All prerequisites are met';
+
+  @override
+  String preLabelChipImages(Object count) {
+    return 'Images: $count';
+  }
+
+  @override
+  String get preLabelBackendTfliteDetection => 'Backend: TFLite Detection';
+
+  @override
+  String get preLabelBackendTfliteClassification =>
+      'Backend: TFLite Classification';
+
+  @override
+  String get preLabelBackendMlkit => 'Backend: ML Kit';
+
+  @override
+  String get preLabelYouCanProceed =>
+      'You can proceed with pre-labeling when ready.';
+
+  @override
+  String get preLabelStartPreLabeling => 'Start pre-labeling';
+
+  @override
+  String get preLabelStep0Title => 'Step 0: What will happen next';
+
+  @override
+  String get preLabelBulletScanTflite =>
+      '• The project images will be scanned using your TensorFlow Lite model.';
+
+  @override
+  String get preLabelBulletScanMlkit =>
+      '• The project images will be scanned using Google ML Kit on this device.';
+
+  @override
+  String get preLabelBulletProposeLabels =>
+      '• We will propose label names found across images. You can review and edit them.';
+
+  @override
+  String get preLabelBulletStartPreAnnotationSavesLabels =>
+      '• When you click \"Start pre-annotation\", labels will be saved to the project.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateDetection =>
+      '• Images will then be auto-annotated with bounding boxes for the detected labels.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateClassification =>
+      '• Images will then be auto-annotated with classification labels.';
+
+  @override
+  String get preLabelBulletRespectExisting =>
+      '• Existing annotations are respected and duplicates are avoided.';
+
+  @override
+  String get preLabelBulletCancelAnyTime =>
+      '• You can cancel at any time. Progress may take a while on large projects.';
+
+  @override
+  String preLabelProgressPercent(Object percent) {
+    return 'Progress: $percent%';
+  }
+
+  @override
+  String get preLabelScanningImages => 'Scanning images...';
+
+  @override
+  String get preLabelErrorReadDatasets => 'Failed to read datasets.';
+
+  @override
+  String get preLabelErrorDetectionModelMissing =>
+      'Detection model not found in your Models folder. Please download it from the Model screen.';
+
+  @override
+  String get preLabelErrorClassificationModelMissing =>
+      'Classification model not found in your Models folder. Please download it from the Model screen.';
+
+  @override
+  String preLabelErrorInitBackendWithDetails(Object details) {
+    return 'Failed to initialize labeling backend. Check model files or permissions.\n\nDetails: $details';
+  }
+
+  @override
+  String get preLabelSavingLabels => 'Saving labels...';
+
+  @override
+  String get preLabelErrorSaveLabelsOrAnnotate =>
+      'Failed to save labels or annotate images';
+
+  @override
+  String get preLabelAnnotatingImages => 'Annotating images...';
+
+  @override
+  String get preLabelStartPreAnnotation => 'Start pre-annotation';
 }

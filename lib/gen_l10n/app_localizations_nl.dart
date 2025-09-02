@@ -1362,4 +1362,153 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get selectFfmpegDialogTitle => 'ffmpeg‑uitvoerbaar bestand selecteren';
+
+  @override
+  String get preLabelIntroTflite =>
+      'Scan projectafbeeldingen automatisch met een TensorFlow Lite‑model en stel labelnamen voor. U kunt ze beoordelen en bewerken voordat u opslaat.';
+
+  @override
+  String get preLabelIntroMlkit =>
+      'Scan projectafbeeldingen automatisch met Google ML Kit en stel labelnamen voor. U kunt ze beoordelen en bewerken voordat u opslaat.';
+
+  @override
+  String get preLabelErrorReadDatasetsTryAgain =>
+      'Kon datasets niet lezen. Probeer het opnieuw.';
+
+  @override
+  String get preLabelErrorCheckModelAvailability =>
+      'Controle van modelbeschikbaarheid mislukt.';
+
+  @override
+  String preLabelProcessedOfTotalImages(Object processed, Object total) {
+    return 'Verwerkt $processed van $total afbeeldingen';
+  }
+
+  @override
+  String get preLabelNoImagesUploadFirst =>
+      'Geen afbeeldingen gevonden in de projectdatasets. Upload eerst media.';
+
+  @override
+  String get preLabelNoLabelsSuggested =>
+      'Er zijn geen labels voorgesteld. U kunt dit dialoogvenster sluiten.';
+
+  @override
+  String get preLabelStep1Title => 'Stap 1: Controleer vereisten';
+
+  @override
+  String get preLabelCheckingProjectAndModels =>
+      'Project en modellen controleren...';
+
+  @override
+  String preLabelImagesInProjectDatasets(Object count) {
+    return 'Afbeeldingen in projectdatasets: $count';
+  }
+
+  @override
+  String get preLabelModelAvailableInFolder =>
+      'Model beschikbaar in uw map Models';
+
+  @override
+  String get preLabelModelMissingPleaseDownload =>
+      'Model ontbreekt. Download het eerst.';
+
+  @override
+  String get preLabelRecheck => 'Opnieuw controleren';
+
+  @override
+  String get preLabelAllPrerequisitesMet => 'Alle vereisten zijn vervuld';
+
+  @override
+  String preLabelChipImages(Object count) {
+    return 'Afbeeldingen: $count';
+  }
+
+  @override
+  String get preLabelBackendTfliteDetection => 'Backend: TFLite Detectie';
+
+  @override
+  String get preLabelBackendTfliteClassification =>
+      'Backend: TFLite Classificatie';
+
+  @override
+  String get preLabelBackendMlkit => 'Backend: ML Kit';
+
+  @override
+  String get preLabelYouCanProceed =>
+      'U kunt doorgaan met voor‑labelen wanneer u klaar bent.';
+
+  @override
+  String get preLabelStartPreLabeling => 'Voor‑labelen starten';
+
+  @override
+  String get preLabelStep0Title => 'Stap 0: Wat er hierna gebeurt';
+
+  @override
+  String get preLabelBulletScanTflite =>
+      '• De projectafbeeldingen worden geanalyseerd met uw TensorFlow Lite‑model.';
+
+  @override
+  String get preLabelBulletScanMlkit =>
+      '• De projectafbeeldingen worden geanalyseerd met Google ML Kit op dit apparaat.';
+
+  @override
+  String get preLabelBulletProposeLabels =>
+      '• We stellen labelnamen voor die in de afbeeldingen zijn gevonden. U kunt ze beoordelen en bewerken.';
+
+  @override
+  String get preLabelBulletStartPreAnnotationSavesLabels =>
+      '• Wanneer u op \"Voor‑annotatie starten\" klikt, worden de labels in het project opgeslagen.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateDetection =>
+      '• Afbeeldingen worden vervolgens automatisch geannoteerd met begrenzingsvakken voor de gedetecteerde labels.';
+
+  @override
+  String get preLabelBulletThenAutoAnnotateClassification =>
+      '• Afbeeldingen worden vervolgens automatisch geannoteerd met classificatielabels.';
+
+  @override
+  String get preLabelBulletRespectExisting =>
+      '• Bestaande annotaties blijven behouden en duplicaten worden vermeden.';
+
+  @override
+  String get preLabelBulletCancelAnyTime =>
+      '• U kunt op elk moment annuleren. Bij grote projecten kan het langer duren.';
+
+  @override
+  String preLabelProgressPercent(Object percent) {
+    return 'Voortgang: $percent%';
+  }
+
+  @override
+  String get preLabelScanningImages => 'Afbeeldingen scannen...';
+
+  @override
+  String get preLabelErrorReadDatasets => 'Kon datasets niet lezen.';
+
+  @override
+  String get preLabelErrorDetectionModelMissing =>
+      'Detectiemodel niet gevonden in uw map Models. Download het via het scherm Modellen.';
+
+  @override
+  String get preLabelErrorClassificationModelMissing =>
+      'Classificatiemodel niet gevonden in uw map Models. Download het via het scherm Modellen.';
+
+  @override
+  String preLabelErrorInitBackendWithDetails(Object details) {
+    return 'Initialiseren van label‑backend mislukt. Controleer modelbestanden of machtigingen.\n\nDetails: $details';
+  }
+
+  @override
+  String get preLabelSavingLabels => 'Labels worden opgeslagen...';
+
+  @override
+  String get preLabelErrorSaveLabelsOrAnnotate =>
+      'Labels opslaan of afbeeldingen annoteren mislukt';
+
+  @override
+  String get preLabelAnnotatingImages => 'Afbeeldingen annoteren...';
+
+  @override
+  String get preLabelStartPreAnnotation => 'Voor‑annotatie starten';
 }
