@@ -97,6 +97,8 @@
   "loadingProjects": "Projecten laden...",
   "importDataset": "Dataset importeren",
   "uploadMedia": "Media uploaden",
+  "uploadVideo": "Video uploaden",
+  "uploadCamera": "Camera",
   "createProjectTitle": "Nieuw Project Aanmaken",
   "createProjectStepOneSubtitle": "Voer je nieuwe projectnaam in en selecteer het Projecttype",
   "createProjectStepTwoSubtitle": "Maak labels aan voor een Nieuw project",

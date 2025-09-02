@@ -282,6 +282,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get uploadMedia => 'Загрузить медиа';
 
   @override
+  String get uploadVideo => 'Загрузить видео';
+
+  @override
+  String get uploadCamera => 'Камера';
+
+  @override
   String get createProjectTitle => 'Создать новый проект';
 
   @override

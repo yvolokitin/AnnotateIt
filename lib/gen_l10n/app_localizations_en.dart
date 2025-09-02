@@ -281,6 +281,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadMedia => 'Upload media';
 
   @override
+  String get uploadVideo => 'Upload video';
+
+  @override
+  String get uploadCamera => 'Camera';
+
+  @override
   String get createProjectTitle => 'Create a New Project';
 
   @override

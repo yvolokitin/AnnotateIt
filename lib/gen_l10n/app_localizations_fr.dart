@@ -283,6 +283,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get uploadMedia => 'Télécharger des médias';
 
   @override
+  String get uploadVideo => 'Télécharger une vidéo';
+
+  @override
+  String get uploadCamera => 'Caméra';
+
+  @override
   String get createProjectTitle => 'Créer un Nouveau Projet';
 
   @override

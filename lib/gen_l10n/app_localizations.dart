@@ -614,6 +614,18 @@ abstract class AppLocalizations {
   /// **'Upload media'**
   String get uploadMedia;
 
+  /// No description provided for @uploadVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload video'**
+  String get uploadVideo;
+
+  /// No description provided for @uploadCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get uploadCamera;
+
   /// No description provided for @createProjectTitle.
   ///
   /// In en, this message translates to:

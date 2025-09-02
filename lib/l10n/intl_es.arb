@@ -97,6 +97,8 @@
   "loadingProjects": "Cargando proyectos...",
   "importDataset": "Importar conjunto de datos",
   "uploadMedia": "Subir medios",
+  "uploadVideo": "Subir medios",
+  "uploadCamera": "Cámara",
   "createProjectTitle": "Crear un Nuevo Proyecto",
   "createProjectStepOneSubtitle": "Por favor, ingrese el nombre de su nuevo proyecto y seleccione el tipo de Proyecto",
   "createProjectStepTwoSubtitle": "Por favor, cree etiquetas para un Nuevo proyecto",

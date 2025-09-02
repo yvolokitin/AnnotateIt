@@ -92,6 +92,8 @@
   "loadingProjects": "Загрузка проектов...",
   "importDataset": "Импортировать датасет",
   "uploadMedia": "Загрузить медиа",
+  "uploadVideo": "Загрузить видео",
+  "uploadCamera": "Камера",
   "createProjectTitle": "Создать новый проект",
   "createProjectStepOneSubtitle": "Введите название проекта и выберите тип проекта",
   "createProjectStepTwoSubtitle": "Создайте метки для нового проекта",

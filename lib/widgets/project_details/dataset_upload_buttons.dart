@@ -1270,7 +1270,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
-            buttonName: 'Upload video',
+            buttonName: l10n.uploadVideo,
             buttonIcon: Icons.movie_creation_outlined,
             borderColor: Colors.orange,
             screenWidth: screenWidth,
@@ -1284,7 +1284,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
-            buttonName: 'Camera',
+            buttonName: l10n.uploadCamera,
             buttonIcon: Icons.camera_alt,
             borderColor: Colors.blue,
             screenWidth: screenWidth,

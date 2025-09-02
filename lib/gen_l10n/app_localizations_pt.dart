@@ -283,6 +283,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get uploadMedia => 'Carregar mídia';
 
   @override
+  String get uploadVideo => 'Carregar vídeo';
+
+  @override
+  String get uploadCamera => 'Câmera';
+
+  @override
   String get createProjectTitle => 'Criar um Novo Projeto';
 
   @override
