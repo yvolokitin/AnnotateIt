@@ -99,6 +99,21 @@ class DatasetDatabase {
     final db = await database;
 
     await db.transaction((txn) async {
+      // Find project for this dataset before deletion
+      int? projectId;
+      try {
+        final datasetRow = await txn.query(
+          'datasets',
+          columns: ['projectId'],
+          where: 'id = ?',
+          whereArgs: [datasetId],
+          limit: 1,
+        );
+        if (datasetRow.isNotEmpty) {
+          projectId = datasetRow.first['projectId'] as int;
+        }
+      } catch (_) {}
+
       // Step 1: Delete media items linked to the dataset
       await txn.delete(
         'media_items',
@@ -112,6 +127,26 @@ class DatasetDatabase {
         where: 'id = ?',
         whereArgs: [datasetId],
       );
+
+      // Step 3: If we know the project, check remaining images across the project
+      if (projectId != null) {
+        final countResult = await txn.rawQuery(
+          "SELECT COUNT(*) as count FROM media_items mi JOIN datasets d ON mi.datasetId = d.id WHERE d.projectId = ? AND mi.type = 'image'",
+          [projectId],
+        );
+        final remainingImages = Sqflite.firstIntValue(countResult) ?? 0;
+        if (remainingImages == 0) {
+          await txn.update(
+            'projects',
+            {
+              'icon': 'assets/images/empty_project_folder.png',
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
+            where: 'id = ?',
+            whereArgs: [projectId],
+          );
+        }
+      }
     });
   }
 
@@ -201,17 +236,67 @@ class DatasetDatabase {
     final db = await instance.database;
 
     await db.transaction((txn) async {
+      // Find dataset and project for this media item before deletion
+      String? datasetId;
+      int? projectId;
+      try {
+        final mediaRow = await txn.query(
+          'media_items',
+          columns: ['datasetId'],
+          where: 'id = ?',
+          whereArgs: [mediaItemId],
+          limit: 1,
+        );
+        if (mediaRow.isNotEmpty) {
+          datasetId = mediaRow.first['datasetId'] as String;
+          final datasetRow = await txn.query(
+            'datasets',
+            columns: ['projectId'],
+            where: 'id = ?',
+            whereArgs: [datasetId],
+            limit: 1,
+          );
+          if (datasetRow.isNotEmpty) {
+            projectId = datasetRow.first['projectId'] as int;
+          }
+        }
+      } catch (_) {
+        // If anything fails, proceed with deletion anyway
+      }
+
+      // Delete annotations for this media
       await txn.delete(
         'annotations',
         where: 'media_item_id = ?',
         whereArgs: [mediaItemId],
       );
 
+      // Delete the media item itself
       await txn.delete(
         'media_items',
         where: 'id = ?',
         whereArgs: [mediaItemId],
       );
+
+      // If we know the project, check if there are any images left across all datasets
+      if (projectId != null) {
+        final countResult = await txn.rawQuery(
+          "SELECT COUNT(*) as count FROM media_items mi JOIN datasets d ON mi.datasetId = d.id WHERE d.projectId = ? AND mi.type = 'image'",
+          [projectId],
+        );
+        final remainingImages = Sqflite.firstIntValue(countResult) ?? 0;
+        if (remainingImages == 0) {
+          await txn.update(
+            'projects',
+            {
+              'icon': 'assets/images/empty_project_folder.png',
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
+            where: 'id = ?',
+            whereArgs: [projectId],
+          );
+        }
+      }
     });
   }
 

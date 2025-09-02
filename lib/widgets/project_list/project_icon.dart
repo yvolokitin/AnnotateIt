@@ -20,8 +20,8 @@ class ProjectIcon extends StatelessWidget {
       	return SizedBox(
 	        width: 35,
 	        height: 35,
-	        child: Image.file(
-	          File(iconPath),
+	        child: Image.asset(
+	          iconPath,
 	          fit: BoxFit.contain,
 	          errorBuilder: (context, error, stackTrace) => _placeholder(),
 	        ),
