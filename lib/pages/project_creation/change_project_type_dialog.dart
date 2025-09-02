@@ -53,7 +53,12 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
         return Dialog(
           insetPadding: EdgeInsets.zero,
           backgroundColor: Colors.grey[850],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          shape: (screenWidth > 1600)
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Theme.of(context).colorScheme.warning, width: 1),
+                )
+              : RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
           child: SizedBox(
             width: dialogWidth,
             height: dialogHeight,
