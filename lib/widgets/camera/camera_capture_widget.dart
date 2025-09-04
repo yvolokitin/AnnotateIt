@@ -11,6 +11,8 @@ import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CameraCaptureWidget extends StatefulWidget {
   final Function(File file, String fileType) onMediaCaptured;
@@ -144,82 +146,353 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
         // For Windows, launch the built-in Windows Camera app
         try {
           // Show a dialog explaining the process to the user
-          await showDialog(
+          final l10n = AppLocalizations.of(context)!;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final bool? proceed = await showDialog<bool>(
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: const Text('Windows Camera'),
-              content: const Column(
+              backgroundColor: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.camera_alt_outlined,
+                    size: (screenWidth > 1200) ? 34 : 26,
+                    color: Theme.of(context).colorScheme.info,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Windows Camera',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.info,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.bold,
+                      fontSize: (screenWidth > 1200) ? 26 : 20,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('We will now open the Windows Camera app:'),
-                  SizedBox(height: 8),
-                  Text('1. Take a photo using the Camera app'),
-                  Text('2. Save the photo to a location you can find'),
-                  Text('3. Return here and select the saved photo'),
+                  Divider(color: Theme.of(context).colorScheme.info),
+                  Padding(
+                    padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+                    child: Text(
+                      'We will open the native Windows Camera app. After taking a photo, save it and return here to select it.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.muted,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.normal,
+                        fontSize: (screenWidth > 1200) ? 24 : 20,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth > 1200 ? 25.0 : 12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('1. Take a photo in Camera app', style: TextStyle(color: Colors.white70)),
+                        SizedBox(height: 6),
+                        Text('2. Save the photo to a known location', style: TextStyle(color: Colors.white70)),
+                        SizedBox(height: 6),
+                        Text('3. Return here and press Continue', style: TextStyle(color: Colors.white70)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Continue'),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.buttonCancel,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.muted,
+                          fontWeight: FontWeight.normal,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: (screenWidth > 1200) ? 22 : 20,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Theme.of(context).colorScheme.info, width: 2),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.buttonContinue,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'CascadiaCode',
+                              fontWeight: FontWeight.bold,
+                              fontSize: (screenWidth > 1200) ? 22 : 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           );
+          if (proceed != true) {
+            widget.onCancel();
+            return;
+          }
           
-          // Launch the Windows Camera app
-          final result = await Process.run('explorer', ['microsoft.windows.camera:']);
-          
-          // Check if the process executed successfully
-          if (result.exitCode != 0) {
-            throw Exception('Windows Camera app failed to launch: ${result.stderr}');
+          // Launch the Windows Camera app using url_launcher for reliability
+          final uri = Uri.parse('microsoft.windows.camera:');
+          final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (!launched) {
+            throw Exception('Windows Camera app failed to launch');
           }
           
           // Wait a moment to ensure the Camera app has time to launch
           await Future.delayed(const Duration(seconds: 1));
           
           // Show a dialog to guide the user to select the captured image
-          await showDialog(
+          final bool proceedToPick = await showDialog<bool>(
             context: context,
             barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: const Text('Select Your Photo'),
-              content: const Text('After taking and saving your photo with the Windows Camera app, click Continue to select the saved photo.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Continue'),
+            builder: (context) {
+              final screenWidth = MediaQuery.of(context).size.width;
+              final l10n = AppLocalizations.of(context)!;
+              return AlertDialog(
+                backgroundColor: Colors.grey[800],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
                 ),
-              ],
-            ),
-          );
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.photo_library_outlined,
+                      size: (screenWidth > 1200) ? 34 : 26,
+                      color: Theme.of(context).colorScheme.info,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Select Your Photo',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.info,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                        fontSize: (screenWidth > 1200) ? 26 : 20,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Padding(
+                  padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+                  child: Text(
+                    'After taking and saving your photo with the Windows Camera app, click Continue to select the saved photo.',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.muted,
+                      fontFamily: 'CascadiaCode',
+                      fontWeight: FontWeight.normal,
+                      fontSize: (screenWidth > 1200) ? 24 : 20,
+                    ),
+                  ),
+                ),
+                actions: [
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.buttonCancel,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.muted,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'CascadiaCode',
+                            fontSize: (screenWidth > 1200) ? 22 : 20,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Theme.of(context).colorScheme.info, width: 2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.buttonContinue,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'CascadiaCode',
+                                fontWeight: FontWeight.bold,
+                                fontSize: (screenWidth > 1200) ? 22 : 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ) ?? false;
+          if (!proceedToPick) {
+            widget.onCancel();
+            return;
+          }
         } catch (e) {
           print('Failed to launch Windows Camera app: $e');
           
           // Show an error dialog and offer to use gallery picker instead
-          await showDialog(
+          final bool proceedWithGallery = await showDialog<bool>(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Camera Error'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Could not launch Windows Camera app: ${e.toString().split('\n')[0]}'),
-                  const SizedBox(height: 12),
-                  const Text('You can still select a photo from your gallery instead.'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Continue with Gallery'),
+            barrierDismissible: false,
+            builder: (context) {
+              final screenWidth = MediaQuery.of(context).size.width;
+              return AlertDialog(
+                backgroundColor: Colors.grey[800],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
                 ),
-              ],
-            ),
-          );
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: (screenWidth > 1200) ? 34 : 26,
+                      color: Theme.of(context).colorScheme.info,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Camera Error',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.info,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold,
+                        fontSize: (screenWidth > 1200) ? 26 : 20,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Padding(
+                  padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Could not launch Windows Camera app: ${e.toString().split('\n')[0]}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.muted,
+                          fontFamily: 'CascadiaCode',
+                          fontWeight: FontWeight.normal,
+                          fontSize: (screenWidth > 1200) ? 24 : 20,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'You can still select a photo from your gallery instead.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.buttonCancel,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.muted,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'CascadiaCode',
+                            fontSize: (screenWidth > 1200) ? 22 : 20,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Theme.of(context).colorScheme.info, width: 2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Continue with Gallery',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'CascadiaCode',
+                                fontWeight: FontWeight.bold,
+                                fontSize: (screenWidth > 1200) ? 22 : 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ) ?? false;
+          if (!proceedWithGallery) {
+            widget.onCancel();
+            return;
+          }
           
           // Continue with gallery picker
         }
@@ -276,18 +549,74 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   }
 
   void _showErrorDialog(String message) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Camera Error'),
-        content: Text(message),
+        backgroundColor: Colors.grey[800],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: (screenWidth > 1200) ? 34 : 26,
+              color: Theme.of(context).colorScheme.info,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Camera Error',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.info,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
+                fontSize: (screenWidth > 1200) ? 26 : 20,
+              ),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: EdgeInsets.all(screenWidth > 1200 ? 25.0 : 12.0),
+          child: Text(
+            message,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.muted,
+              fontFamily: 'CascadiaCode',
+              fontWeight: FontWeight.normal,
+              fontSize: (screenWidth > 1200) ? 24 : 20,
+            ),
+          ),
+        ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onCancel();
-            },
-            child: const Text('OK'),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onCancel();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[800],
+                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  l10n.buttonClose,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.muted,
+                    fontWeight: FontWeight.normal,
+                    fontFamily: 'CascadiaCode',
+                    fontSize: (screenWidth > 1200) ? 22 : 20,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
