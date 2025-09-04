@@ -233,6 +233,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -379,7 +380,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
           ),
 
           // Animated footer with colorful crawling lines (only when placeholder is shown)
-          _filteredProjects.isEmpty
+          (_filteredProjects.isEmpty && screenHeight>650)
             ? SafeArea(
                 top: false,
                 child: CrawlingSnakesFooter(height: 72, snakeCount: 7),

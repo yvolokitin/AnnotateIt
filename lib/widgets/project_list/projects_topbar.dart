@@ -107,7 +107,7 @@ class ProjectsTopBar extends StatelessWidget {
             ),
           ),
 
-          if (screenWidth>500)...[
+          if (screenWidth>300)...[
             const Spacer(),
           ],
 
@@ -151,15 +151,24 @@ class ProjectsTopBar extends StatelessWidget {
                   onTap: onCreateProject,
                   borderRadius: BorderRadius.circular(30),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                    child: Text(
-                      l10n.menuCreateNewProject,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenWidth>=700 ? 22 : 18,
-                        fontFamily: 'CascadiaCode',
-                        fontWeight: FontWeight.bold
-                      ),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth < 500 ? 10 : 16, vertical: 5),
+                    child: Tooltip(
+                      message: l10n.menuCreateNewProject,
+                      waitDuration: const Duration(milliseconds: 500),
+                      child: (screenWidth < 500)
+                          ? Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: screenWidth >= 700 ? 24 : 22,
+                            )
+                          : Text(
+                              l10n.menuCreateNewProject,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: screenWidth >= 700 ? 22 : 18,
+                                  fontFamily: 'CascadiaCode',
+                                  fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ),
                 ),
@@ -188,7 +197,7 @@ class ProjectsTopBar extends StatelessWidget {
                         l10n.menuCreateNewProject,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 22,
+                          fontSize: screenWidth>=700 ? 22 : 18,
                           fontFamily: 'CascadiaCode',
                           fontWeight: FontWeight.normal
                         ),
