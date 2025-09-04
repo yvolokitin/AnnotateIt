@@ -86,7 +86,6 @@ class ProjectsTopBar extends StatelessWidget {
             ),
           ),
 
-          SizedBox(width: screenWidth>=700 ? 10 : 0),
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -108,108 +107,111 @@ class ProjectsTopBar extends StatelessWidget {
             ),
           ),
 
-          if (screenWidth>=700)...[
+          if (screenWidth>500)...[
             const Spacer(),
-            const SizedBox(width: 20),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.swap_vert, color: Colors.white70),
-              onSelected: onSortSelected,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Colors.white70, width: 1),
-              ),
-              itemBuilder: (context) => [
-                PopupMenuItem(value: "Custom order", child: Text(l10n.menuSortCustomOrder, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "Last updated", child: Text(l10n.menuSortLastUpdated, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "Newest-Oldest", child: Text(l10n.menuSortNewestOldest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "Oldest-Newest", child: Text(l10n.menuSortOldestNewest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "Project Type", child: Text(l10n.menuSortProjectType, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "A-Z", child: Text(l10n.menuSortAZ, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-                PopupMenuItem(value: "Z-A", child: Text(l10n.menuSortZA, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+          ],
+
+          // SizedBox(width: screenWidth>=700 ? 10 : 0),
+          // const Spacer(),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.swap_vert, color: Colors.white70),
+            onSelected: onSortSelected,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white70, width: 1),
+            ),
+            itemBuilder: (context) => [
+              PopupMenuItem(value: "Custom order", child: Text(l10n.menuSortCustomOrder, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Last updated", child: Text(l10n.menuSortLastUpdated, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Newest-Oldest", child: Text(l10n.menuSortNewestOldest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Oldest-Newest", child: Text(l10n.menuSortOldestNewest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Project Type", child: Text(l10n.menuSortProjectType, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "A-Z", child: Text(l10n.menuSortAZ, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Z-A", child: Text(l10n.menuSortZA, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+            ],
+          ),
+
+          SizedBox(width: screenWidth>=700 ? 20 : 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.3 * 255).toInt()),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
               ],
             ),
-            const SizedBox(width: 20),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.redAccent,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha((0.3 * 255).toInt()),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InkWell(
+                  onTap: onCreateProject,
+                  borderRadius: BorderRadius.circular(30),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                    child: Text(
+                      l10n.menuCreateNewProject,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: screenWidth>=700 ? 22 : 18,
+                        fontFamily: 'CascadiaCode',
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    onTap: onCreateProject,
-                    borderRadius: BorderRadius.circular(30),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                ),
+                Container(
+                  width: 1,
+                  height: 30,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 7),
+                PopupMenuButton<int>(
+                  color: const Color(0xFF2E2E2E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Colors.white70, width: 1),
+                  ),
+                  icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  offset: const Offset(-10, 47),
+                  onSelected: (value) {
+                    if (value == 0) { onCreateProject(); }
+                    else { onCreateFromDataset(); }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                      value: 0,
                       child: Text(
                         l10n.menuCreateNewProject,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
                           fontFamily: 'CascadiaCode',
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.normal
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 30,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 7),
-                  PopupMenuButton<int>(
-                    color: const Color(0xFF2E2E2E),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Colors.white70, width: 1),
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Text(
+                        l10n.menuCreateFromDataset,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenWidth>=700 ? 22 : 18,
+                          fontFamily: 'CascadiaCode',
+                          fontWeight: FontWeight.normal
+                        ),
+                      ),
                     ),
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                    offset: const Offset(-10, 47),
-                    onSelected: (value) {
-                      if (value == 0) { onCreateProject(); }
-                      else { onCreateFromDataset(); }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem<int>(
-                        value: 0,
-                        child: Text(
-                          l10n.menuCreateNewProject,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontFamily: 'CascadiaCode',
-                            fontWeight: FontWeight.normal
-                          ),
-                        ),
-                      ),
-                      PopupMenuItem<int>(
-                        value: 1,
-                        child: Text(
-                          l10n.menuCreateFromDataset,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontFamily: 'CascadiaCode',
-                            fontWeight: FontWeight.normal
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 20),
-          ],
+          ),
+          SizedBox(width: screenWidth>1200 ? 20 : 4),
         ],
       ),
     );

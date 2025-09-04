@@ -5,6 +5,7 @@ import "../data/project_database.dart";
 import "../widgets/mainmenu/header.dart";
 import '../widgets/mainmenu/main_menu_app_drawer.dart';
 import '../widgets/mainmenu/main_menu_navigation_rail_menu.dart';
+import '../widgets/mainmenu/main_menu_bottom_drawer_menu.dart';
 
 import "project_creation/create_from_dataset_dialog.dart";
 import "project_creation/create_new_project_dialog.dart";
@@ -43,6 +44,12 @@ class MainPageState extends State<MainPage> {
         print('Height $screenHeight, Width $screenWidth');
         return Scaffold(
           key: _scaffoldKey,
+          bottomNavigationBar: screenWidth < 800
+              ? MainMenuBottomDrawerMenu(
+                  selectedIndex: selectedIndex,
+                  onItemSelected: _onItemTapped,
+                )
+              : null,
           body: Column(
             children: [
               AppHeader(),
@@ -76,7 +83,7 @@ class MainPageState extends State<MainPage> {
                       ),
 
                     // NavigationRail for medium screens
-                    if (screenWidth < 1600)
+                    if (screenWidth >= 800 && screenWidth < 1600)
                       MainMenuNavigationRailMenu(
                         selectedIndex: selectedIndex,
                         onItemSelected: _onItemTapped,

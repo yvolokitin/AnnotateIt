@@ -70,7 +70,7 @@ void main() async {
   try {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       try {
-        setWindowMinSize(const Size(1200, 700)); // minimum size
+        setWindowMinSize(const Size(600, 500)); // minimum size
         setWindowMaxSize(Size.infinite); //no max limit
       } catch (e) {
         log.warning('Could not set window size: $e');
