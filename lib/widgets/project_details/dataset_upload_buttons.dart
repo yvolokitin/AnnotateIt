@@ -1044,36 +1044,71 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       await CameraCaptureDialog.show(
         context,
         onMediaCaptured: (File file, String fileType) async {
-          final filename = path.basename(file.path);
-          final ext = fileType.toLowerCase();
-          
+          // Ensure captured media is persisted inside the Dataset application folder
+          // to avoid permission loss (especially on iOS/macOS) after app relaunch.
+          String ext = (fileType.isNotEmpty ? fileType : path.extension(file.path).replaceFirst('.', '')).toLowerCase();
+          if (ext.isEmpty) {
+            ext = 'jpg';
+          }
+
           final currentUser = UserSession.instance.getUser();
           if (currentUser.id == null) {
             widget.onUploadError?.call();
             return;
           }
-          
+
+          // Build destination directory: <ImportRoot>/project_<id>/dataset_<datasetId>
+          final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+          final List<String> segments = [];
+          segments.addAll(['project_' + ((widget.project.id ?? 0).toString())]);
+          segments.addAll(['dataset_' + widget.datasetId]);
+          final destDir = Directory(path.join(importRoot, path.joinAll(segments)));
+          if (!destDir.existsSync()) {
+            destDir.createSync(recursive: true);
+          }
+
+          // Create a unique, stable filename and copy the file there
+          final safeStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+          final originalBase = path.basenameWithoutExtension(file.path);
+          final destFilename = (originalBase.isNotEmpty
+                  ? (safeStamp + '_' + originalBase)
+                  : ('capture_' + safeStamp)) + '.' + ext;
+          final destPath = path.join(destDir.path, destFilename);
+
+          File savedFile;
+          try {
+            savedFile = await file.copy(destPath);
+            // Best effort: remove the temp/original file if different
+            if (!path.equals(file.path, destPath)) {
+              try { await file.delete(); } catch (_) {}
+            }
+          } catch (_) {
+            // If copy fails for any reason, fall back to original file path
+            savedFile = file;
+          }
+
+          // Gather metadata from the saved location
           int? width;
           int? height;
           double? duration;
           double? fps;
-          final isVideo = ext == 'mp4';
-          
+          final bool isVideo = (ext == 'mp4' || ext == 'mov');
+
           if (isVideo) {
-            final videoMeta = await getVideoMetadata(file.path);
+            final videoMeta = await getVideoMetadata(savedFile.path);
             width = videoMeta['width'];
             height = videoMeta['height'];
             duration = videoMeta['duration'];
             fps = videoMeta['fps'];
           } else {
-            final imageMeta = await getImageMetadata(file.path);
+            final imageMeta = await getImageMetadata(savedFile.path);
             width = imageMeta['width'];
             height = imageMeta['height'];
           }
-          
+
           await DatasetDatabase.instance.insertMediaItem(
             widget.datasetId,
-            file.path,
+            savedFile.path,
             ext,
             ownerId: currentUser.id!,
             width: width,
@@ -1082,22 +1117,22 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             fps: fps,
             source: 'camera',
           );
-          
-          widget.onFileProgress?.call(filename, 1, 1);
-          
+
+          widget.onFileProgress?.call(path.basename(savedFile.path), 1, 1);
+
           // Update project icon if needed
           if (widget.project.icon.contains('default_project_image') ||
               widget.project.icon.contains('folder')) {
             if (!isVideo) {
               final thumbnailFile = await generateThumbnailFromImage(
-                  file, widget.project.id.toString());
+                  savedFile, widget.project.id.toString());
               if (thumbnailFile != null) {
                 await ProjectDatabase.instance
                     .updateProjectIcon(widget.project.id!, thumbnailFile.path);
               }
             }
           }
-          
+
           await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
           widget.onUploadingChanged(false);
           widget.onUploadSuccess();

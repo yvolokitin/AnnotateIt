@@ -39,11 +39,22 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   void initState() {
     super.initState();
     if (!kIsWeb) {
-      _requestCameraPermission().then((_) {
-        if (Platform.isAndroid || Platform.isIOS) {
-          _initializeCamera();
-        }
-      });
+      if (Platform.isAndroid) {
+        _requestCameraPermission().then((granted) {
+          if (granted) {
+            _initializeCamera();
+          } else {
+            _showErrorDialog("Camera permission is required to take pictures.");
+          }
+        });
+      } else if (Platform.isIOS) {
+        // On iOS, rely on the camera plugin to request and manage permissions.
+        // Avoid using permission_handler to prevent false negatives and duplicate prompts.
+        _initializeCamera();
+      } else {
+        // Other native platforms fall back to existing handling in _initializeCamera
+        _initializeCamera();
+      }
     } else {
       setState(() => _isInitialized = true);
     }
@@ -55,11 +66,9 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
     super.dispose();
   }
 
-  Future<void> _requestCameraPermission() async {
+  Future<bool> _requestCameraPermission() async {
     final status = await Permission.camera.request();
-    if (!status.isGranted) {
-      _showErrorDialog("Camera permission is required to take pictures.");
-    }
+    return status.isGranted;
   }
 
   Future<void> _initializeCamera() async {
