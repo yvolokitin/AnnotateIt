@@ -115,6 +115,23 @@ class ProjectsListPageState extends State<ProjectsListPage> {
 
     if (result == 'refresh') {
       loadProjectsWithLabels();
+    } else if (result == 'open_project') {
+      // Dialog is already closed; open the project details page
+      final projectWithLabels = await ProjectDatabase.instance.fetchProjectWithLabelsById(project.id!);
+      if (projectWithLabels != null) {
+        if (!mounted) return;
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProjectDetailsPage(projectWithLabels),
+          ),
+        );
+        // Refresh list after returning from details
+        loadProjectsWithLabels();
+      } else {
+        // If fetching failed, just refresh list
+        loadProjectsWithLabels();
+      }
     }
   }
 

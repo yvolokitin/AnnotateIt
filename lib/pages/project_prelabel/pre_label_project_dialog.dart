@@ -73,6 +73,11 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   // UI step: 0 = intro, 1 = preflight checks, 2 = scanning/review
   int _uiStep = 1;
 
+  // Summary counters after pre-annotation completes
+  int _summaryLabelsAdded = 0;
+  int _summaryImagesAnnotated = 0;
+  int _summaryAnnotationsAdded = 0;
+
   bool _preflightLoading = false;
   bool _preflightChecked = false;
   bool _hasImages = false;
@@ -203,6 +208,31 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
         modelSize: '50Mb',
       );
     }
+  }
+
+  // Small helper to render a summary stat line
+  Widget _buildSummaryStat(String title, int value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white12,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Theme.of(context).colorScheme.purple.withOpacity(0.6), width: 1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          Text(
+            value.toString(),
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _startScan() async {
@@ -433,14 +463,26 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       });
       await LabelsDatabase.instance.updateProjectLabels(widget.project.id!, _reviewLabels);
 
-      // 2) Fetch final labels with real IDs
+      // 2) Fetch final labels with real IDs and update summary counts
       final projectLabels = await LabelsDatabase.instance.fetchLabelsByProject(widget.project.id!);
+      if (mounted) {
+        setState(() {
+          _summaryLabelsAdded = projectLabels.length;
+          _isAnnotating = true;
+          _inlineMessage = 'Annotating images...';
+          _inlineMessageColor = Colors.white70;
+        });
+      }
 
-      // 3) Annotate all images in project with detected labels
+      // 3) Annotate all images in project with detected labels and collect stats
       await _annotateAllImages(projectLabels);
 
       if (!mounted) return;
-      Navigator.of(context).pop('refresh');
+      setState(() {
+        _isAnnotating = false;
+        _inlineMessage = null;
+        _uiStep = 3; // Show summary step
+      });
     } catch (e, st) {
       _log.severe('Failed to save labels / annotate', e, st);
       if (!mounted) return;
@@ -456,6 +498,10 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     final Map<String, Label> labelByName = {
       for (final l in projectLabels) l.name.toLowerCase(): l
     };
+
+    // Reset summary counters
+    _summaryImagesAnnotated = 0;
+    _summaryAnnotationsAdded = 0;
 
     setState(() {
       _inlineMessage = 'Annotating images...';
@@ -474,7 +520,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
     // Initialize backend if needed
     final isDetection = widget.project.type.toLowerCase().contains('detection');
-    if (widget.useTFLite) {
+    if (_useTFLite) {
       if (isDetection) {
         _tflDetService ??= TFLiteDetectionService();
         final available = await _tflDetService!.isModelAvailableInUserFolder();
@@ -525,7 +571,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             final now = DateTime.now();
             final List<Annotation> toInsert = [];
 
-            if (widget.useTFLite) {
+            if (_useTFLite) {
               if (isDetection) {
                 final dets = await _tflDetService!.detectImage(file);
                 for (final d in dets) {
@@ -642,6 +688,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             }
 
             if (toInsert.isNotEmpty) {
+              // Update summary statistics
+              _summaryAnnotationsAdded += toInsert.length;
+              _summaryImagesAnnotated += 1;
               await AnnotationDatabase.instance.insertAnnotationsBatch(toInsert);
             }
           } catch (e, st) {
@@ -655,7 +704,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       }
     } finally {
       // Dispose TFLite services if used
-      if (widget.useTFLite) {
+      if (_useTFLite) {
         try { await _tflService?.dispose(); } catch (_) {}
         try { await _tflDetService?.dispose(); } catch (_) {}
         _tflService = null;
@@ -875,7 +924,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                                   labelStyle: const TextStyle(color: Colors.white),
                                                   visualDensity: VisualDensity.compact,
                                                 ),
-                                                if (widget.useTFLite)
+                                                if (_useTFLite)
                                                   Chip(
                                                     label: Text(_isDetection ? 'Backend: TFLite Detection' : 'Backend: TFLite Classification'),
                                                     backgroundColor: Colors.green,
@@ -933,7 +982,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           ),
                         const SizedBox(width: 8),
                         Builder(builder: (context) {
-                          final canStart = _hasImages && (!widget.useTFLite || (_modelAvailable ?? false));
+                          final canStart = _hasImages && (!_useTFLite || (_modelAvailable ?? false));
                           return ElevatedButton(
                             onPressed: (!_preflightLoading && canStart) ? () {
                               setState(() { _uiStep = 2; });
@@ -971,7 +1020,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              widget.useTFLite
+                              _useTFLite
                                   ? '• The project images will be scanned using your TensorFlow Lite model.'
                                   : '• The project images will be scanned using Google ML Kit on this device.',
                               style: const TextStyle(color: Colors.white70),
@@ -1091,6 +1140,58 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                             'Processed $_processed of $_totalImages images',
                             style: const TextStyle(color: Colors.white70),
                             textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ] else if (_uiStep == 3) ...[
+                // Summary step after pre-annotation completes
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 640),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Pre-annotation summary',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.purple,
+                              fontFamily: 'CascadiaCode',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildSummaryStat('Labels added', _summaryLabelsAdded),
+                          const SizedBox(height: 8),
+                          _buildSummaryStat('Images annotated', _summaryImagesAnnotated),
+                          const SizedBox(height: 8),
+                          _buildSummaryStat('Annotations added', _summaryAnnotationsAdded),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop('refresh'),
+                                style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                                child: const Text('Close'),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () => Navigator.of(context).pop('open_project'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.purple,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                ),
+                                child: const Text('Open project', style: TextStyle(color: Colors.white)),
+                              ),
+                            ],
                           ),
                         ],
                       ),
