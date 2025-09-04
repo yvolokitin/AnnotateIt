@@ -17,65 +17,115 @@ class LabelsDatabase {
     throw Exception("Database not set.");
   }
   
-  /// Replaces all labels for a given project and keeps annotations consistent.
+  /// Merge labels for a given project and keep annotations consistent.
   ///
   /// Behavior:
-  /// - Existing labels are replaced with [newLabels].
-  /// - Annotations that referenced labels with the same name are re-linked to the newly inserted label IDs.
-  /// - Annotations that referenced labels removed (name no longer present) are deleted.
+  /// - Existing labels are preserved; newly provided [newLabels] are merged in by name (case-insensitive).
+  /// - If multiple labels share the same name ignoring case (e.g., "Car", "car", "CAR"), they are merged into one.
+  ///   The surviving label is the first by label_order among existing labels; annotations pointing to duplicates
+  ///   are re-linked to the surviving label, and duplicate label rows are removed.
+  /// - No annotations are deleted.
   Future<void> updateProjectLabels(int projectId, List<Label> newLabels) async {
     final db = await database;
 
     await db.transaction((txn) async {
-      // 1) Snapshot existing labels for the project (name -> id)
+      // 1) Load existing labels ordered by label_order so the first one is stable.
       final existingRows = await txn.query(
         'labels',
         where: 'project_id = ?',
         whereArgs: [projectId],
-      );
-      final Map<String, int> oldIdByName = {
-        for (final row in existingRows)
-          (row['name'] as String).toLowerCase(): row['id'] as int,
-      };
-
-      // 2) Remove existing labels
-      await txn.delete(
-        'labels',
-        where: 'project_id = ?',
-        whereArgs: [projectId],
+        orderBy: 'label_order ASC',
       );
 
-      // 3) Insert new labels and keep a mapping name -> newId
-      final Map<String, int> newIdByName = {};
-      for (final label in newLabels) {
-        final insertedId = await txn.insert('labels', label.toMap());
-        newIdByName[label.name.toLowerCase()] = insertedId;
-      }
+      // 2) Build keep map by lowercased name -> kept row, detect duplicates to merge
+      final Map<String, Map<String, Object?>> keptByName = {};
+      final Map<int, int> remapOldIdToKeptId = {}; // old dup id -> kept id
+      final Set<int> duplicateIdsToDelete = {};
+      final Set<int> keptIdsToSetDefault = {}; // if any duplicate had default, propagate to kept
+      int maxOrder = -1;
 
-      // 4) Re-link or remove annotations based on label name match
-      for (final entry in oldIdByName.entries) {
-        final name = entry.key;
-        final oldId = entry.value;
-        final newId = newIdByName[name];
-        if (newId != null) {
-          // Update annotations to new label id
-          await txn.update(
-            'annotations',
-            {'label_id': newId},
-            where: 'label_id = ?',
-            whereArgs: [oldId],
-          );
+      for (final row in existingRows) {
+        final int id = row['id'] as int;
+        final int order = row['label_order'] as int;
+        final int isDefault = (row['is_default'] as int? ?? 0);
+        final String nameLower = (row['name'] as String).toLowerCase();
+        if (order > maxOrder) maxOrder = order;
+
+        if (!keptByName.containsKey(nameLower)) {
+          keptByName[nameLower] = row;
+          // Keep as-is; if later a duplicate had default, we will set it
         } else {
-          // Label removed -> delete its annotations
-          await txn.delete(
-            'annotations',
-            where: 'label_id = ?',
-            whereArgs: [oldId],
-          );
+          final kept = keptByName[nameLower]!;
+          final int keptId = kept['id'] as int;
+          // Remap annotations from duplicate to kept
+          remapOldIdToKeptId[id] = keptId;
+          duplicateIdsToDelete.add(id);
+          if (isDefault == 1) {
+            keptIdsToSetDefault.add(keptId);
+          }
         }
       }
 
-      // 5) Update project's lastUpdated timestamp
+      // 3) Insert missing labels from newLabels (case-insensitive), appending at the end.
+      //    Deduplicate incoming new labels by name (case-insensitive) as well.
+      final Set<String> seenNewNames = {};
+      for (final label in newLabels) {
+        final String lower = label.name.toLowerCase();
+        if (seenNewNames.contains(lower)) {
+          continue; // skip duplicates within new list
+        }
+        seenNewNames.add(lower);
+
+        if (!keptByName.containsKey(lower)) {
+          // Insert new label, append order after existing maxOrder
+          maxOrder += 1;
+          final Label toInsert = label.copyWith(
+            id: -1,
+            projectId: projectId,
+            labelOrder: maxOrder,
+          );
+          final int insertedId = await txn.insert('labels', toInsert.toMap());
+
+          // Emulate a DB row map for the newly inserted label (only needed fields)
+          keptByName[lower] = {
+            'id': insertedId,
+            'label_order': maxOrder,
+            'project_id': projectId,
+            'name': toInsert.name,
+            'color': toInsert.color,
+            'is_default': toInsert.isDefault ? 1 : 0,
+            'description': toInsert.description,
+            'createdAt': toInsert.createdAt.toIso8601String(),
+          };
+        }
+      }
+
+      // 4) Remap annotations from duplicate labels to the kept label
+      for (final entry in remapOldIdToKeptId.entries) {
+        await txn.update(
+          'annotations',
+          {'label_id': entry.value},
+          where: 'label_id = ?',
+          whereArgs: [entry.key],
+        );
+      }
+
+      // 5) If any duplicate carried default flag, set it on kept label as well (do not unset others here)
+      for (final keptId in keptIdsToSetDefault) {
+        await txn.update(
+          'labels',
+          {'is_default': 1},
+          where: 'id = ? AND project_id = ?',
+          whereArgs: [keptId, projectId],
+        );
+      }
+
+      // 6) Delete duplicate label rows
+      for (final dupId in duplicateIdsToDelete) {
+        await txn.delete('labels', where: 'id = ?', whereArgs: [dupId]);
+      }
+
+      // 7) Update project's lastUpdated timestamp
       await txn.update(
         'projects',
         {'lastUpdated': DateTime.now().toIso8601String()},
