@@ -467,35 +467,7 @@ class ProjectsListPageState extends State<ProjectsListPage> {
                     ),
                     onTap: () async {
                       Navigator.pop(context);
-                      if (Platform.isAndroid || Platform.isIOS) {
-                        final choice = await showDialog<String>(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Pre-label Project'),
-                            content: const Text('Choose the pre-labeling backend to use:'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop('mlkit'),
-                                child: const Text('ML Kit'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop('tflite'),
-                                child: const Text('TFLite'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(null),
-                                child: const Text('Cancel'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (choice == null) return;
-                        final useTFLite = choice == 'tflite';
-                        _handlePreLabelProject(project, useTFLite: useTFLite);
-                      } else {
-                        _handlePreLabelProject(project, useTFLite: true);
-                      }
+                      _handlePreLabelProject(project);
                     },
                   ),
                 ],

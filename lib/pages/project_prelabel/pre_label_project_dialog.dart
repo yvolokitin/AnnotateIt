@@ -39,6 +39,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   bool _isScanning = false;
   bool _cancelRequested = false;
 
+  // Selected backend: true = TFLite, false = ML Kit
+  bool _useTFLite = false;
+
   int _totalImages = 0;
   int _processed = 0;
 
@@ -83,6 +86,10 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
   @override
   void initState() {
     super.initState();
+    // Determine default backend based on platform
+    // On iOS/Android, allow user to choose (start with provided initial value)
+    // On other platforms, default to TFLite
+    _useTFLite = (Platform.isAndroid || Platform.isIOS) ? widget.useTFLite : true;
     // Start at Step 1 (preflight checks)
     // Trigger preflight checks as soon as dialog opens
     scheduleMicrotask(() {
@@ -97,7 +104,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       _preflightLoading = true;
       _preflightChecked = false;
       _hasImages = false;
-      _modelAvailable = widget.useTFLite ? null : true; // MLKit path doesn't need model
+      _modelAvailable = _useTFLite ? null : true; // MLKit path doesn't need model
       _inlineMessage = null;
       _totalImages = 0;
     });
@@ -123,7 +130,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       });
     }
 
-    if (widget.useTFLite) {
+    if (_useTFLite) {
       try {
         if (_isDetection) {
           final det = TFLiteDetectionService();
@@ -259,7 +266,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     // Initialize labeling backend: ML Kit (mobile) or TFLite (cross-platform)
     try {
       final isDetection = widget.project.type.toLowerCase().contains('detection');
-      if (widget.useTFLite) {
+      if (_useTFLite) {
         if (isDetection) {
           _tflDetService = TFLiteDetectionService();
           final available = await _tflDetService!.isModelAvailableInUserFolder();
@@ -318,7 +325,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             if (!await file.exists()) {
               _log.warning('File not found: ${item.filePath}');
             } else {
-              if (widget.useTFLite) {
+              if (_useTFLite) {
                 final isDetection = widget.project.type.toLowerCase().contains('detection');
                 if (isDetection) {
                   final dets = await _tflDetService!.detectImage(file);
@@ -403,7 +410,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       _log.severe('Pre-label scan failed', e, st);
     } finally {
       try {
-        if (widget.useTFLite) {
+        if (_useTFLite) {
           await _tflService?.dispose();
           _tflService = null;
           await _tflDetService?.dispose();
@@ -721,7 +728,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
               Divider(color: Theme.of(context).colorScheme.purple),
               const SizedBox(height: 12),
               Text(
-                widget.useTFLite
+                _useTFLite
                   ? l10n.preLabelIntroTflite
                   : l10n.preLabelIntroMlkit,
                 style: const TextStyle(color: Colors.white70),
@@ -737,7 +744,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                          Text(
                               l10n.preLabelStep1Title,
                               style: TextStyle(
                                 fontSize: 18,
@@ -747,6 +754,40 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                               ),
                             ),
                             const SizedBox(height: 12),
+                            if (Platform.isAndroid || Platform.isIOS) ...[
+                              const Text(
+                                'Choose the pre-labeling backend to use:',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              const SizedBox(height: 8),
+                              RadioListTile<bool>(
+                                value: false,
+                                groupValue: _useTFLite,
+                                onChanged: (v) {
+                                  if (v == null) return;
+                                  setState(() { _useTFLite = v; });
+                                  _runPreflightChecks();
+                                },
+                                dense: true,
+                                title: const Text('ML Kit', style: TextStyle(color: Colors.white70)),
+                                activeColor: Colors.lightGreenAccent,
+                                tileColor: Colors.white12,
+                              ),
+                              RadioListTile<bool>(
+                                value: true,
+                                groupValue: _useTFLite,
+                                onChanged: (v) {
+                                  if (v == null) return;
+                                  setState(() { _useTFLite = v; });
+                                  _runPreflightChecks();
+                                },
+                                dense: true,
+                                title: const Text('TFLite', style: TextStyle(color: Colors.white70)),
+                                activeColor: Colors.lightGreenAccent,
+                                tileColor: Colors.white12,
+                              ),
+                              const SizedBox(height: 12),
+                            ],
                             if (_preflightLoading) ...[
                               const SizedBox(height: 8),
                               Row(
@@ -769,7 +810,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              if (widget.useTFLite) ...[
+                              if (_useTFLite) ...[
                                 Row(
                                   children: [
                                     Icon((_modelAvailable ?? false) ? Icons.check_circle : Icons.download, color: (_modelAvailable ?? false) ? Colors.lightGreenAccent : Colors.orangeAccent),
@@ -801,7 +842,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                     ],
                                   ),
                               ],
-                              if (_hasImages && (!widget.useTFLite || (_modelAvailable ?? false))) ...[
+                              if (_hasImages && (!_useTFLite || (_modelAvailable ?? false))) ...[
                                 const SizedBox(height: 12),
                                 Container(
                                   decoration: BoxDecoration(
