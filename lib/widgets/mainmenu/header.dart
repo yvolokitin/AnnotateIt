@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/notification_database.dart';
 import '../dialogs/notifications_dialog.dart';
+import '../mainpage/exported_datasets_dialog.dart';
 
 class AppHeader extends StatefulWidget {
   const AppHeader({super.key});
@@ -41,6 +42,13 @@ class AppHeaderState extends State<AppHeader> {
     _loadUnreadNotificationCount();
   }
 
+  void _showExportedDatasetsDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => const ExportedDatasetsDialog(),
+    );
+  }
+
   double _getHeaderHeight(double width) {
     if (width >= 1600) return 88; // large screens
     if (width >= 1200) return 72; // medium screens
@@ -55,95 +63,171 @@ class AppHeaderState extends State<AppHeader> {
     return Container(
       height: headerHeight,
       color: Colors.red,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (screenWidth>1600)
-            const SizedBox(width: 20),
-
-          Container(
-            width: 71,
-            height: headerHeight,
-            padding: EdgeInsets.all(screenWidth>1600 ? 2 : 10),
-            decoration: BoxDecoration(
-              border: Border(
-                right: BorderSide(
-                  color: Colors.transparent,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Image.asset(
-              'assets/logo/annotateit_white.png',
-              height: headerHeight,
-            ),
-          ),
-
-          const Spacer(),
-          
-          // Title text positioned on the right
-          Container(
-            height: headerHeight,
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(horizontal: screenWidth>600 ? 12 : 4),
-            child: Text(
-              screenWidth>1600 ? "AnnotateIt - Vision Annotations" : 'AnnotateIt',
-              style: TextStyle(
-                fontSize: screenWidth>1600 ? 30 : (screenWidth>1200 ? 24 : 20),
-                fontWeight: FontWeight.bold,
-                fontFamily: 'CascadiaCode',
-                color: Colors.white,
-              ),
-            ),
-          ),
-          
-          // Notification icon with ring indicator
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            child: Stack(
+      child: screenWidth < 600
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Left: folder icon
                 IconButton(
-                  onPressed: _showNotifications,
-                  icon: Icon(
-                    // Icons.mail_outline_rounded,
-                    Icons.article_outlined,
-                    size: screenWidth > 1200 ? 28 : 24,
+                  onPressed: _showExportedDatasetsDialog,
+                  icon: const Icon(
+                    Icons.folder_outlined,
+                    size: 24,
                     color: Colors.white,
                   ),
-                  tooltip: 'Notifications',
+                  tooltip: 'Exported datasets',
                 ),
-                if (_unreadNotificationCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Text(
-                        _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
+
+                // Center: app title
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'AnnotateIt',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'CascadiaCode',
+                        color: Colors.white,
                       ),
                     ),
                   ),
+                ),
+
+                // Right: notifications with unread badge
+                Container(
+                  margin: const EdgeInsets.only(right: 4),
+                  child: Stack(
+                    children: [
+                      IconButton(
+                        onPressed: _showNotifications,
+                        icon: const Icon(
+                          Icons.article_outlined,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                        tooltip: 'Notifications',
+                      ),
+                      if (_unreadNotificationCount > 0)
+                        Positioned(
+                          right: 6,
+                          top: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (screenWidth>1600)
+                  const SizedBox(width: 20),
+
+                Container(
+                  width: 71,
+                  height: headerHeight,
+                  padding: EdgeInsets.all(screenWidth>1600 ? 2 : 10),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      right: BorderSide(
+                        color: Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Image.asset(
+                    'assets/logo/annotateit_white.png',
+                    height: headerHeight,
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Title text positioned on the right
+                Container(
+                  height: headerHeight,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth>600 ? 12 : 4),
+                  child: Text(
+                    screenWidth>1600 ? "AnnotateIt - Vision Annotations" : 'AnnotateIt',
+                    style: TextStyle(
+                      fontSize: screenWidth>1600 ? 30 : (screenWidth>1200 ? 24 : 20),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'CascadiaCode',
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+                // Notification icon with ring indicator
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Stack(
+                    children: [
+                      IconButton(
+                        onPressed: _showNotifications,
+                        icon: Icon(
+                          // Icons.mail_outline_rounded,
+                          Icons.article_outlined,
+                          size: screenWidth > 1200 ? 28 : 24,
+                          color: Colors.white,
+                        ),
+                        tooltip: 'Notifications',
+                      ),
+                      if (_unreadNotificationCount > 0)
+                        Positioned(
+                          right: 6,
+                          top: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(width: screenWidth>500 ? 16 : 4),
               ],
             ),
-          ),
-          
-          SizedBox(width: screenWidth>500 ? 16 : 4),
-        ],
-      ),
     );
   }
 }

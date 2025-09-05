@@ -119,7 +119,7 @@ class User {
     String? themeMode,
     String? language,
     bool? autoSave,
-    bool? showTips,
+   bool? showTips,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? autoSaveAnnotations,
