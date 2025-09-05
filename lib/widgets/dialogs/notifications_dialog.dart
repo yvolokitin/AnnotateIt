@@ -133,14 +133,15 @@ class NotificationsDialogState extends State<NotificationsDialog> {
     final screenHeight = MediaQuery.of(context).size.height;
     final isLargeScreen = screenWidth >= 1600;
     final isTablet = screenWidth >= 900 && screenWidth < 1600;
+    final isMobile = screenWidth < 700;
 
-    final dialogWidth = screenWidth * (isLargeScreen ? 0.8 : isTablet ? 0.9 : 0.95);
-    final dialogHeight = screenHeight * (isLargeScreen ? 0.8 : isTablet ? 0.85 : 0.9);
+    final dialogWidth = isMobile ? screenWidth : screenWidth * (isLargeScreen ? 0.8 : isTablet ? 0.9 : 0.95);
+    final dialogHeight = isMobile ? screenHeight : screenHeight * (isLargeScreen ? 0.8 : isTablet ? 0.85 : 0.9);
 
     return Dialog(
       insetPadding: EdgeInsets.zero,
       backgroundColor: Colors.grey[850],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isMobile ? 0 : 8)),
       child: SizedBox(
         width: dialogWidth,
         height: dialogHeight,
@@ -160,50 +161,75 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                 children: [
                   const Icon(Icons.mail_outline_rounded, color: Colors.white, size: 24),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Notifications',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                  const Spacer(),
-                  // Filter toggle
-                  TextButton.icon(
-                    onPressed: _toggleShowUnreadOnly,
-                    icon: Icon(
-                      _showUnreadOnly ? Icons.filter_alt : Icons.filter_alt_outlined,
-                      color: Colors.white70,
-                      size: 18,
-                    ),
-                    label: Text(
-                      _showUnreadOnly ? 'Show All' : 'Unread Only',
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  Expanded(
+                    child: Text(
+                      'Notifications',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isMobile ? 18 : 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'CascadiaCode',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Mark all as read
-                  TextButton.icon(
-                    onPressed: _notifications.any((n) => !n.isRead) ? _markAllAsRead : null,
-                    icon: const Icon(Icons.done_all, color: Colors.white70, size: 18),
-                    label: const Text(
-                      'Mark All Read',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                  if (!isMobile) ...[
+                    // Filter toggle
+                    TextButton.icon(
+                      onPressed: _toggleShowUnreadOnly,
+                      icon: Icon(
+                        _showUnreadOnly ? Icons.filter_alt : Icons.filter_alt_outlined,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _showUnreadOnly ? 'Show All' : 'Unread Only',
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Delete all
-                  TextButton.icon(
-                    onPressed: _notifications.isNotEmpty ? _deleteAllNotifications : null,
-                    icon: const Icon(Icons.delete_sweep, color: Colors.red, size: 18),
-                    label: const Text(
-                      'Delete All',
-                      style: TextStyle(color: Colors.red, fontSize: 14),
+                    const SizedBox(width: 8),
+                    // Mark all as read
+                    TextButton.icon(
+                      onPressed: _notifications.any((n) => !n.isRead) ? _markAllAsRead : null,
+                      icon: const Icon(Icons.done_all, color: Colors.white70, size: 18),
+                      label: const Text(
+                        'Mark All Read',
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                    // Delete all
+                    TextButton.icon(
+                      onPressed: _notifications.isNotEmpty ? _deleteAllNotifications : null,
+                      icon: const Icon(Icons.delete_sweep, color: Colors.red, size: 18),
+                      label: const Text(
+                        'Delete All',
+                        style: TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ] else ...[
+                    IconButton(
+                      onPressed: _toggleShowUnreadOnly,
+                      icon: Icon(
+                        _showUnreadOnly ? Icons.filter_alt : Icons.filter_alt_outlined,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                      tooltip: _showUnreadOnly ? 'Show All' : 'Unread Only',
+                    ),
+                    IconButton(
+                      onPressed: _notifications.any((n) => !n.isRead) ? _markAllAsRead : null,
+                      icon: const Icon(Icons.done_all, color: Colors.white70, size: 20),
+                      tooltip: 'Mark All Read',
+                    ),
+                    IconButton(
+                      onPressed: _notifications.isNotEmpty ? _deleteAllNotifications : null,
+                      icon: const Icon(Icons.delete_sweep, color: Colors.red, size: 20),
+                      tooltip: 'Delete All',
+                    ),
+                  ],
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close, color: Colors.white),
@@ -261,38 +287,81 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                     bottomRight: Radius.circular(8),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Showing ${_currentPage * _pageSize + 1}-${(_currentPage + 1) * _pageSize > _totalCount ? _totalCount : (_currentPage + 1) * _pageSize} of $_totalCount',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        fontFamily: 'CascadiaCode',
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: _currentPage > 0 ? _previousPage : null,
-                          icon: const Icon(Icons.chevron_left, color: Colors.white),
-                        ),
-                        Text(
-                          'Page ${_currentPage + 1} of ${(_totalCount / _pageSize).ceil()}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'CascadiaCode',
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = MediaQuery.of(context).size.width < 700;
+                    if (isMobile) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Showing ${_currentPage * _pageSize + 1}-${(_currentPage + 1) * _pageSize > _totalCount ? _totalCount : (_currentPage + 1) * _pageSize} of $_totalCount',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontFamily: 'CascadiaCode',
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: (_currentPage + 1) * _pageSize < _totalCount ? _nextPage : null,
-                          icon: const Icon(Icons.chevron_right, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: _currentPage > 0 ? _previousPage : null,
+                                icon: const Icon(Icons.chevron_left, color: Colors.white),
+                              ),
+                              Text(
+                                'Page ${_currentPage + 1} of ${(_totalCount / _pageSize).ceil()}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'CascadiaCode',
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: (_currentPage + 1) * _pageSize < _totalCount ? _nextPage : null,
+                                icon: const Icon(Icons.chevron_right, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Showing ${_currentPage * _pageSize + 1}-${(_currentPage + 1) * _pageSize > _totalCount ? _totalCount : (_currentPage + 1) * _pageSize} of $_totalCount',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontFamily: 'CascadiaCode',
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _currentPage > 0 ? _previousPage : null,
+                                icon: const Icon(Icons.chevron_left, color: Colors.white),
+                              ),
+                              Text(
+                                'Page ${_currentPage + 1} of ${(_totalCount / _pageSize).ceil()}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'CascadiaCode',
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: (_currentPage + 1) * _pageSize < _totalCount ? _nextPage : null,
+                                icon: const Icon(Icons.chevron_right, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
               ),
           ],
