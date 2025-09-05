@@ -39,6 +39,8 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
   bool exportAnnotations = true;
   bool _isExporting = false;
   bool _showExportLabelsButton = true;
+  bool mergeDatasets = true;
+  final Map<String, String> _datasetIdToFolderName = {};
   
   @override
   void initState() {
@@ -195,6 +197,30 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             ),
           ),
           const SizedBox(height: 16),
+          // Merge datasets toggle (first option)
+          SwitchListTile(
+            title: Text(
+              'Merge all datasets into one images folder',
+              style: TextStyle(
+                fontSize: screenWidth > 1200 ? 20 : 16,
+                fontFamily: 'CascadiaCode',
+                color: Colors.white,
+              ),
+            ),
+            subtitle: !mergeDatasets
+                ? Text(
+                    'All datasets will be placed in separate folders by dataset name',
+                    style: TextStyle(
+                      fontSize: screenWidth > 1200 ? 14 : 12,
+                      fontFamily: 'CascadiaCode',
+                      color: Theme.of(context).colorScheme.muted,
+                    ),
+                  )
+                : null,
+            value: mergeDatasets,
+            onChanged: _isExporting ? null : (v) => setState(() => mergeDatasets = v),
+            activeColor: Theme.of(context).colorScheme.success,
+          ),
           if (_showExportLabelsButton)
             _buildExportToggle(
               'Export All Labels',
@@ -341,11 +367,24 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     );
   }
 
+  String _sanitizeFolderName(String input) {
+    var s = input.trim();
+    s = s.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    s = s.replaceAll(RegExp(r'\s+'), '_');
+    if (s.isEmpty) s = 'dataset';
+    return s;
+  }
+
   Future<List<MediaItem>> _fetchMediaItems() async {
     final datasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+    _datasetIdToFolderName.clear();
     final mediaItems = <MediaItem>[];
     for (final dataset in datasets) {
-      mediaItems.addAll(await DatasetDatabase.instance.fetchMediaForDataset(dataset.id));
+      // build mapping from datasetId to sanitized folder name
+      final folderName = _sanitizeFolderName(dataset.name.isNotEmpty ? dataset.name : 'dataset');
+      _datasetIdToFolderName[dataset.id] = folderName;
+      final items = await DatasetDatabase.instance.fetchMediaForDataset(dataset.id);
+      mediaItems.addAll(items);
     }
     return mediaItems;
   }
@@ -420,6 +459,8 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         labels: widget.project.labels,
         mediaItems: mediaItems,
         annotationsByMediaId: annotationsByMediaId,
+        mergeDatasets: mergeDatasets,
+        datasetIdToFolderName: _datasetIdToFolderName,
       );
 
       // Create zip file with retry mechanism

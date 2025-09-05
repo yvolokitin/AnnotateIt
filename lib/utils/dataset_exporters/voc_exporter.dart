@@ -30,6 +30,8 @@ class VOCExporter extends BaseDatasetExporter {
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
+    bool mergeDatasets = true,
+    Map<String, String>? datasetIdToFolderName,
   }) async {
     _logger.info('Exporting dataset in Pascal VOC format');
 
@@ -57,7 +59,13 @@ class VOCExporter extends BaseDatasetExporter {
       if (await file.exists()) {
         try {
           final bytes = await file.readAsBytes();
-          archive.addFile(ArchiveFile('JPEGImages/$fileName', bytes.length, bytes));
+          final datasetFolder = datasetIdToFolderName != null
+              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+              : 'dataset';
+          final imagePathInZip = mergeDatasets
+              ? 'JPEGImages/$fileName'
+              : 'JPEGImages/$datasetFolder/$fileName';
+          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
         } catch (e) {
           _logger.severe('Failed to read image ${file.path}: $e');
           continue;
@@ -75,7 +83,13 @@ class VOCExporter extends BaseDatasetExporter {
         );
         if (xml != null && xml.isNotEmpty) {
           final xmlBytes = utf8.encode(xml);
-          archive.addFile(ArchiveFile('Annotations/$baseName.xml', xmlBytes.length, xmlBytes));
+          final datasetFolder = datasetIdToFolderName != null
+              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+              : 'dataset';
+          final xmlPathInZip = mergeDatasets
+              ? 'Annotations/$baseName.xml'
+              : 'Annotations/$datasetFolder/$baseName.xml';
+          archive.addFile(ArchiveFile(xmlPathInZip, xmlBytes.length, xmlBytes));
         }
       }
     }

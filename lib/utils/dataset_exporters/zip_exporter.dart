@@ -29,6 +29,8 @@ class ZipExporter extends BaseDatasetExporter {
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
+    bool mergeDatasets = true,
+    Map<String, String>? datasetIdToFolderName,
   }) async {
     _logger.info('Exporting dataset in simple ZIP format');
 
@@ -68,6 +70,12 @@ class ZipExporter extends BaseDatasetExporter {
 
       final fileName = path.basename(mediaItem.filePath);
       final file = File(mediaItem.filePath);
+      final datasetFolder = datasetIdToFolderName != null
+          ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+          : 'dataset';
+      final imagePathInZip = mergeDatasets
+          ? 'images/$fileName'
+          : 'images/$datasetFolder/$fileName';
       
       if (!await file.exists()) {
         _logger.warning('Media file not found: ${mediaItem.filePath}');
@@ -77,8 +85,8 @@ class ZipExporter extends BaseDatasetExporter {
       try {
         final bytes = await file.readAsBytes();
         if (bytes.isNotEmpty) {
-          archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
-          mediaIdToFilename[mediaItem.id!] = fileName;
+          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
+          mediaIdToFilename[mediaItem.id!] = mergeDatasets ? fileName : '$datasetFolder/$fileName';
         }
       } catch (e) {
         _logger.severe('Failed to read ${mediaItem.filePath}: $e');

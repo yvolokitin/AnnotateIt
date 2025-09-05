@@ -27,6 +27,8 @@ class COCOExporter extends BaseDatasetExporter {
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
+    bool mergeDatasets = true,
+    Map<String, String>? datasetIdToFolderName,
   }) async {
     _logger.info('Exporting dataset in COCO format');
 
@@ -83,18 +85,29 @@ class COCOExporter extends BaseDatasetExporter {
       try {
         final bytes = await file.readAsBytes();
         if (bytes.isNotEmpty) {
-          archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
+          final datasetFolder = datasetIdToFolderName != null
+              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+              : 'dataset';
+          final imagePathInZip = mergeDatasets
+              ? 'images/$fileName'
+              : 'images/$datasetFolder/$fileName';
+          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
         }
       } catch (e) {
         _logger.severe('Failed to read ${mediaItem.filePath}: $e');
         continue;
       }
 
+      final datasetFolder = datasetIdToFolderName != null
+          ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+          : 'dataset';
+      final fileNameForJson = mergeDatasets ? fileName : '$datasetFolder/$fileName';
+
       cocoJson['images'].add({
         'id': imageId,
         'width': mediaItem.width ?? 0,
         'height': mediaItem.height ?? 0,
-        'file_name': fileName,
+        'file_name': fileNameForJson,
         'license': 1,
         'flickr_url': '',
         'coco_url': '',

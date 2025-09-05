@@ -26,6 +26,8 @@ class YOLOExporter extends BaseDatasetExporter {
     required List<Label> labels,
     required List<MediaItem> mediaItems,
     required Map<int, List<Annotation>> annotationsByMediaId,
+    bool mergeDatasets = true,
+    Map<String, String>? datasetIdToFolderName,
   }) async {
     _logger.info('Exporting dataset in YOLO format');
 
@@ -46,12 +48,18 @@ class YOLOExporter extends BaseDatasetExporter {
       final file = File(mediaItem.filePath);
       final fileName = path.basename(mediaItem.filePath);
       final imageBaseName = path.basenameWithoutExtension(fileName);
+      final datasetFolder = datasetIdToFolderName != null
+          ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+          : 'dataset';
+      final imagePathInZip = mergeDatasets
+          ? 'images/$fileName'
+          : 'images/$datasetFolder/$fileName';
 
       // Add image to archive
       if (await file.exists()) {
         try {
           final bytes = await file.readAsBytes();
-          archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
+          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
         } catch (e) {
           _logger.severe('Failed to read ${file.path}: $e');
           continue;
@@ -93,7 +101,9 @@ class YOLOExporter extends BaseDatasetExporter {
 
       // Add label file if it has content
       if (buffer.isNotEmpty) {
-        final labelPath = 'labels/$imageBaseName.txt';
+        final labelPath = mergeDatasets
+            ? 'labels/$imageBaseName.txt'
+            : 'labels/$datasetFolder/$imageBaseName.txt';
         final labelBytes = utf8.encode(buffer.toString());
         archive.addFile(ArchiveFile(labelPath, labelBytes.length, labelBytes));
       }
