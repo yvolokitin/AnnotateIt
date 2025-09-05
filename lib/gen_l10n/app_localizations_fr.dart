@@ -380,6 +380,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuAbout => 'À propos';
 
   @override
+  String get menuExportedDatasetsLong => 'Jeux de données exportés';
+
+  @override
+  String get menuExportedDatasetsShort => 'Jeux de données';
+
+  @override
   String get menuCreateNewProject => 'Créer un nouveau projet';
 
   @override

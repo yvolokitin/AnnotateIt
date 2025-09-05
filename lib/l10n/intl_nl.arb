@@ -155,6 +155,8 @@
   "menuAccount": "Account",
   "menuLearn": "Leren",
   "menuAbout": "Over",
+  "menuExportedDatasetsLong": "Geëxporteerde datasets",
+  "menuExportedDatasetsShort": "Datasets",
 
   "menuCreateNewProject": "Nieuw project aanmaken",
   "menuCreateFromDataset": "Aanmaken vanuit Dataset",

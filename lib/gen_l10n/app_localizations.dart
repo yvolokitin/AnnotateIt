@@ -782,6 +782,18 @@ abstract class AppLocalizations {
   /// **'About'**
   String get menuAbout;
 
+  /// No description provided for @menuExportedDatasetsLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported Datasets'**
+  String get menuExportedDatasetsLong;
+
+  /// No description provided for @menuExportedDatasetsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Datasets'**
+  String get menuExportedDatasetsShort;
+
   /// No description provided for @menuCreateNewProject.
   ///
   /// In en, this message translates to:

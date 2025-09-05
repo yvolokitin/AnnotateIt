@@ -380,6 +380,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuAbout => 'Over';
 
   @override
+  String get menuExportedDatasetsLong => 'Geëxporteerde datasets';
+
+  @override
+  String get menuExportedDatasetsShort => 'Datasets';
+
+  @override
   String get menuCreateNewProject => 'Nieuw project aanmaken';
 
   @override

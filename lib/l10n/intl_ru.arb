@@ -147,6 +147,8 @@
   "menuAccount": "Аккаунт",
   "menuLearn": "Обучение",
   "menuAbout": "О приложении",
+  "menuExportedDatasetsLong": "Экспортированные датасеты",
+  "menuExportedDatasetsShort": "Датасеты",
 
   "menuCreateNewProject": "Создать новый проект",
   "menuCreateFromDataset": "Создать из датасета",

@@ -376,6 +376,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuAbout => 'About';
 
   @override
+  String get menuExportedDatasetsLong => 'Exported Datasets';
+
+  @override
+  String get menuExportedDatasetsShort => 'Datasets';
+
+  @override
   String get menuCreateNewProject => 'Create new project';
 
   @override

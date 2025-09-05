@@ -155,6 +155,8 @@
   "menuAccount": "Konto",
   "menuLearn": "Lernen",
   "menuAbout": "Über",
+  "menuExportedDatasetsLong": "Exportierte Datensätze",
+  "menuExportedDatasetsShort": "Datensätze",
 
   "menuCreateNewProject": "Neues Projekt erstellen",
   "menuCreateFromDataset": "Aus Datensatz erstellen",

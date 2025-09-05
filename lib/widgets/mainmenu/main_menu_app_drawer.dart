@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import 'main_menu_drawer_item.dart';
+import 'exported_datasets_dialog.dart';
 
 class MainMenuAppDrawer extends StatelessWidget {
   final bool fullMode;
@@ -16,6 +17,7 @@ class MainMenuAppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
     return Drawer(
       child: Column(
@@ -43,6 +45,18 @@ class MainMenuAppDrawer extends StatelessWidget {
             title: l10n.menuAbout,
             isSelected: selectedIndex == 3,
             onTap: () => onItemSelected(3),
+          ),
+          const Spacer(),
+          MainMenuDrawerItem(
+            icon: Icons.folder_zip_outlined,
+            title: screenWidth>=1600 ? l10n.menuExportedDatasetsLong : l10n.menuExportedDatasetsShort,
+            isSelected: false,
+            onTap: () async {
+              await showDialog(
+                context: context,
+                builder: (context) => const ExportedDatasetsDialog(),
+              );
+            },
           ),
         ],
       ),

@@ -379,6 +379,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get menuAbout => 'Info';
 
   @override
+  String get menuExportedDatasetsLong => 'Set di dati esportati';
+
+  @override
+  String get menuExportedDatasetsShort => 'Set di dati';
+
+  @override
   String get menuCreateNewProject => 'Crea nuovo progetto';
 
   @override

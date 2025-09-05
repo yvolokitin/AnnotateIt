@@ -377,6 +377,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuAbout => 'О приложении';
 
   @override
+  String get menuExportedDatasetsLong => 'Экспортированные датасеты';
+
+  @override
+  String get menuExportedDatasetsShort => 'Датасеты';
+
+  @override
   String get menuCreateNewProject => 'Создать новый проект';
 
   @override

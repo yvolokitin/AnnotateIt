@@ -379,6 +379,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get menuAbout => 'Sobre';
 
   @override
+  String get menuExportedDatasetsLong => 'Conjuntos de dados exportados';
+
+  @override
+  String get menuExportedDatasetsShort => 'Conjuntos de dados';
+
+  @override
   String get menuCreateNewProject => 'Criar novo projeto';
 
   @override

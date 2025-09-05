@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/notification_database.dart';
 import '../dialogs/notifications_dialog.dart';
-import '../mainpage/exported_datasets_dialog.dart';
+import 'exported_datasets_dialog.dart';
 
 class AppHeader extends StatefulWidget {
   const AppHeader({super.key});
@@ -63,7 +63,7 @@ class AppHeaderState extends State<AppHeader> {
     return Container(
       height: headerHeight,
       color: Colors.red,
-      child: screenWidth < 600
+      child: screenWidth < 800
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -71,11 +71,10 @@ class AppHeaderState extends State<AppHeader> {
                 IconButton(
                   onPressed: _showExportedDatasetsDialog,
                   icon: const Icon(
-                    Icons.folder_outlined,
+                    Icons.folder_zip_outlined,
                     size: 24,
                     color: Colors.white,
                   ),
-                  tooltip: 'Exported datasets',
                 ),
 
                 // Center: app title

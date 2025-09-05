@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import 'exported_datasets_dialog.dart';
 
 class MainMenuNavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
@@ -43,7 +44,6 @@ class MainMenuNavigationRailMenu extends StatelessWidget {
             ),
           ),
 
-          // const Divider(color: Colors.white30),
           // Bottom buttons
           if (screenWidth<700)
             Padding(
@@ -95,6 +95,38 @@ class MainMenuNavigationRailMenu extends StatelessWidget {
                 ],
               ),
             ),
+
+          // Always-visible Exported datasets folder button at bottom
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10),
+            child: Tooltip(
+              message: l10n.menuExportedDatasetsLong,
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => const ExportedDatasetsDialog(),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[900],
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(
+                    size: 28,
+                    Icons.folder_zip_outlined,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
