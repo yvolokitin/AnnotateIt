@@ -78,14 +78,8 @@ class DatumaroExporter extends BaseDatasetExporter {
         try {
           final bytes = await sourceFile.readAsBytes();
           if (bytes.isNotEmpty) {
-            final datasetFolder = datasetIdToFolderName != null
-                ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
-                : 'dataset';
-            final imagePathInZip = mergeDatasets
-                ? 'images/$imageFileName'
-                : 'images/$datasetFolder/$imageFileName';
-            archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
-            _logger.fine('Added to ZIP: $imagePathInZip');
+            archive.addFile(ArchiveFile('images/$imageFileName', bytes.length, bytes));
+            _logger.fine('Added to ZIP: images/$imageFileName');
           }
         } catch (e) {
           _logger.severe('Failed to read ${sourceFile.path}: $e');
@@ -99,9 +93,7 @@ class DatumaroExporter extends BaseDatasetExporter {
       final Map<String, dynamic> item = {
         'id': itemId++, // Use sequential number for item ID
         'image': {
-          'path': (mergeDatasets
-              ? 'images/$imageFileName'
-              : 'images/${datasetIdToFolderName != null ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset') : 'dataset'}/$imageFileName'),
+          'path': 'images/$imageFileName',
           'size': [mediaItem.width ?? 0, mediaItem.height ?? 0],
         },
         'annotations': <Map<String, dynamic>>[],

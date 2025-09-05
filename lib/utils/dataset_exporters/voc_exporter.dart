@@ -59,13 +59,7 @@ class VOCExporter extends BaseDatasetExporter {
       if (await file.exists()) {
         try {
           final bytes = await file.readAsBytes();
-          final datasetFolder = datasetIdToFolderName != null
-              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
-              : 'dataset';
-          final imagePathInZip = mergeDatasets
-              ? 'JPEGImages/$fileName'
-              : 'JPEGImages/$datasetFolder/$fileName';
-          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
+          archive.addFile(ArchiveFile('JPEGImages/$fileName', bytes.length, bytes));
         } catch (e) {
           _logger.severe('Failed to read image ${file.path}: $e');
           continue;
@@ -83,13 +77,7 @@ class VOCExporter extends BaseDatasetExporter {
         );
         if (xml != null && xml.isNotEmpty) {
           final xmlBytes = utf8.encode(xml);
-          final datasetFolder = datasetIdToFolderName != null
-              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
-              : 'dataset';
-          final xmlPathInZip = mergeDatasets
-              ? 'Annotations/$baseName.xml'
-              : 'Annotations/$datasetFolder/$baseName.xml';
-          archive.addFile(ArchiveFile(xmlPathInZip, xmlBytes.length, xmlBytes));
+          archive.addFile(ArchiveFile('Annotations/$baseName.xml', xmlBytes.length, xmlBytes));
         }
       }
     }

@@ -70,13 +70,7 @@ class ZipExporter extends BaseDatasetExporter {
 
       final fileName = path.basename(mediaItem.filePath);
       final file = File(mediaItem.filePath);
-      final datasetFolder = datasetIdToFolderName != null
-          ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
-          : 'dataset';
-      final imagePathInZip = mergeDatasets
-          ? 'images/$fileName'
-          : 'images/$datasetFolder/$fileName';
-      
+
       if (!await file.exists()) {
         _logger.warning('Media file not found: ${mediaItem.filePath}');
         continue;
@@ -85,8 +79,8 @@ class ZipExporter extends BaseDatasetExporter {
       try {
         final bytes = await file.readAsBytes();
         if (bytes.isNotEmpty) {
-          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
-          mediaIdToFilename[mediaItem.id!] = mergeDatasets ? fileName : '$datasetFolder/$fileName';
+          archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
+          mediaIdToFilename[mediaItem.id!] = fileName;
         }
       } catch (e) {
         _logger.severe('Failed to read ${mediaItem.filePath}: $e');
