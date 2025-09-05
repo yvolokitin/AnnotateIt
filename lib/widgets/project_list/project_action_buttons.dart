@@ -25,7 +25,7 @@ class ProjectActionButtons extends StatelessWidget {
           onPressed: onCreate,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: screenWidth < 500 ? 11.2 : 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           icon: const Icon(Icons.add_circle_outline, color: Colors.white),
@@ -42,7 +42,7 @@ class ProjectActionButtons extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onImport,
           style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: screenWidth < 500 ? 11.2 : 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             side: const BorderSide(color: Colors.white54),
           ),

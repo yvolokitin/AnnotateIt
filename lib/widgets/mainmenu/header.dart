@@ -85,7 +85,7 @@ class AppHeaderState extends State<AppHeader> {
           Container(
             height: headerHeight,
             alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: screenWidth>600 ? 12 : 4),
             child: Text(
               screenWidth>1600 ? "AnnotateIt - Vision Annotations" : 'AnnotateIt',
               style: TextStyle(
@@ -141,7 +141,7 @@ class AppHeaderState extends State<AppHeader> {
             ),
           ),
           
-          const SizedBox(width: 16),
+          SizedBox(width: screenWidth>500 ? 16 : 4),
         ],
       ),
     );

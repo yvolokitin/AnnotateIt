@@ -383,7 +383,10 @@ class ProjectsListPageState extends State<ProjectsListPage> {
           (_filteredProjects.isEmpty && screenHeight>650)
             ? SafeArea(
                 top: false,
-                child: CrawlingSnakesFooter(height: 72, snakeCount: 7),
+                child: CrawlingSnakesFooter(
+                  height: screenWidth>500 ? 72 : 36,
+                  snakeCount: screenWidth>500 ? 7 : 5,
+                ),
               )
             : const SizedBox.shrink(),
         ],

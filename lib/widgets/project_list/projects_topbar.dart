@@ -111,8 +111,6 @@ class ProjectsTopBar extends StatelessWidget {
             const Spacer(),
           ],
 
-          // SizedBox(width: screenWidth>=700 ? 10 : 0),
-          // const Spacer(),
           PopupMenuButton<String>(
             icon: const Icon(Icons.swap_vert, color: Colors.white70),
             onSelected: onSortSelected,
@@ -151,7 +149,7 @@ class ProjectsTopBar extends StatelessWidget {
                   onTap: onCreateProject,
                   borderRadius: BorderRadius.circular(30),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth < 500 ? 10 : 16, vertical: 5),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth < 500 ? 10 : 16, vertical: screenWidth < 500 ? 3.5 : 5),
                     child: Tooltip(
                       message: l10n.menuCreateNewProject,
                       waitDuration: const Duration(milliseconds: 500),
@@ -159,7 +157,7 @@ class ProjectsTopBar extends StatelessWidget {
                           ? Icon(
                               Icons.add,
                               color: Colors.white,
-                              size: screenWidth >= 700 ? 24 : 22,
+                              size: (screenWidth >= 700 ? 24 : 22) * 0.7,
                             )
                           : Text(
                               l10n.menuCreateNewProject,
@@ -174,7 +172,7 @@ class ProjectsTopBar extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 30,
+                  height: screenWidth < 500 ? 21 : 30,
                   color: Colors.white,
                 ),
                 const SizedBox(width: 7),
@@ -184,7 +182,17 @@ class ProjectsTopBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     side: const BorderSide(color: Colors.white70, width: 1),
                   ),
-                  icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  icon: screenWidth < 500 ? null : const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  child: (screenWidth < 500)
+                      ? Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
+                          child: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                            size: (screenWidth >= 700 ? 24 : 22) * 0.7,
+                          ),
+                        )
+                      : null,
                   offset: const Offset(-10, 47),
                   onSelected: (value) {
                     if (value == 0) { onCreateProject(); }
