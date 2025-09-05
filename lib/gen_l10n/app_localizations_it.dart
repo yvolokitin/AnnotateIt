@@ -1523,4 +1523,19 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get preLabelStartPreAnnotation => 'Avvia pre‑annotazione';
+
+  @override
+  String get preLabelSummaryTitle => 'Riepilogo';
+
+  @override
+  String get preLabelSummaryLabelsAdded => 'Etichette aggiunte';
+
+  @override
+  String get preLabelSummaryImagesAnnotated => 'Immagini annotate';
+
+  @override
+  String get preLabelSummaryAnnotationsAdded => 'Annotazioni aggiunte';
+
+  @override
+  String get buttonOpenProject => 'Apri progetto';
 }

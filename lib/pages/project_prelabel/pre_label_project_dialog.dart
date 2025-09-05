@@ -267,7 +267,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             } catch (_) {}
           }
         }
-        if (orbit.length >= 8) break;
       }
       if (!mounted) return;
       setState(() { _orbitImages = orbit; });
@@ -286,7 +285,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
       if (mounted) {
         setState(() {
           _isScanning = false;
-          _inlineMessage = 'Failed to read datasets.';
+          _inlineMessage = AppLocalizations.of(context)!.preLabelErrorReadDatasets;
           _inlineMessageColor = Colors.redAccent;
         });
       }
@@ -718,6 +717,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     final progress = _totalImages == 0 ? 0.0 : _processed / (_totalImages.toDouble());
     final screenSize = MediaQuery.of(context).size;
     final bool isWide = screenSize.width > 1600;
+    final bool isCompact = screenSize.width < 650;
     final double targetWidth = isWide ? screenSize.width * 0.9 : screenSize.width;
     final double targetHeight = isWide ? screenSize.height * 0.9 : screenSize.height;
     final l10n = AppLocalizations.of(context)!;
@@ -926,24 +926,24 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                                 ),
                                                 if (_useTFLite)
                                                   Chip(
-                                                    label: Text(_isDetection ? 'Backend: TFLite Detection' : 'Backend: TFLite Classification'),
+                                                    label: Text(_isDetection ? l10n.preLabelBackendTfliteDetection : l10n.preLabelBackendTfliteClassification),
                                                     backgroundColor: Colors.green,
                                                     labelStyle: const TextStyle(color: Colors.white),
                                                     visualDensity: VisualDensity.compact,
                                                   )
                                                 else
-                                                  const Chip(
-                                                    label: Text('Backend: ML Kit'),
+                                                  Chip(
+                                                    label: Text(l10n.preLabelBackendMlkit),
                                                     backgroundColor: Colors.green,
-                                                    labelStyle: TextStyle(color: Colors.white),
+                                                    labelStyle: const TextStyle(color: Colors.white),
                                                     visualDensity: VisualDensity.compact,
                                                   ),
                                               ],
                                             ),
                                             const SizedBox(height: 6),
-                                            const Text(
-                                              'You can proceed with pre-labeling when ready.',
-                                              style: TextStyle(color: Colors.white70),
+                                            Text(
+                                              l10n.preLabelYouCanProceed,
+                                              style: const TextStyle(color: Colors.white70),
                                             ),
                                           ],
                                         ),
@@ -993,7 +993,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             ),
-                            child: Text(l10n.preLabelStartPreLabeling, style: TextStyle(color: Colors.white)),
+                            child: Text(isCompact ? l10n.preLabelStartPreLabeling.split(RegExp(r'\s+')).first : l10n.preLabelStartPreLabeling, style: TextStyle(color: Colors.white)),
                           );
                         }),
                       ],
@@ -1065,7 +1065,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.buttonCancel),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -1077,7 +1077,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: const Text('Next', style: TextStyle(color: Colors.white)),
+                      child: Text(l10n.buttonNext, style: const TextStyle(color: Colors.white)), 
                     ),
                   ],
                 ),
@@ -1122,9 +1122,8 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           const SizedBox(height: 16),
                           Text(
                             _totalImages > 0
-                                ? 'Progress: ${(progress * 100).toStringAsFixed(0)}%'
-                                : 'Scanning images...'
-                            ,
+                                ? l10n.preLabelProgressPercent((progress * 100).toStringAsFixed(0))
+                                : l10n.preLabelScanningImages,
                             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
                             textAlign: TextAlign.center,
                           ),
@@ -1137,7 +1136,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Processed $_processed of $_totalImages images',
+                            l10n.preLabelProcessedOfTotalImages(_processed, _totalImages),
                             style: const TextStyle(color: Colors.white70),
                             textAlign: TextAlign.center,
                           ),
@@ -1157,7 +1156,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'Pre-annotation summary',
+                            l10n.preLabelSummaryTitle,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -1167,11 +1166,11 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
-                          _buildSummaryStat('Labels added', _summaryLabelsAdded),
+                          _buildSummaryStat(l10n.preLabelSummaryLabelsAdded, _summaryLabelsAdded),
                           const SizedBox(height: 8),
-                          _buildSummaryStat('Images annotated', _summaryImagesAnnotated),
+                          _buildSummaryStat(l10n.preLabelSummaryImagesAnnotated, _summaryImagesAnnotated),
                           const SizedBox(height: 8),
-                          _buildSummaryStat('Annotations added', _summaryAnnotationsAdded),
+                          _buildSummaryStat(l10n.preLabelSummaryAnnotationsAdded, _summaryAnnotationsAdded),
                           const SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -1286,9 +1285,11 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          'Start pre-annotation',
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                          isCompact
+                              ? AppLocalizations.of(context)!.preLabelStartPreAnnotation.split(RegExp(r'\s+')).first
+                              : AppLocalizations.of(context)!.preLabelStartPreAnnotation,
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                   ],

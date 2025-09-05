@@ -615,5 +615,10 @@
   "preLabelSavingLabels": "Salvando etiquetas...",
   "preLabelErrorSaveLabelsOrAnnotate": "Falha ao salvar etiquetas ou anotar imagens",
   "preLabelAnnotatingImages": "Anotando imagens...",
-  "preLabelStartPreAnnotation": "Iniciar pré‑anotação"
+  "preLabelStartPreAnnotation": "Iniciar pré‑anotação",
+  "preLabelSummaryTitle": "Resumo",
+  "preLabelSummaryLabelsAdded": "Etiquetas adicionadas",
+  "preLabelSummaryImagesAnnotated": "Imagens anotadas",
+  "preLabelSummaryAnnotationsAdded": "Anotações adicionadas",
+  "buttonOpenProject": "Abrir projeto"
 }

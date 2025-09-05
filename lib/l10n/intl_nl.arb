@@ -615,5 +615,10 @@
   "preLabelSavingLabels": "Labels worden opgeslagen...",
   "preLabelErrorSaveLabelsOrAnnotate": "Labels opslaan of afbeeldingen annoteren mislukt",
   "preLabelAnnotatingImages": "Afbeeldingen annoteren...",
-  "preLabelStartPreAnnotation": "Voor‑annotatie starten"
+  "preLabelStartPreAnnotation": "Voor‑annotatie starten",
+  "preLabelSummaryTitle": "Samenvatting",
+  "preLabelSummaryLabelsAdded": "Toegevoegde labels",
+  "preLabelSummaryImagesAnnotated": "Geannoteerde afbeeldingen",
+  "preLabelSummaryAnnotationsAdded": "Toegevoegde annotaties",
+  "buttonOpenProject": "Project openen"
 }

@@ -1512,4 +1512,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get preLabelStartPreAnnotation => 'Начать предварительную аннотацию';
+
+  @override
+  String get preLabelSummaryTitle => 'Сводка';
+
+  @override
+  String get preLabelSummaryLabelsAdded => 'Добавлено меток';
+
+  @override
+  String get preLabelSummaryImagesAnnotated => 'Аннотированных изображений';
+
+  @override
+  String get preLabelSummaryAnnotationsAdded => 'Добавлено аннотаций';
+
+  @override
+  String get buttonOpenProject => 'Открыть проект';
 }

@@ -630,6 +630,10 @@
   "preLabelSavingLabels": "Saving labels...",
   "preLabelErrorSaveLabelsOrAnnotate": "Failed to save labels or annotate images",
   "preLabelAnnotatingImages": "Annotating images...",
-  "preLabelStartPreAnnotation": "Start pre-annotation"
-
+  "preLabelStartPreAnnotation": "Start pre-annotation",
+  "preLabelSummaryTitle": "Summary",
+  "preLabelSummaryLabelsAdded": "Labels added",
+  "preLabelSummaryImagesAnnotated": "Images annotated",
+  "preLabelSummaryAnnotationsAdded": "Annotations added",
+  "buttonOpenProject": "Open project"
 }

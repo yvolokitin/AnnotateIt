@@ -2699,6 +2699,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start pre-annotation'**
   String get preLabelStartPreAnnotation;
+
+  /// No description provided for @preLabelSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get preLabelSummaryTitle;
+
+  /// No description provided for @preLabelSummaryLabelsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels added'**
+  String get preLabelSummaryLabelsAdded;
+
+  /// No description provided for @preLabelSummaryImagesAnnotated.
+  ///
+  /// In en, this message translates to:
+  /// **'Images annotated'**
+  String get preLabelSummaryImagesAnnotated;
+
+  /// No description provided for @preLabelSummaryAnnotationsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotations added'**
+  String get preLabelSummaryAnnotationsAdded;
+
+  /// No description provided for @buttonOpenProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open project'**
+  String get buttonOpenProject;
 }
 
 class _AppLocalizationsDelegate

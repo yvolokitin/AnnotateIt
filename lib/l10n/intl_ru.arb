@@ -577,5 +577,10 @@
   "preLabelSavingLabels": "Сохранение меток...",
   "preLabelErrorSaveLabelsOrAnnotate": "Не удалось сохранить метки или аннотировать изображения",
   "preLabelAnnotatingImages": "Аннотирование изображений...",
-  "preLabelStartPreAnnotation": "Начать предварительную аннотацию"
+  "preLabelStartPreAnnotation": "Начать предварительную аннотацию",
+  "preLabelSummaryTitle": "Сводка",
+  "preLabelSummaryLabelsAdded": "Добавлено меток",
+  "preLabelSummaryImagesAnnotated": "Аннотированных изображений",
+  "preLabelSummaryAnnotationsAdded": "Добавлено аннотаций",
+  "buttonOpenProject": "Открыть проект"
 }

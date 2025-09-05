@@ -624,5 +624,10 @@
   "preLabelSavingLabels": "Labels werden gespeichert...",
   "preLabelErrorSaveLabelsOrAnnotate": "Labels konnten nicht gespeichert oder Bilder nicht annotiert werden",
   "preLabelAnnotatingImages": "Bilder werden annotiert...",
-  "preLabelStartPreAnnotation": "Vor‑Annotation starten"
+  "preLabelStartPreAnnotation": "Vor‑Annotation starten",
+  "preLabelSummaryTitle": "Zusammenfassung",
+  "preLabelSummaryLabelsAdded": "Hinzugefügte Labels",
+  "preLabelSummaryImagesAnnotated": "Annotierte Bilder",
+  "preLabelSummaryAnnotationsAdded": "Hinzugefügte Annotationen",
+  "buttonOpenProject": "Projekt öffnen"
 }

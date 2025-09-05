@@ -615,5 +615,10 @@
   "preLabelSavingLabels": "Enregistrement des étiquettes...",
   "preLabelErrorSaveLabelsOrAnnotate": "Échec de l’enregistrement des étiquettes ou de l’annotation des images",
   "preLabelAnnotatingImages": "Annotation des images...",
-  "preLabelStartPreAnnotation": "Démarrer la pré‑annotation"
+  "preLabelStartPreAnnotation": "Démarrer la pré‑annotation",
+  "preLabelSummaryTitle": "Récapitulatif",
+  "preLabelSummaryLabelsAdded": "Étiquettes ajoutées",
+  "preLabelSummaryImagesAnnotated": "Images annotées",
+  "preLabelSummaryAnnotationsAdded": "Annotations ajoutées",
+  "buttonOpenProject": "Ouvrir le projet"
 }

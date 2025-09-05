@@ -1511,4 +1511,19 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get preLabelStartPreAnnotation => 'Voor‑annotatie starten';
+
+  @override
+  String get preLabelSummaryTitle => 'Samenvatting';
+
+  @override
+  String get preLabelSummaryLabelsAdded => 'Toegevoegde labels';
+
+  @override
+  String get preLabelSummaryImagesAnnotated => 'Geannoteerde afbeeldingen';
+
+  @override
+  String get preLabelSummaryAnnotationsAdded => 'Toegevoegde annotaties';
+
+  @override
+  String get buttonOpenProject => 'Project openen';
 }
