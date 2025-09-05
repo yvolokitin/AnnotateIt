@@ -45,11 +45,14 @@ class ProjectDetailsNavigation extends StatelessWidget {
           ],
         ),
       );
-    } else {
+    } else if (screenWidth >= 800) {
       return ProjectDetailsNavigationRailMenu(
         selectedIndex: selectedIndex,
         onItemSelected: onItemSelected,
       );
+    } else {
+      // On small screens, navigation is shown at the bottom via ProjectDetailsBottomDrawerMenu in the page
+      return const SizedBox.shrink();
     }
   }
 }

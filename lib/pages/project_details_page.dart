@@ -5,6 +5,7 @@ import "../models/project.dart";
 import '../widgets/project_details/project_details_app_bar.dart';
 import '../widgets/project_details/project_details_navigation.dart';
 import '../widgets/project_details/project_details_content_switcher.dart';
+import '../widgets/project_details/project_details_bottom_drawer_menu.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 
@@ -87,9 +88,16 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[850],
+        bottomNavigationBar: screenWidth < 800
+            ? ProjectDetailsBottomDrawerMenu(
+                selectedIndex: selectedIndex,
+                onItemSelected: _onItemTapped,
+              )
+            : null,
         body: Column(
           children: [
             // In ProjectDetailsPage
