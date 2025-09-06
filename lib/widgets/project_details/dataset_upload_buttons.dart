@@ -16,6 +16,7 @@ import '../dialogs/camera_capture_dialog.dart';
 import '../dialogs/ffmpeg_check_dialog.dart';
 import '../../services/video_frame_extractor.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/photo_picker_service.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
   final Project project;
@@ -74,84 +75,155 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
   Future<void> _uploadMedia(BuildContext context) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
-      );
+      // Pick files/photos depending on platform
+      final bool isCupertino = Platform.isIOS || Platform.isMacOS;
+      final List<String> selectedPaths = [];
+      final List<String> selectedNames = [];
 
-      if (result != null && result.files.isNotEmpty) {
-        widget.onUploadingChanged(true);
-        final total = result.files.length;
-
-        if (widget.project.icon.contains('default_project_image') ||
-            widget.project.icon.contains('folder')) {
-          final platformFile = result.files[0];
-          final thumbnailFile = await generateThumbnailFromImage(
-              File(platformFile.path!), widget.project.id.toString());
-          if (thumbnailFile != null) {
-            await ProjectDatabase.instance
-                .updateProjectIcon(widget.project.id!, thumbnailFile.path);
+      if (isCupertino) {
+        // iOS/macOS: use system Photos picker for images
+        final images = await PhotoPickerService.pickMultipleImages();
+        if (images.isEmpty) {
+          widget.onUploadingChanged(false);
+          return;
+        }
+        for (final x in images) {
+          if (x.path.isNotEmpty) {
+            selectedPaths.add(x.path);
+            selectedNames.add(path.basename(x.path));
           }
         }
-
-        for (int i = 0; i < total; i++) {
-          if (widget.cancelUpload) {
-            widget.onUploadingChanged(false);
-            widget.onUploadError?.call();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Upload stopped")),
-            );
-            return;
-          }
-
-          final file = result.files[i];
-          final ext = file.extension?.toLowerCase() ?? 'unknown';
-          final currentUser = UserSession.instance.getUser();
-          if (currentUser.id == null) {
-            widget.onUploadError?.call();
-            return;
-          }
-
-          int? width;
-          int? height;
-          double? duration;
-          double? fps;
-          final isVideo = ['mp4', 'mov'].contains(ext);
-
-          if (isVideo) {
-            final videoMeta = await getVideoMetadata(file.path!);
-            width = videoMeta['width'];
-            height = videoMeta['height'];
-            duration = videoMeta['duration'];
-            fps = videoMeta['fps'];
-          } else {
-            final imageMeta = await getImageMetadata(file.path!);
-            width = imageMeta['width'];
-            height = imageMeta['height'];
-          }
-
-          await DatasetDatabase.instance.insertMediaItem(
-            widget.datasetId,
-            file.path!,
-            ext,
-            ownerId: currentUser.id!,
-            width: width,
-            height: height,
-            duration: duration,
-            fps: fps,
-            source: 'local',
-          );
-
-          widget.onFileProgress?.call(file.name, i + 1, total);
-        }
-
-        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
-        widget.onUploadingChanged(false);
-        widget.onUploadSuccess();
       } else {
-        widget.onUploadingChanged(false);
+        // Other platforms: use file picker for images/videos
+        final result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
+        );
+        if (result == null || result.files.isEmpty) {
+          widget.onUploadingChanged(false);
+          return;
+        }
+        for (final f in result.files) {
+          if (f.path != null) {
+            selectedPaths.add(f.path!);
+            selectedNames.add(f.name);
+          }
+        }
       }
+
+      widget.onUploadingChanged(true);
+      final total = selectedPaths.length;
+
+      // If default icon, set it from the first image
+      if (selectedPaths.isNotEmpty &&
+          (widget.project.icon.contains('default_project_image') ||
+              widget.project.icon.contains('folder'))) {
+        final thumbSrc = File(selectedPaths.first);
+        final thumbnailFile = await generateThumbnailFromImage(
+            thumbSrc, widget.project.id.toString());
+        if (thumbnailFile != null) {
+          await ProjectDatabase.instance
+              .updateProjectIcon(widget.project.id!, thumbnailFile.path);
+        }
+      }
+
+      // Prepare destination dataset dir for iOS/macOS copies
+      Directory? datasetDir;
+      if (isCupertino) {
+        final importRoot =
+            await UserSession.instance.getCurrentUserDatasetImportFolder();
+        datasetDir = Directory(path.join(
+          importRoot,
+          'project_${widget.project.id}',
+          'dataset_${widget.datasetId}',
+        ));
+        if (!datasetDir.existsSync()) {
+          datasetDir.createSync(recursive: true);
+        }
+      }
+
+      for (int i = 0; i < total; i++) {
+        if (widget.cancelUpload) {
+          widget.onUploadingChanged(false);
+          widget.onUploadError?.call();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Upload stopped")),
+          );
+          return;
+        }
+
+        final originalPath = selectedPaths[i];
+        final originalName = selectedNames[i];
+        final ext = path.extension(originalPath).replaceFirst('.', '').toLowerCase();
+        final isVideo = ['mp4', 'mov'].contains(ext);
+
+        final currentUser = UserSession.instance.getUser();
+        if (currentUser.id == null) {
+          widget.onUploadError?.call();
+          return;
+        }
+
+        // On iOS/macOS: copy the file into the app dataset folder
+        String finalPath = originalPath;
+        if (isCupertino && datasetDir != null) {
+          String candidateName = originalName.isEmpty
+              ? 'media_${DateTime.now().millisecondsSinceEpoch}.${ext.isEmpty ? 'bin' : ext}'
+              : originalName;
+          String destPath = path.join(datasetDir.path, candidateName);
+
+          // Ensure unique filename
+          if (File(destPath).existsSync()) {
+            final base = path.basenameWithoutExtension(candidateName);
+            final extension = path.extension(candidateName);
+            int k = 1;
+            while (File(destPath).existsSync()) {
+              final newName = '${base}_$k$extension';
+              destPath = path.join(datasetDir.path, newName);
+              k++;
+            }
+          }
+
+          await File(originalPath).copy(destPath);
+          finalPath = destPath;
+        }
+
+        // Gather metadata
+        int? width;
+        int? height;
+        double? duration;
+        double? fps;
+        if (isVideo) {
+          final videoMeta = await getVideoMetadata(finalPath);
+          width = videoMeta['width'];
+          height = videoMeta['height'];
+          duration = videoMeta['duration'];
+          fps = videoMeta['fps'];
+        } else {
+          final imageMeta = await getImageMetadata(finalPath);
+          width = imageMeta['width'];
+          height = imageMeta['height'];
+        }
+
+        await DatasetDatabase.instance.insertMediaItem(
+          widget.datasetId,
+          finalPath,
+          ext.isEmpty ? 'unknown' : ext,
+          ownerId: currentUser.id!,
+          width: width,
+          height: height,
+          duration: duration,
+          fps: fps,
+          source: isCupertino ? 'photos' : 'local',
+        );
+
+        widget.onFileProgress?.call(path.basename(finalPath), i + 1, total);
+      }
+
+      await ProjectDatabase.instance
+          .updateProjectLastUpdated(widget.project.id!);
+      widget.onUploadingChanged(false);
+      widget.onUploadSuccess();
     } catch (e) {
       print("_uploadMedia: Upload error: $e");
       widget.onUploadError?.call();
