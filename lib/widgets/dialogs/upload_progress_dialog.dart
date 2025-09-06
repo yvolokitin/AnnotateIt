@@ -70,86 +70,96 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
     // Check if cancellation is in progress
     final isCancelling = widget.files.any((file) => file.isCancelling);
     
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  isCancelling ? 'Cancelling Upload...' : 'Uploading Files',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: isCancelling ? Colors.orange : null,
+    final size = MediaQuery.of(context).size;
+    final isCompact = size.width < 800;
+
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
+        child: Container(
+          width: isCompact ? size.width : size.width * 0.9,
+          height: isCompact ? size.height : size.height * 0.9,
+          decoration: BoxDecoration(
+            color: Colors.grey[800],
+            border: Border.all(color: Colors.orangeAccent, width: 1),
+            borderRadius: isCompact ? null : BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with title and Cancel button (no minimize/hide)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isCancelling ? 'Cancelling Upload...' : 'Uploading Files',
+                    style: TextStyle(
+                      color: isCancelling ? Colors.orangeAccent : Colors.white,
+                      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'CascadiaCode',
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white70),
+                    tooltip: 'Cancel',
+                    onPressed: isCancelling ? null : widget.onCancel,
+                    color: isCancelling ? Colors.grey : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Overall progress
+              Text(
+                'Overall Progress: ${(overallProgress * 100).toStringAsFixed(0)}%',
+                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: overallProgress,
+                backgroundColor: Colors.grey[600],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isCancelling ? Colors.orange : Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Counts and notice
+              Text(
+                'Files: $currentFileIndex/$totalFiles',
+                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Note: Leaving this page will cancel the upload',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 12,
+                  fontFamily: 'CascadiaCode',
+                ),
+              ),
+              if (isCancelling)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Cancelling upload in progress...',
+                    style: TextStyle(
+                      color: Colors.orangeAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.minimize),
-                      tooltip: 'Minimize',
-                      onPressed: widget.onMinimize,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      tooltip: 'Cancel',
-                      onPressed: isCancelling ? null : widget.onCancel,
-                      color: isCancelling ? Colors.grey : null,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Overall Progress: ${(overallProgress * 100).toStringAsFixed(0)}%',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: overallProgress,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isCancelling ? Colors.orange : Colors.blue
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Files: $currentFileIndex/$totalFiles',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Note: Leaving this page will cancel the upload',
-              style: TextStyle(
-                color: Colors.orange[800],
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
-              ),
-            ),
-            if (isCancelling)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Cancelling upload in progress...',
-                  style: TextStyle(
-                    color: Colors.orange[800],
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 8),
-            Flexible(
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 300),
+              const SizedBox(height: 8),
+
+              // File list with per-file progress
+              Expanded(
                 child: ListView.builder(
-                  shrinkWrap: true,
                   itemCount: widget.files.length,
                   itemBuilder: (context, index) {
                     final file = widget.files[index];
@@ -163,10 +173,11 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                               Expanded(
                                 child: Text(
                                   file.filename,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: file.isCancelling ? Colors.orange : null,
+                                  style: TextStyle(
+                                    color: file.isCancelling ? Colors.orangeAccent : Colors.white,
                                     fontStyle: file.isCancelling ? FontStyle.italic : null,
                                     fontWeight: file.isCancelling ? FontWeight.bold : null,
+                                    fontFamily: 'CascadiaCode',
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -179,7 +190,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
                               value: file.progress,
-                              backgroundColor: Colors.grey[300],
+                              backgroundColor: Colors.grey[600],
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 file.progress >= 1.0 ? Colors.green : Colors.blue,
                               ),
@@ -191,8 +202,8 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                   },
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -453,32 +464,28 @@ class UploadProgressManagerState extends State<UploadProgressManager> {
       children: [
         widget.child,
         if (_isVisible)
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: _isMinimized
-                ? UploadProgressDialog(
-                    files: _files,
-                    isMinimized: true,
-                    onMinimize: () {},
-                    onRestore: () {
-                      setState(() {
-                        _isMinimized = false;
-                      });
-                    },
-                    onCancel: cancelUpload,
-                  )
-                : UploadProgressDialog(
+          Positioned.fill(
+            child: Stack(
+              children: [
+                // Scrim that blocks interactions with underlying UI
+                GestureDetector(
+                  onTap: () {}, // absorb taps (no dismiss)
+                  child: Container(
+                    color: Colors.black54,
+                  ),
+                ),
+                // Centered responsive dialog (no minimize/hide)
+                Center(
+                  child: UploadProgressDialog(
                     files: _files,
                     isMinimized: false,
-                    onMinimize: () {
-                      setState(() {
-                        _isMinimized = true;
-                      });
-                    },
+                    onMinimize: () {},
                     onRestore: () {},
                     onCancel: cancelUpload,
                   ),
+                ),
+              ],
+            ),
           ),
       ],
     );

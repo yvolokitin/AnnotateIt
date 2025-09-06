@@ -115,7 +115,57 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       widget.onUploadingChanged(true);
       final total = selectedPaths.length;
 
-      // If default icon, set it from the first image
+      // Prepare destination dataset dir for iOS/macOS copies EARLY and seed progress UI immediately
+      Directory? datasetDir;
+      List<String>? expectedNames;
+      if (isCupertino) {
+        final importRoot =
+            await UserSession.instance.getCurrentUserDatasetImportFolder();
+        datasetDir = Directory(path.join(
+          importRoot,
+          'project_${widget.project.id}',
+          'dataset_${widget.datasetId}',
+        ));
+        if (!datasetDir.existsSync()) {
+          datasetDir.createSync(recursive: true);
+        }
+
+        // Pre-compute final filenames to show consistent names in the progress UI
+        final usedNames = <String>{};
+        expectedNames = List<String>.filled(total, '', growable: false);
+        for (int i = 0; i < total; i++) {
+          final origPath = selectedPaths[i];
+          final origName = selectedNames[i];
+          final ext = path.extension(origPath).replaceFirst('.', '').toLowerCase();
+          String candidateName = origName.isEmpty
+              ? 'media_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.${ext.isEmpty ? 'bin' : ext}'
+              : origName;
+          String destPath = path.join(datasetDir.path, candidateName);
+
+          // Ensure unique filename (avoid clashes before copy)
+          if (File(destPath).existsSync() || usedNames.contains(candidateName)) {
+            final base = path.basenameWithoutExtension(candidateName);
+            final extension = path.extension(candidateName);
+            int k = 1;
+            String newName;
+            do {
+              newName = '${base}_$k$extension';
+              destPath = path.join(datasetDir.path, newName);
+              k++;
+            } while (File(destPath).existsSync() || usedNames.contains(newName));
+            candidateName = newName;
+          }
+          usedNames.add(candidateName);
+          expectedNames[i] = candidateName;
+        }
+
+        // Seed the upload progress immediately so the dialog appears without delay
+        for (int i = 0; i < total; i++) {
+          widget.onFileProgress?.call(expectedNames[i], 0, total);
+        }
+      }
+
+      // If default icon, set it from the first image (runs after dialog appears)
       if (selectedPaths.isNotEmpty &&
           (widget.project.icon.contains('default_project_image') ||
               widget.project.icon.contains('folder'))) {
@@ -128,20 +178,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         }
       }
 
-      // Prepare destination dataset dir for iOS/macOS copies
-      Directory? datasetDir;
-      if (isCupertino) {
-        final importRoot =
-            await UserSession.instance.getCurrentUserDatasetImportFolder();
-        datasetDir = Directory(path.join(
-          importRoot,
-          'project_${widget.project.id}',
-          'dataset_${widget.datasetId}',
-        ));
-        if (!datasetDir.existsSync()) {
-          datasetDir.createSync(recursive: true);
-        }
-      }
+      // datasetDir was prepared earlier for iOS/macOS to enable immediate progress UI
 
       for (int i = 0; i < total; i++) {
         if (widget.cancelUpload) {
@@ -167,12 +204,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         // On iOS/macOS: copy the file into the app dataset folder
         String finalPath = originalPath;
         if (isCupertino && datasetDir != null) {
-          String candidateName = originalName.isEmpty
-              ? 'media_${DateTime.now().millisecondsSinceEpoch}.${ext.isEmpty ? 'bin' : ext}'
-              : originalName;
+          String candidateName = (expectedNames != null && expectedNames.length == total)
+              ? expectedNames[i]
+              : (originalName.isEmpty
+                  ? 'media_${DateTime.now().millisecondsSinceEpoch}.${ext.isEmpty ? 'bin' : ext}'
+                  : originalName);
           String destPath = path.join(datasetDir.path, candidateName);
 
-          // Ensure unique filename
+          // Ensure unique filename (safety in case files changed since pre-compute)
           if (File(destPath).existsSync()) {
             final base = path.basenameWithoutExtension(candidateName);
             final extension = path.extension(candidateName);
