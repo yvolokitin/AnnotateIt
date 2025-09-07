@@ -417,22 +417,8 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     try {
       _logger.info('Starting project export: ${widget.project.name} as $selectedDatasetType');
       
-      // Validate export folder exists
-      final currentUser = UserSession.instance.getUser();
-      final exportFolder = currentUser.datasetExportFolder;
-      
-      try {
-        final directory = Directory(exportFolder);
-        if (!await directory.exists()) {
-          final errorMessage = 'Export directory does not exist: $exportFolder';
-          _logger.severe(errorMessage);
-          throw Exception(errorMessage);
-        }
-      } catch (e, stack) {
-        final errorMessage = 'Failed to check if export directory exists: $exportFolder';
-        _logger.severe(errorMessage, e, stack);
-        throw Exception('$errorMessage: ${e.toString()}');
-      }
+      // Resolve and ensure export folder exists (platform-aware)
+      final exportFolder = await UserSession.instance.getCurrentUserDatasetExportFolder();
       
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final filename = '${widget.project.name.replaceAll(' ', '_')}_${selectedDatasetType.toLowerCase()}_$timestamp.zip';
