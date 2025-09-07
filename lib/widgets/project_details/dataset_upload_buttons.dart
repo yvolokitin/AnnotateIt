@@ -578,20 +578,32 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         }
       }
 
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.custom,
-        allowedExtensions: ['mp4', 'mov'],
-      );
+      late String videoPath;
+      late String fileName;
+      if (Platform.isIOS) {
+        final xfile = await PhotoPickerService.pickSingleVideo();
+        if (xfile == null) {
+          logMsg('User cancelled Photos video picking.');
+          return;
+        }
+        videoPath = xfile.path;
+        fileName = path.basename(videoPath);
+      } else {
+        final result = await FilePicker.platform.pickFiles(
+          allowMultiple: false,
+          type: FileType.custom,
+          allowedExtensions: ['mp4', 'mov'],
+        );
 
-      if (result == null || result.files.isEmpty) {
-        logMsg('User cancelled file picking.');
-        return;
+        if (result == null || result.files.isEmpty) {
+          logMsg('User cancelled file picking.');
+          return;
+        }
+
+        final picked = result.files.first;
+        videoPath = picked.path!;
+        fileName = picked.name;
       }
-
-      final picked = result.files.first;
-      final videoPath = picked.path!;
-      final fileName = picked.name;
       logMsg('Selected file: ' + videoPath);
 
       widget.onUploadingChanged(true);

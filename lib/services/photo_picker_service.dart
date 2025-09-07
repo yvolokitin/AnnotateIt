@@ -55,6 +55,24 @@ class PhotoPickerService {
     }
   }
 
+  /// Pick a single video from the Photos/Gallery.
+  static Future<XFile?> pickSingleVideo({
+    Duration? maxDuration,
+  }) async {
+    try {
+      final result = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: maxDuration,
+      );
+      return result;
+    } catch (e, st) {
+      if (kDebugMode) {
+        print('pickSingleVideo error: $e\n$st');
+      }
+      return null;
+    }
+  }
+
   /// Helper to check if a picked file still exists on disk.
   static Future<bool> exists(XFile file) async {
     try {
