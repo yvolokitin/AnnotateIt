@@ -51,6 +51,143 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
     final screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
 
+    if (screenWidth < 800) {
+      final titleStyle = TextStyle(
+        color: Colors.orangeAccent,
+        fontFamily: 'CascadiaCode',
+        fontWeight: FontWeight.bold,
+        fontSize: 22,
+      );
+      final bodyStyle = TextStyle(
+        color: Colors.white70,
+        fontFamily: 'CascadiaCode',
+        fontWeight: FontWeight.normal,
+        fontSize: 18,
+      );
+      final inputTextStyle = TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontFamily: 'CascadiaCode',
+        fontWeight: FontWeight.normal,
+      );
+
+      return Dialog.fullscreen(
+        child: SafeArea(
+          child: Container(
+            color: Colors.grey[800],
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.edit_note_outlined,
+                      size: 28,
+                      color: Colors.orangeAccent,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.editDatasetTitle, style: titleStyle),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white70),
+                      tooltip: l10n.buttonClose,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(color: Colors.orangeAccent),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    l10n.editDatasetDescription,
+                    style: bodyStyle,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextField(
+                    controller: _controller,
+                    onChanged: (value) => setState(() {
+                      datasetName = value;
+                    }),
+                    decoration: InputDecoration(
+                      hintStyle: bodyStyle,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      filled: false,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.orangeAccent, width: 1),
+                      ),
+                    ),
+                    style: inputTextStyle,
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.buttonClose,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.normal,
+                          fontFamily: 'CascadiaCode',
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: _saveChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.buttonSave,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'CascadiaCode',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return AlertDialog(
       backgroundColor: Colors.grey[800],
       shape: RoundedRectangleBorder(
@@ -73,6 +210,12 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white70),
+            tooltip: l10n.buttonClose,
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
