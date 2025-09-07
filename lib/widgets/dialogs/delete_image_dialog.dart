@@ -115,6 +115,217 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 700;
 
+    if (screenWidth < 800) {
+      return Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.grey[800],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+          side: const BorderSide(color: Colors.redAccent, width: 1),
+        ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 16, right: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.delete_outline,
+                                size: 32,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                l10n.removeFilesFromDataset,
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontFamily: 'CascadiaCode',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isLargeScreen ? 24 : 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!_isDeleting)
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.redAccent),
+                              tooltip: l10n.buttonClose,
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(color: Colors.redAccent),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: _isDeleting
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(height: 40),
+                                    const CircularProgressIndicator(
+                                      color: Colors.redAccent,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Text(
+                                      l10n.removeFilesFromDatasetInProgress,
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontFamily: 'CascadiaCode',
+                                        fontSize: isLargeScreen ? 22 : 18,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.removeFilesFromDatasetConfirm(widget.mediaItems.length),
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontFamily: 'CascadiaCode',
+                                        fontSize: isLargeScreen ? 22 : 18,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    CheckboxListTile(
+                                      value: !_dbOnly,
+                                      onChanged: (v) => setState(() => _dbOnly = !(v ?? false)),
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      activeColor: Colors.redAccent,
+                                      checkColor: Colors.black,
+                                      title: Text(
+                                        l10n.deleteProjectOptionDeleteFromDisk,
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontFamily: 'CascadiaCode',
+                                          fontSize: isLargeScreen ? 20 : 16,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (_dbOnly)
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.info_outline, color: Colors.amberAccent),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              l10n.removeFilesDbOnlyNote,
+                                              style: const TextStyle(
+                                                color: Colors.amberAccent,
+                                                fontFamily: 'CascadiaCode',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    if (_dbOnly) const SizedBox(height: 16),
+                                    ...widget.mediaItems.map((item) {
+                                      final fileName = File(item.filePath).uri.pathSegments.last;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Icon(Icons.image, size: 24, color: Colors.white38),
+                                            const SizedBox(width: 15),
+                                            Expanded(
+                                              child: Text(
+                                                fileName,
+                                                style: TextStyle(
+                                                  color: Colors.white54,
+                                                  fontFamily: 'CascadiaCode',
+                                                  fontSize: isLargeScreen ? 20 : 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                    const Divider(color: Colors.redAccent),
+                    if (!_isDeleting)
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[800],
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: Colors.white70, width: 2),
+                                ),
+                              ),
+                              child: Text(
+                                l10n.buttonCancel,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'CascadiaCode',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isLargeScreen ? 22 : 18,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            ElevatedButton(
+                              onPressed: _deleteFiles,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[800],
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: Colors.redAccent, width: 2),
+                                ),
+                              ),
+                              child: Text(
+                                l10n.buttonDelete,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'CascadiaCode',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isLargeScreen ? 22 : 18,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
     return AlertDialog(
       backgroundColor: Colors.grey[800],
       shape: RoundedRectangleBorder(

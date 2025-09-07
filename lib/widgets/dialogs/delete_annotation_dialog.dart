@@ -68,7 +68,166 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
           }
         }
       },
-      child: AlertDialog(
+      child: (screenWidth < 800)
+          ? Dialog(
+              insetPadding: EdgeInsets.zero,
+              backgroundColor: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+                side: const BorderSide(color: Colors.orangeAccent, width: 1),
+              ),
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SizedBox(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 16, right: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 32,
+                                      color: Colors.orangeAccent,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      l10n.deleteAnnotationTitle,
+                                      style: TextStyle(
+                                        color: Colors.orangeAccent,
+                                        fontFamily: 'CascadiaCode',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth > 700 ? 24 : 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.orangeAccent),
+                                  onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+                                    shouldDelete: false,
+                                    dontAskAgain: false,
+                                  )),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(color: Colors.orangeAccent),
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(screenWidth > 1600 ? 40.0 : 20.0),
+                                    child: Text(
+                                      '${l10n.deleteAnnotationMessage} "${widget.annotation.name ?? l10n.unnamedAnnotation}"?',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontFamily: 'CascadiaCode',
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: screenWidth > 700 ? 22 : 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 25),
+                                  Row(
+                                    children: [
+                                      Checkbox(
+                                        value: _dontAskAgain,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _dontAskAgain = value ?? false;
+                                          });
+                                        },
+                                        activeColor: Colors.orangeAccent,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          "Remove annotations without confirmation in the future",
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontFamily: 'CascadiaCode',
+                                            fontSize: screenWidth > 700 ? 16 : 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 25),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Divider(color: Colors.orangeAccent),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+                                    shouldDelete: false,
+                                    dontAskAgain: false,
+                                  )),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                  ),
+                                  child: Text(
+                                    l10n.buttonCancel,
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontFamily: 'CascadiaCode',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenWidth > 700 ? 22 : 18,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context, DeleteAnnotationResult(
+                                    shouldDelete: true,
+                                    dontAskAgain: _dontAskAgain,
+                                  )),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red[900],
+                                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: const BorderSide(color: Colors.redAccent, width: 2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    l10n.buttonDelete,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'CascadiaCode',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenWidth > 700 ? 22 : 18,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            )
+          : AlertDialog(
         backgroundColor: Colors.grey[800],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

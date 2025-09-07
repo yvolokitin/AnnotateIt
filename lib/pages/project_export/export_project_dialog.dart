@@ -122,6 +122,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
   }
 
   Widget _buildHeader(double screenWidth) {
+    final isSmall = screenWidth < 800;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,14 +130,14 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
           children: [
             Icon(
               Icons.upload_file,
-              size: screenWidth >= 1600 ? 34 : 30,
+              size: isSmall ? 26 : (screenWidth >= 1600 ? 34 : 30),
               color: Theme.of(context).colorScheme.success,
             ),
             const SizedBox(width: 12),
             Text(
               'Export Project as Dataset',
               style: TextStyle(
-                fontSize: screenWidth >= 1600 ? 26 : 22,
+                fontSize: isSmall ? 20 : (screenWidth >= 1600 ? 26 : 22),
                 fontWeight: FontWeight.bold,
                 fontFamily: 'CascadiaCode',
                 color: Theme.of(context).colorScheme.success,
@@ -161,6 +162,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
   }
 
   Widget _buildExportOptions(double screenWidth) {
+    final isSmall = screenWidth < 800;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,16 +170,16 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
           Text(
             'Dataset Type',
             style: TextStyle(
-              fontSize: screenWidth > 1200 ? 22 : 18,
+              fontSize: isSmall ? 16 : (screenWidth > 1200 ? 22 : 18),
               fontWeight: FontWeight.bold,
               fontFamily: 'CascadiaCode',
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmall ? 10 : 16),
           Wrap(
-            spacing: 16,
-            runSpacing: 16,
+            spacing: isSmall ? 10 : 16,
+            runSpacing: isSmall ? 10 : 16,
             children: [
               _buildDatasetTypeCard('COCO', 'Common Objects in Context', Icons.photo_library),
               _buildDatasetTypeCard('YOLO', 'You Only Look Once', Icons.view_in_ar),
@@ -186,23 +188,23 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
               _buildDatasetTypeCard('ZIP', 'Simple ZIP Archive', Icons.folder_zip),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: isSmall ? 20 : 32),
           Text(
             'Export Options',
             style: TextStyle(
-              fontSize: screenWidth > 1200 ? 22 : 18,
+              fontSize: isSmall ? 16 : (screenWidth > 1200 ? 22 : 18),
               fontWeight: FontWeight.bold,
               fontFamily: 'CascadiaCode',
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmall ? 10 : 16),
           // Merge datasets toggle (first option)
           SwitchListTile(
             title: Text(
               'Merge all datasets into one images folder',
               style: TextStyle(
-                fontSize: screenWidth > 1200 ? 20 : 16,
+                fontSize: isSmall ? 14 : (screenWidth > 1200 ? 20 : 16),
                 fontFamily: 'CascadiaCode',
                 color: Colors.white,
               ),
@@ -211,7 +213,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                 ? Text(
                     'All datasets will be placed in separate folders by dataset name',
                     style: TextStyle(
-                      fontSize: screenWidth > 1200 ? 14 : 12,
+                      fontSize: isSmall ? 11 : (screenWidth > 1200 ? 14 : 12),
                       fontFamily: 'CascadiaCode',
                       color: Theme.of(context).colorScheme.muted,
                     ),
@@ -247,13 +249,15 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
 
   Widget _buildDatasetTypeCard(String type, String description, IconData icon) {
     final isSelected = selectedDatasetType == type;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 800;
     
     return InkWell(
       onTap: () => setState(() => selectedDatasetType = type),
       child: Container(
-        width: 220,
-        height: 160,
-        padding: const EdgeInsets.all(16),
+        width: isSmall ? 170 : 220,
+        height: isSmall ? 130 : 160,
+        padding: EdgeInsets.all(isSmall ? 12 : 16),
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).colorScheme.success.withOpacity(0.2) : Colors.grey[800],
           borderRadius: BorderRadius.circular(12),
@@ -271,16 +275,16 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                 Icon(
                   icon,
                   color: isSelected ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.muted,
-                  size: 28,
+                  size: isSmall ? 22 : 28,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: isSmall ? 8 : 10),
                 Expanded(
                   child: Text(
                     type,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: isSmall ? 16 : 20,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'CascadiaCode',
                       color: isSelected ? Theme.of(context).colorScheme.success : Colors.white,
@@ -289,14 +293,14 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isSmall ? 6 : 8),
             Expanded(
               child: Text(
                 description,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: isSmall ? 12 : 15,
                   fontFamily: 'CascadiaCode',
                   color: Theme.of(context).colorScheme.muted,
                 ),
@@ -314,11 +318,12 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
     ValueChanged<bool> onChanged,
     double screenWidth,
   ) {
+    final isSmall = screenWidth < 800;
     return SwitchListTile(
       title: Text(
         title,
         style: TextStyle(
-          fontSize: screenWidth > 1200 ? 20 : 16,
+          fontSize: isSmall ? 14 : (screenWidth > 1200 ? 20 : 16),
           fontFamily: 'CascadiaCode',
           color: Colors.white,
         ),
@@ -330,6 +335,8 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
   }
 
   Widget _buildBottomButtons(AppLocalizations l10n) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 800;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -340,6 +347,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             style: TextStyle(
               color: Theme.of(context).colorScheme.muted,
               fontFamily: 'CascadiaCode',
+              fontSize: isSmall ? 16 : null,
             ),
           ),
         ),
@@ -347,7 +355,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
           onPressed: _isExporting ? null : _handleExport,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey[850],
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: isSmall ? 12 : 16, vertical: isSmall ? 10 : 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
               side: BorderSide(color: Theme.of(context).colorScheme.success, width: 2),
@@ -355,11 +363,11 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
           ),
           child: Text(
             'Export',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontSize: isSmall ? 18 : 20,
             ),
           ),
         ),
