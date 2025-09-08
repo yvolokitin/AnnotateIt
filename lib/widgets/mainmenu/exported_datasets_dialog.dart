@@ -113,11 +113,24 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
     }
   }
 
-  Future<void> _shareFile(File file) async {
+  Future<void> _shareFile(BuildContext originContext, File file) async {
     try {
+      final box = originContext.findRenderObject() as RenderBox?;
+      final rect = box != null
+          ? (box.localToGlobal(Offset.zero) & box.size)
+          : const Rect.fromLTWH(0, 0, 0, 0);
+
       await Share.shareXFiles(
-        [XFile(file.path)],
+        [
+          XFile(
+            file.path,
+            mimeType: 'application/zip',
+            name: p.basename(file.path),
+          )
+        ],
         text: p.basename(file.path),
+        subject: p.basename(file.path),
+        sharePositionOrigin: rect,
       );
     } catch (e) {
       if (mounted) {
@@ -302,7 +315,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                           IconButton(
                                             tooltip: 'Share',
                                             icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
-                                            onPressed: () => _shareFile(file),
+                                            onPressed: () => _shareFile(context, file),
                                           ),
                                         ],
                                       ),
