@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui' show Offset, Rect;
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
@@ -115,23 +117,52 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
 
   Future<void> _shareFile(BuildContext originContext, File file) async {
     try {
-      final box = originContext.findRenderObject() as RenderBox?;
-      final rect = box != null
-          ? (box.localToGlobal(Offset.zero) & box.size)
-          : const Rect.fromLTWH(0, 0, 0, 0);
+      if (Platform.isIOS) {
+        // Compute a valid, non-zero rect anchored to the invoking widget
+        final ro = originContext.findRenderObject();
+        Rect originRect;
+        if (ro is RenderBox && ro.hasSize && ro.size.width > 0 && ro.size.height > 0) {
+          final topLeft = ro.localToGlobal(Offset.zero);
+          originRect = topLeft & ro.size;
 
-      await Share.shareXFiles(
-        [
-          XFile(
-            file.path,
-            mimeType: 'application/zip',
-            name: p.basename(file.path),
-          )
-        ],
-        text: p.basename(file.path),
-        subject: p.basename(file.path),
-        sharePositionOrigin: rect,
-      );
+          // Ensure the rect lies within the screen bounds; otherwise fallback to small center rect
+          final screenSize = MediaQuery.of(originContext).size;
+          final screenRect = Offset.zero & screenSize;
+          if (!originRect.overlaps(screenRect)) {
+            originRect = Rect.fromCenter(center: screenRect.center, width: 1, height: 1);
+          }
+        } else {
+          // Fallback: 1x1 rect at center of screen (non-zero and within bounds)
+          final screenSize = MediaQuery.of(originContext).size;
+          originRect = Rect.fromCenter(center: Offset(screenSize.width / 2, screenSize.height / 2), width: 1, height: 1);
+        }
+
+        await Share.shareXFiles(
+          [
+            XFile(
+              file.path,
+              mimeType: 'application/zip',
+              name: p.basename(file.path),
+            )
+          ],
+          text: p.basename(file.path),
+          subject: p.basename(file.path),
+          sharePositionOrigin: originRect,
+        );
+      } else {
+        // Desktop/mobile platforms do not require sharePositionOrigin
+        await Share.shareXFiles(
+          [
+            XFile(
+              file.path,
+              mimeType: 'application/zip',
+              name: p.basename(file.path),
+            )
+          ],
+          text: p.basename(file.path),
+          subject: p.basename(file.path),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -312,10 +343,12 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                             icon: const Icon(Icons.save_alt_rounded, color: Colors.white),
                                             onPressed: () => _saveFile(file),
                                           ),
-                                          IconButton(
-                                            tooltip: 'Share',
-                                            icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
-                                            onPressed: () => _shareFile(context, file),
+                                          Builder(
+                                            builder: (buttonCtx) => IconButton(
+                                              tooltip: 'Share',
+                                              icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
+                                              onPressed: () => _shareFile(buttonCtx, file),
+                                            ),
                                           ),
                                         ],
                                       ),
