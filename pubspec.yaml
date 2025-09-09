@@ -69,6 +69,7 @@ dependencies:
   crypto: ^3.0.6
   ffmpeg_kit_flutter_new: ^3.2.0
   tflite_flutter: ^0.11.0
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -160,7 +161,7 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/logo/annotateit_white_red.png"
 
-version: 4.3.0+27
+version: 4.4.0+31
 msix_config:
   display_name: AnnotateIt
   architecture: x64
@@ -181,3 +182,12 @@ msix_config:
   output_name: annotateit
   build_windows: true
   install_certificate: false
+
+flutter_native_splash:
+  ios: true
+  android: false
+  web: false
+  color: "#0B0F1A"
+  image: assets/logo/annotateit_white.png
+  color_dark: "#0B0F1A"
+  image_dark: assets/ios/AppStore_Icon_1024x1024.png
