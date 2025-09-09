@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../../utils/theme.dart';
 
 import '../../models/project.dart';
@@ -21,14 +22,25 @@ class ChangeProjectTypeDialog extends StatefulWidget {
   ChangeProjectTypeDialogState createState() => ChangeProjectTypeDialogState();
 }
 
-class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
+class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with SingleTickerProviderStateMixin {
   String currentProjectType = '';
   int currentStep = 1;
+  late final AnimationController _rotationController;
 
   @override
   void initState() {
     super.initState();
     currentProjectType = widget.project.type;
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -176,7 +188,14 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: Theme.of(context).colorScheme.warning),
+              SizedBox(
+                width: 160,
+                height: 160,
+                child: _SpotCloud(
+                  animation: _rotationController,
+                  color: Theme.of(context).colorScheme.warning,
+                ),
+              ),
               SizedBox(height: 20),
               Text(
                 l10n.changeProjectTypeMigrating,
@@ -212,7 +231,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
         ),
         Row(
           children: [
-            if (currentStep > 1)
+            if (currentStep == 2)
               TextButton(
                 onPressed: () => setState(() => currentStep--),
                 child: Text(
@@ -225,7 +244,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
               ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: _handleStepButtonPressed,
+              onPressed: currentStep == 3 ? null : _handleStepButtonPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[850],
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -257,26 +276,31 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
         setState(() => currentStep = 2);
       }
     } else if (currentStep == 2) {
-      // Step 2 confirmed – proceed to step 3: show loading and start migration
+      // Step 2 confirmed – proceed to step 3: show mutation animation and start migration
       setState(() => currentStep = 3);
+      _rotationController.repeat();
 
       try {
-        await ProjectTypeMigrator.migrateProjectType(
+        final migrationFuture = ProjectTypeMigrator.migrateProjectType(
           project: widget.project,
           newProjectType: currentProjectType,
         );
+        // Ensure the animation is visible at least 3 seconds
+        final minDelay = Future.delayed(const Duration(seconds: 3));
+        await Future.wait([migrationFuture, minDelay]);
 
-        // Add a short delay
-        await Future.delayed(const Duration(milliseconds: 1000));
-
-        // Close dialog and maybe reopen the updated project or show success
-        if (mounted) Navigator.of(context).pop('refresh');
+        if (mounted) {
+          _rotationController.stop();
+          Navigator.of(context).pop('refresh');
+        }
 
       } catch (e, stack) {
         debugPrint('Error during project type migration: $e');
         debugPrint(stack.toString());
 
         if (mounted) {
+          _rotationController.stop();
+          setState(() => currentStep = 2);
           Future.microtask(() {
             AlertErrorDialog.show(
               context,
@@ -288,5 +312,94 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> {
         }
       }
     }
+  }
+}
+
+
+class _SpotCloud extends StatelessWidget {
+  final Animation<double> animation;
+  final Color color;
+
+  const _SpotCloud({
+    super.key,
+    required this.animation,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _SpotCloudPainter(
+            t: animation.value,
+            color: color,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SpotCloudPainter extends CustomPainter {
+  final double t;
+  final Color color;
+
+  _SpotCloudPainter({
+    required this.t,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final s = size.shortestSide;
+
+    // Base parameters
+    final baseRadius = s * 0.08;
+    final globalScale = 0.95 + 0.15 * math.sin(2 * math.pi * t);
+
+    // Shared paint with varying opacity per spot
+    final paint = Paint()
+      ..color = color.withOpacity(0.55)
+      ..style = PaintingStyle.fill;
+
+    // Center spot (breathes)
+    final centerR = baseRadius * (1.2 + 0.4 * math.sin(2 * math.pi * (t + 0.07)));
+    canvas.drawCircle(center, centerR * globalScale, paint);
+
+    // Outer ring spots (mutate in size and orbit slightly)
+    const int count = 10;
+    for (int i = 0; i < count; i++) {
+      final angle = i * (2 * math.pi / count) + (t * 0.6) * 2 * math.pi; // slow rotation
+      final phase = t + i * 0.17;
+      final ringR = s * (0.22 + 0.05 * math.sin(2 * math.pi * phase));
+      final spotR = baseRadius * (0.7 + 0.6 * math.sin(2 * math.pi * (phase + 0.33)));
+      final pos = center + Offset(math.cos(angle), math.sin(angle)) * ringR * globalScale;
+
+      final localOpacity = 0.35 + 0.25 * (0.5 + 0.5 * math.sin(2 * math.pi * (phase + 0.5)));
+      final p = paint..color = color.withOpacity(localOpacity.clamp(0.2, 0.9));
+      canvas.drawCircle(pos, spotR.abs() * globalScale, p);
+    }
+
+    // Inner orbiters for richness
+    const int innerCount = 6;
+    for (int i = 0; i < innerCount; i++) {
+      final angle = i * (2 * math.pi / innerCount) - (t * 1.0) * 2 * math.pi; // counter-rotation
+      final phase = t + i * 0.29 + 0.13;
+      final ringR = s * (0.12 + 0.03 * math.sin(2 * math.pi * phase));
+      final spotR = baseRadius * (0.5 + 0.45 * math.sin(2 * math.pi * (phase + 0.2)));
+      final pos = center + Offset(math.cos(angle), math.sin(angle)) * ringR * globalScale;
+
+      final localOpacity = 0.3 + 0.3 * (0.5 + 0.5 * math.sin(2 * math.pi * phase));
+      final p = paint..color = color.withOpacity(localOpacity.clamp(0.2, 0.8));
+      canvas.drawCircle(pos, spotR.abs() * globalScale, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpotCloudPainter oldDelegate) {
+    return oldDelegate.t != t || oldDelegate.color != color;
   }
 }
