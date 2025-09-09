@@ -51,118 +51,229 @@ class StepDatasetTaskConfirmationState
     final detectedTasks = widget.archive.taskTypes.toSet();
     final allEnabled = detectedTasks.contains("Unknown") || detectedTasks.isEmpty;
 
+    final double width = MediaQuery.of(context).size.width;
+    final bool isCompact = width < 700;
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
+            if (isCompact)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
                     "Choose your Project type based on detected annotations",
                     style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'CascadiaCode',
                         color: Colors.white),
                   ),
-                ),
-                if (!allEnabled)
-                Row(
-                  children: [
-                    const Text(
-                      "Allow Project Type Change",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
-                      ),
-                    ),
-                    Switch(
-                      value: ignoreDisabled,
-                      onChanged: (value) {
-                        setState(() {
-                          ignoreDisabled = value;
-                        });
-
-                        //  Auto-show helper dialog after enabling if user setting allows it
-                        if (value && UserSession.instance.isInitialized) {
-                          final user = UserSession.instance.getUser();
-                          if (user.projectShowImportWarning) {
-                            Future.delayed(Duration.zero, () {
-                              DatasetImportProjectTypeHelper.show(context);
+                  const SizedBox(height: 8),
+                  if (!allEnabled)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Allow Project Type Change",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
+                        Switch(
+                          value: ignoreDisabled,
+                          onChanged: (value) {
+                            setState(() {
+                              ignoreDisabled = value;
                             });
-                          }
-                        }
-                      },
-                      activeColor: Colors.redAccent,
+
+                            //  Auto-show helper dialog after enabling if user setting allows it
+                            if (value && UserSession.instance.isInitialized) {
+                              final user = UserSession.instance.getUser();
+                              if (user.projectShowImportWarning) {
+                                Future.delayed(Duration.zero, () {
+                                  DatasetImportProjectTypeHelper.show(context);
+                                });
+                              }
+                            }
+                          },
+                          activeColor: Colors.redAccent,
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.help_outline, color: Colors.white70),
+                          tooltip: 'Help',
+                          onPressed: () {
+                            DatasetImportProjectTypeHelper.show(context);
+                          },
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: const Icon(Icons.help_outline, color: Colors.white70),
-                      tooltip: 'Help',
-                      onPressed: () {
-                        DatasetImportProjectTypeHelper.show(context);
-                      },
+                ],
+              )
+            else
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      "Choose your Project type based on detected annotations",
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'CascadiaCode',
+                          color: Colors.white),
                     ),
-                  ],
-                ),
-                
-              ],
-            ),
+                  ),
+                  if (!allEnabled)
+                    Row(
+                      children: [
+                        const Text(
+                          "Allow Project Type Change",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
+                        Switch(
+                          value: ignoreDisabled,
+                          onChanged: (value) {
+                            setState(() {
+                              ignoreDisabled = value;
+                            });
+
+                            //  Auto-show helper dialog after enabling if user setting allows it
+                            if (value && UserSession.instance.isInitialized) {
+                              final user = UserSession.instance.getUser();
+                              if (user.projectShowImportWarning) {
+                                Future.delayed(Duration.zero, () {
+                                  DatasetImportProjectTypeHelper.show(context);
+                                });
+                              }
+                            }
+                          },
+                          activeColor: Colors.redAccent,
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.help_outline, color: Colors.white70),
+                          tooltip: 'Help',
+                          onPressed: () {
+                            DatasetImportProjectTypeHelper.show(context);
+                          },
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             
             // Show polygon conversion option only for detection projects
             if (selectedTask != null && selectedTask!.toLowerCase().contains('detection'))
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        "Convert polygon annotations to bounding boxes",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'CascadiaCode',
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ),
-                    Switch(
-                      value: convertPolygonsToBbox,
-                      onChanged: (value) {
-                        setState(() {
-                          convertPolygonsToBbox = value;
-                        });
-                      },
-                      activeColor: Colors.redAccent,
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: const Icon(Icons.help_outline, color: Colors.white70),
-                      tooltip: 'Convert polygon annotations to bounding boxes for detection projects',
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Polygon Conversion'),
-                            content: const Text(
-                              'When enabled, polygon annotations will be converted to bounding boxes for detection projects. '
-                              'This allows you to use segmentation datasets for detection tasks by automatically '
-                              'calculating the bounding box that encompasses each polygon.',
+                child: isCompact
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Convert polygon annotations to bounding boxes",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'CascadiaCode',
+                              color: Colors.white70,
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('OK'),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: convertPolygonsToBbox,
+                                onChanged: (value) {
+                                  setState(() {
+                                    convertPolygonsToBbox = value;
+                                  });
+                                },
+                                activeColor: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 4),
+                              IconButton(
+                                icon: const Icon(Icons.help_outline, color: Colors.white70),
+                                tooltip: 'Convert polygon annotations to bounding boxes for detection projects',
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Polygon Conversion'),
+                                      content: const Text(
+                                        'When enabled, polygon annotations will be converted to bounding boxes for detection projects. '
+                                        'This allows you to use segmentation datasets for detection tasks by automatically '
+                                        'calculating the bounding box that encompasses each polygon.',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Convert polygon annotations to bounding boxes",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'CascadiaCode',
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ),
+                          Switch(
+                            value: convertPolygonsToBbox,
+                            onChanged: (value) {
+                              setState(() {
+                                convertPolygonsToBbox = value;
+                              });
+                            },
+                            activeColor: Colors.redAccent,
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(Icons.help_outline, color: Colors.white70),
+                            tooltip: 'Convert polygon annotations to bounding boxes for detection projects',
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Polygon Conversion'),
+                                  content: const Text(
+                                    'When enabled, polygon annotations will be converted to bounding boxes for detection projects. '
+                                    'This allows you to use segmentation datasets for detection tasks by automatically '
+                                    'calculating the bounding box that encompasses each polygon.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
               ),
             const SizedBox(height: 16),
             LayoutBuilder(

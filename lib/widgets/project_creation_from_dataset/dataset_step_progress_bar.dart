@@ -10,35 +10,62 @@ class DatasetStepProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 700;
+
+    if (isCompact) {
+      // Compact layout: avoid Expanded in unbounded width by removing connectors
+      // and slightly reducing sizes.
+      return Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            _buildStep(l10n.datasetStepProgressSelection, 1, true),
+            _buildStep(l10n.datasetStepProgressExtract, 2, true),
+            _buildStep(l10n.datasetStepProgressOverview, 3, true),
+            _buildStep(l10n.datasetStepProgressTaskConfirmation, 4, true),
+            _buildStep(l10n.datasetStepProgressProjectCreation, 5, true),
+          ],
+        ),
+      );
+    }
+
     return Row(
       children: [
-        _buildStep(l10n.datasetStepProgressSelection, 1),
+        _buildStep(l10n.datasetStepProgressSelection, 1, false),
         _buildLine(),
-        _buildStep(l10n.datasetStepProgressExtract, 2),
+        _buildStep(l10n.datasetStepProgressExtract, 2, false),
         _buildLine(),
-        _buildStep(l10n.datasetStepProgressOverview, 3),
+        _buildStep(l10n.datasetStepProgressOverview, 3, false),
         _buildLine(),
-        _buildStep(l10n.datasetStepProgressTaskConfirmation, 4),
+        _buildStep(l10n.datasetStepProgressTaskConfirmation, 4, false),
         _buildLine(),
-        _buildStep(l10n.datasetStepProgressProjectCreation, 5),
+        _buildStep(l10n.datasetStepProgressProjectCreation, 5, false),
       ],
     );
   }
 
-  Widget _buildStep(String label, int stepIndex) {
+  Widget _buildStep(String label, int stepIndex, bool compact) {
     final isActive = currentStep == stepIndex;
     final isCompleted = currentStep > stepIndex;
     final icon = _getStepIcon(stepIndex);
 
+    final double circleSize = compact ? 36 : 48;
+    final double iconSize = compact ? 16 : 18;
+    final double fontSize = compact ? 12 : 14;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
           message: label,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            width: 48,
-            height: 48,
+            width: circleSize,
+            height: circleSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: isActive
@@ -60,7 +87,7 @@ class DatasetStepProgressBar extends StatelessWidget {
               child: Icon(
                 isCompleted ? Icons.check : icon,
                 color: Colors.white,
-                size: 18,
+                size: iconSize,
               ),
             ),
           ),
@@ -69,7 +96,7 @@ class DatasetStepProgressBar extends StatelessWidget {
         AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 300),
           style: TextStyle(
-            fontSize: 14,
+            fontSize: fontSize,
             fontFamily: 'CascadiaCode',
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             color: isActive || isCompleted ? Colors.white : Colors.white54,

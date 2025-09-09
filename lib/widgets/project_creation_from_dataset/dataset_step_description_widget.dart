@@ -17,6 +17,8 @@ class StepDescriptionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 700;
     
     if (currentStep == 1) {
       return Text(
@@ -46,15 +48,28 @@ class StepDescriptionWidget extends StatelessWidget {
                 await launchUrl(Uri.file(extractedPath!), mode: LaunchMode.platformDefault);
               }
             },
-            child: Text(
-              l10n.datasetStepExtractedPath(extractedPath ?? ''),
-              style: const TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 18,
-                fontFamily: 'CascadiaCode',
-                decoration: TextDecoration.underline,
-              ),
-            ),
+            child: isCompact
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Text(
+                      l10n.datasetStepExtractedPath(extractedPath ?? ''),
+                      style: const TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 18,
+                        fontFamily: 'CascadiaCode',
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  )
+                : Text(
+                    l10n.datasetStepExtractedPath(extractedPath ?? ''),
+                    style: const TextStyle(
+                      color: Colors.blueAccent,
+                      fontSize: 18,
+                      fontFamily: 'CascadiaCode',
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
           ),
           const SizedBox(height: 12),
           Text(

@@ -51,12 +51,16 @@ class StepDatasetOverview extends StatelessWidget {
   Widget _buildCard(BuildContext context, Icon icon, String title, List<Widget> rows) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double horizontalPadding = 40; // approximate total horizontal padding
+    final double availableWidth = (screenWidth - horizontalPadding).clamp(0.0, double.infinity);
+    final double finalCardWidth = availableWidth < 480 ? availableWidth : 480;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 480,
+        width: finalCardWidth,
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),

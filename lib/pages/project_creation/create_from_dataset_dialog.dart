@@ -445,6 +445,52 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   Widget _buildActionButtons() {
     final l10n = AppLocalizations.of(context)!;
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 700;
+
+    final Widget primaryButton = ElevatedButton(
+      onPressed: _isCreatingProject ? null : _goToNextStep,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: _isCreatingProject
+          ? const CircularProgressIndicator(color: Colors.white)
+          : Text(
+              _currentStep == 3 ? l10n.buttonNextConfirmTask : l10n.buttonCreateProject,
+              style: const TextStyle(
+                color: Colors.black,
+                fontFamily: 'CascadiaCode',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+    );
+
+    if (isCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: _handleCancel,
+              child: Text(
+                l10n.buttonCancel,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontFamily: 'CascadiaCode',
+                ),
+              ),
+            ),
+          ),
+          if ((_currentStep == 3 || _currentStep == 4) && !_isUploading) ...[
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, child: primaryButton),
+          ],
+        ],
+      );
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -459,28 +505,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             ),
           ),
         ),
-        if ((_currentStep == 3 || _currentStep == 4) && !_isUploading)
-          ElevatedButton(
-            onPressed: _isCreatingProject ? null : _goToNextStep,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            ),
-            child: _isCreatingProject
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    _currentStep == 3 
-                        ? l10n.buttonNextConfirmTask 
-                        : l10n.buttonCreateProject,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'CascadiaCode',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-          ),
+        if ((_currentStep == 3 || _currentStep == 4) && !_isUploading) primaryButton,
       ],
     );
   }
