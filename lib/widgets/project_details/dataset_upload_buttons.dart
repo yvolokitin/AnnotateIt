@@ -1479,21 +1479,29 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     if (screenWidth < 1024) {
       return Tooltip(
         message: tooltip ?? buttonName,
-        child: ElevatedButton(
-          onPressed: buttonOnPressed,
-          style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(14),
-            backgroundColor: Colors.transparent,
-            side: BorderSide(
-              color: buttonOnPressed == null ? Colors.grey : borderColor, 
-              width: 1
+        child: SizedBox(
+          width: smallScreen ? 36 : 40,
+          height: smallScreen ? 36 : 40,
+          child: ElevatedButton(
+            onPressed: buttonOnPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+                side: BorderSide(
+                  color: buttonOnPressed == null ? Colors.grey : borderColor,
+                  width: 1,
+                ),
+              ),
+              fixedSize: Size.square(smallScreen ? 36 : 40),
+            ),
+            child: Icon(
+              buttonIcon,
+              color: buttonOnPressed == null ? Colors.grey : borderColor,
+              size: smallScreen ? 24 : 26,
             ),
           ),
-          child: Icon(
-            buttonIcon,
-            color: buttonOnPressed == null ? Colors.grey : borderColor,
-            size: smallScreen ? 24 : 30),
         ),
       );
 
