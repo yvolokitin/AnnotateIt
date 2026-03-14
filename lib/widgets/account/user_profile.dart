@@ -9,6 +9,7 @@ import '../app_snackbar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
+import 'package:in_app_review/in_app_review.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({
@@ -50,6 +51,35 @@ class _UserProfileState extends State<UserProfile> {
     Future.delayed(const Duration(milliseconds: 700)).then((_) {
       try { entry.remove(); } catch (_) {}
     });
+  }
+
+  Future<void> _requestInAppReview() async {
+    try {
+      final inAppReview = InAppReview.instance;
+      final available = await inAppReview.isAvailable();
+      if (available) {
+        await inAppReview.requestReview();
+      } else {
+        // Fallback: On Android we can open the Play Store listing without specifying the ID.
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          await inAppReview.openStoreListing();
+        } else {
+          AppSnackbar.show(
+            context,
+            'Reviews are not available right now.',
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+          );
+        }
+      }
+    } catch (_) {
+      AppSnackbar.show(
+        context,
+        'Could not open the review dialog.',
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+      );
+    }
   }
 
   @override
@@ -94,7 +124,17 @@ class _UserProfileState extends State<UserProfile> {
                     children: [
                       FloatingActionButton.extended(
                         onPressed: () async {
-                          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+                          if (kIsWeb) {
+                            AppSnackbar.show(
+                              context,
+                              'In-app reviews are not supported on web.',
+                              backgroundColor: Colors.redAccent,
+                              textColor: Colors.white,
+                            );
+                            return;
+                          }
+
+                          if (defaultTargetPlatform == TargetPlatform.windows) {
                             final uri = Uri.parse('https://apps.microsoft.com/detail/9N640T6RLT89?hl=en-us&gl=NL&ocid=pdpshare');
                             final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
                             if (!ok) {
@@ -105,7 +145,22 @@ class _UserProfileState extends State<UserProfile> {
                                 textColor: Colors.white,
                               );
                             }
+                            return;
                           }
+
+                          if (defaultTargetPlatform == TargetPlatform.iOS ||
+                              defaultTargetPlatform == TargetPlatform.android ||
+                              defaultTargetPlatform == TargetPlatform.macOS) {
+                            await _requestInAppReview();
+                            return;
+                          }
+
+                          AppSnackbar.show(
+                            context,
+                            'In-app reviews are not supported on this platform.',
+                            backgroundColor: Colors.redAccent,
+                            textColor: Colors.white,
+                          );
                         },
                         elevation: 0,
                         backgroundColor: Colors.grey.shade300,
