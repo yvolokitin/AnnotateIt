@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../gen_l10n/app_localizations.dart';
+import '../../gen_l10n/app_localizations.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
   // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project

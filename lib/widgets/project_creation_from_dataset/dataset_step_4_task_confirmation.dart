@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'dataset_dialog_project_type_helper.dart';
-import '../../../models/archive.dart';
+import '../../models/archive.dart';
 import '../../session/user_session.dart';
 
 class StepDatasetTaskConfirmation extends StatefulWidget {

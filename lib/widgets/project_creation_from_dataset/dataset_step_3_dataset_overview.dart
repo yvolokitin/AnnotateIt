@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'dataset_dialog_show_all_labels.dart';
-import '../../../models/archive.dart';
+import '../../models/archive.dart';
 
 class StepDatasetOverview extends StatelessWidget {
   final Archive archive;

@@ -5,10 +5,10 @@ import 'package:logging/logging.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 
-import '../../../models/archive.dart';
-import '../../../session/user_session.dart';
-import '../../../utils/dataset_import_utils.dart';
-import '../../../utils/dataset_import_project_creation.dart';
+import '../../models/archive.dart';
+import '../../session/user_session.dart';
+import '../../utils/dataset_import_utils.dart';
+import '../../utils/dataset_import_project_creation.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
 import '../../widgets/project_creation_from_dataset/dataset_upload_prompt.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_description_widget.dart';

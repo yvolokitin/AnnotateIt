@@ -7,7 +7,7 @@ import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
 
 import '../data/dataset_database.dart';
-import '../../data/annotation_database.dart';
+import '../data/annotation_database.dart';
 import '../session/user_session.dart';
 
 Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async {

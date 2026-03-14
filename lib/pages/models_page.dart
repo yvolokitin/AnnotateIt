@@ -5,7 +5,7 @@ import '../widgets/model_cards/model_card_build_in.dart';
 import '../widgets/model_cards/model_card_comming_soon.dart';
 import '../widgets/model_cards/models_top_bar.dart';
 
-import '../../gen_l10n/app_localizations.dart';
+import '../gen_l10n/app_localizations.dart';
 
 class ModelInfo {
   final String id;

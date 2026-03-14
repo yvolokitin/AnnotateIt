@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import '../../../utils/date_utils.dart';
+import '../../utils/date_utils.dart';
 import '../../models/project.dart';
 import '../dialogs/edit_project_name_dialog.dart';
 

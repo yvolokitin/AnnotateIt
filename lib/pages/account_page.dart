@@ -10,7 +10,7 @@ import '../widgets/account/account_storage.dart';
 import '../widgets/account/application_settings.dart';
 import '../widgets/responsive/responsive_layout.dart';
 
-import '../../gen_l10n/app_localizations.dart';
+import '../gen_l10n/app_localizations.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});

@@ -7,7 +7,7 @@ import '../widgets/project_details/project_details_navigation.dart';
 import '../widgets/project_details/project_details_content_switcher.dart';
 import '../widgets/project_details/project_details_bottom_drawer_menu.dart';
 
-import '../../gen_l10n/app_localizations.dart';
+import '../gen_l10n/app_localizations.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   final Project project;
