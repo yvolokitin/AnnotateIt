@@ -18,7 +18,9 @@ class DatasetDatabase {
   // Receive shared db from external source
   Future<Database> get database async {
     if (_db != null) return _db!;
-    throw Exception("Database is not initialized. Inject it via setDatabase().");
+    throw Exception(
+      "Database is not initialized. Inject it via setDatabase().",
+    );
   }
 
   void setDatabase(Database db) {
@@ -122,11 +124,7 @@ class DatasetDatabase {
       );
 
       // Step 2: Delete the dataset itself
-      await txn.delete(
-        'datasets',
-        where: 'id = ?',
-        whereArgs: [datasetId],
-      );
+      await txn.delete('datasets', where: 'id = ?', whereArgs: [datasetId]);
 
       // Step 3: If we know the project, check remaining images across the project
       if (projectId != null) {
@@ -152,7 +150,11 @@ class DatasetDatabase {
 
   Future<List<Dataset>> fetchDatasetsForProject(int projectId) async {
     final db = await database;
-    final result = await db.query('datasets', where: 'projectId = ?', whereArgs: [projectId]);
+    final result = await db.query(
+      'datasets',
+      where: 'projectId = ?',
+      whereArgs: [projectId],
+    );
     return result.map((map) => Dataset.fromMap(map)).toList();
   }
 
@@ -163,6 +165,7 @@ class DatasetDatabase {
       'media_items',
       where: 'datasetId = ?',
       whereArgs: [datasetId],
+      orderBy: 'id ASC',
     );
 
     return mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
@@ -183,12 +186,16 @@ class DatasetDatabase {
     final datasetMap = datasetResult.first;
 
     // Step 2: Load folder IDs via the junction table
-    final folderResults = await db.rawQuery('''
+    final folderResults = await db.rawQuery(
+      '''
       SELECT folderId FROM dataset_media_folders
       WHERE datasetId = ?
-    ''', [datasetId]);
+    ''',
+      [datasetId],
+    );
 
-    final folderIds = folderResults.map((row) => row['folderId'] as int).toList();
+    final folderIds =
+        folderResults.map((row) => row['folderId'] as int).toList();
 
     // Step 3: Return Dataset with folders field populated
     return Dataset.fromMap(datasetMap).copyWith(folders: folderIds);
@@ -206,9 +213,10 @@ class DatasetDatabase {
     double? fps,
     String? source, // e.g., 'uploaded', 'imported', 'url'
   }) async {
-    final type = (ext.toLowerCase() == 'mp4' || ext.toLowerCase() == 'mov')
-      ? MediaType.video
-      : MediaType.image;
+    final type =
+        (ext.toLowerCase() == 'mp4' || ext.toLowerCase() == 'mov')
+            ? MediaType.video
+            : MediaType.image;
 
     final mediaItem = MediaItem(
       uuid: const Uuid().v4(),
@@ -326,6 +334,7 @@ class DatasetDatabase {
       whereArgs: [datasetId],
       offset: offset,
       limit: limit,
+      orderBy: 'id ASC',
     );
     final mediaItems = mediaMaps.map((map) => MediaItem.fromMap(map)).toList();
 
@@ -335,46 +344,54 @@ class DatasetDatabase {
     final mediaIds = mediaItems.map((m) => m.id).toList();
     final annotationMaps = await db.query(
       'annotations',
-      where: 'media_item_id IN (${List.filled(mediaIds.length, '?').join(',')})',
+      where:
+          'media_item_id IN (${List.filled(mediaIds.length, '?').join(',')})',
       whereArgs: mediaIds,
+      orderBy: 'id ASC',
     );
-    List<Annotation> annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+    List<Annotation> annotations =
+        annotationMaps.map((map) => Annotation.fromMap(map)).toList();
 
     // Step 3: Fetch unique label IDs used in annotations (excluding nulls)
-    final Set<int> labelIds = annotations
-      .where((a) => a.labelId != null)
-      .map((a) => a.labelId!)
-      .toSet();
+    final Set<int> labelIds =
+        annotations
+            .where((a) => a.labelId != null)
+            .map((a) => a.labelId!)
+            .toSet();
 
-    final List<Label> labels = labelIds.isEmpty
-      ? []
-      : await db.query(
-          'labels',
-          where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
-          whereArgs: labelIds.toList(),
-        ).then((rows) => rows.map((e) => Label.fromMap(e)).toList());
+    final List<Label> labels =
+        labelIds.isEmpty
+            ? []
+            : await db
+                .query(
+                  'labels',
+                  where:
+                      'id IN (${List.filled(labelIds.length, '?').join(',')})',
+                  whereArgs: labelIds.toList(),
+                )
+                .then((rows) => rows.map((e) => Label.fromMap(e)).toList());
 
     // Create label map and assign name + color to annotations
     final labelMap = {
       for (var label in labels)
-        label.id: {
-          'name': label.name,
-          'color': label.toColor(),
-        }
+        label.id: {'name': label.name, 'color': label.toColor()},
     };
 
-    annotations = annotations.map((a) {
-      final info = a.labelId != null ? labelMap[a.labelId] : null;
-      return a.copyWith(
-        name: info?['name'] as String?,
-        color: info?['color'] as Color?, // already parsed
-      );
-    }).toList();
+    annotations =
+        annotations.map((a) {
+          final info = a.labelId != null ? labelMap[a.labelId] : null;
+          return a.copyWith(
+            name: info?['name'] as String?,
+            color: info?['color'] as Color?, // already parsed
+          );
+        }).toList();
 
     // Step 4: Group annotations by mediaId
     final Map<int, List<Annotation>> annotationsByMediaId = {};
     for (final annotation in annotations) {
-      annotationsByMediaId.putIfAbsent(annotation.mediaItemId, () => []).add(annotation);
+      annotationsByMediaId
+          .putIfAbsent(annotation.mediaItemId, () => [])
+          .add(annotation);
     }
 
     // Step 5: Assemble AnnotatedLabeledMedia list
@@ -388,7 +405,10 @@ class DatasetDatabase {
     }).toList();
   }
 
-  Future<AnnotatedLabeledMedia?> loadMediaAtIndex(String datasetId, int index, ) async {
+  Future<AnnotatedLabeledMedia?> loadMediaAtIndex(
+    String datasetId,
+    int index,
+  ) async {
     final db = await database;
 
     final mediaMaps = await db.query(
@@ -397,6 +417,7 @@ class DatasetDatabase {
       whereArgs: [datasetId],
       limit: 1,
       offset: index,
+      orderBy: 'id ASC',
     );
 
     if (mediaMaps.isEmpty) return null;
@@ -407,21 +428,25 @@ class DatasetDatabase {
       'annotations',
       where: 'media_item_id = ?',
       whereArgs: [mediaItem.id],
+      orderBy: 'id ASC',
     );
-    final annotations = annotationMaps.map((map) => Annotation.fromMap(map)).toList();
+    final annotations =
+        annotationMaps.map((map) => Annotation.fromMap(map)).toList();
 
-    final labelIds = annotations
-      .where((a) => a.labelId != null)
-      .map((a) => a.labelId!)
-      .toSet();
+    final labelIds =
+        annotations
+            .where((a) => a.labelId != null)
+            .map((a) => a.labelId!)
+            .toSet();
 
-    final List<Label> labels = labelIds.isEmpty
-      ? []
-      : (await db.query(
-        'labels',
-        where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
-        whereArgs: labelIds.toList(),
-      )).map((e) => Label.fromMap(e)).toList();
+    final List<Label> labels =
+        labelIds.isEmpty
+            ? []
+            : (await db.query(
+              'labels',
+              where: 'id IN (${List.filled(labelIds.length, '?').join(',')})',
+              whereArgs: labelIds.toList(),
+            )).map((e) => Label.fromMap(e)).toList();
 
     // Enrich annotations
     final Map<int, Label> labelMap = {
@@ -435,7 +460,7 @@ class DatasetDatabase {
         annotation.color = label.toColor();
       }
     }
-  
+
     return AnnotatedLabeledMedia(
       mediaItem: mediaItem,
       annotations: annotations,
@@ -519,11 +544,7 @@ class DatasetDatabase {
       }
 
       // Delete the dataset
-      await db.delete(
-        'datasets',
-        where: 'id = ?',
-        whereArgs: [dataset.id],
-      );
+      await db.delete('datasets', where: 'id = ?', whereArgs: [dataset.id]);
     }
   }
 
@@ -544,38 +565,45 @@ class DatasetDatabase {
     required String currentDatasetId,
   }) async {
     final db = await database;
-    final results = await db.rawQuery('''
+    final results = await db.rawQuery(
+      '''
       SELECT DISTINCT p.name
       FROM projects p
       JOIN datasets d ON p.id = d.projectId
       JOIN dataset_media_folders f ON d.id = f.datasetId
       WHERE f.folderId = ? AND d.id != ?
-    ''', [folderId, currentDatasetId]);
+    ''',
+      [folderId, currentDatasetId],
+    );
 
     return results.map((row) => row['name'] as String).toList();
   }
 
   Future<int> countAnnotationsForDataset(String datasetId) async {
     final db = await database;
-    
+
     // Get all media items for the dataset
     final mediaItems = await fetchMediaForDataset(datasetId);
     if (mediaItems.isEmpty) {
       return 0;
     }
-    
+
     // Get the IDs of all media items
-    final mediaItemIds = mediaItems.where((item) => item.id != null).map((item) => item.id!).toList();
+    final mediaItemIds =
+        mediaItems
+            .where((item) => item.id != null)
+            .map((item) => item.id!)
+            .toList();
     if (mediaItemIds.isEmpty) {
       return 0;
     }
-    
+
     // Count annotations for these media items
     final countResult = await db.rawQuery(
       'SELECT COUNT(*) as count FROM annotations WHERE media_item_id IN (${List.filled(mediaItemIds.length, '?').join(',')})',
       mediaItemIds,
     );
-    
+
     return Sqflite.firstIntValue(countResult) ?? 0;
   }
 

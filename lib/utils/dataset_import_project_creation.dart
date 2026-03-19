@@ -26,9 +26,11 @@ class DatasetImportProjectCreation {
   static final Logger _logger = Logger('DatasetImportProjectCreation');
 
   static Future<int> createProjectWithDataset(
-    Archive archive,
-    {required ProgressCallback onProgress, bool convertPolygonsToBbox = false}
-  ) async {
+    Archive archive, {
+    required ProgressCallback onProgress,
+    bool convertPolygonsToBbox = false,
+  }) async {
+    int? createdProjectId;
     try {
       _logger.info('Starting project creation from dataset');
       final currentUser = UserSession.instance.getUser();
@@ -46,6 +48,7 @@ class DatasetImportProjectCreation {
           ownerId: currentUser.id ?? -1,
         ),
       );
+      createdProjectId = newProject.id;
 
       // Step 2: Create and link media folder
       _logger.info('Creating media folder...');
@@ -54,7 +57,7 @@ class DatasetImportProjectCreation {
         name: archive.zipFileName.split('.').first,
         createdAt: DateTime.now(),
       );
-      
+
       await DatasetDatabase.instance.linkMediaFolderToDataset(
         datasetId: newProject.defaultDatasetId!,
         folderId: folderId,
@@ -74,13 +77,13 @@ class DatasetImportProjectCreation {
         _logger.info('Generating thumbnail...');
         try {
           final thumbnailFile = await generateThumbnailFromImage(
-            File(firstImagePath), 
-            newProject.id.toString()
+            File(firstImagePath),
+            newProject.id.toString(),
           );
           if (thumbnailFile != null) {
             await ProjectDatabase.instance.updateProjectIcon(
-              newProject.id!, 
-              thumbnailFile.path
+              newProject.id!,
+              thumbnailFile.path,
             );
           }
         } catch (e) {
@@ -91,8 +94,8 @@ class DatasetImportProjectCreation {
       // Step 5: Update dataset metadata
       _logger.info('Updating dataset metadata...');
       final existingDataset = await DatasetDatabase.instance
-        .loadDatasetWithFolderIds(newProject.defaultDatasetId!);
-      
+          .loadDatasetWithFolderIds(newProject.defaultDatasetId!);
+
       if (existingDataset != null) {
         final updatedDataset = existingDataset.copyWith(
           name: 'Dataset',
@@ -108,7 +111,7 @@ class DatasetImportProjectCreation {
 
         await DatasetDatabase.instance.updateDataset(updatedDataset);
       }
-  
+
       // Step 6: Import labels and annotations if available
       if (archive.labels.isNotEmpty) {
         _logger.info('Importing labels...');
@@ -118,13 +121,15 @@ class DatasetImportProjectCreation {
         );
 
         _logger.info('Fetching media items map...');
-        final mediaItemsMap = await fetchMediaItemsMap(newProject.defaultDatasetId!);
+        final mediaItemsMap = await fetchMediaItemsMap(
+          newProject.defaultDatasetId!,
+        );
 
         _logger.info('Importing annotations...');
         final importer = DatasetAnnotationImporter(
-          annotationDb: AnnotationDatabase.instance
+          annotationDb: AnnotationDatabase.instance,
         );
-        
+
         final addedCount = await importer.addAnnotationsToProjectFromDataset(
           projectType: newProject.type,
           projectLabels: projectLabels,
@@ -135,7 +140,7 @@ class DatasetImportProjectCreation {
           annotatorId: currentUser.id ?? -1,
           convertPolygonsToBbox: convertPolygonsToBbox,
         );
-        
+
         _logger.info('Added $addedCount annotations.');
       } else {
         _logger.info("No labels detected in dataset. Skipping label import.");
@@ -143,8 +148,21 @@ class DatasetImportProjectCreation {
 
       _logger.info('Project creation completed successfully');
       return newProject.id!;
-
     } catch (e, stack) {
+      if (createdProjectId != null) {
+        try {
+          _logger.warning(
+            'Project import failed. Rolling back partial project $createdProjectId.',
+          );
+          await ProjectDatabase.instance.deleteProject(createdProjectId);
+        } catch (cleanupError, cleanupStack) {
+          _logger.severe(
+            'Rollback failed for project $createdProjectId',
+            cleanupError,
+            cleanupStack,
+          );
+        }
+      }
       _logger.severe('Error in createProjectWithDataset', e, stack);
       rethrow;
     }
@@ -156,11 +174,27 @@ class DatasetImportProjectCreation {
     required int ownerId,
     required void Function(int current, int total) onProgress,
   }) async {
-    final db = await DatasetDatabase.instance.database;
-
     final mediaFiles = <File>[];
-    final allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'jfif', 'webp', 'mp4', 'mov'];
-    final imageExtensions = ['bmp', 'gif', 'jpeg', 'jfif', 'jpg', 'png', 'webp'];
+    final allowedExtensions = [
+      'jpg',
+      'jpeg',
+      'png',
+      'bmp',
+      'gif',
+      'jfif',
+      'webp',
+      'mp4',
+      'mov',
+    ];
+    final imageExtensions = [
+      'bmp',
+      'gif',
+      'jpeg',
+      'jfif',
+      'jpg',
+      'png',
+      'webp',
+    ];
 
     final dir = Directory(datasetPath);
     if (!await dir.exists()) {
@@ -241,9 +275,10 @@ class DatasetImportProjectCreation {
           height = meta['height'];
           duration = meta['duration'];
           fps = meta['fps'];
-          numberOfFrames = (duration != null && fps != null)
-            ? (duration * fps).round()
-            : null;
+          numberOfFrames =
+              (duration != null && fps != null)
+                  ? (duration * fps).round()
+                  : null;
         } else {
           final meta = await getImageMetadata(file.path);
           width = meta['width'];
@@ -305,7 +340,7 @@ class DatasetImportProjectCreation {
     for (final name in labelNames) {
       // Set isDefault to true for the first label if user preference is enabled
       final isDefault = counter == 0 && setFirstLabelAsDefault;
-      
+
       final label = Label(
         id: -1,
         labelOrder: counter,
@@ -325,20 +360,27 @@ class DatasetImportProjectCreation {
     return insertedLabels;
   }
 
-  static Future<Map<String, MediaItem>> fetchMediaItemsMap(String datasetId) async {
-    final mediaItems = await DatasetDatabase.instance.fetchMediaForDataset(datasetId);
+  static Future<Map<String, MediaItem>> fetchMediaItemsMap(
+    String datasetId,
+  ) async {
+    final mediaItems = await DatasetDatabase.instance.fetchMediaForDataset(
+      datasetId,
+    );
 
     final map = <String, MediaItem>{};
     for (final item in mediaItems) {
       final normalizedPath = item.filePath.replaceAll('\\', '/');
       final fileName = p.basename(normalizedPath).toLowerCase();
-      final fileNameNoExt = p.basenameWithoutExtension(normalizedPath).toLowerCase();
+      final fileNameNoExt =
+          p.basenameWithoutExtension(normalizedPath).toLowerCase();
 
       map[fileName] = item;
       map[fileNameNoExt] = item;
     }
 
-    _logger.info('[fetchMediaItemsMap] Loaded ${map.length} media items for dataset $datasetId');
+    _logger.info(
+      '[fetchMediaItemsMap] Loaded ${map.length} media items for dataset $datasetId',
+    );
     return map;
   }
 
@@ -351,18 +393,10 @@ class DatasetImportProjectCreation {
       return {'width': 0, 'height': 0};
     }
 
-    return {
-      'width': decoded.width,
-      'height': decoded.height,
-    };
+    return {'width': decoded.width, 'height': decoded.height};
   }
 
   static Future<Map<String, dynamic>> getVideoMetadata(String path) async {
-    return {
-      'width': 0,
-      'height': 0,
-      'duration': 0.0,
-      'fps': 0.0,
-    };
+    return {'width': 0, 'height': 0, 'duration': 0.0, 'fps': 0.0};
   }
 }

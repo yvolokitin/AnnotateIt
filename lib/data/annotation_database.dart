@@ -25,7 +25,7 @@ class AnnotationDatabase {
   // Insert multiple annotations in a single transaction
   Future<void> insertAnnotationsBatch(List<Annotation> annotations) async {
     if (annotations.isEmpty) return;
-  
+
     final db = await database;
     await db.transaction((txn) async {
       for (final annotation in annotations) {
@@ -36,11 +36,14 @@ class AnnotationDatabase {
 
   Future<bool> labelExists(int labelId, int projectId) async {
     final db = await database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT id FROM labels
       WHERE id = ? AND project_id = ?
       LIMIT 1;
-    ''', [labelId, projectId]);
+    ''',
+      [labelId, projectId],
+    );
     return result.isNotEmpty;
   }
 
@@ -49,7 +52,7 @@ class AnnotationDatabase {
   /// [mediaItemId] – ID of the media item to fetch annotations for.
   ///
   /// [type] – Optional filter to return only annotations of a specific type.
-  /// 
+  ///
   /// Supported types include:
   /// - `'bbox'` – Bounding box annotations. `data` should contain: `x`, `y`, `width`, `height`.
   /// - `'classification'` – Whole-image or region classification. `data` may contain: `class`, `score`, etc.
@@ -59,15 +62,17 @@ class AnnotationDatabase {
   /// If [type] is omitted or `null`, all annotation types will be returned.
   ///
   /// Returns a list of [Annotation] objects.
-  Future<List<Annotation>> fetchAnnotations(int mediaItemId, {String? type}) async {
+  Future<List<Annotation>> fetchAnnotations(
+    int mediaItemId, {
+    String? type,
+  }) async {
     final db = await database;
 
-    final whereClause = type != null
-        ? 'media_item_id = ? AND annotation_type = ?'
-        : 'media_item_id = ?';
-    final whereArgs = type != null
-        ? [mediaItemId, type]
-        : [mediaItemId];
+    final whereClause =
+        type != null
+            ? 'media_item_id = ? AND annotation_type = ?'
+            : 'media_item_id = ?';
+    final whereArgs = type != null ? [mediaItemId, type] : [mediaItemId];
 
     final result = await db.query(
       'annotations',
@@ -79,19 +84,32 @@ class AnnotationDatabase {
   }
 
   Future<int> updateAnnotation(Annotation annotation) async {
+    if (annotation.id == null) {
+      throw ArgumentError('Cannot update annotation without id.');
+    }
+
     final db = await database;
+    final updatePayload =
+        annotation
+            .copyWith(
+              version: annotation.version + 1,
+              updatedAt: DateTime.now(),
+            )
+            .toMap()
+          ..remove('id');
+
     return await db.update(
       'annotations',
-      annotation.toMap(),
-      where: 'id = ?',
-      whereArgs: [annotation.id],
+      updatePayload,
+      where: 'id = ? AND version = ?',
+      whereArgs: [annotation.id, annotation.version],
     );
   }
 
   /// Deletes a specific annotation from the database
-  /// 
+  ///
   /// [annotationId] - The ID of the annotation to delete
-  /// 
+  ///
   /// Returns the number of rows affected (1 if successful, 0 if not found)
   Future<int> deleteAnnotation(int annotationId) async {
     final db = await database;
@@ -105,15 +123,11 @@ class AnnotationDatabase {
   // Delete multiple annotations in a single transaction
   Future<void> deleteAnnotationsBatch(List<int> annotationIds) async {
     if (annotationIds.isEmpty) return;
-    
+
     final db = await database;
     await db.transaction((txn) async {
       for (final id in annotationIds) {
-        await txn.delete(
-          'annotations',
-          where: 'id = ?',
-          whereArgs: [id],
-        );
+        await txn.delete('annotations', where: 'id = ?', whereArgs: [id]);
       }
     });
   }
@@ -121,7 +135,23 @@ class AnnotationDatabase {
   // Optional: Delete all annotations for a specific media item
   Future<void> deleteAnnotationsByMedia(int mediaItemId) async {
     final db = await database;
-    await db.delete('annotations', where: 'media_item_id = ?', whereArgs: [mediaItemId]);
+    await db.delete(
+      'annotations',
+      where: 'media_item_id = ?',
+      whereArgs: [mediaItemId],
+    );
+  }
+
+  Future<int> deleteAnnotationsByMediaAndType(
+    int mediaItemId,
+    String annotationType,
+  ) async {
+    final db = await database;
+    return await db.delete(
+      'annotations',
+      where: 'media_item_id = ? AND annotation_type = ?',
+      whereArgs: [mediaItemId, annotationType],
+    );
   }
 
   // Delete all annotations for a specific label

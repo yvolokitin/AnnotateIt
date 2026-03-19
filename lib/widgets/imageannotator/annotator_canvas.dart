@@ -22,7 +22,7 @@ class AnnotatorCanvas extends StatefulWidget {
   final int mediaItemId;
 
   final List<Annotation>? annotations;
-  final Annotation? selectedAnnotation; 
+  final Annotation? selectedAnnotation;
   final UserAction userAction;
   final List<Label> labels;
   final Label selectedLabel;
@@ -52,7 +52,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.resetZoomCount,
     required this.opacity,
     required this.cornerSize,
-    required this.strokeWidth,    
+    required this.strokeWidth,
     required this.userAction,
     required this.showAnnotationNames,
     required this.selectedLabel,
@@ -144,7 +144,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     }
 
     // Apply externally requested zoom, if provided
-    if (widget.requestedZoom != null && widget.requestedZoom != oldWidget.requestedZoom) {
+    if (widget.requestedZoom != null &&
+        widget.requestedZoom != oldWidget.requestedZoom) {
       final desired = widget.requestedZoom!;
       // Defer to next frame to ensure size is available (avoid accessing context.size during build)
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -152,7 +153,10 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         final current = matrix.getMaxScaleOnAxis();
         if ((desired - current).abs() > 1e-6) {
           final size = context.size;
-          final center = size == null ? const Offset(0, 0) : Offset(size.width / 2, size.height / 2);
+          final center =
+              size == null
+                  ? const Offset(0, 0)
+                  : Offset(size.width / 2, size.height / 2);
           final factor = desired / current;
           scaleCanvas(Vector3(center.dx, center.dy, 0), factor);
         }
@@ -181,17 +185,24 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
     final imageSize = Size(image.width.toDouble(), image.height.toDouble());
     final canvasSize = context.size!;
-    final ratio = Size(imageSize.width / canvasSize.width, imageSize.height / canvasSize.height);
+    final ratio = Size(
+      imageSize.width / canvasSize.width,
+      imageSize.height / canvasSize.height,
+    );
     final scale = 1 / max(ratio.width, ratio.height) * 0.9;
-    final scaledImageSize = Size(imageSize.width * scale, imageSize.height * scale);
+    final scaledImageSize = Size(
+      imageSize.width * scale,
+      imageSize.height * scale,
+    );
     final offset = Offset(
       (canvasSize.width - scaledImageSize.width) / 2,
       (canvasSize.height - scaledImageSize.height) / 2,
     );
 
-    return matrix = Matrix4.identity()
-      ..translate(offset.dx, offset.dy, 0.0)
-      ..scale(scale);
+    return matrix =
+        Matrix4.identity()
+          ..translate(offset.dx, offset.dy, 0.0)
+          ..scale(scale);
   }
 
   void scaleCanvas(Vector3 localPosition, double scale) {
@@ -200,10 +211,23 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final mScale = 1 - scale;
     setState(() {
       matrix *= Matrix4(
-        scale, 0, 0, 0,
-        0, scale, 0, 0,
-        0, 0, scale, 0,
-        mScale * position.x, mScale * position.y, 0, 1);
+        scale,
+        0,
+        0,
+        0,
+        0,
+        scale,
+        0,
+        0,
+        0,
+        0,
+        scale,
+        0,
+        mScale * position.x,
+        mScale * position.y,
+        0,
+        1,
+      );
     });
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
   }
@@ -213,9 +237,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       setState(() => _lastMiddleButtonPosition = event.localPosition);
       return;
     }
-    
+
     // Right-click to cancel polygon drawing
-    if (event.buttons == kSecondaryButton && widget.userAction == UserAction.polygon_annotation && _polygonPoints.isNotEmpty) {
+    if (event.buttons == kSecondaryButton &&
+        widget.userAction == UserAction.polygon_annotation &&
+        _polygonPoints.isNotEmpty) {
       setState(() {
         _polygonPoints = [];
         _currentPolygonPoint = null;
@@ -224,9 +250,13 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       return;
     }
 
-    if (event.buttons == kPrimaryButton && widget.userAction == UserAction.navigation) {
+    if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.navigation) {
       inverse.copyInverse(matrix);
-      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final transformed = MatrixUtils.transformPoint(
+        inverse,
+        event.localPosition,
+      );
       final tapped = _findAnnotationAtPosition(transformed);
       if (tapped != null) {
         _draggingAnnotation = tapped;
@@ -248,33 +278,45 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           }
         }
       }
-
-    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.bbox_annotation) {
+    } else if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.bbox_annotation) {
       inverse.copyInverse(matrix);
-      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final transformed = MatrixUtils.transformPoint(
+        inverse,
+        event.localPosition,
+      );
       final clamped = _clampToImage(transformed);
       setState(() {
         _drawingStart = clamped;
         _drawingCurrent = clamped;
       });
-    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.sam_annotation) {
+    } else if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.sam_annotation) {
       // In SAM mode: on click, emit the image-space coordinate to parent for processing
       inverse.copyInverse(matrix);
-      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final transformed = MatrixUtils.transformPoint(
+        inverse,
+        event.localPosition,
+      );
       final clamped = _clampToImage(transformed);
       widget.onSamTap?.call(clamped);
       return;
-    } else if (event.buttons == kPrimaryButton && widget.userAction == UserAction.polygon_annotation) {
+    } else if (event.buttons == kPrimaryButton &&
+        widget.userAction == UserAction.polygon_annotation) {
       inverse.copyInverse(matrix);
-      final transformed = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final transformed = MatrixUtils.transformPoint(
+        inverse,
+        event.localPosition,
+      );
       final clampedPoint = _clampToImage(transformed);
-      
+
       // If we have at least 3 points and clicked near the first point, complete the polygon
       // Use a larger threshold to make it easier to close the polygon
       if (_polygonPoints.length >= 3) {
         final distanceToFirst = (_polygonPoints.first - clampedPoint).distance;
-        final closeThreshold = 25.0 / matrix.getMaxScaleOnAxis(); // Increased from 20 to 25
-        
+        final closeThreshold =
+            25.0 / matrix.getMaxScaleOnAxis(); // Increased from 20 to 25
+
         if (distanceToFirst < closeThreshold) {
           // Use the exact position of the first point to ensure perfect closure
           setState(() {
@@ -284,7 +326,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           return; // Exit early to prevent adding another point
         }
       }
-      
+
       // Add the point to the polygon
       setState(() {
         _polygonPoints.add(clampedPoint);
@@ -292,37 +334,38 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       });
     }
   }
-  
+
   void _createPolygonAnnotation() async {
     if (_polygonPoints.length < 3) return;
-    
+
     // Create a copy of the points list to ensure we don't modify the original
     List<Offset> finalPoints = List<Offset>.from(_polygonPoints);
-    
+
     // Ensure the polygon is properly closed by making the last point exactly match the first point
     // This guarantees that all points are connected in the final polygon
     if ((finalPoints.last - finalPoints.first).distance > 0.1) {
       finalPoints.add(finalPoints.first);
     }
-    
-    final newAnnotation = Annotation(
-      id: DateTime.now().millisecondsSinceEpoch,
-      mediaItemId: widget.mediaItemId,
-      labelId: widget.selectedLabel.id!,
-      annotationType: 'polygon',
-      data: {
-        'points': finalPoints.map((p) => [p.dx, p.dy]).toList(),
-      },
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    )
-    ..name = widget.selectedLabel.name
-    ..color = widget.selectedLabel.toColor();
+
+    final newAnnotation =
+        Annotation(
+            id: DateTime.now().millisecondsSinceEpoch,
+            mediaItemId: widget.mediaItemId,
+            labelId: widget.selectedLabel.id!,
+            annotationType: 'polygon',
+            data: {
+              'points': finalPoints.map((p) => [p.dx, p.dy]).toList(),
+            },
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          )
+          ..name = widget.selectedLabel.name
+          ..color = widget.selectedLabel.toColor();
 
     setState(() {
       _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
       widget.onAnnotationSelected?.call(newAnnotation);
-      
+
       // Reset polygon drawing state
       _polygonPoints = [];
       _currentPolygonPoint = null;
@@ -338,7 +381,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
   void _handlePointerMove(PointerMoveEvent event) {
     // Pan the canvas with the middle mouse button
-    if (event.buttons == kMiddleMouseButton && _lastMiddleButtonPosition != null) {
+    if (event.buttons == kMiddleMouseButton &&
+        _lastMiddleButtonPosition != null) {
       final delta = event.localPosition - _lastMiddleButtonPosition!;
       setState(() {
         _lastMiddleButtonPosition = event.localPosition;
@@ -354,10 +398,16 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _draggingAnnotation != null &&
         _dragStartPosition != null) {
       inverse.copyInverse(matrix);
-      final currentPosition = MatrixUtils.transformPoint(inverse, event.localPosition);
+      final currentPosition = MatrixUtils.transformPoint(
+        inverse,
+        event.localPosition,
+      );
       final delta = currentPosition - _dragStartPosition!;
       final shape = Shape.fromAnnotation(_draggingAnnotation!);
-      final imageSize = Size(widget.image.width.toDouble(), widget.image.height.toDouble());
+      final imageSize = Size(
+        widget.image.width.toDouble(),
+        widget.image.height.toDouble(),
+      );
 
       if (shape != null) {
         Shape newShape;
@@ -410,17 +460,17 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         _drawingCurrent = clamped;
       });
     }
-    
+
     // Update current point for polygon annotation
-    if (widget.userAction == UserAction.polygon_annotation && !_isPolygonComplete) {
+    if (widget.userAction == UserAction.polygon_annotation &&
+        !_isPolygonComplete) {
       inverse.copyInverse(matrix);
       final current = MatrixUtils.transformPoint(inverse, event.localPosition);
       final clamped = _clampToImage(current);
-      
+
       // Only update if the point has moved significantly to reduce unnecessary repaints
-      if (_currentPolygonPoint == null || 
+      if (_currentPolygonPoint == null ||
           (_currentPolygonPoint! - clamped).distance > 1.0) {
-        
         // Check if we're near the first point for closing the polygon
         bool nearFirstPoint = false;
         if (_polygonPoints.length >= 3) {
@@ -428,7 +478,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           final closeThreshold = 20.0 / matrix.getMaxScaleOnAxis();
           nearFirstPoint = distanceToFirst < closeThreshold;
         }
-        
+
         // Use markNeedsPaint instead of setState for more efficient updates
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -439,7 +489,6 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         });
       }
     }
-
   }
 
   void _handlePointerUp(PointerUpEvent event) async {
@@ -449,9 +498,37 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
     if (event.kind == PointerDeviceKind.mouse && event.buttons == 0) {
       final shouldSave = UserSession.instance.autoSaveAnnotations;
-      
+
       if (_draggingAnnotation != null && shouldSave) {
-        await AnnotationDatabase.instance.updateAnnotation(_draggingAnnotation!);
+        final updatedRows = await AnnotationDatabase.instance.updateAnnotation(
+          _draggingAnnotation!,
+        );
+        if (updatedRows > 0) {
+          final persisted = _draggingAnnotation!.copyWith(
+            version: _draggingAnnotation!.version + 1,
+          );
+          final index = _localAnnotations.indexWhere(
+            (a) => a.id == persisted.id,
+          );
+          if (index != -1) {
+            setState(() {
+              _localAnnotations = List<Annotation>.from(_localAnnotations)
+                ..[index] = persisted;
+            });
+          }
+          widget.onAnnotationUpdated?.call(persisted);
+          widget.onAnnotationSelected?.call(persisted);
+          _draggingAnnotation = persisted;
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Annotation update conflict. Reload item and retry.',
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
 
       _draggingAnnotation = null;
@@ -460,27 +537,30 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       _originalCorners = null;
     }
 
-    if (widget.userAction == UserAction.bbox_annotation && _drawingStart != null && _drawingCurrent != null) {
+    if (widget.userAction == UserAction.bbox_annotation &&
+        _drawingStart != null &&
+        _drawingCurrent != null) {
       final rect = Rect.fromPoints(_drawingStart!, _drawingCurrent!);
 
       if (rect.width > 4 && rect.height > 4) {
-        final newAnnotation = Annotation(
-          id: DateTime.now().millisecondsSinceEpoch,
-          mediaItemId: widget.mediaItemId,
-          labelId: widget.selectedLabel.id!,
-          annotationType: 'bbox',
-          data: {
-            'x': rect.left,
-            'y': rect.top,
-            'width': rect.width,
-            'height': rect.height,
-          },
-          // annotator: UserSession.instance.getUser().id!,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        )
-        ..name = widget.selectedLabel.name
-        ..color = widget.selectedLabel.toColor();
+        final newAnnotation =
+            Annotation(
+                id: DateTime.now().millisecondsSinceEpoch,
+                mediaItemId: widget.mediaItemId,
+                labelId: widget.selectedLabel.id!,
+                annotationType: 'bbox',
+                data: {
+                  'x': rect.left,
+                  'y': rect.top,
+                  'width': rect.width,
+                  'height': rect.height,
+                },
+                // annotator: UserSession.instance.getUser().id!,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              )
+              ..name = widget.selectedLabel.name
+              ..color = widget.selectedLabel.toColor();
 
         setState(() {
           _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
@@ -497,13 +577,15 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       _drawingStart = null;
       _drawingCurrent = null;
     }
-
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.userAction == UserAction.navigation) {
       inverse.copyInverse(matrix);
-      final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
+      final transformed = MatrixUtils.transformPoint(
+        inverse,
+        details.localPosition,
+      );
       final tapped = _findAnnotationAtPosition(transformed);
       widget.onAnnotationSelected?.call(tapped);
     }
@@ -515,7 +597,10 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
     // Determine which annotation (if any) was right-clicked
     inverse.copyInverse(matrix);
-    final transformed = MatrixUtils.transformPoint(inverse, details.localPosition);
+    final transformed = MatrixUtils.transformPoint(
+      inverse,
+      details.localPosition,
+    );
     final tapped = _findAnnotationAtPosition(transformed);
 
     // Show context menu only if right-clicked on the currently selected annotation
@@ -526,7 +611,12 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final global = details.globalPosition;
     final selectedAction = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(global.dx, global.dy, global.dx, global.dy),
+      position: RelativeRect.fromLTRB(
+        global.dx,
+        global.dy,
+        global.dx,
+        global.dy,
+      ),
       shape: RoundedRectangleBorder(
         side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
         borderRadius: BorderRadius.circular(8),
@@ -570,30 +660,46 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       // Show a second-level menu with labels
       final chosenLabel = await showMenu<Label>(
         context: context,
-        position: RelativeRect.fromLTRB(global.dx, global.dy, global.dx, global.dy),
+        position: RelativeRect.fromLTRB(
+          global.dx,
+          global.dy,
+          global.dx,
+          global.dy,
+        ),
         shape: RoundedRectangleBorder(
           side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         color: Colors.grey[850],
-        items: widget.labels.map((label) => PopupMenuItem<Label>(
-          value: label,
-          child: Row(
-            children: [
-              Container(
-                width: 16,
-                height: 16,
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: label.toColor(),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Theme.of(context).dividerColor, width: 1),
-                ),
-              ),
-              Text(label.name, style: const TextStyle(color: Colors.white)),
-            ],
-          ),
-        )).toList(),
+        items:
+            widget.labels
+                .map(
+                  (label) => PopupMenuItem<Label>(
+                    value: label,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: label.toColor(),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          label.name,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
       );
 
       if (!mounted || chosenLabel == null) return;
@@ -618,7 +724,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     final annotations = widget.annotations?.reversed ?? [];
     for (final annotation in annotations) {
       final shape = Shape.fromAnnotation(annotation);
-      if (shape != null && shape.boundingBox.contains(position) && shape.containsPoint(position)) {
+      if (shape != null &&
+          shape.boundingBox.contains(position) &&
+          shape.containsPoint(position)) {
         return annotation;
       }
     }
@@ -653,7 +761,10 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
               onPointerSignal: (p) {
                 if (p is PointerScrollEvent) {
                   final scale = p.scrollDelta.dy > 0 ? 0.95 : 1.05;
-                  scaleCanvas(Vector3(p.localPosition.dx, p.localPosition.dy, 0), scale);
+                  scaleCanvas(
+                    Vector3(p.localPosition.dx, p.localPosition.dy, 0),
+                    scale,
+                  );
                 }
               },
               child: GestureDetector(
@@ -673,14 +784,21 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                 onScaleUpdate: (d) {
                   final scale = 1 - (prevScale - d.scale);
                   prevScale = d.scale;
-                  scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale);
+                  scaleCanvas(
+                    Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0),
+                    scale,
+                  );
                 },
                 child: RepaintBoundary(
                   child: Transform(
                     transform: matrix,
                     child: CustomPaint(
-                      isComplex: true, // Hint to the framework that this is a complex painting operation
-                      willChange: widget.userAction == UserAction.polygon_annotation, // Hint that this will change frequently during polygon drawing
+                      isComplex:
+                          true, // Hint to the framework that this is a complex painting operation
+                      willChange:
+                          widget.userAction ==
+                          UserAction
+                              .polygon_annotation, // Hint that this will change frequently during polygon drawing
                       painter: CanvasPainter(
                         image: widget.image,
                         annotations: _localAnnotations,
@@ -690,15 +808,28 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                         strokeWidth: widget.strokeWidth,
                         cornerSize: widget.cornerSize,
                         showAnnotationNames: widget.showAnnotationNames,
-                        drawingRect: (_drawingStart != null && _drawingCurrent != null)
-                          ? Rect.fromPoints(_drawingStart!, _drawingCurrent!)
-                          : null,
-                        drawingRectColor: (_drawingStart != null)
-                          ? (widget.selectedLabel.toColor() ?? Colors.grey)
-                          : Colors.grey,
-                        polygonPoints: widget.userAction == UserAction.polygon_annotation ? _polygonPoints : null,
-                        currentPolygonPoint: widget.userAction == UserAction.polygon_annotation ? _currentPolygonPoint : null,
-                        polygonColor: widget.selectedLabel.toColor() ?? Colors.red,
+                        drawingRect:
+                            (_drawingStart != null && _drawingCurrent != null)
+                                ? Rect.fromPoints(
+                                  _drawingStart!,
+                                  _drawingCurrent!,
+                                )
+                                : null,
+                        drawingRectColor:
+                            (_drawingStart != null)
+                                ? (widget.selectedLabel.toColor() ??
+                                    Colors.grey)
+                                : Colors.grey,
+                        polygonPoints:
+                            widget.userAction == UserAction.polygon_annotation
+                                ? _polygonPoints
+                                : null,
+                        currentPolygonPoint:
+                            widget.userAction == UserAction.polygon_annotation
+                                ? _currentPolygonPoint
+                                : null,
+                        polygonColor:
+                            widget.selectedLabel.toColor() ?? Colors.red,
                       ),
                     ),
                   ),

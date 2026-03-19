@@ -20,8 +20,9 @@ class ProjectViewMediaGalery extends StatefulWidget {
   final Project project;
   final String datasetId;
 
-  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
-  
+  final void Function(AnnotatedLabeledMedia media, bool withAnnotations)?
+  onImageDuplicated;
+
   /// Callback to notify when upload status changes
   final void Function(bool isUploading)? onUploadStatusChanged;
 
@@ -37,7 +38,8 @@ class ProjectViewMediaGalery extends StatefulWidget {
   ProjectViewMediaGaleryState createState() => ProjectViewMediaGaleryState();
 }
 
-class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with TickerProviderStateMixin {
+class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery>
+    with TickerProviderStateMixin {
   Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
   bool _dependenciesInitialized = false;
   List<Dataset> datasets = [];
@@ -64,9 +66,10 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   final MediaSortOption _sortOption = MediaSortOption.newestFirst;
 
   final Set<MediaItem> _selectedMediaItems = {};
-  
+
   // Global key to access the UploadProgressManagerState
-  final GlobalKey<UploadProgressManagerState> _uploadProgressKey = GlobalKey<UploadProgressManagerState>();
+  final GlobalKey<UploadProgressManagerState> _uploadProgressKey =
+      GlobalKey<UploadProgressManagerState>();
 
   @override
   void initState() {
@@ -91,7 +94,8 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 
   Future<void> _loadDatasets() async {
-    final fetchedDatasets = await DatasetDatabase.instance.fetchDatasetsForProject(widget.project.id!);
+    final fetchedDatasets = await DatasetDatabase.instance
+        .fetchDatasetsForProject(widget.project.id!);
 
     fetchedDatasets.sort((a, b) {
       if (a.id == widget.datasetId) return -1;
@@ -100,25 +104,27 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     });
 
     // Add the "+ tab" placeholder with required fields
-    fetchedDatasets.add(Dataset(
-      id: 'add_new_tab',
-      projectId: widget.project.id!,
-      datasetOrder: 0,
-      name: '+',
-      description: '',
-      type: widget.project.type,
-      source: 'manual',
-      format: 'custom',
-      version: '1.0.0',
-      mediaCount: 0,
-      annotationCount: 0,
-      defaultDataset: false,
-      license: null,
-      metadata: null,
-      folders: const [],
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ));
+    fetchedDatasets.add(
+      Dataset(
+        id: 'add_new_tab',
+        projectId: widget.project.id!,
+        datasetOrder: 0,
+        name: '+',
+        description: '',
+        type: widget.project.type,
+        source: 'manual',
+        format: 'custom',
+        version: '1.0.0',
+        mediaCount: 0,
+        annotationCount: 0,
+        defaultDataset: false,
+        license: null,
+        metadata: null,
+        folders: const [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
 
     if (!mounted) return;
     setState(() {
@@ -136,12 +142,22 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     });
   }
 
-  Future<void> loadMediaForDataset(String datasetId, int itemsPerPage, int pageIndex) async {
+  Future<void> loadMediaForDataset(
+    String datasetId,
+    int itemsPerPage,
+    int pageIndex,
+  ) async {
     if (datasetId == 'add_new_tab') return;
 
-    final totalCount = await DatasetDatabase.instance.countMediaItemsInDataset(datasetId);
+    final totalCount = await DatasetDatabase.instance.countMediaItemsInDataset(
+      datasetId,
+    );
     final totalPages = (totalCount / itemsPerPage).ceil();
-    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, pageIndex);
+    final annotatedList = await loadAnnotatedMediaForDataset(
+      datasetId,
+      itemsPerPage,
+      pageIndex,
+    );
 
     if (!mounted) return;
     setState(() {
@@ -153,17 +169,22 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
     });
   }
 
-  Future<List<AnnotatedLabeledMedia>> loadAnnotatedMediaForDataset(String datasetId, int pageSize, int pageIndex) async {
+  Future<List<AnnotatedLabeledMedia>> loadAnnotatedMediaForDataset(
+    String datasetId,
+    int pageSize,
+    int pageIndex,
+  ) async {
     final offset = pageIndex * pageSize;
-    final annotatedList = await DatasetDatabase.instance.fetchAnnotatedLabeledMediaBatch(
-      datasetId: datasetId,
-      offset: offset,
-      limit: pageSize,
-    );
-// Sorting is disabled to preserve the original database order (based on offset).
-// This ensures consistency between PaginatedImageGrid and AnnotatorPage,
-// so that the clicked index points to the correct image without mismatch.
-/*
+    final annotatedList = await DatasetDatabase.instance
+        .fetchAnnotatedLabeledMediaBatch(
+          datasetId: datasetId,
+          offset: offset,
+          limit: pageSize,
+        );
+    // Sorting is disabled to preserve the original database order (based on offset).
+    // This ensures consistency between PaginatedImageGrid and AnnotatorPage,
+    // so that the clicked index points to the correct image without mismatch.
+    /*
     switch (_sortOption) {
       case MediaSortOption.newestFirst:
         annotatedList.sort((a, b) => b.mediaItem.uploadDate.compareTo(a.mediaItem.uploadDate));
@@ -179,7 +200,11 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   void _handlePageChanged(int newPage) async {
     final datasetId = datasets[_tabController!.index].id;
 
-    final annotatedList = await loadAnnotatedMediaForDataset(datasetId, itemsPerPage, newPage);
+    final annotatedList = await loadAnnotatedMediaForDataset(
+      datasetId,
+      itemsPerPage,
+      newPage,
+    );
 
     setState(() {
       annotatedMediaByDataset[datasetId] = annotatedList;
@@ -228,8 +253,8 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
 
       _rebuildTabController();
       _tabController!.index = datasets.indexWhere((d) => d.id == newDataset.id);
-
-    } else { // else load data
+    } else {
+      // else load data
       if (_lastLoadedDatasetId == currentDataset.id) return;
 
       _lastLoadedDatasetId = currentDataset.id;
@@ -242,12 +267,12 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 
   /// Handles changes in upload status
-  /// 
+  ///
   /// This method is called by DatasetTabContent when the upload status changes.
   /// It updates the local state and notifies parent components about the change,
   /// allowing them to show a confirmation dialog when the user tries to navigate
   /// away during an active upload.
-  /// 
+  ///
   /// @param uploading Whether there's an active upload in progress
   void _handleUploadingChanged(bool uploading) {
     if (!mounted) return;
@@ -255,20 +280,20 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       _isUploading = uploading;
       if (!uploading) _uploadingFile = null;
     });
-    
+
     // Notify parent components about upload status change
     widget.onUploadStatusChanged?.call(uploading);
   }
 
   void _handleFileUploadProgress(String filename, int index, int total) {
     if (!mounted) return;
-    
+
     // If cancellation was requested, clear the files when the upload process detects it
     if (_cancelUpload) {
       // Clear the upload progress dialog after a short delay to show cancellation status
       Future.delayed(const Duration(milliseconds: 1500), () {
         if (!mounted) return;
-        
+
         // Clear the dialog and reset state
         _uploadProgressKey.currentState?.clearFiles();
         setState(() {
@@ -279,16 +304,16 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
           _cancelUpload = false;
         });
       });
-      
+
       return;
     }
-    
+
     setState(() {
       _uploadingFile = filename;
       _currentFileIndex = index;
       _uploadProgress = index / total;
     });
-    
+
     // Update the upload progress dialog
     _uploadProgressKey.currentState?.updateFileProgress(filename, index, total);
   }
@@ -310,7 +335,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
         _uploadProgress = 0.0;
         _currentFileIndex = 0;
       });
-      
+
       // Clear the upload progress dialog
       _uploadProgressKey.currentState?.clearFiles();
     });
@@ -331,7 +356,7 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 
   /// Resets the cancel upload flag
-  /// 
+  ///
   /// This method is called after a successful upload or an upload error.
   /// It should not be called when the user explicitly cancels the upload,
   /// as that is handled in _handleFileUploadProgress.
@@ -343,17 +368,21 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 
   void _setDefaultDataset(Dataset dataset) async {
-    await ProjectDatabase.instance.updateDefaultDataset(projectId: widget.project.id!, datasetId: dataset.id);
+    await ProjectDatabase.instance.updateDefaultDataset(
+      projectId: widget.project.id!,
+      datasetId: dataset.id,
+    );
     await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
 
     setState(() {
       // Update in-memory default flags to reflect the change immediately in UI
-      datasets = datasets.map((d) {
-        if (d.id == 'add_new_tab') return d; // keep the "+" tab as-is
-        return d.id == dataset.id
-            ? d.copyWith(defaultDataset: true)
-            : d.copyWith(defaultDataset: false);
-      }).toList();
+      datasets =
+          datasets.map((d) {
+            if (d.id == 'add_new_tab') return d; // keep the "+" tab as-is
+            return d.id == dataset.id
+                ? d.copyWith(defaultDataset: true)
+                : d.copyWith(defaultDataset: false);
+          }).toList();
 
       // Move the new default dataset to the first position
       final updatedDefault = datasets.firstWhere((d) => d.id == dataset.id);
@@ -370,30 +399,36 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   void _renameDataset(Dataset dataset) async {
     await showDialog<Dataset>(
       context: context,
-      builder: (context) => EditDatasetNameDialog(
-        dataset: dataset,
-        onDatasetNameUpdated: (updated) {
-          setState(() {
-            final index = datasets.indexWhere((d) => d.id == dataset.id);
-            datasets[index] = updated;
-            _datasetTabCache.remove(updated.id);
-          });
-        },
-      ),
+      builder:
+          (context) => EditDatasetNameDialog(
+            dataset: dataset,
+            onDatasetNameUpdated: (updated) {
+              setState(() {
+                final index = datasets.indexWhere((d) => d.id == dataset.id);
+                datasets[index] = updated;
+                _datasetTabCache.remove(updated.id);
+              });
+            },
+          ),
     );
   }
 
   void _deleteDataset(Dataset dataset) async {
     // Determine if dataset is empty
-    final mediaCount = await DatasetDatabase.instance.countMediaItemsInDataset(dataset.id);
-    final annotationCount = await DatasetDatabase.instance.countAnnotationsForDataset(dataset.id);
+    final mediaCount = await DatasetDatabase.instance.countMediaItemsInDataset(
+      dataset.id,
+    );
+    final annotationCount = await DatasetDatabase.instance
+        .countAnnotationsForDataset(dataset.id);
     final isEmpty = (mediaCount == 0) && (annotationCount == 0);
 
     bool confirmed = false;
     if (isEmpty) {
       // Delete directly without asking user
       await DatasetDatabase.instance.deleteDataset(dataset.id);
-      await ProjectDatabase.instance.updateProjectLastUpdated(dataset.projectId);
+      await ProjectDatabase.instance.updateProjectLastUpdated(
+        dataset.projectId,
+      );
       confirmed = true;
     } else {
       final result = await showDialog<bool>(
@@ -416,7 +451,11 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
       }
 
       if (datasets.isNotEmpty) {
-        loadMediaForDataset(datasets[_tabController!.index].id, itemsPerPage, 0);
+        loadMediaForDataset(
+          datasets[_tabController!.index].id,
+          itemsPerPage,
+          0,
+        );
       }
     }
   }
@@ -459,56 +498,70 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
           child: TabBarView(
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(),
-            children: datasets.map((dataset) {
-              if (_datasetTabCache.containsKey(dataset.id)) {
-                return _datasetTabCache[dataset.id]!;
-              }
+            children:
+                datasets.map((dataset) {
+                  if (_datasetTabCache.containsKey(dataset.id)) {
+                    return _datasetTabCache[dataset.id]!;
+                  }
 
-              final mediaItems = annotatedMediaByDataset[dataset.id];
+                  final mediaItems = annotatedMediaByDataset[dataset.id];
 
-              final widgetToRender = dataset.id == 'add_new_tab'
-                  ? const Center(child: Text("Creating new dataset..."))
-                  : DatasetTabContent(
-                      project: widget.project,
-                      datasetId: currentDatasetId,
-                      labels: widget.project.labels ?? [],
-                      mediaItems: mediaItems,
-                      fileCount: _fileCount,
-                      totalPages: _totalPages,
-                      currentPage: _currentPage,
-                      itemsPerPage: itemsPerPage,
-                      isUploading: _isUploading,
-                      cancelUpload: _cancelUpload,
-                      onUploadingChanged: _handleUploadingChanged,
-                      onUploadSuccess: _handleUploadSuccess,
-                      onFileProgress: _handleFileUploadProgress,
-                      onUploadError: _handleUploadError,
-                      onPageChanged: _handlePageChanged,
-                      onMediaDeleted: () {
-                        loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
-                      },
-                      onItemsPerPageChanged: (int newItemsPerPage) {
-                        loadMediaForDataset(dataset.id, newItemsPerPage, _currentPage);
-                      },
-                      onImageDuplicated: (media, withAnnotations) {
-                        _handleDuplicateImage(media, withAnnotations);
-                      },
-                      onRefreshNeeded: () {
-                        setState(() {
-                          _datasetTabCache.remove(dataset.id);
-                        });
-                        loadMediaForDataset(dataset.id, itemsPerPage, _currentPage);
-                      },
-                    );
-                    
-              _datasetTabCache[dataset.id] = widgetToRender;
-              return widgetToRender;
-            }).toList(),
+                  final widgetToRender =
+                      dataset.id == 'add_new_tab'
+                          ? const Center(child: Text("Creating new dataset..."))
+                          : DatasetTabContent(
+                            project: widget.project,
+                            datasetId: dataset.id,
+                            labels: widget.project.labels ?? [],
+                            mediaItems: mediaItems,
+                            fileCount: _fileCount,
+                            totalPages: _totalPages,
+                            currentPage: _currentPage,
+                            itemsPerPage: itemsPerPage,
+                            isUploading: _isUploading,
+                            cancelUpload: _cancelUpload,
+                            onUploadingChanged: _handleUploadingChanged,
+                            onUploadSuccess: _handleUploadSuccess,
+                            onFileProgress: _handleFileUploadProgress,
+                            onUploadError: _handleUploadError,
+                            onPageChanged: _handlePageChanged,
+                            onMediaDeleted: () {
+                              loadMediaForDataset(
+                                dataset.id,
+                                itemsPerPage,
+                                _currentPage,
+                              );
+                            },
+                            onItemsPerPageChanged: (int newItemsPerPage) {
+                              loadMediaForDataset(
+                                dataset.id,
+                                newItemsPerPage,
+                                _currentPage,
+                              );
+                            },
+                            onImageDuplicated: (media, withAnnotations) {
+                              _handleDuplicateImage(media, withAnnotations);
+                            },
+                            onRefreshNeeded: () {
+                              setState(() {
+                                _datasetTabCache.remove(dataset.id);
+                              });
+                              loadMediaForDataset(
+                                dataset.id,
+                                itemsPerPage,
+                                _currentPage,
+                              );
+                            },
+                          );
+
+                  _datasetTabCache[dataset.id] = widgetToRender;
+                  return widgetToRender;
+                }).toList(),
           ),
         ),
       ],
     );
-    
+
     // Wrap the content with the UploadProgressManager
     return UploadProgressManager(
       key: _uploadProgressKey,
@@ -522,7 +575,4 @@ class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery> with Tic
   }
 }
 
-enum MediaSortOption {
-  newestFirst,
-  oldestFirst,
-}
+enum MediaSortOption { newestFirst, oldestFirst }

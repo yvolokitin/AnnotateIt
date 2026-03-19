@@ -22,7 +22,8 @@ class CreateFromDatasetDialog extends StatefulWidget {
   const CreateFromDatasetDialog({super.key});
 
   @override
-  State<CreateFromDatasetDialog> createState() => _CreateFromDatasetDialogState();
+  State<CreateFromDatasetDialog> createState() =>
+      _CreateFromDatasetDialogState();
 }
 
 class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
@@ -39,9 +40,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   int _progressTotal = 0;
   double _processingProgress = 0.0;
   Archive? _archive;
-  
+
   // Key to access task confirmation widget state
-  final GlobalKey<StepDatasetTaskConfirmationState> _taskConfirmationKey = GlobalKey<StepDatasetTaskConfirmationState>();
+  final GlobalKey<StepDatasetTaskConfirmationState> _taskConfirmationKey =
+      GlobalKey<StepDatasetTaskConfirmationState>();
 
   @override
   void dispose() {
@@ -104,9 +106,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
       setState(() => _useIsolateMode = useIsolate);
 
-      final archive = useIsolate
-          ? await _processWithIsolate(file, storagePath)
-          : await _processLocally(file, storagePath);
+      final archive =
+          useIsolate
+              ? await _processWithIsolate(file, storagePath)
+              : await _processLocally(file, storagePath);
 
       if (!mounted) return;
 
@@ -125,7 +128,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         '${l10n.datasetDialogImportFailedMessage}\n\n${e.toString()}',
         l10n.datasetDialogImportFailedTips,
       );
-      
+
       _resetToInitialState();
     }
   }
@@ -134,12 +137,13 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     return await processZipLocallyWithIsolates(
       zipFile: file,
       storagePath: storagePath,
-      onExtractProgress: (progress) => setState(() => _processingProgress = progress * 0.5),
+      onExtractProgress:
+          (progress) => setState(() => _processingProgress = progress * 0.5),
       onExtractDone: (_) => setState(() => _processingProgress = 0.5),
-      onDetectProgress: (progress) => setState(() => _processingProgress = 0.5 + progress * 0.5),
-    ).timeout(
-      Duration(minutes: 10),
-      onTimeout: () => throw Exception('Dataset processing timeout'),
+      onDetectProgress:
+          (progress) =>
+              setState(() => _processingProgress = 0.5 + progress * 0.5),
+      timeout: const Duration(minutes: 10),
     );
   }
 
@@ -147,9 +151,12 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     return await processZipLocally(
       zipFile: file,
       storagePath: storagePath,
-      onExtractProgress: (progress) => setState(() => _processingProgress = progress * 0.5),
+      onExtractProgress:
+          (progress) => setState(() => _processingProgress = progress * 0.5),
       onExtractDone: (_) => setState(() => _processingProgress = 0.5),
-      onDetectProgress: (progress) => setState(() => _processingProgress = 0.5 + progress * 0.5),
+      onDetectProgress:
+          (progress) =>
+              setState(() => _processingProgress = 0.5 + progress * 0.5),
     );
   }
 
@@ -158,17 +165,18 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
     if (_currentStep == 3) {
       if (_archive == null) return;
-      
+
       setState(() {
         _archive = _archive!.withDefaultSelectedTaskType();
         _currentStep = 4;
       });
-    } 
-    else if (_currentStep == 4) {
+    } else if (_currentStep == 4) {
       if (_archive == null) return;
-      
+
       final selectedTask = _archive!.selectedTaskType?.trim();
-      if (selectedTask == null || selectedTask.isEmpty || selectedTask == 'Unknown') {
+      if (selectedTask == null ||
+          selectedTask.isEmpty ||
+          selectedTask == 'Unknown') {
         await _showErrorDialog(
           l10n.datasetDialogNoProjectTypeTitle,
           l10n.datasetDialogNoProjectTypeMessage,
@@ -184,13 +192,16 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
       try {
         // Get the convertPolygonsToBbox value from the task confirmation widget
-        final convertPolygonsToBbox = _taskConfirmationKey.currentState?.getConvertPolygonsToBbox() ?? false;
-        
-        final newProjectId = await DatasetImportProjectCreation.createProjectWithDataset(
-          _archive!,
-          onProgress: _onMediaImportProgress,
-          convertPolygonsToBbox: convertPolygonsToBbox,
-        );
+        final convertPolygonsToBbox =
+            _taskConfirmationKey.currentState?.getConvertPolygonsToBbox() ??
+            false;
+
+        final newProjectId =
+            await DatasetImportProjectCreation.createProjectWithDataset(
+              _archive!,
+              onProgress: _onMediaImportProgress,
+              convertPolygonsToBbox: convertPolygonsToBbox,
+            );
 
         if (!mounted) return;
         Navigator.of(context).pop(newProjectId);
@@ -222,7 +233,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     }
 
     if (_archive != null) {
-      final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
+      final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(
+        context,
+      );
       if (shouldCancel != true) return;
       await _cleanupExtractedFiles();
     }
@@ -234,17 +247,23 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   Future<void> _showProcessingInProgressDialog() async {
     final l10n = AppLocalizations.of(context)!;
-    final title = _isUploading 
-        ? l10n.datasetDialogProcessingDatasetTitle 
-        : l10n.datasetDialogCreatingProjectTitle;
-    final message = _isUploading 
-        ? l10n.datasetDialogProcessingDatasetMessage 
-        : l10n.datasetDialogCreatingProjectMessage;
+    final title =
+        _isUploading
+            ? l10n.datasetDialogProcessingDatasetTitle
+            : l10n.datasetDialogCreatingProjectTitle;
+    final message =
+        _isUploading
+            ? l10n.datasetDialogProcessingDatasetMessage
+            : l10n.datasetDialogCreatingProjectMessage;
 
     await AlertErrorDialog.show(context, title, message);
   }
 
-  Future<void> _showErrorDialog(String title, String message, [String? tips]) async {
+  Future<void> _showErrorDialog(
+    String title,
+    String message, [
+    String? tips,
+  ]) async {
     final l10n = AppLocalizations.of(context)!;
     await AlertErrorDialog.show(
       context,
@@ -272,13 +291,16 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isLargeScreen = constraints.maxWidth >= 1600;
-        final isTablet = constraints.maxWidth >= 800 && constraints.maxWidth < 1600;
-        
+        final isTablet =
+            constraints.maxWidth >= 800 && constraints.maxWidth < 1600;
+
         final dialogWidth = constraints.maxWidth * (isLargeScreen ? 0.9 : 1.0);
-        final dialogHeight = constraints.maxHeight * (isLargeScreen ? 0.9 : 1.0);
-        final dialogPadding = isLargeScreen
-            ? const EdgeInsets.all(60)
-            : isTablet
+        final dialogHeight =
+            constraints.maxHeight * (isLargeScreen ? 0.9 : 1.0);
+        final dialogPadding =
+            isLargeScreen
+                ? const EdgeInsets.all(60)
+                : isTablet
                 ? const EdgeInsets.all(24)
                 : const EdgeInsets.all(12);
 
@@ -290,7 +312,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             }
 
             if (_archive != null) {
-              final shouldCancel = await DatasetImportDiscardConfirmationDialog.show(context);
+              final shouldCancel =
+                  await DatasetImportDiscardConfirmationDialog.show(context);
               if (shouldCancel != true) return false;
               await _cleanupExtractedFiles();
             }
@@ -300,7 +323,9 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
           child: Dialog(
             insetPadding: EdgeInsets.zero,
             backgroundColor: Colors.grey[850],
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
+            ),
             child: SizedBox(
               width: dialogWidth,
               height: dialogHeight,
@@ -344,9 +369,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             const SizedBox(height: 24),
             Expanded(
               child: Center(
-                child: _isUploading
-                    ? _buildProcessingIndicator()
-                    : _buildCurrentStepContent(),
+                child:
+                    _isUploading
+                        ? _buildProcessingIndicator()
+                        : _buildCurrentStepContent(),
               ),
             ),
             const SizedBox(height: 24),
@@ -374,14 +400,15 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         CircularProgressIndicator(
           color: Colors.redAccent,
           strokeWidth: 5,
-          value: _processingProgress == 0.0 || _processingProgress == 1.0 
-              ? null 
-              : _processingProgress,
+          value:
+              _processingProgress == 0.0 || _processingProgress == 1.0
+                  ? null
+                  : _processingProgress,
         ),
         const SizedBox(height: 24),
         Text(
-          _processingProgress == 0 
-              ? l10n.datasetDialogProcessing 
+          _processingProgress == 0
+              ? l10n.datasetDialogProcessing
               : "${l10n.datasetDialogProcessingProgress} ${(100 * _processingProgress).toInt()}%",
           style: const TextStyle(
             color: Colors.white70,
@@ -391,8 +418,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         ),
         const SizedBox(height: 8),
         Text(
-          _useIsolateMode 
-              ? l10n.datasetDialogModeIsolate 
+          _useIsolateMode
+              ? l10n.datasetDialogModeIsolate
               : l10n.datasetDialogModeNormal,
           style: const TextStyle(
             color: Colors.white38,
@@ -402,10 +429,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         ),
 
         Text(
-          _progressTotal > 0 
-            ? "${l10n.datasetDialogProcessingProgress} $_progressCurrent/$_progressTotal"
-            : l10n.datasetDialogProcessing,
-          ),
+          _progressTotal > 0
+              ? "${l10n.datasetDialogProcessingProgress} $_progressCurrent/$_progressTotal"
+              : l10n.datasetDialogProcessing,
+        ),
       ],
     );
   }
@@ -417,20 +444,20 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       case 1:
         return UploadPrompt(onPickFile: _pickZipArchive);
       case 3:
-        return _archive != null 
-            ? StepDatasetOverview(archive: _archive!) 
+        return _archive != null
+            ? StepDatasetOverview(archive: _archive!)
             : Text(l10n.datasetDialogNoDatasetLoaded);
       case 4:
-        return _archive != null 
+        return _archive != null
             ? StepDatasetTaskConfirmation(
-                key: _taskConfirmationKey,
-                archive: _archive!,
-                onSelectionChanged: (selectedTask) {
-                  setState(() {
-                    _archive = _archive!.copyWith(selectedTaskType: selectedTask);
-                  });
-                },
-              )
+              key: _taskConfirmationKey,
+              archive: _archive!,
+              onSelectionChanged: (selectedTask) {
+                setState(() {
+                  _archive = _archive!.copyWith(selectedTaskType: selectedTask);
+                });
+              },
+            )
             : Text(l10n.datasetDialogNoDatasetLoaded);
       case 5:
         return StepDatasetProjectCreation(
@@ -455,16 +482,19 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child: _isCreatingProject
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text(
-              _currentStep == 3 ? l10n.buttonNextConfirmTask : l10n.buttonCreateProject,
-              style: const TextStyle(
-                color: Colors.black,
-                fontFamily: 'CascadiaCode',
-                fontWeight: FontWeight.bold,
+      child:
+          _isCreatingProject
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(
+                _currentStep == 3
+                    ? l10n.buttonNextConfirmTask
+                    : l10n.buttonCreateProject,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'CascadiaCode',
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
     );
 
     if (isCompact) {
@@ -505,7 +535,8 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             ),
           ),
         ),
-        if ((_currentStep == 3 || _currentStep == 4) && !_isUploading) primaryButton,
+        if ((_currentStep == 3 || _currentStep == 4) && !_isUploading)
+          primaryButton,
       ],
     );
   }

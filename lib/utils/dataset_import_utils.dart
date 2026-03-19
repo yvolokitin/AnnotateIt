@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:async';
 import 'dart:isolate';
 import 'package:archive/archive_io.dart' as zip;
 import 'package:xml/xml.dart';
@@ -23,17 +24,22 @@ class DatasetAnnotationStats {
 
 final _logger = Logger('DatasetImportUtils');
 
-Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datasetDir, String datasetType) async {
+Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(
+  Directory datasetDir,
+  String datasetType,
+) async {
   int annotationCount = 0;
   final annotatedMediaFiles = <String>{};
   final labels = <String>{};
 
-  final allFiles = datasetDir.listSync(recursive: true).whereType<File>().toList();
+  final allFiles =
+      datasetDir.listSync(recursive: true).whereType<File>().toList();
 
   if (datasetType == 'COCO') {
     final cocoFile = allFiles.firstWhere(
       (f) => f.path.toLowerCase().endsWith('.json'),
-      orElse: () => File(''));
+      orElse: () => File(''),
+    );
 
     if (await cocoFile.exists()) {
       await _parseCocoAnnotations(
@@ -43,7 +49,6 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datase
         (count) => annotationCount = count,
       );
     }
-
   } else if (datasetType == 'YOLO') {
     await _parseYOLOAnnotations(
       allFiles,
@@ -51,7 +56,6 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datase
       annotatedMediaFiles,
       (count) => annotationCount = count,
     );
-
   } else if (datasetType == 'VOC') {
     await _parseVOCAnnotations(
       allFiles,
@@ -59,16 +63,19 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datase
       annotatedMediaFiles,
       (count) => annotationCount = count,
     );
-
   } else if (datasetType == 'LabelMe') {
-    final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
+    final jsonFiles = allFiles.where(
+      (f) => f.path.toLowerCase().endsWith('.json'),
+    );
     for (final file in jsonFiles) {
       final jsonMap = jsonDecode(await file.readAsString());
       if (jsonMap is Map && jsonMap.containsKey('shapes')) {
         final shapes = jsonMap['shapes'] as List;
         if (shapes.isNotEmpty) {
           annotationCount += shapes.length;
-          annotatedMediaFiles.add(file.uri.pathSegments.last.replaceAll('.json', ''));
+          annotatedMediaFiles.add(
+            file.uri.pathSegments.last.replaceAll('.json', ''),
+          );
           for (final shape in shapes) {
             if (shape is Map && shape.containsKey('label')) {
               labels.add(shape['label'].toString());
@@ -77,7 +84,6 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datase
         }
       }
     }
-
   } else if (datasetType == 'Datumaro') {
     await _parseDatumaroAnnotations(
       allFiles,
@@ -85,17 +91,20 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(Directory datase
       annotatedMediaFiles,
       (count) => annotationCount = count,
     );
-
   } else {
     // fallback heuristic for unknown dataset types
-    final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
+    final jsonFiles = allFiles.where(
+      (f) => f.path.toLowerCase().endsWith('.json'),
+    );
     for (final file in jsonFiles) {
       final jsonMap = jsonDecode(await file.readAsString());
       if (jsonMap is Map && jsonMap.containsKey('annotations')) {
         final annotations = jsonMap['annotations'] as List;
         if (annotations.isNotEmpty) {
           annotationCount += annotations.length;
-          annotatedMediaFiles.add(file.uri.pathSegments.last.replaceAll('.json', ''));
+          annotatedMediaFiles.add(
+            file.uri.pathSegments.last.replaceAll('.json', ''),
+          );
         }
       }
     }
@@ -115,11 +124,11 @@ extension FirstOrNullExtension<E> on Iterable<E> {
 }
 
 Future<void> _parseCocoAnnotations(
-    File cocoFile,
-    Set<String> labels,
-    Set<String> annotatedMediaFiles,
-    void Function(int count) setAnnotationCount) async {
-
+  File cocoFile,
+  Set<String> labels,
+  Set<String> annotatedMediaFiles,
+  void Function(int count) setAnnotationCount,
+) async {
   final jsonMap = jsonDecode(await cocoFile.readAsString());
   if (jsonMap is! Map) return;
 
@@ -167,16 +176,18 @@ Future<void> _parseYOLOAnnotations(
 
   // Exclude dataset split and metadata files
   final excludedFiles = {'train.txt', 'val.txt', 'test.txt'};
-  final txtFiles = allFiles.where((f) =>
-      f.path.toLowerCase().endsWith('.txt') &&
-      !excludedFiles.contains(f.uri.pathSegments.last.toLowerCase())
+  final txtFiles = allFiles.where(
+    (f) =>
+        f.path.toLowerCase().endsWith('.txt') &&
+        !excludedFiles.contains(f.uri.pathSegments.last.toLowerCase()),
   );
 
   // Step 1: Load classes.txt or obj.names if exists
   Map<String, String> classMap = {};
   final classesFile = allFiles.firstWhere(
-    (f) => f.path.toLowerCase().endsWith('classes.txt') ||
-           f.path.toLowerCase().endsWith('obj.names'),
+    (f) =>
+        f.path.toLowerCase().endsWith('classes.txt') ||
+        f.path.toLowerCase().endsWith('obj.names'),
     orElse: () => File(''),
   );
 
@@ -203,7 +214,8 @@ Future<void> _parseYOLOAnnotations(
 
       // Add media file name (usually image file with same name)
       annotatedMediaFiles.add(
-          file.uri.pathSegments.last.replaceAll('.txt', ''));
+        file.uri.pathSegments.last.replaceAll('.txt', ''),
+      );
 
       for (final line in lines) {
         final parts = line.trim().split(RegExp(r'\s+'));
@@ -220,11 +232,11 @@ Future<void> _parseYOLOAnnotations(
 }
 
 Future<void> _parseVOCAnnotations(
-    List<File> allFiles,
-    Set<String> labels,
-    Set<String> annotatedMediaFiles,
-    void Function(int count) setAnnotationCount) async {
-
+  List<File> allFiles,
+  Set<String> labels,
+  Set<String> annotatedMediaFiles,
+  void Function(int count) setAnnotationCount,
+) async {
   int annotationCountLocal = 0;
   final xmlFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.xml'));
 
@@ -253,8 +265,9 @@ Future<void> _parseVOCAnnotations(
   if (annotationCountLocal == 0) {
     // Fallback: check for labelmap.txt (custom dataset style)
     final labelmapFile = allFiles.firstWhere(
-        (f) => f.path.toLowerCase().endsWith('labelmap.txt'),
-        orElse: () => File(''));
+      (f) => f.path.toLowerCase().endsWith('labelmap.txt'),
+      orElse: () => File(''),
+    );
     if (await labelmapFile.exists()) {
       final lines = await labelmapFile.readAsLines();
       for (final line in lines) {
@@ -273,30 +286,34 @@ Future<void> _parseVOCAnnotations(
     }
 
     // Fallback: assume every image file belongs to dataset
-    final imageFiles = allFiles.where((f) =>
-        f.path.toLowerCase().endsWith('.jpg') ||
-        f.path.toLowerCase().endsWith('.jpeg') ||
-        f.path.toLowerCase().endsWith('.png') ||
-        f.path.toLowerCase().endsWith('.bmp') ||
-        f.path.toLowerCase().endsWith('.webp'));
+    final imageFiles = allFiles.where(
+      (f) =>
+          f.path.toLowerCase().endsWith('.jpg') ||
+          f.path.toLowerCase().endsWith('.jpeg') ||
+          f.path.toLowerCase().endsWith('.png') ||
+          f.path.toLowerCase().endsWith('.bmp') ||
+          f.path.toLowerCase().endsWith('.webp'),
+    );
 
-    annotatedMediaFiles.addAll(
-        imageFiles.map((f) => f.uri.pathSegments.last));
+    annotatedMediaFiles.addAll(imageFiles.map((f) => f.uri.pathSegments.last));
 
-    annotationCountLocal = imageFiles.length; // fake annotation count = image count
+    annotationCountLocal =
+        imageFiles.length; // fake annotation count = image count
   }
 
   setAnnotationCount(annotationCountLocal);
 }
 
 Future<void> _parseDatumaroAnnotations(
-    List<File> allFiles,
-    Set<String> labels,
-    Set<String> annotatedMediaFiles,
-    void Function(int count) setAnnotationCount) async {
-
+  List<File> allFiles,
+  Set<String> labels,
+  Set<String> annotatedMediaFiles,
+  void Function(int count) setAnnotationCount,
+) async {
   int annotationCountLocal = 0;
-  final jsonFiles = allFiles.where((f) => f.path.toLowerCase().endsWith('.json'));
+  final jsonFiles = allFiles.where(
+    (f) => f.path.toLowerCase().endsWith('.json'),
+  );
 
   for (final file in jsonFiles) {
     final jsonMap = jsonDecode(await file.readAsString());
@@ -341,16 +358,18 @@ Future<void> _parseDatumaroAnnotations(
 }
 
 /// Extracts a ZIP file to the given [storagePath] folder.
-/// 
+///
 /// [zipFile] is the input file. [onProgress] is called with progress between 0.0 and 1.0.
-/// 
+///
 /// Returns the created [Directory] where files were extracted.
 Future<Directory> extractZipToAppFolder(
   File zipFile,
   String storagePath, {
   void Function(double progress)? onProgress,
 }) async {
-  final outputDir = Directory('$storagePath/${DateTime.now().millisecondsSinceEpoch}');
+  final outputDir = Directory(
+    '$storagePath/${DateTime.now().millisecondsSinceEpoch}',
+  );
   await outputDir.create(recursive: true);
 
   final bytes = zipFile.readAsBytesSync();
@@ -390,9 +409,9 @@ Future<Directory> extractZipToAppFolder(
 }
 
 /// Detects dataset type by analyzing files inside [datasetDir].
-/// 
+///
 /// [onProgress] reports scanning progress between 0.0 and 1.0.
-/// 
+///
 /// Returns dataset type as string: e.g. COCO, YOLO, VOC, LabelMe, etc.
 Future<String> detectDatasetType(
   Directory datasetDir, {
@@ -408,19 +427,24 @@ Future<String> detectDatasetType(
   bool hasImages = false;
   bool hasVideos = false;
 
-  final allFiles = datasetDir.listSync(recursive: true).whereType<File>().toList();
+  final allFiles =
+      datasetDir.listSync(recursive: true).whereType<File>().toList();
   final total = allFiles.length;
   int processed = 0;
 
   for (final file in allFiles) {
     final name = file.path.toLowerCase();
 
-    if (name.endsWith('.jpg') || name.endsWith('.jpeg') ||
-        name.endsWith('.png') || name.endsWith('.bmp') ||
+    if (name.endsWith('.jpg') ||
+        name.endsWith('.jpeg') ||
+        name.endsWith('.png') ||
+        name.endsWith('.bmp') ||
         name.endsWith('.webp')) {
       hasImages = true;
-    } else if (name.endsWith('.mp4') || name.endsWith('.avi') ||
-        name.endsWith('.mov') || name.endsWith('.mkv')) {
+    } else if (name.endsWith('.mp4') ||
+        name.endsWith('.avi') ||
+        name.endsWith('.mov') ||
+        name.endsWith('.mkv')) {
       hasVideos = true;
     }
 
@@ -431,24 +455,27 @@ Future<String> detectDatasetType(
 
         if (jsonMap is Map) {
           // Datumaro native format
-          if (jsonMap.containsKey('items') && jsonMap['items'] is List &&
-              jsonMap.containsKey('categories') && jsonMap['categories'] is Map) {
+          if (jsonMap.containsKey('items') &&
+              jsonMap['items'] is List &&
+              jsonMap.containsKey('categories') &&
+              jsonMap['categories'] is Map) {
             isDatumaro = true;
           }
           // COCO
-          else if (jsonMap.containsKey('images') && jsonMap.containsKey('annotations')) {
+          else if (jsonMap.containsKey('images') &&
+              jsonMap.containsKey('annotations')) {
             isCOCO = true;
           }
           // LabelMe
           else if (jsonMap.containsKey('version') &&
-                   jsonMap.containsKey('flags') &&
-                   jsonMap.containsKey('shapes')) {
+              jsonMap.containsKey('flags') &&
+              jsonMap.containsKey('shapes')) {
             isLabelMe = true;
           }
           // CVAT XML exported to JSON
           else if (jsonMap.containsKey('meta') &&
-                   jsonMap['meta'] is Map &&
-                   jsonMap['meta']['task']?['id'] != null) {
+              jsonMap['meta'] is Map &&
+              jsonMap['meta']['task']?['id'] != null) {
             isCVAT = true;
           }
         }
@@ -486,7 +513,8 @@ Future<String> detectDatasetType(
           final lines = await file.readAsLines();
           if (lines.isNotEmpty) {
             final parts = lines.first.trim().split(' ');
-            if (parts.length == 5 && parts.every((p) => double.tryParse(p) != null)) {
+            if (parts.length == 5 &&
+                parts.every((p) => double.tryParse(p) != null)) {
               isYOLO = true;
             }
           }
@@ -518,7 +546,7 @@ Future<String> detectDatasetType(
 }
 
 /// Deletes extracted dataset folder at [extractedPath].
-/// 
+///
 /// Optionally logs messages via [onLog].
 Future<void> cleanupExtractedPath(
   String extractedPath, {
@@ -552,11 +580,11 @@ Future<void> cleanupExtractedPath(
 }
 
 /// Extracts + detects dataset (non-isolate mode).
-/// 
+///
 /// Best for small to medium dataset sizes.
 /// Reports progress via [onExtractProgress], [onDetectProgress].
 /// Calls [onExtractDone] after extraction.
-/// 
+///
 /// Returns [Archive].
 Future<Archive> processZipLocally({
   required File zipFile,
@@ -581,21 +609,49 @@ Future<Archive> processZipLocally({
   );
 
   // Detect task type (Detection, Segmentation, Classification etc.)
-  List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
+  List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(
+    extractedDir,
+  );
 
   // Get media files
-  final allFiles = extractedDir.listSync(recursive: true).whereType<File>().toList();
-  final mediaExtensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.mkv'];
-  final mediaFiles = allFiles.where((f) =>
-      mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
+  final allFiles =
+      extractedDir.listSync(recursive: true).whereType<File>().toList();
+  final mediaExtensions = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.bmp',
+    '.webp',
+    '.mp4',
+    '.avi',
+    '.mov',
+    '.mkv',
+  ];
+  final mediaFiles =
+      allFiles
+          .where(
+            (f) => mediaExtensions.any(
+              (ext) => f.path.toLowerCase().endsWith(ext),
+            ),
+          )
+          .toList();
 
   // Use new high-quality annotation stats function
-  final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
+  final stats = await countDatasetAnnotationsAndLabels(
+    extractedDir,
+    datasetType,
+  );
 
   // Just collect annotation file names for label list (same as before)
   final annotationExtensions = ['.json', '.xml', '.txt'];
-  final annotationFiles = allFiles.where((f) =>
-      annotationExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
+  final annotationFiles =
+      allFiles
+          .where(
+            (f) => annotationExtensions.any(
+              (ext) => f.path.toLowerCase().endsWith(ext),
+            ),
+          )
+          .toList();
 
   return Archive(
     zipFileName: zipFile.path.split(Platform.pathSeparator).last,
@@ -610,11 +666,11 @@ Future<Archive> processZipLocally({
 }
 
 /// Extracts + detects dataset (isolate mode).
-/// 
+///
 /// Best for very large datasets (avoids UI freezes).
 /// Reports progress via [onExtractProgress], [onDetectProgress].
 /// Calls [onExtractDone] after extraction.
-/// 
+///
 /// Returns [Archive].
 Future<Archive> processZipLocallyWithIsolates({
   required File zipFile,
@@ -622,63 +678,75 @@ Future<Archive> processZipLocallyWithIsolates({
   required void Function(double progress) onExtractProgress,
   required void Function(String path) onExtractDone,
   required void Function(double progress) onDetectProgress,
+  Duration timeout = const Duration(minutes: 10),
 }) async {
   final receivePort = ReceivePort();
   final detectionPort = ReceivePort();
+  Isolate? extractIsolate;
+  Isolate? detectIsolate;
+  final deadline = DateTime.now().add(timeout);
 
   try {
     // Extract in isolate
-    await Isolate.spawn(extractInIsolate, [
+    extractIsolate = await Isolate.spawn(extractInIsolate, [
       zipFile.path,
       storagePath,
       receivePort.sendPort,
     ]);
 
-    String extractedPath = '';
-    await for (final message in receivePort) {
-      if (message is Map<String, dynamic>) {
-        if (message['type'] == 'extract_progress') {
-          onExtractProgress(message['progress'] ?? 0.0);
-        } else if (message['type'] == 'extract_done') {
-          extractedPath = message['path'];
-          onExtractDone(extractedPath);
-          break;
-        } else if (message['type'] == 'extract_error') {
-          throw Exception("Extract isolate error: ${message['error']}");
-        }
-      }
-    }
+    final extractedPath = await _waitForExtractResult(
+      port: receivePort,
+      onProgress: onExtractProgress,
+      timeout: _remainingDuration(deadline),
+    );
+    onExtractDone(extractedPath);
 
     // Detect dataset type in isolate
-    await Isolate.spawn(detectInIsolate, [
+    detectIsolate = await Isolate.spawn(detectInIsolate, [
       extractedPath,
       detectionPort.sendPort,
     ]);
 
-    String datasetType = '';
-    await for (final message in detectionPort) {
-      if (message is Map<String, dynamic>) {
-        if (message['type'] == 'detect_progress') {
-          onDetectProgress(message['progress'] ?? 0.0);
-        } else if (message['type'] == 'detect_done') {
-          datasetType = message['taskType'];
-          break;
-        }
-      }
-    }
+    final datasetType = await _waitForDetectResult(
+      port: detectionPort,
+      onProgress: onDetectProgress,
+      timeout: _remainingDuration(deadline),
+    );
 
     final extractedDir = Directory(extractedPath);
-    final allFiles = extractedDir.listSync(recursive: true).whereType<File>().toList();
-    final mediaExtensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.mkv'];
+    final allFiles =
+        extractedDir.listSync(recursive: true).whereType<File>().toList();
+    final mediaExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.bmp',
+      '.webp',
+      '.mp4',
+      '.avi',
+      '.mov',
+      '.mkv',
+    ];
 
-    final mediaFiles = allFiles.where((f) =>
-      mediaExtensions.any((ext) => f.path.toLowerCase().endsWith(ext))).toList();
+    final mediaFiles =
+        allFiles
+            .where(
+              (f) => mediaExtensions.any(
+                (ext) => f.path.toLowerCase().endsWith(ext),
+              ),
+            )
+            .toList();
 
     // Count real annotation + annotated media files
-    final stats = await countDatasetAnnotationsAndLabels(extractedDir, datasetType);
+    final stats = await countDatasetAnnotationsAndLabels(
+      extractedDir,
+      datasetType,
+    );
 
     // Detect task type based on dataset type + annotations
-    List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(extractedDir);
+    List<String> detectedTaskTypes = await detectDatasetAllTaskTypes(
+      extractedDir,
+    );
 
     return Archive(
       zipFileName: zipFile.path.split(Platform.pathSeparator).last,
@@ -691,9 +759,103 @@ Future<Archive> processZipLocallyWithIsolates({
       labels: stats.labels.toList(),
     );
   } finally {
+    extractIsolate?.kill(priority: Isolate.immediate);
+    detectIsolate?.kill(priority: Isolate.immediate);
     receivePort.close();
     detectionPort.close();
     _logger.info('Isolate ports closed');
+  }
+}
+
+Duration _remainingDuration(DateTime deadline) {
+  final remaining = deadline.difference(DateTime.now());
+  if (remaining <= Duration.zero) {
+    throw TimeoutException('Dataset processing timeout');
+  }
+  return remaining;
+}
+
+Future<String> _waitForExtractResult({
+  required ReceivePort port,
+  required void Function(double progress) onProgress,
+  required Duration timeout,
+}) async {
+  final completer = Completer<String>();
+  late final StreamSubscription<dynamic> subscription;
+
+  subscription = port.listen((message) {
+    if (message is! Map) return;
+    final type = message['type'];
+    if (type == 'extract_progress') {
+      final progress = message['progress'];
+      onProgress(progress is num ? progress.toDouble() : 0.0);
+      return;
+    }
+    if (type == 'extract_done') {
+      final path = message['path'] as String?;
+      if (!completer.isCompleted) {
+        if (path == null || path.isEmpty) {
+          completer.completeError(
+            Exception('Extract isolate returned empty path'),
+          );
+        } else {
+          completer.complete(path);
+        }
+      }
+      return;
+    }
+    if (type == 'extract_error' && !completer.isCompleted) {
+      completer.completeError(
+        Exception('Extract isolate error: ${message['error']}'),
+      );
+    }
+  });
+
+  try {
+    return await completer.future.timeout(
+      timeout,
+      onTimeout: () => throw TimeoutException('Dataset extraction timeout'),
+    );
+  } finally {
+    await subscription.cancel();
+  }
+}
+
+Future<String> _waitForDetectResult({
+  required ReceivePort port,
+  required void Function(double progress) onProgress,
+  required Duration timeout,
+}) async {
+  final completer = Completer<String>();
+  late final StreamSubscription<dynamic> subscription;
+
+  subscription = port.listen((message) {
+    if (message is! Map) return;
+    final type = message['type'];
+    if (type == 'detect_progress') {
+      final progress = message['progress'];
+      onProgress(progress is num ? progress.toDouble() : 0.0);
+      return;
+    }
+    if (type == 'detect_done' && !completer.isCompleted) {
+      final detected = message['taskType'] as String?;
+      if (detected == null || detected.isEmpty) {
+        completer.completeError(
+          Exception('Detect isolate returned empty task type'),
+        );
+      } else {
+        completer.complete(detected);
+      }
+    }
+  });
+
+  try {
+    return await completer.future.timeout(
+      timeout,
+      onTimeout: () => throw TimeoutException('Dataset detection timeout'),
+    );
+  } finally {
+    await subscription.cancel();
   }
 }
 
@@ -730,17 +892,22 @@ Future<void> detectInIsolate(List<dynamic> args) async {
   final sendPort = args[1] as SendPort;
   final dir = Directory(path);
 
-  final taskType = await detectDatasetType(dir, onProgress: (progress) {
-    sendPort.send({"type": "detect_progress", "progress": progress});
-  });
+  final taskType = await detectDatasetType(
+    dir,
+    onProgress: (progress) {
+      sendPort.send({"type": "detect_progress", "progress": progress});
+    },
+  );
 
   sendPort.send({"type": "detect_done", "taskType": taskType});
 }
 
 /// Generates a unique folder path inside base path from [getBasePath].
-/// 
+///
 /// Useful for preparing dataset extraction folders.
-Future<String> getDefaultStoragePath(Future<String> Function() getBasePath) async {
+Future<String> getDefaultStoragePath(
+  Future<String> Function() getBasePath,
+) async {
   final basePath = await getBasePath();
   final uniqueFolder = 'dataset_${DateTime.now().millisecondsSinceEpoch}';
   final fullPath = Directory("$basePath/$uniqueFolder");

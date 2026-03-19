@@ -6,7 +6,8 @@ import 'package:path/path.dart' as path;
 
 /// Creates all tables and initializes folders.
 Future<void> createInitialSchema(Database db, int version) async {
-    await db.execute('''
+  await db.execute('PRAGMA foreign_keys = ON');
+  await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         firstName TEXT NOT NULL,
@@ -42,68 +43,74 @@ Future<void> createInitialSchema(Database db, int version) async {
       )
     ''');
 
-    final datasetImportFolder = 'datasets';
-    final datasetExportFolder = 'exports';
-    final thumbnailFolder = 'thumbnails';
-    final modelsFolder = 'models';
+  final datasetImportFolder = 'datasets';
+  final datasetExportFolder = 'exports';
+  final thumbnailFolder = 'thumbnails';
+  final modelsFolder = 'models';
 
-    final rootPath = await getDefaultAnnotationRootPath();
-    try {
-      await Directory(path.join(rootPath, datasetImportFolder)).create(recursive: true);
-    } catch (e) {
-      print('Warning: Could not create datasets directory: $e');
-    }
+  final rootPath = await getDefaultAnnotationRootPath();
+  try {
+    await Directory(
+      path.join(rootPath, datasetImportFolder),
+    ).create(recursive: true);
+  } catch (e) {
+    print('Warning: Could not create datasets directory: $e');
+  }
 
-    // Create folders if they don't exist - with error handling
-    try {
-      await Directory(path.join(rootPath, datasetExportFolder)).create(recursive: true);
-    } catch (e) {
-      print('Warning: Could not create exports directory: $e');
-    }
+  // Create folders if they don't exist - with error handling
+  try {
+    await Directory(
+      path.join(rootPath, datasetExportFolder),
+    ).create(recursive: true);
+  } catch (e) {
+    print('Warning: Could not create exports directory: $e');
+  }
 
-    try {
-      await Directory(path.join(rootPath, thumbnailFolder)).create(recursive: true);
-    } catch (e) {
-      print('Warning: Could not create thumbnails directory: $e');
-    }
+  try {
+    await Directory(
+      path.join(rootPath, thumbnailFolder),
+    ).create(recursive: true);
+  } catch (e) {
+    print('Warning: Could not create thumbnails directory: $e');
+  }
 
-    try {
-      await Directory(path.join(rootPath, modelsFolder)).create(recursive: true);
-    } catch (e) {
-      print('Warning: Could not create models directory: $e');
-    }
+  try {
+    await Directory(path.join(rootPath, modelsFolder)).create(recursive: true);
+  } catch (e) {
+    print('Warning: Could not create models directory: $e');
+  }
 
-    final now = DateTime.now().toIso8601String();
-    await db.insert('users', {
-      'firstName': 'Captain',
-      'lastName': 'Annotator',
-      'email': 'captain@labelship.local',
-      'iconPath': '',
-      'datasetImportFolder': datasetImportFolder,
-      'datasetExportFolder': datasetExportFolder,
-      'thumbnailFolder': thumbnailFolder,
-            'modelsFolder': modelsFolder,
-      'themeMode': 'dark',
-      'language': 'en',
-      'autoSave': 1,
-      'showTips': 1,
-      'createdAt': now,
-      'updatedAt': now,
-      'projectShowNoLabels': 0,
-      'datasetEnableDuplicate': 1,
-      'datasetEnableDelete': 1,
-      'labelsDeleteAnnotations': 0,
-      'labelsSetFirstAsDefault': 1,
-      'autoSaveAnnotations': 1,
-      'projectSkipDeleteConfirm': 0,
-      'projectShowImportWarning': 1,
-      'annotationAllowImageCopy': 1,
-      'askConfirmationOnAnnotationRemoval': 1,
-      'showExportLabelsButton': 1,
-      'annotationOpacity': 0.35,
-    });
+  final now = DateTime.now().toIso8601String();
+  await db.insert('users', {
+    'firstName': 'Captain',
+    'lastName': 'Annotator',
+    'email': 'captain@labelship.local',
+    'iconPath': '',
+    'datasetImportFolder': datasetImportFolder,
+    'datasetExportFolder': datasetExportFolder,
+    'thumbnailFolder': thumbnailFolder,
+    'modelsFolder': modelsFolder,
+    'themeMode': 'dark',
+    'language': 'en',
+    'autoSave': 1,
+    'showTips': 1,
+    'createdAt': now,
+    'updatedAt': now,
+    'projectShowNoLabels': 0,
+    'datasetEnableDuplicate': 1,
+    'datasetEnableDelete': 1,
+    'labelsDeleteAnnotations': 0,
+    'labelsSetFirstAsDefault': 1,
+    'autoSaveAnnotations': 1,
+    'projectSkipDeleteConfirm': 0,
+    'projectShowImportWarning': 1,
+    'annotationAllowImageCopy': 1,
+    'askConfirmationOnAnnotationRemoval': 1,
+    'showExportLabelsButton': 1,
+    'annotationOpacity': 0.35,
+  });
 
-    await db.execute('''
+  await db.execute('''
       CREATE TABLE projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -119,7 +126,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       )
     ''');
 
-    await db.execute('''
+  await db.execute('''
       CREATE TABLE datasets (
         id TEXT PRIMARY KEY,
         projectId INTEGER NOT NULL,
@@ -141,7 +148,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
-    await db.execute('''
+  await db.execute('''
       CREATE TABLE media_folders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         path TEXT NOT NULL,
@@ -150,7 +157,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
-    await db.execute('''
+  await db.execute('''
       CREATE TABLE dataset_media_folders (
         datasetId TEXT NOT NULL,
         folderId INTEGER NOT NULL,
@@ -160,7 +167,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
-    await db.execute('''
+  await db.execute('''
       CREATE TABLE media_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Internal DB ID
         uuid TEXT UNIQUE,                              -- Unique UUID for external reference
@@ -187,8 +194,8 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
-    // Labels table (per project)
-    await db.execute('''
+  // Labels table (per project)
+  await db.execute('''
       CREATE TABLE labels (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         label_order INTEGER NOT NULL,
@@ -201,11 +208,11 @@ Future<void> createInitialSchema(Database db, int version) async {
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
       );
     ''');
-    
-    // Annotations table
-    // annotation_type TEXT NOT NULL,        -- "bbox", "classification", "segmentation", "keypoints", etc.
-    // data TEXT NOT NULL,                   -- JSON-string with coordinates, masks, or key poinrts etc.
-    await db.execute('''
+
+  // Annotations table
+  // annotation_type TEXT NOT NULL,        -- "bbox", "classification", "segmentation", "keypoints", etc.
+  // data TEXT NOT NULL,                   -- JSON-string with coordinates, masks, or key poinrts etc.
+  await db.execute('''
       CREATE TABLE annotations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         media_item_id INTEGER NOT NULL,
@@ -225,8 +232,8 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
-    // Notifications table
-    await db.execute('''
+  // Notifications table
+  await db.execute('''
       CREATE TABLE notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         message TEXT NOT NULL,
@@ -237,6 +244,31 @@ Future<void> createInitialSchema(Database db, int version) async {
         isRead INTEGER NOT NULL DEFAULT 0
       );
     ''');
+
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(ownerId)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_datasets_project_id_order ON datasets(projectId, dataset_order)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_media_items_dataset_id ON media_items(datasetId)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotations_media_item_id ON annotations(media_item_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotations_label_id ON annotations(label_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_labels_project_id ON labels(project_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_dataset_id ON dataset_media_folders(datasetId)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_folder_id ON dataset_media_folders(folderId)',
+  );
 }
 
 Future<String> getDefaultAnnotationRootPath() async {

@@ -28,13 +28,22 @@ class ProjectDatabase {
       final columns = await db.rawQuery("PRAGMA table_info(projects)");
       final hasOrder = columns.any((row) => row['name'] == 'project_order');
       if (!hasOrder) {
-        await db.execute('ALTER TABLE projects ADD COLUMN project_order INTEGER NOT NULL DEFAULT 0');
-        final ids = await db.rawQuery('SELECT id FROM projects ORDER BY id ASC');
+        await db.execute(
+          'ALTER TABLE projects ADD COLUMN project_order INTEGER NOT NULL DEFAULT 0',
+        );
+        final ids = await db.rawQuery(
+          'SELECT id FROM projects ORDER BY id ASC',
+        );
         final batch = db.batch();
         int idx = 0;
         for (final row in ids) {
           final id = row['id'] as int;
-          batch.update('projects', {'project_order': idx++}, where: 'id = ?', whereArgs: [id]);
+          batch.update(
+            'projects',
+            {'project_order': idx++},
+            where: 'id = ?',
+            whereArgs: [id],
+          );
         }
         await batch.commit(noResult: true);
         _log.info('Migration: project_order column added and initialized.');
@@ -44,9 +53,29 @@ class ProjectDatabase {
     }
   }
 
+  Future<void> _migrateEnsureIndexes(Database db) async {
+    try {
+      final statements = <String>[
+        'CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(ownerId)',
+        'CREATE INDEX IF NOT EXISTS idx_datasets_project_id_order ON datasets(projectId, dataset_order)',
+        'CREATE INDEX IF NOT EXISTS idx_media_items_dataset_id ON media_items(datasetId)',
+        'CREATE INDEX IF NOT EXISTS idx_annotations_media_item_id ON annotations(media_item_id)',
+        'CREATE INDEX IF NOT EXISTS idx_annotations_label_id ON annotations(label_id)',
+        'CREATE INDEX IF NOT EXISTS idx_labels_project_id ON labels(project_id)',
+        'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_dataset_id ON dataset_media_folders(datasetId)',
+        'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_folder_id ON dataset_media_folders(folderId)',
+      ];
+      for (final sql in statements) {
+        await db.execute(sql);
+      }
+    } catch (e, stack) {
+      _log.severe('Migration _migrateEnsureIndexes failed', e, stack);
+    }
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
-    
+
     _database = await _initDB(kDatabaseFileName);
     return _database!;
   }
@@ -66,9 +95,13 @@ class ProjectDatabase {
       return await openDatabase(
         returnPath,
         version: 1,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
         onCreate: createInitialSchema,
         onOpen: (db) async {
           await _migrateAddProjectOrder(db);
+          await _migrateEnsureIndexes(db);
         },
         singleInstance: true,
       );
@@ -78,75 +111,74 @@ class ProjectDatabase {
     }
   }
 
-Future<Project> createProject(Project project) async {
-  final db = await database;
+  Future<Project> createProject(Project project) async {
+    final db = await database;
 
-  final String projectName = (project.name.trim().isEmpty)
-    ? 'Project'
-    : project.name.trim();
+    final String projectName =
+        (project.name.trim().isEmpty) ? 'Project' : project.name.trim();
 
-  final now = DateTime.now();
+    final now = DateTime.now();
 
-  return await db.transaction<Project>((txn) async {
-    // Determine next order
-    final List<Map<String, Object?>> maxRes = await txn.rawQuery('SELECT COALESCE(MAX(project_order), -1) + 1 as nextOrder FROM projects');
-    final int nextOrder = (maxRes.isNotEmpty && maxRes.first['nextOrder'] is int)
-        ? maxRes.first['nextOrder'] as int
-        : 0;
+    return await db.transaction<Project>((txn) async {
+      // Determine next order
+      final List<Map<String, Object?>> maxRes = await txn.rawQuery(
+        'SELECT COALESCE(MAX(project_order), -1) + 1 as nextOrder FROM projects',
+      );
+      final int nextOrder =
+          (maxRes.isNotEmpty && maxRes.first['nextOrder'] is int)
+              ? maxRes.first['nextOrder'] as int
+              : 0;
 
-    // Insert project without defaultDatasetId
-    final projectId = await txn.insert('projects', {
-      'name': projectName,
-      'type': project.type,
-      'icon': project.icon,
-      'creationDate': now.toIso8601String(),
-      'lastUpdated': now.toIso8601String(),
-      'ownerId': project.ownerId,
-      'project_order': nextOrder,
+      // Insert project without defaultDatasetId
+      final projectId = await txn.insert('projects', {
+        'name': projectName,
+        'type': project.type,
+        'icon': project.icon,
+        'creationDate': now.toIso8601String(),
+        'lastUpdated': now.toIso8601String(),
+        'ownerId': project.ownerId,
+        'project_order': nextOrder,
+      });
+
+      // Create default dataset
+      final dataset = Dataset(
+        id: uuid.v4(),
+        projectId: projectId,
+        datasetOrder: 0,
+        name: 'Dataset',
+        description: 'Default dataset for $projectName',
+        type: project.type,
+        source: 'manual',
+        format: 'custom',
+        version: '1.0.0',
+        mediaCount: 0,
+        annotationCount: 0,
+        defaultDataset: true,
+        license: null,
+        metadata: null,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      await txn.insert('datasets', dataset.toMap());
+
+      // Update project with defaultDatasetId
+      await txn.update(
+        'projects',
+        {
+          'defaultDatasetId': dataset.id,
+          'lastUpdated': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+
+      print('dataset.id ${dataset.id} for $projectName created');
+
+      // Return a new complete Project object
+      return project.copyWith(id: projectId, defaultDatasetId: dataset.id);
     });
-
-    // Create default dataset
-    final dataset = Dataset(
-      id: uuid.v4(),
-      projectId: projectId,
-      datasetOrder: 0,
-      name: 'Dataset',
-      description: 'Default dataset for $projectName',
-      type: project.type,
-      source: 'manual',
-      format: 'custom',
-      version: '1.0.0',
-      mediaCount: 0,
-      annotationCount: 0,
-      defaultDataset: true,
-      license: null,
-      metadata: null,
-      createdAt: now,
-      updatedAt: now,
-    );
-
-    await txn.insert('datasets', dataset.toMap());
-
-    // Update project with defaultDatasetId
-    await txn.update(
-      'projects',
-      {
-        'defaultDatasetId': dataset.id,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [projectId],
-    );
-
-    print('dataset.id ${dataset.id} for $projectName created');
-
-    // Return a new complete Project object
-    return project.copyWith(
-      id: projectId,
-      defaultDatasetId: dataset.id,
-    );
-  });
-}
+  }
 
   Future<String?> getDefaultDatasetId(int projectId) async {
     final db = await database;
@@ -181,7 +213,9 @@ Future<Project> createProject(Project project) async {
       String currentName = result.first['name'];
       // If the name has not changed, do nothing and return 0 (no update)
       if (currentName == projectName) {
-        _log.info('No changes detected for project "$projectName", skipping update.');
+        _log.info(
+          'No changes detected for project "$projectName", skipping update.',
+        );
         return 0; // No update performed
       }
     }
@@ -199,7 +233,10 @@ Future<Project> createProject(Project project) async {
     );
   }
 
-  Future<void> updateDefaultDataset({required int projectId, required String datasetId, }) async {
+  Future<void> updateDefaultDataset({
+    required int projectId,
+    required String datasetId,
+  }) async {
     final db = await database;
 
     await db.update(
@@ -216,76 +253,75 @@ Future<Project> createProject(Project project) async {
   }
 
   Future<Dataset> createDatasetForProject({
-      required int projectId,
-      required String projectType,
-      String name = 'New Dataset',
-      String description = '',
-      bool isDefault = false
-    }) async {
-      final db = await database;
+    required int projectId,
+    required String projectType,
+    String name = 'New Dataset',
+    String description = '',
+    bool isDefault = false,
+  }) async {
+    final db = await database;
 
-      // Check if a default dataset already exists
-      if (isDefault) {
-        final List<Map<String, dynamic>> existing = await db.query(
-          'projects',
-          where: 'id = ? AND defaultDatasetId IS NOT NULL',
-          whereArgs: [projectId],
-        );
-        if (existing.isNotEmpty) {
-          throw Exception('Default dataset already exists for this project.');
-        }
-      }
-
-      final countResult = await db.rawQuery(
-        'SELECT COUNT(*) FROM datasets WHERE projectId = ?',
-        [projectId],
+    // Check if a default dataset already exists
+    if (isDefault) {
+      final List<Map<String, dynamic>> existing = await db.query(
+        'projects',
+        where: 'id = ? AND defaultDatasetId IS NOT NULL',
+        whereArgs: [projectId],
       );
-      final nextOrder = Sqflite.firstIntValue(countResult) ?? 0;
-
-      final now = DateTime.now();
-      // Create dataset
-      final dataset = Dataset(
-        id: uuid.v4(),
-        projectId: projectId,
-        datasetOrder: nextOrder,
-        name: name.trim().isEmpty ? 'Dataset' : name.trim(),
-        description: description,
-        type: projectType,
-        source: 'manual',
-        format: 'custom',
-        version: '1.0.0',
-        mediaCount: 0,
-        annotationCount: 0,
-        defaultDataset: isDefault,
-        license: null,
-        metadata: null,
-        createdAt: now,
-        updatedAt: now,
-      );
-      await db.insert('datasets', dataset.toMap());
-
-      // If it's a default dataset, update the project record
-      if (isDefault) {
-        await db.update(
-          'projects',
-          {
-            'defaultDatasetId': dataset.id,
-            'lastUpdated': DateTime.now().toIso8601String(),
-          },
-          where: 'id = ?',
-          whereArgs: [projectId],
-        );
-      } else { // else update only lastUpdated timestamp
-        await db.update(
-          'projects',
-          {
-            'lastUpdated': DateTime.now().toIso8601String(),
-          },
-          where: 'id = ?',
-          whereArgs: [projectId],
-        );
+      if (existing.isNotEmpty) {
+        throw Exception('Default dataset already exists for this project.');
       }
-      return dataset;
+    }
+
+    final countResult = await db.rawQuery(
+      'SELECT COUNT(*) FROM datasets WHERE projectId = ?',
+      [projectId],
+    );
+    final nextOrder = Sqflite.firstIntValue(countResult) ?? 0;
+
+    final now = DateTime.now();
+    // Create dataset
+    final dataset = Dataset(
+      id: uuid.v4(),
+      projectId: projectId,
+      datasetOrder: nextOrder,
+      name: name.trim().isEmpty ? 'Dataset' : name.trim(),
+      description: description,
+      type: projectType,
+      source: 'manual',
+      format: 'custom',
+      version: '1.0.0',
+      mediaCount: 0,
+      annotationCount: 0,
+      defaultDataset: isDefault,
+      license: null,
+      metadata: null,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await db.insert('datasets', dataset.toMap());
+
+    // If it's a default dataset, update the project record
+    if (isDefault) {
+      await db.update(
+        'projects',
+        {
+          'defaultDatasetId': dataset.id,
+          'lastUpdated': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+    } else {
+      // else update only lastUpdated timestamp
+      await db.update(
+        'projects',
+        {'lastUpdated': DateTime.now().toIso8601String()},
+        where: 'id = ?',
+        whereArgs: [projectId],
+      );
+    }
+    return dataset;
   }
 
   Future<void> updateProjectLastUpdated(int projectId) async {
@@ -304,10 +340,7 @@ Future<Project> createProject(Project project) async {
 
     return await db.update(
       'projects',
-      {
-        'icon': newProjectIcon,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      },
+      {'icon': newProjectIcon, 'lastUpdated': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [projectId],
     );
@@ -320,10 +353,7 @@ Future<Project> createProject(Project project) async {
     final db = await database;
     await db.update(
       'projects',
-      {
-        'type': newType,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      },
+      {'type': newType, 'lastUpdated': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [projectId],
     );
@@ -375,7 +405,10 @@ Future<Project> createProject(Project project) async {
 
   Future<List<Project>> fetchProjectsWithLabels() async {
     final db = await database;
-    final projectMaps = await db.query('projects', orderBy: 'project_order ASC');
+    final projectMaps = await db.query(
+      'projects',
+      orderBy: 'project_order ASC',
+    );
     final projects = projectMaps.map((map) => Project.fromMap(map)).toList();
 
     final labelMaps = await db.query('labels');
