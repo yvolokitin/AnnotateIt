@@ -4,7 +4,6 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vthumb;
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart' as img;
-import 'package:file_picker/file_picker.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
@@ -23,7 +22,12 @@ class MediaTile extends StatefulWidget {
   final void Function(bool isSelected)? onSelectedChanged;
   final VoidCallback? onRefreshNeeded;
 
-  const MediaTile({super.key, required this.mediaItem, this.onSelectedChanged, this.onRefreshNeeded});
+  const MediaTile({
+    super.key,
+    required this.mediaItem,
+    this.onSelectedChanged,
+    this.onRefreshNeeded,
+  });
 
   @override
   State<MediaTile> createState() => _MediaTileState();
@@ -43,22 +47,25 @@ class _MediaTileState extends State<MediaTile> {
     if (media.type == MediaType.video && File(media.filePath).existsSync()) {
       try {
         _videoController = VideoPlayerController.file(File(media.filePath));
-        _videoController!.initialize().then((_) {
-          if (mounted) {
-            setState(() {
-              _initialized = true;
-              _videoController?.pause(); // we only want the first frame
+        _videoController!
+            .initialize()
+            .then((_) {
+              if (mounted) {
+                setState(() {
+                  _initialized = true;
+                  _videoController?.pause(); // we only want the first frame
+                });
+              }
+            })
+            .catchError((error) {
+              // Handle initialization error
+              if (mounted) {
+                setState(() {
+                  _videoController = null;
+                  _videoSupported = false;
+                });
+              }
             });
-          }
-        }).catchError((error) {
-          // Handle initialization error
-          if (mounted) {
-            setState(() {
-              _videoController = null;
-              _videoSupported = false;
-            });
-          }
-        });
       } catch (e) {
         // Handle platform not supported error
         _videoController = null;
@@ -124,7 +131,10 @@ class _MediaTileState extends State<MediaTile> {
         width: 140,
         height: 140,
         decoration: BoxDecoration(
-          border: Border.all(color: isSelected ? Colors.redAccent : Colors.transparent, width: 2),
+          border: Border.all(
+            color: isSelected ? Colors.redAccent : Colors.transparent,
+            width: 2,
+          ),
         ),
         child: ClipRRect(
           child: Stack(
@@ -157,7 +167,9 @@ class _MediaTileState extends State<MediaTile> {
                         case 'details':
                           await showDialog(
                             context: context,
-                            builder: (_) => ImageDetailsDialog(media: widget.mediaItem),
+                            builder:
+                                (_) =>
+                                    ImageDetailsDialog(media: widget.mediaItem),
                           );
                           break;
                         case 'open_in_folder':
@@ -169,10 +181,13 @@ class _MediaTileState extends State<MediaTile> {
                         case 'delete':
                           final deleted = await showDialog<List<String>>(
                             context: context,
-                            builder: (_) => DeleteImageDialog(
-                              mediaItems: [media],
-                              onConfirmed: (deletedPaths) => Navigator.pop(context, deletedPaths),
-                            ),
+                            builder:
+                                (_) => DeleteImageDialog(
+                                  mediaItems: [media],
+                                  onConfirmed:
+                                      (deletedPaths) =>
+                                          Navigator.pop(context, deletedPaths),
+                                ),
                           );
                           if (deleted != null && deleted.isNotEmpty) {
                             debugPrint('Media deleted: \\${media.filePath}');
@@ -193,7 +208,10 @@ class _MediaTileState extends State<MediaTile> {
                           value: 'details',
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline, size: screenWidth > 1200 ? 26 : 22),
+                              Icon(
+                                Icons.info_outline,
+                                size: screenWidth > 1200 ? 26 : 22,
+                              ),
                               SizedBox(width: screenWidth > 1200 ? 8 : 4),
                               Text(l10n.menuImageDetails, style: textStyle),
                             ],
@@ -205,7 +223,10 @@ class _MediaTileState extends State<MediaTile> {
                           value: 'open_in_folder',
                           child: Row(
                             children: [
-                              Icon(Icons.folder_open, size: screenWidth > 1200 ? 26 : 22),
+                              Icon(
+                                Icons.folder_open,
+                                size: screenWidth > 1200 ? 26 : 22,
+                              ),
                               SizedBox(width: screenWidth > 1200 ? 8 : 4),
                               Text('Open in folder', style: textStyle),
                             ],
@@ -218,7 +239,10 @@ class _MediaTileState extends State<MediaTile> {
                             value: 'extract_frames',
                             child: Row(
                               children: [
-                                Icon(Icons.movie_creation_outlined, size: screenWidth > 1200 ? 26 : 22),
+                                Icon(
+                                  Icons.movie_creation_outlined,
+                                  size: screenWidth > 1200 ? 26 : 22,
+                                ),
                                 SizedBox(width: screenWidth > 1200 ? 8 : 4),
                                 Text('Extract frames', style: textStyle),
                               ],
@@ -231,7 +255,10 @@ class _MediaTileState extends State<MediaTile> {
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline, size: screenWidth > 1200 ? 26 : 22),
+                              Icon(
+                                Icons.delete_outline,
+                                size: screenWidth > 1200 ? 26 : 22,
+                              ),
                               SizedBox(width: screenWidth > 1200 ? 8 : 4),
                               Text(l10n.menuImageDelete, style: textStyle),
                             ],
@@ -278,7 +305,10 @@ class _MediaTileState extends State<MediaTile> {
           AppSnackbar.show(context, 'Failed to open folder');
         }
       } else {
-        AppSnackbar.show(context, 'Open in folder is not supported on this platform');
+        AppSnackbar.show(
+          context,
+          'Open in folder is not supported on this platform',
+        );
       }
     } catch (e) {
       AppSnackbar.show(context, 'Failed to open folder: ' + e.toString());
@@ -324,15 +354,19 @@ class _MediaTileState extends State<MediaTile> {
       }
 
       double extractFps = FfmpegCheckDialog.lastSelectedFps;
-      int expectedFrames = (durationSec > 0 ? (durationSec * extractFps) : 60).round();
+      int expectedFrames =
+          (durationSec > 0 ? (durationSec * extractFps) : 60).round();
       expectedFrames = expectedFrames.clamp(1, 1200);
 
       // Prepare frames base directory and a unique run directory inside Dataset import folder
       final baseName = path.basenameWithoutExtension(videoPath);
-      final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+      final importRoot =
+          await UserSession.instance.getCurrentUserDatasetImportFolder();
       int? projectId;
       try {
-        final ds = await DatasetDatabase.instance.loadDatasetWithFolderIds(media.datasetId);
+        final ds = await DatasetDatabase.instance.loadDatasetWithFolderIds(
+          media.datasetId,
+        );
         projectId = ds?.projectId;
       } catch (_) {}
       final List<String> segments = [];
@@ -340,12 +374,19 @@ class _MediaTileState extends State<MediaTile> {
         segments.addAll(['project_' + projectId.toString()]);
       }
       segments.addAll(['dataset_' + media.datasetId, baseName + '_frames']);
-      final framesBaseDir = Directory(path.join(importRoot, path.joinAll(segments)));
+      final framesBaseDir = Directory(
+        path.join(importRoot, path.joinAll(segments)),
+      );
       if (!framesBaseDir.existsSync()) {
         framesBaseDir.createSync(recursive: true);
       }
-      final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
-      final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+      final String runStamp = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .replaceAll('.', '-');
+      final runDir = Directory(
+        path.join(framesBaseDir.path, 'run_' + runStamp),
+      );
       if (!runDir.existsSync()) {
         runDir.createSync(recursive: true);
       }
@@ -367,7 +408,10 @@ class _MediaTileState extends State<MediaTile> {
             if (bytes != null && bytes.isNotEmpty) {
               final framePath = path.join(
                 runDir.path,
-                baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
+                baseName +
+                    '_frame_' +
+                    (i + 1).toString().padLeft(5, '0') +
+                    '.png',
               );
               final out = File(framePath);
               await out.writeAsBytes(bytes);
@@ -401,21 +445,23 @@ class _MediaTileState extends State<MediaTile> {
             }
 
             // Return number of produced frames from runDir
-            final produced = runDir
-                .listSync()
-                .whereType<File>()
-                .where((f) => f.path.toLowerCase().endsWith('.png'))
-                .length;
+            final produced =
+                runDir
+                    .listSync()
+                    .whereType<File>()
+                    .where((f) => f.path.toLowerCase().endsWith('.png'))
+                    .length;
             return produced;
           },
         );
         if (ffmpegPath != null) {
-          final all = runDir
-              .listSync()
-              .whereType<File>()
-              .where((f) => f.path.toLowerCase().endsWith('.png'))
-              .toList()
-            ..sort((a, b) => a.path.compareTo(b.path));
+          final all =
+              runDir
+                  .listSync()
+                  .whereType<File>()
+                  .where((f) => f.path.toLowerCase().endsWith('.png'))
+                  .toList()
+                ..sort((a, b) => a.path.compareTo(b.path));
           frameFiles.addAll(all);
         }
       }
@@ -452,57 +498,16 @@ class _MediaTileState extends State<MediaTile> {
         inserted++;
       }
 
-      AppSnackbar.show(context, 'Extracted and added $inserted frame${inserted == 1 ? '' : 's'}');
+      AppSnackbar.show(
+        context,
+        'Extracted and added $inserted frame${inserted == 1 ? '' : 's'}',
+      );
 
       widget.onRefreshNeeded?.call();
     } catch (e, st) {
       log('Extraction error: ' + e.toString());
       log(st.toString());
       AppSnackbar.show(context, 'Extraction failed: ' + e.toString());
-    }
-  }
-
-  static String? _ffmpegPathCache;
-  Future<String?> _resolveFfmpegPath({
-    required void Function(String) log,
-  }) async {
-    // Delegate to the shared service (non-UI)
-    return await VideoFrameExtractor().resolveFfmpegPath(log: log);
-  }
-
-  Future<bool> _tryExtractFramesWithFfmpeg({
-    required String ffmpegPath,
-    required String videoPath,
-    required String framesDir,
-    required String baseName,
-    required double fps,
-    required void Function(String) log,
-  }) async {
-    try {
-      final outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
-      log('Running ffmpeg to extract frames at ' + fps.toString() + ' fps. Using: ' + ffmpegPath);
-      final result = await Process.run(
-        ffmpegPath,
-        [
-          '-y',
-          '-i',
-          videoPath,
-          '-vf',
-          'fps=$fps',
-          outPattern,
-        ],
-      );
-      log('ffmpeg exitCode: ' + result.exitCode.toString());
-      if (result.stdout is String && (result.stdout as String).isNotEmpty) {
-        log('ffmpeg stdout: ' + (result.stdout as String).split('\n').take(5).join(' | '));
-      }
-      if (result.stderr is String && (result.stderr as String).isNotEmpty) {
-        log('ffmpeg stderr: ' + (result.stderr as String).split('\n').take(5).join(' | '));
-      }
-      return result.exitCode == 0;
-    } catch (e) {
-      log('ffmpeg run error: ' + e.toString());
-      return false;
     }
   }
 
@@ -524,9 +529,7 @@ class _MediaTileState extends State<MediaTile> {
         color: Colors.grey.shade800,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -544,7 +547,10 @@ class _MediaTileState extends State<MediaTile> {
             const SizedBox(height: 8),
             Text(
               'Video not supported',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),

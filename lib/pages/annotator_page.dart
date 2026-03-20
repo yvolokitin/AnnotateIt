@@ -8,16 +8,18 @@ import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
 import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
-import '../data/annotation_database.dart';
 
 import '../models/label.dart';
 import '../models/project.dart';
 import '../models/annotation.dart';
 import '../models/annotated_labeled_media.dart';
 
+import '../services/annotation_application_service.dart';
 import '../services/ml_kit_image_labeling_service.dart';
 import '../services/sam_segmentation_service.dart';
 import '../session/user_session.dart';
+import '../repositories/annotation_repository.dart';
+import '../repositories/sqlite_annotation_repository.dart';
 
 import '../widgets/dialogs/alert_error_dialog.dart';
 import '../widgets/dialogs/delete_annotation_dialog.dart';
@@ -67,6 +69,10 @@ class _MediaOperationContext {
 
 class _AnnotatorPageState extends State<AnnotatorPage> {
   static final _logger = Logger('AnnotatorPage');
+  final AnnotationRepository _annotationRepository =
+      const SqliteAnnotationRepository();
+  late final AnnotationApplicationService _annotationService =
+      AnnotationApplicationService(annotationRepository: _annotationRepository);
   late PageController _pageController;
   late double _currentZoom = 1.0;
   late int _resetZoomCount = 0;
@@ -364,7 +370,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
               ..color = selectedLabel.toColor();
       }
 
-      final insertedId = await AnnotationDatabase.instance.insertAnnotation(
+      final insertedId = await _annotationRepository.insertAnnotation(
         newAnnotation,
       );
       final savedAnnotation =
@@ -554,7 +560,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       );
 
       // Save annotations to database
-      final annotationDb = AnnotationDatabase.instance;
+      final annotationDb = _annotationRepository;
       final savedAnnotations = <Annotation>[];
 
       for (final annotation in annotations) {
@@ -835,135 +841,28 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           mediaCtx == null ? null : _mediaCache[mediaCtx.index];
       if (currentMedia == null) return;
       final activeCtx = mediaCtx!;
-
-      // Multi-label: allow multiple classification annotations
-      if (type.contains('multi-label')) {
-        final exists =
-            currentMedia.annotations?.any(
-              (a) =>
-                  a.annotationType == 'classification' && a.labelId == label.id,
-            ) ??
-            false;
-
-        if (exists) return;
-
-        final newAnnotation =
-            Annotation(
-                id: null,
-                mediaItemId: currentMedia.mediaItem.id!,
-                labelId: label.id,
-                annotationType: 'classification',
-                data: {},
-                confidence: 1.0,
-                annotatorId: null,
-                comment: null,
-                status: 'pending',
-                version: 1,
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              )
-              ..name = label.name
-              ..color = label.toColor();
-
-        final insertedId = await AnnotationDatabase.instance.insertAnnotation(
-          newAnnotation,
-        );
-
-        final savedAnnotation =
-            Annotation(
-                id: insertedId,
-                mediaItemId: newAnnotation.mediaItemId,
-                labelId: newAnnotation.labelId,
-                annotationType: newAnnotation.annotationType,
-                data: newAnnotation.data,
-                confidence: newAnnotation.confidence,
-                annotatorId: newAnnotation.annotatorId,
-                comment: newAnnotation.comment,
-                status: newAnnotation.status,
-                version: newAnnotation.version,
-                createdAt: newAnnotation.createdAt,
-                updatedAt: newAnnotation.updatedAt,
-              )
-              ..name = newAnnotation.name
-              ..color = newAnnotation.color;
-
-        final newAnnotations = List<Annotation>.from(
+      final result = await _annotationService.assignClassificationLabel(
+        mediaItemId: currentMedia.mediaItem.id!,
+        label: label,
+        isMultiLabel: type.contains('multi-label'),
+        existingAnnotations: List<Annotation>.from(
           currentMedia.annotations ?? [],
+        ),
+      );
+      if (!result.changed) return;
+
+      setState(() {
+        if (!_isLiveMediaContext(activeCtx)) {
+          return;
+        }
+        final liveMedia = _mediaCache[activeCtx.index]!;
+        _mediaCache[activeCtx.index] = liveMedia.copyWith(
+          annotations: result.annotations,
         );
-        newAnnotations.add(savedAnnotation);
-
-        setState(() {
-          if (!_isLiveMediaContext(activeCtx)) {
-            return;
-          }
-          final liveMedia = _mediaCache[activeCtx.index]!;
-          final updated = List<Annotation>.from(liveMedia.annotations ?? []);
-          updated.add(savedAnnotation);
-          _mediaCache[activeCtx.index] = liveMedia.copyWith(
-            annotations: updated,
-          );
-        });
-      } else {
-        // Binary or multi-class: only one label allowed
-        final db = AnnotationDatabase.instance;
-        final mediaId = currentMedia.mediaItem.id!;
-
-        // Replace only classification annotations; keep all other types.
-        await db.deleteAnnotationsByMediaAndType(mediaId, 'classification');
-
-        final newAnnotation =
-            Annotation(
-                id: null,
-                mediaItemId: currentMedia.mediaItem.id!,
-                labelId: label.id,
-                annotationType: 'classification',
-                data: {},
-                confidence: 1.0,
-                annotatorId: null,
-                comment: null,
-                status: 'pending',
-                version: 1,
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              )
-              ..name = label.name
-              ..color = label.toColor();
-
-        final insertedId = await db.insertAnnotation(newAnnotation);
-
-        final savedAnnotation =
-            Annotation(
-                id: insertedId,
-                mediaItemId: newAnnotation.mediaItemId,
-                labelId: newAnnotation.labelId,
-                annotationType: newAnnotation.annotationType,
-                data: newAnnotation.data,
-                confidence: newAnnotation.confidence,
-                annotatorId: newAnnotation.annotatorId,
-                comment: newAnnotation.comment,
-                status: newAnnotation.status,
-                version: newAnnotation.version,
-                createdAt: newAnnotation.createdAt,
-                updatedAt: newAnnotation.updatedAt,
-              )
-              ..name = newAnnotation.name
-              ..color = newAnnotation.color;
-
-        setState(() {
-          if (!_isLiveMediaContext(activeCtx)) {
-            return;
-          }
-          final liveMedia = _mediaCache[activeCtx.index]!;
-          final preserved =
-              (liveMedia.annotations ?? [])
-                  .where((a) => a.annotationType != 'classification')
-                  .toList();
-          preserved.add(savedAnnotation);
-          _mediaCache[activeCtx.index] = liveMedia.copyWith(
-            annotations: preserved,
-          );
-        });
-      }
+        if (_currentIndex == activeCtx.index) {
+          _selectedAnnotation = result.addedAnnotation;
+        }
+      });
     } else {
       // For other project types, just update the selected label
       if (_selectedAnnotation != null) {
@@ -1038,19 +937,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         mediaItemId: annotation.mediaItemId,
       );
 
-      // Create updated annotation
-      final updatedAnnotation = annotation.copyWith(
-        labelId: newLabel.id,
-        name: newLabel.name,
-        color: newLabel.toColor(),
-        updatedAt: DateTime.now(),
+      final result = await _annotationService.updateAnnotationLabel(
+        annotation: annotation,
+        newLabel: newLabel,
       );
-
-      // Update in database
-      final updatedCount = await AnnotationDatabase.instance.updateAnnotation(
-        updatedAnnotation,
-      );
-      if (updatedCount == 0) {
+      if (result.status == AnnotationLabelUpdateStatus.conflict) {
         if (mounted) {
           await AlertErrorDialog.show(
             context,
@@ -1060,10 +951,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         }
         return;
       }
-
-      final persistedAnnotation = updatedAnnotation.copyWith(
-        version: updatedAnnotation.version + 1,
-      );
+      final persistedAnnotation = result.annotation!;
 
       // Update UI state
       if (mounted) {
@@ -1148,7 +1036,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                 );
 
         // Delete from database
-        final deletedCount = await AnnotationDatabase.instance.deleteAnnotation(
+        final deletedCount = await _annotationRepository.deleteAnnotation(
           annotation.id!,
         );
 
@@ -1209,7 +1097,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     try {
       final mediaId = currentMedia.mediaItem.id;
       if (mediaId == null) return;
-      await AnnotationDatabase.instance.deleteAnnotationsByMedia(mediaId);
+      await _annotationRepository.deleteAnnotationsByMedia(mediaId);
       if (!mounted) return;
       setState(() {
         if (_isLiveMediaContext(activeCtx)) {

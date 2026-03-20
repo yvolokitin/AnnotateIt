@@ -22,6 +22,7 @@ import '../../widgets/dialogs/prelabel_cancel_confirmation_dialog.dart';
 import '../models_page.dart';
 import '../../widgets/model_cards/model_card.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../config/model_registry_urls.dart';
 
 class PreLabelProjectDialog extends StatefulWidget {
   final Project project;
@@ -204,11 +205,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
         description:
             "EfficientDet-Lite4 is an object detection model optimized for mobile and edge devices. It uses an EfficientNet-Lite4 backbone with a BiFPN feature network to achieve strong accuracy while keeping the model size small and inference fast.     Task: Object detection (bounding boxes + labels) Dataset: Trained on COCO (90 common object classes). Format: TensorFlow Lite with metadata (easy integration and standardized input/output). Input: 320×320 RGB image (normalized to 0–1). Output: Bounding boxes, class IDs (0–89), and confidence scores",
         imageAsset: 'assets/images/efficientnet-tflite-lite4-detection.jpg',
-        urlEncoder:
-            'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientdet-tflite-lite4-detection-metadata-v2.tflite',
+        urlEncoder: ModelRegistryUrls.efficientDetLite4Detector,
         urlDecoder: '',
-        urlConfig:
-            'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/coco_labels.txt',
+        urlConfig: ModelRegistryUrls.cocoLabels,
         shaEncoder:
             '0d9b3ffe97d6d9e78ac1632f4b63630f35e39c87d20349b648268d671c7730c5',
         shaDecoder: '',
@@ -225,11 +224,9 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
             "EfficientNet-Lite4 FP32v2 is a convolutional neural network (CNN) from the EfficientNet-Lite family, designed for image classification on mobile and edge devices. EfficientNet-Lite models provide a strong balance of accuracy and efficiency, using fewer parameters and computations than many traditional CNNs. The FP32v2 variant is distributed in TensorFlow Lite format, making it directly usable in mobile and embedded applications for real-time image classification. While FP32 ensures maximum accuracy, smaller quantized versions (e.g., INT8) offer lower latency and power consumption on constrained hardware.",
         imageAsset:
             'assets/images/efficientnet-tflite-lite4-classification.jpg',
-        urlEncoder:
-            'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientnet-tflite-lite4-fp32-v2.tflite',
+        urlEncoder: ModelRegistryUrls.efficientNetLite4Classifier,
         urlDecoder: '',
-        urlConfig:
-            'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/classification_efficientnet-tflite-lite0-int8-v2_labels.txt',
+        urlConfig: ModelRegistryUrls.efficientNetLite4ClassifierLabels,
         shaEncoder:
             'f0d69132ee9759f2d98e817f7a96a28e40384d3c1894f222c4e6653d9e285586',
         shaDecoder: '',

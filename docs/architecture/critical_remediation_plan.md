@@ -61,5 +61,5 @@ Status legend: `[ ]` pending, `[~]` in progress, `[x]` completed.
 ## Verification tasks
 
 - [x] Run static analysis on changed files (`flutter analyze` or targeted checks).
-- [ ] Add/adjust focused tests for fixed critical paths where feasible.
+- [x] Add/adjust focused tests for fixed critical paths where feasible.
 - [x] Re-read this file and mark each task complete as implemented.

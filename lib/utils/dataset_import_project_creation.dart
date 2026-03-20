@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
 
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
@@ -14,6 +12,7 @@ import '../data/project_database.dart';
 import '../data/dataset_database.dart';
 import '../data/labels_database.dart';
 import '../data/annotation_database.dart';
+import '../services/media_metadata_service.dart';
 
 import '../models/label.dart';
 import '../models/project.dart';
@@ -230,8 +229,14 @@ class DatasetImportProjectCreation {
 
         if (firstImagePath == null && imageExtensions.contains(ext)) {
           try {
-            final bytes = await entity.readAsBytes();
-            await ui.instantiateImageCodec(bytes); // Validate
+            final meta = await MediaMetadataService.instance.getImageMetadata(
+              path,
+            );
+            final width = (meta['width'] as num?)?.toInt() ?? 0;
+            final height = (meta['height'] as num?)?.toInt() ?? 0;
+            if (width <= 0 || height <= 0) {
+              throw Exception('Image dimensions are invalid');
+            }
             firstImagePath = path;
             print("First valid image for thumbnail: $firstImagePath");
           } catch (e) {
@@ -270,7 +275,9 @@ class DatasetImportProjectCreation {
 
       if (extractMetadata) {
         if (isVideo) {
-          final meta = await getVideoMetadata(file.path);
+          final meta = await MediaMetadataService.instance.getVideoMetadata(
+            file.path,
+          );
           width = meta['width'];
           height = meta['height'];
           duration = meta['duration'];
@@ -280,7 +287,9 @@ class DatasetImportProjectCreation {
                   ? (duration * fps).round()
                   : null;
         } else {
-          final meta = await getImageMetadata(file.path);
+          final meta = await MediaMetadataService.instance.getImageMetadata(
+            file.path,
+          );
           width = meta['width'];
           height = meta['height'];
         }
@@ -382,21 +391,5 @@ class DatasetImportProjectCreation {
       '[fetchMediaItemsMap] Loaded ${map.length} media items for dataset $datasetId',
     );
     return map;
-  }
-
-  static Future<Map<String, dynamic>> getImageMetadata(String path) async {
-    final bytes = await File(path).readAsBytes();
-    final decoded = img.decodeImage(bytes);
-    if (decoded == null) {
-      // throw Exception("Unable to decode image: $path");
-      print("Warning: Unable to decode image: $path");
-      return {'width': 0, 'height': 0};
-    }
-
-    return {'width': decoded.width, 'height': decoded.height};
-  }
-
-  static Future<Map<String, dynamic>> getVideoMetadata(String path) async {
-    return {'width': 0, 'height': 0, 'duration': 0.0, 'fps': 0.0};
   }
 }

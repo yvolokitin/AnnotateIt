@@ -23,11 +23,24 @@ import 'gen_l10n/app_localizations.dart';
 import 'package:window_size/window_size.dart';
 import 'services/file_logger.dart';
 import 'widgets/animated/puzzle_reveal_overlay.dart';
+import 'config/app_runtime_config.dart';
 
 ThemeData themeData = getSystemTheme();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final runtimeConfig = AppRuntimeConfig.instance;
+  final configErrors = runtimeConfig.validate();
+  if (configErrors.isNotEmpty) {
+    runApp(
+      ErrorApp(
+        error:
+            'Runtime configuration is invalid:\n${configErrors.map((e) => '- $e').join('\n')}',
+      ),
+    );
+    return;
+  }
 
   // Initialize file logger first
   String? logFilePath;
@@ -41,17 +54,20 @@ void main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
     // Console output (existing)
-    print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
+    print(
+      '${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}',
+    );
     if (record.error != null) {
       print('Error: ${record.error}');
     }
     if (record.stackTrace != null) {
       print('StackTrace: ${record.stackTrace}');
     }
-    
+
     // File output (new)
     try {
-      if (UserSession.instance.isInitialized && UserSession.instance.getUser().saveApplicationLogInFile) {
+      if (UserSession.instance.isInitialized &&
+          UserSession.instance.getUser().saveApplicationLogInFile) {
         FileLogger.instance.writeLogRecord(record);
       }
     } catch (_) {
@@ -60,12 +76,13 @@ void main() async {
   });
 
   final log = Logger('main');
-  
+
   if (logFilePath != null) {
     log.info('File logging initialized. Log file: $logFilePath');
   } else {
     log.warning('File logging could not be initialized');
   }
+  log.info('Runtime config: ${runtimeConfig.summary()}');
 
   try {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -147,8 +164,10 @@ void main() async {
     }
 
     try {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-          overlays: [SystemUiOverlay.bottom]);
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom],
+      );
     } catch (e) {
       log.warning('Could not set system UI mode: $e');
     }
@@ -199,13 +218,14 @@ class AnnotateItAppState extends State<AnnotateItApp> {
     });
     themeData = theme;
   }
-  
+
   // Method to update the app's locale
   void updateLocale() {
-    final userLanguage = UserSession.instance.isInitialized 
-        ? UserSession.instance.getUser().language 
-        : null;
-        
+    final userLanguage =
+        UserSession.instance.isInitialized
+            ? UserSession.instance.getUser().language
+            : null;
+
     if (userLanguage != null && userLanguage.isNotEmpty) {
       setState(() {
         // Explicitly set the locale to the user's language preference
@@ -231,10 +251,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Container(
-              color: Colors.black,
-              child: MainPage(),
-            ),
+            Container(color: Colors.black, child: MainPage()),
             const PuzzleRevealOverlay(),
           ],
         ),
@@ -243,17 +260,18 @@ class AnnotateItAppState extends State<AnnotateItApp> {
       // Localization setup
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      
+
       // Use explicit locale if set, otherwise use resolution callback
       locale: _locale,
 
       // Use user's preferred language if available, otherwise use system locale with fallback to English
       localeResolutionCallback: (locale, supportedLocales) {
         // First try to use the user's preferred language from settings
-        final userLanguage = UserSession.instance.isInitialized 
-            ? UserSession.instance.getUser().language 
-            : null;
-            
+        final userLanguage =
+            UserSession.instance.isInitialized
+                ? UserSession.instance.getUser().language
+                : null;
+
         if (userLanguage != null && userLanguage.isNotEmpty) {
           for (final supportedLocale in supportedLocales) {
             if (supportedLocale.languageCode == userLanguage) {
@@ -261,7 +279,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
             }
           }
         }
-        
+
         // If user language preference is not set or not supported, try system locale
         if (locale != null) {
           for (final supportedLocale in supportedLocales) {
@@ -270,7 +288,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
             }
           }
         }
-        
+
         // Default to English
         return const Locale('en');
       },
@@ -281,7 +299,7 @@ class AnnotateItAppState extends State<AnnotateItApp> {
 // Error app to display when critical initialization fails
 class ErrorApp extends StatelessWidget {
   final String error;
-  
+
   const ErrorApp({super.key, required this.error});
 
   @override
@@ -297,11 +315,7 @@ class ErrorApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.error_outline, size: 64, color: Colors.white),
                 const SizedBox(height: 24),
                 const Text(
                   'AnnotateIt Failed to Start',
@@ -315,10 +329,7 @@ class ErrorApp extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   'The application encountered a critical error during initialization and cannot continue.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade300,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade300),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -340,10 +351,7 @@ class ErrorApp extends StatelessWidget {
                 const SizedBox(height: 24),
                 const Text(
                   'Please try restarting the application. If the problem persists, contact support.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
               ],

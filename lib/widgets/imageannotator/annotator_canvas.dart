@@ -6,8 +6,9 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
+import '../../repositories/annotation_repository.dart';
+import '../../repositories/sqlite_annotation_repository.dart';
 import '../../session/user_session.dart';
-import '../../data/annotation_database.dart';
 
 import '../../models/label.dart';
 import '../../models/annotation.dart';
@@ -72,6 +73,8 @@ class AnnotatorCanvas extends StatefulWidget {
 }
 
 class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
+  final AnnotationRepository _annotationRepository =
+      const SqliteAnnotationRepository();
   late List<Annotation> _localAnnotations;
 
   Offset? _lastMiddleButtonPosition;
@@ -375,7 +378,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     widget.onAnnotationUpdated?.call(newAnnotation);
 
     if (UserSession.instance.autoSaveAnnotations) {
-      await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+      await _annotationRepository.insertAnnotation(newAnnotation);
     }
   }
 
@@ -500,7 +503,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       final shouldSave = UserSession.instance.autoSaveAnnotations;
 
       if (_draggingAnnotation != null && shouldSave) {
-        final updatedRows = await AnnotationDatabase.instance.updateAnnotation(
+        final updatedRows = await _annotationRepository.updateAnnotation(
           _draggingAnnotation!,
         );
         if (updatedRows > 0) {
@@ -570,7 +573,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         widget.onAnnotationUpdated?.call(newAnnotation);
 
         if (UserSession.instance.autoSaveAnnotations) {
-          await AnnotationDatabase.instance.insertAnnotation(newAnnotation);
+          await _annotationRepository.insertAnnotation(newAnnotation);
         }
       }
 

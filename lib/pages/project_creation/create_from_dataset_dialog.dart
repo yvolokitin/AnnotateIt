@@ -55,9 +55,10 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
   }
 
   Future<void> _cleanupExtractedFiles() async {
-    if (_archive?.datasetPath?.isNotEmpty ?? false) {
+    final datasetPath = _archive?.datasetPath;
+    if (datasetPath != null && datasetPath.isNotEmpty) {
       await cleanupExtractedPath(
-        _archive!.datasetPath,
+        datasetPath,
         onLog: (msg) => _logger.info(msg),
       );
     }
@@ -287,7 +288,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isLargeScreen = constraints.maxWidth >= 1600;

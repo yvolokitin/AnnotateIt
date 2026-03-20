@@ -224,11 +224,18 @@ Future<void> createInitialSchema(Database db, int version) async {
         comment TEXT,
         status TEXT,
         version INTEGER DEFAULT 1,
+        annotation_schema_version INTEGER NOT NULL DEFAULT 1 CHECK (annotation_schema_version >= 1),
+        provenance TEXT,
+        review_status TEXT NOT NULL DEFAULT 'draft' CHECK (review_status IN ('draft', 'proposed', 'accepted', 'rejected')),
+        reviewed_by INTEGER,
+        reviewed_at TEXT,
+        review_comment TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE,
         FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE CASCADE,
-        FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL
+        FOREIGN KEY(annotator_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY(reviewed_by) REFERENCES users(id) ON DELETE SET NULL
       );
     ''');
 
@@ -259,6 +266,9 @@ Future<void> createInitialSchema(Database db, int version) async {
   );
   await db.execute(
     'CREATE INDEX IF NOT EXISTS idx_annotations_label_id ON annotations(label_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotations_review_status ON annotations(review_status)',
   );
   await db.execute(
     'CREATE INDEX IF NOT EXISTS idx_labels_project_id ON labels(project_id)',

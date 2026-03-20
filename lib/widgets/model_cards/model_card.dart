@@ -46,6 +46,18 @@ class ModelCard extends StatefulWidget {
   State<ModelCard> createState() => _ModelCardState();
 }
 
+class _ModelArtifact {
+  final Uri uri;
+  final String fileName;
+  final String expectedSha256;
+
+  const _ModelArtifact({
+    required this.uri,
+    required this.fileName,
+    required this.expectedSha256,
+  });
+}
+
 class _ModelCardState extends State<ModelCard> {
   int _checkCounter = 0;
   bool _downloading = false;
@@ -66,9 +78,15 @@ class _ModelCardState extends State<ModelCard> {
   DateTime _lastProgressUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   // Network robustness settings
-  static const Duration _requestTimeout = Duration(seconds: 30); // connection and first-byte
-  static const Duration _inactivityTimeout = Duration(seconds: 30); // between chunks
-  static const Duration _progressUiInterval = Duration(milliseconds: 120); // throttle UI updates
+  static const Duration _requestTimeout = Duration(
+    seconds: 30,
+  ); // connection and first-byte
+  static const Duration _inactivityTimeout = Duration(
+    seconds: 30,
+  ); // between chunks
+  static const Duration _progressUiInterval = Duration(
+    milliseconds: 120,
+  ); // throttle UI updates
 
   void _showError(String message) {
     if (!mounted) return;
@@ -107,7 +125,9 @@ class _ModelCardState extends State<ModelCard> {
       if (!dir.existsSync()) return;
       for (final ent in dir.listSync()) {
         if (ent is File && ent.path.toLowerCase().endsWith('.part')) {
-          try { ent.deleteSync(); } catch (_) {}
+          try {
+            ent.deleteSync();
+          } catch (_) {}
         }
       }
     } catch (_) {
@@ -174,7 +194,8 @@ class _ModelCardState extends State<ModelCard> {
   Future<Directory> _modelsRoot() async {
     try {
       // Use user-configured models root folder
-      final modelsRoot = await UserSession.instance.getCurrentUserModelsFolder();
+      final modelsRoot =
+          await UserSession.instance.getCurrentUserModelsFolder();
       final base = Directory(p.join(modelsRoot, widget.id));
       if (!base.existsSync()) {
         base.createSync(recursive: true);
@@ -184,7 +205,9 @@ class _ModelCardState extends State<ModelCard> {
     } catch (_) {
       // Fallback to legacy default location if UserSession is not initialized
       final dir = await getApplicationDocumentsDirectory();
-      final base = Directory(p.join(dir.path, 'AnnotateIt', 'models', widget.id));
+      final base = Directory(
+        p.join(dir.path, 'AnnotateIt', 'models', widget.id),
+      );
       if (!base.existsSync()) {
         base.createSync(recursive: true);
       }
@@ -193,28 +216,61 @@ class _ModelCardState extends State<ModelCard> {
     }
   }
 
-  List<Uri> get _urls {
-        final list = <Uri>[Uri.parse(widget.urlEncoder)];
-        if (widget.urlDecoder.trim().isNotEmpty) {
-          list.add(Uri.parse(widget.urlDecoder));
-        }
-        list.add(Uri.parse(widget.urlConfig));
-        return list;
-      }
+  bool get _hasDownloadSources {
+    final hasEncoder = _parseArtifact(widget.urlEncoder, widget.shaEncoder);
+    final hasConfig = _parseArtifact(widget.urlConfig, widget.shaConfig);
+    return hasEncoder != null && hasConfig != null;
+  }
 
-  List<String> get _shas {
-    final list = <String>[widget.shaEncoder];
-    if (widget.urlDecoder.trim().isNotEmpty) {
-      list.add(widget.shaDecoder);
+  _ModelArtifact? _parseArtifact(String rawUrl, String expectedSha256) {
+    final raw = rawUrl.trim();
+    if (raw.isEmpty) {
+      return null;
     }
-    list.add(widget.shaConfig);
-    return list;
+    final uri = Uri.tryParse(raw);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      return null;
+    }
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      return null;
+    }
+    final fileName = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+    if (fileName.isEmpty) {
+      return null;
+    }
+    return _ModelArtifact(
+      uri: uri,
+      fileName: fileName,
+      expectedSha256: expectedSha256,
+    );
+  }
+
+  List<_ModelArtifact> get _artifacts {
+    final artifacts = <_ModelArtifact>[];
+
+    final encoder = _parseArtifact(widget.urlEncoder, widget.shaEncoder);
+    if (encoder != null) {
+      artifacts.add(encoder);
+    }
+
+    final decoder = _parseArtifact(widget.urlDecoder, widget.shaDecoder);
+    if (decoder != null) {
+      artifacts.add(decoder);
+    }
+
+    final config = _parseArtifact(widget.urlConfig, widget.shaConfig);
+    if (config != null) {
+      artifacts.add(config);
+    }
+
+    return artifacts;
   }
 
   Future<List<File>> _targetFiles() async {
     final folder = await _modelsRoot();
-    final names = _urls.map((u) => u.pathSegments.isNotEmpty ? u.pathSegments.last : 'file').toList();
-    return names.map((n) => File(p.join(folder.path, n))).toList();
+    return _artifacts
+        .map((artifact) => File(p.join(folder.path, artifact.fileName)))
+        .toList();
   }
 
   // Common request headers to improve compatibility with hosting providers (e.g., GitHub Releases)
@@ -225,10 +281,12 @@ class _ModelCardState extends State<ModelCard> {
 
   int _minValidBytes(String path) {
     final p = path.toLowerCase();
-    if (p.endsWith('.onnx')) return 5 * 1024 * 1024; // ≥ 5 MB for model binaries
-    if (p.endsWith('.yaml') || p.endsWith('.yml')) return 20; // small text file is fine
+    if (p.endsWith('.onnx'))
+      return 5 * 1024 * 1024; // ≥ 5 MB for model binaries
+    if (p.endsWith('.yaml') || p.endsWith('.yml'))
+      return 20; // small text file is fine
     return 100; // default small threshold
-    }
+  }
 
   bool _looksLikeHtmlContentType(String? ct) {
     if (ct == null) return false;
@@ -262,17 +320,30 @@ class _ModelCardState extends State<ModelCard> {
   }
 
   Future<void> _drainWithTimeout(Stream<List<int>> s) async {
-    await s.drain<void>().timeout(_requestTimeout, onTimeout: () {
-      throw TimeoutException('Timed out while draining response');
-    });
+    await s.drain<void>().timeout(
+      _requestTimeout,
+      onTimeout: () {
+        throw TimeoutException('Timed out while draining response');
+      },
+    );
   }
 
-  Future<http.StreamedResponse> _getWithRedirects(http.Client client, Uri uri, {int maxRedirects = 5}) async {
+  Future<http.StreamedResponse> _getWithRedirects(
+    http.Client client,
+    Uri uri, {
+    int maxRedirects = 5,
+  }) async {
     Uri current = uri;
     for (int i = 0; i < maxRedirects; i++) {
-      final resp = await _sendWithRetry(client, 'GET', current, headers: _commonHeaders);
+      final resp = await _sendWithRetry(
+        client,
+        'GET',
+        current,
+        headers: _commonHeaders,
+      );
       // 3xx redirect handling
-      if ((resp.statusCode >= 300 && resp.statusCode < 400) || resp.isRedirect) {
+      if ((resp.statusCode >= 300 && resp.statusCode < 400) ||
+          resp.isRedirect) {
         final location = resp.headers['location'];
         await _drainWithTimeout(resp.stream);
         if (location == null) return resp;
@@ -287,45 +358,20 @@ class _ModelCardState extends State<ModelCard> {
   Future<void> _checkAlreadyDownloaded() async {
     // Ticket-based guard to ensure only the latest check updates UI
     final int myTicket = ++_checkCounter;
+
+    if (!_hasDownloadSources) {
+      if (!mounted || myTicket != _checkCounter) return;
+      setState(() => _downloaded = false);
+      return;
+    }
+
     try {
       final files = await _targetFiles();
-      bool allExist = files.every((f) {
+      final allExist = files.every((f) {
         if (!f.existsSync()) return false;
         final minBytes = _minValidBytes(f.path);
         return f.lengthSync() >= minBytes;
       });
-
-      if (!allExist) {
-        // Fallback that does not rely on positions and treats decoder as optional when URL is empty
-        final folder = await _modelsRoot();
-
-        final needDecoder = widget.urlDecoder.trim().isNotEmpty;
-        final encUri = Uri.parse(widget.urlEncoder);
-        final cfgUri = Uri.parse(widget.urlConfig);
-        final decUri = needDecoder ? Uri.parse(widget.urlDecoder) : null;
-
-        final encName = encUri.pathSegments.isNotEmpty ? encUri.pathSegments.last : null;
-        final cfgName = cfgUri.pathSegments.isNotEmpty ? cfgUri.pathSegments.last : null;
-        final decName = (decUri != null && decUri.pathSegments.isNotEmpty) ? decUri.pathSegments.last : null;
-
-        final encFile = (encName != null) ? File(p.join(folder.path, encName)) : null;
-        final cfgFile = (cfgName != null) ? File(p.join(folder.path, cfgName)) : null;
-        final decFile = (decName != null) ? File(p.join(folder.path, decName)) : null;
-
-        bool encOk = encFile != null && encFile.existsSync() && encFile.lengthSync() >= _minValidBytes(encFile.path);
-        bool decOk = !needDecoder || (decFile != null && decFile.existsSync() && decFile.lengthSync() >= _minValidBytes(decFile.path));
-        bool cfgOk = false;
-        if (cfgFile != null && cfgFile.existsSync() && cfgFile.lengthSync() >= _minValidBytes(cfgFile.path)) {
-          cfgOk = true;
-        } else {
-          final alt = File(p.join(folder.path, 'config.yaml'));
-          if (alt.existsSync() && alt.lengthSync() >= _minValidBytes(alt.path)) {
-            cfgOk = true;
-          }
-        }
-
-        allExist = encOk && decOk && cfgOk;
-      }
 
       if (!mounted || myTicket != _checkCounter) return;
       setState(() => _downloaded = allExist);
@@ -387,6 +433,17 @@ class _ModelCardState extends State<ModelCard> {
   Future<void> _downloadModel() async {
     if (_downloading) return;
 
+    if (!_hasDownloadSources) {
+      AppSnackbar.show(
+        context,
+        'Model download is unavailable in this deployment profile. Configure APP_MODEL_REGISTRY_BASE_URL or allow external model downloads.',
+        backgroundColor: Colors.orangeAccent,
+        textColor: Colors.black,
+        saveToDb: false,
+      );
+      return;
+    }
+
     if (_globalDownloading) {
       // Inform user and avoid starting another download simultaneously
       AppSnackbar.show(
@@ -411,14 +468,23 @@ class _ModelCardState extends State<ModelCard> {
     try {
       _client = http.Client();
       final client = _client!;
+      final artifacts = _artifacts;
+      if (artifacts.isEmpty) {
+        throw Exception('No valid model artifacts configured for download.');
+      }
       final files = await _targetFiles();
 
       int totalBytes = 0;
       final lengths = <int>[];
-      for (final url in _urls) {
+      for (final artifact in artifacts) {
         if (_canceled) return;
         try {
-          final head = await _sendWithRetry(client, 'HEAD', url, headers: _commonHeaders);
+          final head = await _sendWithRetry(
+            client,
+            'HEAD',
+            artifact.uri,
+            headers: _commonHeaders,
+          );
           final len = head.contentLength ?? 0;
           lengths.add(len);
           totalBytes += len;
@@ -429,13 +495,15 @@ class _ModelCardState extends State<ModelCard> {
       }
 
       int downloadedSoFar = 0;
-      for (int i = 0; i < _urls.length; i++) {
+      for (int i = 0; i < artifacts.length; i++) {
         if (_canceled) return;
 
-        final url = _urls[i];
+        final artifact = artifacts[i];
+        final url = artifact.uri;
         final file = files[i];
 
-        if (file.existsSync() && file.lengthSync() >= _minValidBytes(file.path)) {
+        if (file.existsSync() &&
+            file.lengthSync() >= _minValidBytes(file.path)) {
           downloadedSoFar += lengths[i];
           if (totalBytes > 0 && mounted) {
             setState(() => _progress = downloadedSoFar / totalBytes);
@@ -449,8 +517,13 @@ class _ModelCardState extends State<ModelCard> {
         if (resp.statusCode < 200 || resp.statusCode >= 300) {
           await _drainWithTimeout(resp.stream);
           if (mounted) {
-            setState(() { _downloading = false; _progress = 0.0; });
-            _showError('Download failed (${resp.statusCode}) for ${url.toString()}');
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
+            _showError(
+              'Download failed (${resp.statusCode}) for ${url.toString()}',
+            );
           }
           return;
         }
@@ -461,14 +534,23 @@ class _ModelCardState extends State<ModelCard> {
         if (isOnnx && _looksLikeHtmlContentType(contentType)) {
           await _drainWithTimeout(resp.stream);
           if (mounted) {
-            setState(() { _downloading = false; _progress = 0.0; });
-            _showError('Download failed: unexpected content for ${url.toString()}');
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
+            _showError(
+              'Download failed: unexpected content for ${url.toString()}',
+            );
           }
           return;
         }
 
         final tmp = File('$filePath.part');
-        if (tmp.existsSync()) { try { tmp.deleteSync(); } catch(_) {} }
+        if (tmp.existsSync()) {
+          try {
+            tmp.deleteSync();
+          } catch (_) {}
+        }
         final sink = tmp.openWrite();
 
         int received = 0;
@@ -481,12 +563,18 @@ class _ModelCardState extends State<ModelCard> {
 
             if (mounted) {
               final now = DateTime.now();
-              if (now.difference(_lastProgressUiUpdate) >= _progressUiInterval) {
+              if (now.difference(_lastProgressUiUpdate) >=
+                  _progressUiInterval) {
                 if (totalBytes > 0) {
                   final currentTotal = downloadedSoFar + received;
                   setState(() => _progress = currentTotal / totalBytes);
                 } else if (thisLen > 0) {
-                  setState(() => _progress = (downloadedSoFar + (received / thisLen)) / _urls.length);
+                  setState(
+                    () =>
+                        _progress =
+                            (downloadedSoFar + (received / thisLen)) /
+                            artifacts.length,
+                  );
                 }
                 _lastProgressUiUpdate = now;
               }
@@ -495,10 +583,18 @@ class _ModelCardState extends State<ModelCard> {
           await sink.flush();
           await sink.close();
         } catch (e) {
-          try { await sink.flush(); await sink.close(); } catch (_) {}
-          try { if (tmp.existsSync()) tmp.deleteSync(); } catch (_) {}
+          try {
+            await sink.flush();
+            await sink.close();
+          } catch (_) {}
+          try {
+            if (tmp.existsSync()) tmp.deleteSync();
+          } catch (_) {}
           if (!_canceled && mounted) {
-            setState(() { _downloading = false; _progress = 0.0; });
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
             _showError('Download failed: ${_friendlyError(e)}');
           }
           return;
@@ -508,37 +604,58 @@ class _ModelCardState extends State<ModelCard> {
           final finalLen = tmp.lengthSync();
           final minBytes = _minValidBytes(filePath);
           if (finalLen < minBytes) {
-            try { tmp.deleteSync(); } catch (_) {}
+            try {
+              tmp.deleteSync();
+            } catch (_) {}
             if (mounted && !_canceled) {
-              setState(() { _downloading = false; _progress = 0.0; });
-              _showError('Download failed: file too small for ${url.toString()}');
+              setState(() {
+                _downloading = false;
+                _progress = 0.0;
+              });
+              _showError(
+                'Download failed: file too small for ${url.toString()}',
+              );
             }
             return;
           }
 
-          final expectedSha = (i >= 0 && i < _shas.length) ? _shas[i] : '';
+          final expectedSha = artifact.expectedSha256;
 
           if (expectedSha.isNotEmpty) {
             final actual = await _sha256OfFile(tmp);
             if (!_shaMatches(expectedSha, actual)) {
-              try { tmp.deleteSync(); } catch (_) {}
+              try {
+                tmp.deleteSync();
+              } catch (_) {}
               if (mounted && !_canceled) {
-                setState(() { _downloading = false; _progress = 0.0; });
-                _showError('Checksum mismatch for ${url.pathSegments.isNotEmpty ? url.pathSegments.last : url.toString()}');
+                setState(() {
+                  _downloading = false;
+                  _progress = 0.0;
+                });
+                _showError(
+                  'Checksum mismatch for ${url.pathSegments.isNotEmpty ? url.pathSegments.last : url.toString()}',
+                );
               }
               return;
             }
           }
 
           if (file.existsSync()) {
-            try { file.deleteSync(); } catch (_) {}
+            try {
+              file.deleteSync();
+            } catch (_) {}
           }
           tmp.renameSync(filePath);
           downloadedSoFar += (thisLen > 0 ? thisLen : received);
         } catch (e) {
-          try { tmp.deleteSync(); } catch (_) {}
+          try {
+            tmp.deleteSync();
+          } catch (_) {}
           if (mounted && !_canceled) {
-            setState(() { _downloading = false; _progress = 0.0; });
+            setState(() {
+              _downloading = false;
+              _progress = 0.0;
+            });
             _showError('Download failed: ${_friendlyError(e)}');
           }
           return;
@@ -546,7 +663,10 @@ class _ModelCardState extends State<ModelCard> {
       }
 
       if (!mounted) return;
-      setState(() { _downloading = false; _progress = 1.0; });
+      setState(() {
+        _downloading = false;
+        _progress = 1.0;
+      });
 
       // Re-validate from disk after all files are finalized to avoid any transient UI mismatch
       await _checkAlreadyDownloaded();
@@ -560,9 +680,10 @@ class _ModelCardState extends State<ModelCard> {
           saveToDb: false,
         );
       } else {
-        _showError('Downloaded files not found or incomplete. Please try again.');
+        _showError(
+          'Downloaded files not found or incomplete. Please try again.',
+        );
       }
-
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -579,12 +700,20 @@ class _ModelCardState extends State<ModelCard> {
         );
       }
     } finally {
-      try { await _sub?.cancel(); } catch (_) {}
-      try { await _sink?.flush(); } catch (_) {}
-      try { await _sink?.close(); } catch (_) {}
+      try {
+        await _sub?.cancel();
+      } catch (_) {}
+      try {
+        await _sink?.flush();
+      } catch (_) {}
+      try {
+        await _sink?.close();
+      } catch (_) {}
       _sink = null;
       _sub = null;
-      try { _client?.close(); } catch (_) {}
+      try {
+        _client?.close();
+      } catch (_) {}
       if (_canceled) {
         _cleanupPartialFiles();
       }
@@ -611,7 +740,8 @@ class _ModelCardState extends State<ModelCard> {
       });
     }
 
-    final borderColor = _downloaded ? darkGreen : theme.colorScheme.outlineVariant;
+    final borderColor =
+        _downloaded ? darkGreen : theme.colorScheme.outlineVariant;
     final borderWidth = _downloaded ? 2.0 : 1.5;
 
     return Card(
@@ -653,9 +783,12 @@ class _ModelCardState extends State<ModelCard> {
                           Expanded(
                             child: Text(
                               widget.title,
-                              style: compact
-                                  ? theme.textTheme.titleSmall
-                                  : (isNarrow ? theme.textTheme.titleMedium : theme.textTheme.titleLarge),
+                              style:
+                                  compact
+                                      ? theme.textTheme.titleSmall
+                                      : (isNarrow
+                                          ? theme.textTheme.titleMedium
+                                          : theme.textTheme.titleLarge),
                               softWrap: true,
                               maxLines: compact ? 1 : 2,
                               overflow: TextOverflow.ellipsis,
@@ -665,12 +798,19 @@ class _ModelCardState extends State<ModelCard> {
                           const SizedBox(width: 4),
                           Chip(
                             label: Text(widget.modelSize),
-                            backgroundColor: _downloaded ? Colors.green : theme.colorScheme.surfaceVariant,
-                            labelStyle: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)?.copyWith(
-                              color: _downloaded ? Colors.white : null,
-                            ),
+                            backgroundColor:
+                                _downloaded
+                                    ? Colors.green
+                                    : theme.colorScheme.surfaceVariant,
+                            labelStyle: (compact
+                                    ? theme.textTheme.labelSmall
+                                    : theme.textTheme.labelMedium)
+                                ?.copyWith(
+                                  color: _downloaded ? Colors.white : null,
+                                ),
                             visualDensity: VisualDensity.compact,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                         ],
                       ),
@@ -683,14 +823,19 @@ class _ModelCardState extends State<ModelCard> {
                           style: theme.textTheme.bodyMedium,
                           softWrap: true,
                           maxLines: compact ? 1 : null,
-                          overflow: compact ? TextOverflow.ellipsis : TextOverflow.fade,
+                          overflow:
+                              compact
+                                  ? TextOverflow.ellipsis
+                                  : TextOverflow.fade,
                         ),
                       ),
 
                       SizedBox(height: compact ? 6 : 10),
 
                       if (_downloading) ...[
-                        LinearProgressIndicator(value: _progress > 0 ? _progress : null),
+                        LinearProgressIndicator(
+                          value: _progress > 0 ? _progress : null,
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           _progress > 0
@@ -708,7 +853,10 @@ class _ModelCardState extends State<ModelCard> {
                             Expanded(
                               child: Text(
                                 l10n.modelDownloaded,
-                                style: compact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium,
+                                style:
+                                    compact
+                                        ? theme.textTheme.bodySmall
+                                        : theme.textTheme.bodyMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -720,7 +868,11 @@ class _ModelCardState extends State<ModelCard> {
                                   tooltip: l10n.menuAbout,
                                   icon: const Icon(Icons.info_outline),
                                   onPressed: () {
-                                    AlertErrorDialog.show(context, widget.title, widget.description);
+                                    AlertErrorDialog.show(
+                                      context,
+                                      widget.title,
+                                      widget.description,
+                                    );
                                   },
                                   visualDensity: VisualDensity.compact,
                                 ),
@@ -745,38 +897,67 @@ class _ModelCardState extends State<ModelCard> {
                           ],
                         ),
                       ] else ...[
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                tooltip: l10n.menuAbout,
-                                icon: const Icon(Icons.info_outline),
-                                onPressed: () {
-                                  AlertErrorDialog.show(context, widget.title, widget.description);
-                                },
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              const SizedBox(width: 6),
-                              ElevatedButton.icon(
-                                onPressed: _downloadModel,
-                                icon: const Icon(Icons.download),
-                                label: Text(l10n.modelDownload),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: compact ? 10 : 14,
-                                    vertical: compact ? 8 : 10,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (!_hasDownloadSources)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text(
+                                  'Download source is not configured for this environment.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.orangeAccent,
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+                                  textAlign: TextAlign.right,
                                 ),
                               ),
-                            ],
-                          ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: l10n.menuAbout,
+                                    icon: const Icon(Icons.info_outline),
+                                    onPressed: () {
+                                      AlertErrorDialog.show(
+                                        context,
+                                        widget.title,
+                                        widget.description,
+                                      );
+                                    },
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  ElevatedButton.icon(
+                                    onPressed:
+                                        _hasDownloadSources
+                                            ? _downloadModel
+                                            : null,
+                                    icon: const Icon(Icons.download),
+                                    label: Text(l10n.modelDownload),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          _hasDownloadSources
+                                              ? Colors.red
+                                              : Colors.grey,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: compact ? 10 : 14,
+                                        vertical: compact ? 8 : 10,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      visualDensity:
+                                          compact
+                                              ? VisualDensity.compact
+                                              : VisualDensity.standard,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],

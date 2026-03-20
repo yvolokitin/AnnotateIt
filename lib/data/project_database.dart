@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import '../models/project.dart';
 import '../models/dataset.dart';
 import '../models/label.dart';
+import '../models/annotation_review.dart';
 
 import 'create_initial_schema.dart';
 
@@ -61,6 +62,7 @@ class ProjectDatabase {
         'CREATE INDEX IF NOT EXISTS idx_media_items_dataset_id ON media_items(datasetId)',
         'CREATE INDEX IF NOT EXISTS idx_annotations_media_item_id ON annotations(media_item_id)',
         'CREATE INDEX IF NOT EXISTS idx_annotations_label_id ON annotations(label_id)',
+        'CREATE INDEX IF NOT EXISTS idx_annotations_review_status ON annotations(review_status)',
         'CREATE INDEX IF NOT EXISTS idx_labels_project_id ON labels(project_id)',
         'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_dataset_id ON dataset_media_folders(datasetId)',
         'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_folder_id ON dataset_media_folders(folderId)',
@@ -70,6 +72,60 @@ class ProjectDatabase {
       }
     } catch (e, stack) {
       _log.severe('Migration _migrateEnsureIndexes failed', e, stack);
+    }
+  }
+
+  Future<void> _migrateAnnotationsSchemaAndReview(Database db) async {
+    try {
+      final columns = await db.rawQuery('PRAGMA table_info(annotations)');
+      bool hasColumn(String name) => columns.any((row) => row['name'] == name);
+
+      if (!hasColumn('annotation_schema_version')) {
+        await db.execute(
+          'ALTER TABLE annotations ADD COLUMN annotation_schema_version INTEGER NOT NULL DEFAULT 1',
+        );
+      }
+      if (!hasColumn('provenance')) {
+        await db.execute('ALTER TABLE annotations ADD COLUMN provenance TEXT');
+      }
+      if (!hasColumn('review_status')) {
+        await db.execute(
+          "ALTER TABLE annotations ADD COLUMN review_status TEXT NOT NULL DEFAULT '${AnnotationReviewStatus.draft}'",
+        );
+      }
+      if (!hasColumn('reviewed_by')) {
+        await db.execute(
+          'ALTER TABLE annotations ADD COLUMN reviewed_by INTEGER',
+        );
+      }
+      if (!hasColumn('reviewed_at')) {
+        await db.execute('ALTER TABLE annotations ADD COLUMN reviewed_at TEXT');
+      }
+      if (!hasColumn('review_comment')) {
+        await db.execute(
+          'ALTER TABLE annotations ADD COLUMN review_comment TEXT',
+        );
+      }
+
+      await db.execute('''
+        UPDATE annotations
+        SET annotation_schema_version = ${AnnotationSchema.currentVersion}
+        WHERE annotation_schema_version IS NULL OR annotation_schema_version < 1
+      ''');
+
+      await db.execute('''
+        UPDATE annotations
+        SET review_status = '${AnnotationReviewStatus.draft}'
+        WHERE review_status IS NULL
+           OR TRIM(review_status) = ''
+           OR LOWER(review_status) NOT IN ('draft', 'proposed', 'accepted', 'rejected')
+      ''');
+    } catch (e, stack) {
+      _log.severe(
+        'Migration _migrateAnnotationsSchemaAndReview failed',
+        e,
+        stack,
+      );
     }
   }
 
@@ -101,6 +157,7 @@ class ProjectDatabase {
         onCreate: createInitialSchema,
         onOpen: (db) async {
           await _migrateAddProjectOrder(db);
+          await _migrateAnnotationsSchemaAndReview(db);
           await _migrateEnsureIndexes(db);
         },
         singleInstance: true,

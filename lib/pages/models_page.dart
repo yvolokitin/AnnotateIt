@@ -4,6 +4,7 @@ import '../widgets/model_cards/model_card.dart';
 import '../widgets/model_cards/model_card_build_in.dart';
 import '../widgets/model_cards/model_card_comming_soon.dart';
 import '../widgets/model_cards/models_top_bar.dart';
+import '../config/model_registry_urls.dart';
 
 import '../gen_l10n/app_localizations.dart';
 
@@ -66,12 +67,15 @@ class _ModelPageState extends State<ModelPage> {
         title: 'SAM2 Hiera Base+',
         description: l10n.modelDescriptionSAM2HieraBasePlus,
         imageAsset: 'assets/images/sam_example.jpg',
-        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus.encoder.onnx',
-        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus.decoder.onnx',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_base_plus_config.yaml',
-        shaEncoder: '53b79cec15f2078b3c7410f00f00950a09ef02007dccf238859fec156e42cc8d',
-        shaDecoder: '666f00ce2664de31211a71068b6b74c3fc5aeee089ebeb2fc9c37834b9ce03b4',
-        shaConfig: '9a1b2e1976daf9d802aba4b330d9bfb1438948aff8328716b80884b1124d4428',
+        urlEncoder: ModelRegistryUrls.sam2HieraBasePlusEncoder,
+        urlDecoder: ModelRegistryUrls.sam2HieraBasePlusDecoder,
+        urlConfig: ModelRegistryUrls.sam2HieraBasePlusConfig,
+        shaEncoder:
+            '53b79cec15f2078b3c7410f00f00950a09ef02007dccf238859fec156e42cc8d',
+        shaDecoder:
+            '666f00ce2664de31211a71068b6b74c3fc5aeee089ebeb2fc9c37834b9ce03b4',
+        shaConfig:
+            '9a1b2e1976daf9d802aba4b330d9bfb1438948aff8328716b80884b1124d4428',
         modelSize: '352Mb',
       ),
       ModelInfo(
@@ -79,38 +83,48 @@ class _ModelPageState extends State<ModelPage> {
         title: 'SAM2 Hiera Large',
         description: l10n.modelDescriptionSAM2HieraLarge,
         imageAsset: 'assets/images/sam_example.jpg',
-        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.encoder.onnx',
-        urlDecoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large.decoder.onnx',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/sam2_hiera_large_config.yaml',
-        shaEncoder: 'cb252d7b59fdeb2567f7134ed9f23d712e4f24584628913bbcb0ea72ba72b617',
-        shaDecoder: '2b5a3d40a017e61d2cb4fac7147ebf899d24b082753fb5049be3810d2318ca07',
-        shaConfig: 'bce77bef82f523bec8daedfbaeac252d43075534574cc4579876d78678f4fab5',
+        urlEncoder: ModelRegistryUrls.sam2HieraLargeEncoder,
+        urlDecoder: ModelRegistryUrls.sam2HieraLargeDecoder,
+        urlConfig: ModelRegistryUrls.sam2HieraLargeConfig,
+        shaEncoder:
+            'cb252d7b59fdeb2567f7134ed9f23d712e4f24584628913bbcb0ea72ba72b617',
+        shaDecoder:
+            '2b5a3d40a017e61d2cb4fac7147ebf899d24b082753fb5049be3810d2318ca07',
+        shaConfig:
+            'bce77bef82f523bec8daedfbaeac252d43075534574cc4579876d78678f4fab5',
         modelSize: '860Mb',
       ),
       ModelInfo(
         id: 'classification_efficientnet-tflite-lite4-fp32-v2',
         title: 'EfficientNet-Lite4',
-        description: "EfficientNet-Lite4 FP32v2 is a convolutional neural network (CNN) from the EfficientNet-Lite family, designed for image classification on mobile and edge devices. EfficientNet-Lite models provide a strong balance of accuracy and efficiency, using fewer parameters and computations than many traditional CNNs. The FP32v2 variant is distributed in TensorFlow Lite format, making it directly usable in mobile and embedded applications for real-time image classification. While FP32 ensures maximum accuracy, smaller quantized versions (e.g., INT8) offer lower latency and power consumption on constrained hardware.",
-        imageAsset: 'assets/images/efficientnet-tflite-lite4-classification.jpg',
-        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientnet-tflite-lite4-fp32-v2.tflite',
+        description:
+            "EfficientNet-Lite4 FP32v2 is a convolutional neural network (CNN) from the EfficientNet-Lite family, designed for image classification on mobile and edge devices. EfficientNet-Lite models provide a strong balance of accuracy and efficiency, using fewer parameters and computations than many traditional CNNs. The FP32v2 variant is distributed in TensorFlow Lite format, making it directly usable in mobile and embedded applications for real-time image classification. While FP32 ensures maximum accuracy, smaller quantized versions (e.g., INT8) offer lower latency and power consumption on constrained hardware.",
+        imageAsset:
+            'assets/images/efficientnet-tflite-lite4-classification.jpg',
+        urlEncoder: ModelRegistryUrls.efficientNetLite4Classifier,
         urlDecoder: '',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/classification_efficientnet-tflite-lite0-int8-v2_labels.txt',
-        shaEncoder: 'f0d69132ee9759f2d98e817f7a96a28e40384d3c1894f222c4e6653d9e285586',
+        urlConfig: ModelRegistryUrls.efficientNetLite4ClassifierLabels,
+        shaEncoder:
+            'f0d69132ee9759f2d98e817f7a96a28e40384d3c1894f222c4e6653d9e285586',
         shaDecoder: '',
-        shaConfig: 'ff830819b4418bc52ce12b81398e2d7f6fbf09f98584cd83f3f92629a3074eb7',
+        shaConfig:
+            'ff830819b4418bc52ce12b81398e2d7f6fbf09f98584cd83f3f92629a3074eb7',
         modelSize: '50Mb',
       ),
       ModelInfo(
         id: 'efficientdet-tflite-lite4-detection-metadata-v2',
         title: 'EfficientDet-Lite4',
-        description: "EfficientDet-Lite4 is an object detection model optimized for mobile and edge devices. It uses an EfficientNet-Lite4 backbone with a BiFPN feature network to achieve strong accuracy while keeping the model size small and inference fast.     Task: Object detection (bounding boxes + labels) Dataset: Trained on COCO (90 common object classes). Format: TensorFlow Lite with metadata (easy integration and standardized input/output). Input: 320×320 RGB image (normalized to 0–1). Output: Bounding boxes, class IDs (0–89), and confidence scores",
+        description:
+            "EfficientDet-Lite4 is an object detection model optimized for mobile and edge devices. It uses an EfficientNet-Lite4 backbone with a BiFPN feature network to achieve strong accuracy while keeping the model size small and inference fast.     Task: Object detection (bounding boxes + labels) Dataset: Trained on COCO (90 common object classes). Format: TensorFlow Lite with metadata (easy integration and standardized input/output). Input: 320×320 RGB image (normalized to 0–1). Output: Bounding boxes, class IDs (0–89), and confidence scores",
         imageAsset: 'assets/images/efficientnet-tflite-lite4-detection.jpg',
-        urlEncoder: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/efficientdet-tflite-lite4-detection-metadata-v2.tflite',
+        urlEncoder: ModelRegistryUrls.efficientDetLite4Detector,
         urlDecoder: '',
-        urlConfig: 'https://github.com/yvolokitin/segment-anything-onnx-models/releases/download/SAM2_Hiera_Large/coco_labels.txt',
-        shaEncoder: '0d9b3ffe97d6d9e78ac1632f4b63630f35e39c87d20349b648268d671c7730c5',
+        urlConfig: ModelRegistryUrls.cocoLabels,
+        shaEncoder:
+            '0d9b3ffe97d6d9e78ac1632f4b63630f35e39c87d20349b648268d671c7730c5',
         shaDecoder: '',
-        shaConfig: '4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930',
+        shaConfig:
+            '4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930',
         modelSize: '20Mb',
       ),
       ModelInfo(

@@ -15,7 +15,7 @@ import '../../session/user_session.dart';
 import '../dialogs/camera_capture_dialog.dart';
 import '../dialogs/ffmpeg_check_dialog.dart';
 import '../../services/video_frame_extractor.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../services/media_metadata_service.dart';
 import '../../services/photo_picker_service.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
@@ -61,9 +61,6 @@ class DatasetUploadButtons extends StatefulWidget {
 }
 
 class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
-  // Session-scoped cache for a user-selected ffmpeg executable on Windows
-  static String? _ffmpegPathCache;
-
   bool _hoveringDelete = false;
   late int _currentItemsPerPage;
 
@@ -121,11 +118,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       if (isCupertino) {
         final importRoot =
             await UserSession.instance.getCurrentUserDatasetImportFolder();
-        datasetDir = Directory(path.join(
-          importRoot,
-          'project_${widget.project.id}',
-          'dataset_${widget.datasetId}',
-        ));
+        datasetDir = Directory(
+          path.join(
+            importRoot,
+            'project_${widget.project.id}',
+            'dataset_${widget.datasetId}',
+          ),
+        );
         if (!datasetDir.existsSync()) {
           datasetDir.createSync(recursive: true);
         }
@@ -136,14 +135,17 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         for (int i = 0; i < total; i++) {
           final origPath = selectedPaths[i];
           final origName = selectedNames[i];
-          final ext = path.extension(origPath).replaceFirst('.', '').toLowerCase();
-          String candidateName = origName.isEmpty
-              ? 'media_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.${ext.isEmpty ? 'bin' : ext}'
-              : origName;
+          final ext =
+              path.extension(origPath).replaceFirst('.', '').toLowerCase();
+          String candidateName =
+              origName.isEmpty
+                  ? 'media_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.${ext.isEmpty ? 'bin' : ext}'
+                  : origName;
           String destPath = path.join(datasetDir.path, candidateName);
 
           // Ensure unique filename (avoid clashes before copy)
-          if (File(destPath).existsSync() || usedNames.contains(candidateName)) {
+          if (File(destPath).existsSync() ||
+              usedNames.contains(candidateName)) {
             final base = path.basenameWithoutExtension(candidateName);
             final extension = path.extension(candidateName);
             int k = 1;
@@ -152,7 +154,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               newName = '${base}_$k$extension';
               destPath = path.join(datasetDir.path, newName);
               k++;
-            } while (File(destPath).existsSync() || usedNames.contains(newName));
+            } while (File(destPath).existsSync() ||
+                usedNames.contains(newName));
             candidateName = newName;
           }
           usedNames.add(candidateName);
@@ -171,10 +174,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               widget.project.icon.contains('folder'))) {
         final thumbSrc = File(selectedPaths.first);
         final thumbnailFile = await generateThumbnailFromImage(
-            thumbSrc, widget.project.id.toString());
+          thumbSrc,
+          widget.project.id.toString(),
+        );
         if (thumbnailFile != null) {
-          await ProjectDatabase.instance
-              .updateProjectIcon(widget.project.id!, thumbnailFile.path);
+          await ProjectDatabase.instance.updateProjectIcon(
+            widget.project.id!,
+            thumbnailFile.path,
+          );
         }
       }
 
@@ -184,15 +191,16 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         if (widget.cancelUpload) {
           widget.onUploadingChanged(false);
           widget.onUploadError?.call();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Upload stopped")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Upload stopped")));
           return;
         }
 
         final originalPath = selectedPaths[i];
         final originalName = selectedNames[i];
-        final ext = path.extension(originalPath).replaceFirst('.', '').toLowerCase();
+        final ext =
+            path.extension(originalPath).replaceFirst('.', '').toLowerCase();
         final isVideo = ['mp4', 'mov'].contains(ext);
 
         final currentUser = UserSession.instance.getUser();
@@ -204,11 +212,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         // On iOS/macOS: copy the file into the app dataset folder
         String finalPath = originalPath;
         if (isCupertino && datasetDir != null) {
-          String candidateName = (expectedNames != null && expectedNames.length == total)
-              ? expectedNames[i]
-              : (originalName.isEmpty
-                  ? 'media_${DateTime.now().millisecondsSinceEpoch}.${ext.isEmpty ? 'bin' : ext}'
-                  : originalName);
+          String candidateName =
+              (expectedNames != null && expectedNames.length == total)
+                  ? expectedNames[i]
+                  : (originalName.isEmpty
+                      ? 'media_${DateTime.now().millisecondsSinceEpoch}.${ext.isEmpty ? 'bin' : ext}'
+                      : originalName);
           String destPath = path.join(datasetDir.path, candidateName);
 
           // Ensure unique filename (safety in case files changed since pre-compute)
@@ -233,13 +242,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         double? duration;
         double? fps;
         if (isVideo) {
-          final videoMeta = await getVideoMetadata(finalPath);
+          final videoMeta = await MediaMetadataService.instance
+              .getVideoMetadata(finalPath);
           width = videoMeta['width'];
           height = videoMeta['height'];
           duration = videoMeta['duration'];
           fps = videoMeta['fps'];
         } else {
-          final imageMeta = await getImageMetadata(finalPath);
+          final imageMeta = await MediaMetadataService.instance
+              .getImageMetadata(finalPath);
           width = imageMeta['width'];
           height = imageMeta['height'];
         }
@@ -259,8 +270,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         widget.onFileProgress?.call(path.basename(finalPath), i + 1, total);
       }
 
-      await ProjectDatabase.instance
-          .updateProjectLastUpdated(widget.project.id!);
+      await ProjectDatabase.instance.updateProjectLastUpdated(
+        widget.project.id!,
+      );
       widget.onUploadingChanged(false);
       widget.onUploadSuccess();
     } catch (e) {
@@ -268,18 +280,24 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       widget.onUploadError?.call();
     }
   }
-  
+
   Future<void> _uploadVideoAsFrames(BuildContext context) async {
     // Collect debug logs to show in UI if needed
     final List<String> _logs = [];
     void logMsg(String msg) {
-      final line = '[VIDEO_IMPORT] ' + DateTime.now().toIso8601String() + ' ' + msg;
+      final line =
+          '[VIDEO_IMPORT] ' + DateTime.now().toIso8601String() + ' ' + msg;
       _logs.add(line);
       print(line);
     }
 
     try {
-      logMsg('Platform: ' + Platform.operatingSystem + ' ' + Platform.version.split('\n').first);
+      logMsg(
+        'Platform: ' +
+            Platform.operatingSystem +
+            ' ' +
+            Platform.version.split('\n').first,
+      );
 
       // Windows-only: Use FfmpegCheckDialog to show progress and perform selection + extraction
       if (Platform.isWindows) {
@@ -305,18 +323,26 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             baseName = path.basenameWithoutExtension(selectedVideoPath!);
 
             // 2) Prepare frames base directory inside Dataset import folder, then create unique run dir
-            final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
-            final framesBaseDir = Directory(path.join(
-              importRoot,
-              'project_' + ((widget.project.id ?? 0).toString()),
-              'dataset_' + widget.datasetId,
-              baseName! + '_frames',
-            ));
+            final importRoot =
+                await UserSession.instance.getCurrentUserDatasetImportFolder();
+            final framesBaseDir = Directory(
+              path.join(
+                importRoot,
+                'project_' + ((widget.project.id ?? 0).toString()),
+                'dataset_' + widget.datasetId,
+                baseName! + '_frames',
+              ),
+            );
             if (!framesBaseDir.existsSync()) {
               framesBaseDir.createSync(recursive: true);
             }
-            final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
-            final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+            final String runStamp = DateTime.now()
+                .toIso8601String()
+                .replaceAll(':', '-')
+                .replaceAll('.', '-');
+            final runDir = Directory(
+              path.join(framesBaseDir.path, 'run_' + runStamp),
+            );
             if (!runDir.existsSync()) {
               runDir.createSync(recursive: true);
             }
@@ -336,29 +362,34 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             }
 
             // 4) Return produced count for dialog UI from runDir
-            final produced = runDir
-                .listSync()
-                .whereType<File>()
-                .where((f) => f.path.toLowerCase().endsWith('.png'))
-                .length;
+            final produced =
+                runDir
+                    .listSync()
+                    .whereType<File>()
+                    .where((f) => f.path.toLowerCase().endsWith('.png'))
+                    .length;
             totalExtracted = produced;
             return produced;
           },
         );
 
-        if (ffmpegPath == null || selectedVideoPath == null || framesDirPath == null || baseName == null) {
+        if (ffmpegPath == null ||
+            selectedVideoPath == null ||
+            framesDirPath == null ||
+            baseName == null) {
           logMsg('User cancelled FFmpeg dialog or no video selected.');
           return;
         }
 
         // Collect generated frames
         final framesDir = Directory(framesDirPath!);
-        final frameFiles = framesDir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.toLowerCase().endsWith('.png'))
-            .toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
+        final frameFiles =
+            framesDir
+                .listSync()
+                .whereType<File>()
+                .where((f) => f.path.toLowerCase().endsWith('.png'))
+                .toList()
+              ..sort((a, b) => a.path.compareTo(b.path));
 
         if (frameFiles.isEmpty) {
           logMsg('No frames found after FFmpeg extraction.');
@@ -390,9 +421,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           if (widget.cancelUpload) {
             widget.onUploadingChanged(false);
             widget.onUploadError?.call();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Upload stopped')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Upload stopped')));
             return;
           }
 
@@ -409,15 +440,24 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         }
 
         // Update project icon if default
-        if (widget.project.icon.contains('default_project_image') || widget.project.icon.contains('folder')) {
+        if (widget.project.icon.contains('default_project_image') ||
+            widget.project.icon.contains('folder')) {
           final firstFramePath = frameFiles.first.path;
-          final thumb = await generateThumbnailFromImage(File(firstFramePath), widget.project.id.toString());
+          final thumb = await generateThumbnailFromImage(
+            File(firstFramePath),
+            widget.project.id.toString(),
+          );
           if (thumb != null) {
-            await ProjectDatabase.instance.updateProjectIcon(widget.project.id!, thumb.path);
+            await ProjectDatabase.instance.updateProjectIcon(
+              widget.project.id!,
+              thumb.path,
+            );
           }
         }
 
-        await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+        await ProjectDatabase.instance.updateProjectLastUpdated(
+          widget.project.id!,
+        );
         widget.onUploadingChanged(false);
         widget.onUploadSuccess();
 
@@ -458,8 +498,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     const Divider(color: Colors.orangeAccent),
                     const SizedBox(height: 6),
                     Text(
-                      'Extracted ' + totalExtracted.toString() + ' frame' + (totalExtracted == 1 ? '' : 's') + ' and added to dataset. (via FFmpeg)',
-                      style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                      'Extracted ' +
+                          totalExtracted.toString() +
+                          ' frame' +
+                          (totalExtracted == 1 ? '' : 's') +
+                          ' and added to dataset. (via FFmpeg)',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'CascadiaCode',
+                      ),
                     ),
                   ],
                 ),
@@ -470,12 +517,21 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[800],
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                       ),
                       const Spacer(),
                     ],
@@ -488,7 +544,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
         return;
       }
-
 
       // Android/iOS info dialog (built-in extraction, no FFmpeg needed)
       if (Platform.isAndroid || Platform.isIOS) {
@@ -530,12 +585,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                   SizedBox(height: 4),
                   Text(
                     'Frames will be extracted using built-in capabilities of your device (no FFmpeg required).',
-                    style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                   SizedBox(height: 10),
                   Text(
                     'Tap Continue to choose a video file to import and extract frames as images.',
-                    style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                 ],
               ),
@@ -546,25 +609,47 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       onPressed: () => Navigator.of(ctx).pop(false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[800],
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                     ),
                     const Spacer(),
                     ElevatedButton(
                       onPressed: () => Navigator.of(ctx).pop(true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[800],
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: Colors.orangeAccent, width: 2),
+                          side: const BorderSide(
+                            color: Colors.orangeAccent,
+                            width: 2,
+                          ),
                         ),
                       ),
-                      child: const Text('Continue', style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Continue',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'CascadiaCode',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -611,7 +696,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       // Inform user we started working on the selected file
 
       // Determine target frames count (fallback if metadata is unavailable)
-      final meta = await getVideoMetadata(videoPath);
+      final meta = await MediaMetadataService.instance.getVideoMetadata(
+        videoPath,
+      );
       final double durationStub = (meta['duration'] ?? 0.0) as double;
       final double fpsStub = (meta['fps'] ?? 0.0) as double;
       int totalFrames;
@@ -620,7 +707,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       } else {
         totalFrames = 60; // fallback default
       }
-      logMsg('Stub metadata -> duration: ' + durationStub.toString() + ', fps: ' + fpsStub.toString() + ', fallback totalFrames: ' + totalFrames.toString());
+      logMsg(
+        'Stub metadata -> duration: ' +
+            durationStub.toString() +
+            ', fps: ' +
+            fpsStub.toString() +
+            ', fallback totalFrames: ' +
+            totalFrames.toString(),
+      );
 
       // Prepare output directory inside Dataset import folder
       final videoFile = File(videoPath);
@@ -630,29 +724,42 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       final fileSize = await videoFile.length();
       logMsg('Video exists. Size: ' + fileSize.toString() + ' bytes.');
 
-      final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+      final importRoot =
+          await UserSession.instance.getCurrentUserDatasetImportFolder();
       final baseName = path.basenameWithoutExtension(videoFile.path);
-      final framesBaseDir = Directory(path.join(
-        importRoot,
-        'project_' + ((widget.project.id ?? 0).toString()),
-        'dataset_' + widget.datasetId,
-        baseName + '_frames',
-      ));
+      final framesBaseDir = Directory(
+        path.join(
+          importRoot,
+          'project_' + ((widget.project.id ?? 0).toString()),
+          'dataset_' + widget.datasetId,
+          baseName + '_frames',
+        ),
+      );
       if (!framesBaseDir.existsSync()) {
         framesBaseDir.createSync(recursive: true);
         logMsg('Created frames base directory: ' + framesBaseDir.path);
       } else {
         logMsg('Using existing frames base directory: ' + framesBaseDir.path);
       }
-      final String runStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
-      final runDir = Directory(path.join(framesBaseDir.path, 'run_' + runStamp));
+      final String runStamp = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .replaceAll('.', '-');
+      final runDir = Directory(
+        path.join(framesBaseDir.path, 'run_' + runStamp),
+      );
       if (!runDir.existsSync()) {
         runDir.createSync(recursive: true);
         logMsg('Created run directory: ' + runDir.path);
       }
 
       // Ensure run directory writable
-      final testFile = File(path.join(runDir.path, '.write_test_${DateTime.now().millisecondsSinceEpoch}'));
+      final testFile = File(
+        path.join(
+          runDir.path,
+          '.write_test_${DateTime.now().millisecondsSinceEpoch}',
+        ),
+      );
       try {
         await testFile.writeAsString('test');
         await testFile.delete();
@@ -678,7 +785,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         final controller = vp.VideoPlayerController.file(File(videoPath));
         await controller.initialize();
         videoSeconds = controller.value.duration.inMilliseconds / 1000.0;
-        logMsg('video_player initialize OK. Duration: ' + videoSeconds.toString() + ' s, aspectRatio: ' + controller.value.aspectRatio.toString());
+        logMsg(
+          'video_player initialize OK. Duration: ' +
+              videoSeconds.toString() +
+              ' s, aspectRatio: ' +
+              controller.value.aspectRatio.toString(),
+        );
         await controller.dispose();
       } catch (e) {
         controllerError = e.toString();
@@ -686,11 +798,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
 
       // Choose an extraction fps (configurable)
-      final double extractFps = FfmpegCheckDialog.lastSelectedFps; // configurable fps
-      int expectedFrames = (videoSeconds > 0 ? (videoSeconds * extractFps) : totalFrames).round();
-      if (expectedFrames <= 0) expectedFrames = totalFrames > 0 ? totalFrames : 60;
+      final double extractFps =
+          FfmpegCheckDialog.lastSelectedFps; // configurable fps
+      int expectedFrames =
+          (videoSeconds > 0 ? (videoSeconds * extractFps) : totalFrames)
+              .round();
+      if (expectedFrames <= 0)
+        expectedFrames = totalFrames > 0 ? totalFrames : 60;
       expectedFrames = expectedFrames.clamp(1, 1200); // safety cap
-      logMsg('Extraction fps: ' + extractFps.toString() + ', expectedFrames: ' + expectedFrames.toString());
+      logMsg(
+        'Extraction fps: ' +
+            extractFps.toString() +
+            ', expectedFrames: ' +
+            expectedFrames.toString(),
+      );
 
       // Prepare variables for extraction
       String? firstThumbError;
@@ -705,7 +826,10 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             imageFormat: ImageFormat.PNG,
             quality: 100,
           );
-          logMsg('video_thumbnail probe@0ms -> bytes: ' + (probe?.length ?? 0).toString());
+          logMsg(
+            'video_thumbnail probe@0ms -> bytes: ' +
+                (probe?.length ?? 0).toString(),
+          );
         } catch (e) {
           firstThumbError = e.toString();
           logMsg('video_thumbnail probe FAILED: ' + firstThumbError);
@@ -715,12 +839,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         final int intervalMs = (1000 / extractFps).round();
         for (int i = 0; i < expectedFrames; i++) {
           if (widget.cancelUpload) {
-            logMsg('User requested cancel during extraction loop at frame ' + (i + 1).toString());
+            logMsg(
+              'User requested cancel during extraction loop at frame ' +
+                  (i + 1).toString(),
+            );
             widget.onUploadingChanged(false);
             widget.onUploadError?.call();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Upload stopped')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Upload stopped')));
             return;
           }
 
@@ -735,7 +862,10 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             if (bytes != null && bytes.isNotEmpty) {
               final framePath = path.join(
                 runDir.path,
-                baseName + '_frame_' + (i + 1).toString().padLeft(5, '0') + '.png',
+                baseName +
+                    '_frame_' +
+                    (i + 1).toString().padLeft(5, '0') +
+                    '.png',
               );
               final frameFile = File(framePath);
               await frameFile.writeAsBytes(bytes);
@@ -756,7 +886,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
       int totalExtracted = frameFiles.length;
       if (!Platform.isWindows) {
-        logMsg('video_thumbnail extracted frames: ' + totalExtracted.toString());
+        logMsg(
+          'video_thumbnail extracted frames: ' + totalExtracted.toString(),
+        );
       }
 
       // Windows fallback with FFmpeg if no frames extracted
@@ -765,10 +897,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       String? ffmpegError;
       String? ffmpegPathUsed;
       if (totalExtracted == 0 && Platform.isWindows) {
-        logMsg('No frames via video_thumbnail and running on Windows. Trying FFmpeg extraction...');
+        logMsg(
+          'No frames via video_thumbnail and running on Windows. Trying FFmpeg extraction...',
+        );
 
         // Use the already-created unique runDir; do not clean previous runs
-        final ffmpegPath = await VideoFrameExtractor().resolveFfmpegPath(log: logMsg);
+        final ffmpegPath = await VideoFrameExtractor().resolveFfmpegPath(
+          log: logMsg,
+        );
         if (ffmpegPath != null) {
           ffmpegResolved = true;
           ffmpegPathUsed = ffmpegPath;
@@ -783,12 +919,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           usedFfmpeg = ok;
           if (ok) {
             // Collect generated frames
-            final all = runDir
-                .listSync()
-                .whereType<File>()
-                .where((f) => f.path.toLowerCase().endsWith('.png'))
-                .toList()
-              ..sort((a, b) => a.path.compareTo(b.path));
+            final all =
+                runDir
+                    .listSync()
+                    .whereType<File>()
+                    .where((f) => f.path.toLowerCase().endsWith('.png'))
+                    .toList()
+                  ..sort((a, b) => a.path.compareTo(b.path));
             frameFiles.addAll(all);
             totalExtracted = frameFiles.length;
             logMsg('FFmpeg extracted frames: ' + totalExtracted.toString());
@@ -796,7 +933,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             ffmpegError = 'FFmpeg run did not produce frames (see logs above).';
           }
         } else {
-          ffmpegError = 'FFmpeg not available on PATH and user did not provide a valid ffmpeg.exe.';
+          ffmpegError =
+              'FFmpeg not available on PATH and user did not provide a valid ffmpeg.exe.';
         }
       }
 
@@ -806,10 +944,14 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         final String diag = [
           'Platform: ' + Platform.operatingSystem,
           'video path: ' + videoPath,
-          if (controllerError != null) 'video_player error: ' + controllerError!,
-          if (firstThumbError != null) 'video_thumbnail error: ' + firstThumbError!,
-          if (Platform.isWindows) 'ffmpeg resolved: ' + (ffmpegResolved ? 'YES' : 'NO'),
-          if (Platform.isWindows && ffmpegPathUsed != null) 'ffmpeg path: ' + ffmpegPathUsed!,
+          if (controllerError != null)
+            'video_player error: ' + controllerError!,
+          if (firstThumbError != null)
+            'video_thumbnail error: ' + firstThumbError!,
+          if (Platform.isWindows)
+            'ffmpeg resolved: ' + (ffmpegResolved ? 'YES' : 'NO'),
+          if (Platform.isWindows && ffmpegPathUsed != null)
+            'ffmpeg path: ' + ffmpegPathUsed!,
           if (ffmpegError != null) ffmpegError!,
           'frames dir: ' + runDir.path,
         ].join('\n');
@@ -851,8 +993,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       const Divider(color: Colors.orangeAccent),
                       const SizedBox(height: 6),
                       SelectableText(
-                        'Could not extract frames from the selected video.\n\nDiagnostics:\n' + diag,
-                        style: const TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                        'Could not extract frames from the selected video.\n\nDiagnostics:\n' +
+                            diag,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                          fontFamily: 'CascadiaCode',
+                        ),
                       ),
                     ],
                   ),
@@ -864,12 +1011,21 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[800],
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontFamily: 'CascadiaCode',
+                          ),
+                        ),
                       ),
                       const Spacer(),
                     ],
@@ -891,7 +1047,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         if (decoded != null) {
           frameWidth = decoded.width;
           frameHeight = decoded.height;
-          logMsg('First frame dimensions: ' + frameWidth.toString() + 'x' + frameHeight.toString());
+          logMsg(
+            'First frame dimensions: ' +
+                frameWidth.toString() +
+                'x' +
+                frameHeight.toString(),
+          );
         }
       } catch (e) {
         logMsg('Failed to read first frame size: ' + e.toString());
@@ -901,12 +1062,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       int inserted = 0;
       for (final f in frameFiles) {
         if (widget.cancelUpload) {
-          logMsg('User requested cancel during DB insert at item ' + (inserted + 1).toString());
+          logMsg(
+            'User requested cancel during DB insert at item ' +
+                (inserted + 1).toString(),
+          );
           widget.onUploadingChanged(false);
           widget.onUploadError?.call();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Upload stopped')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Upload stopped')));
           return;
         }
 
@@ -924,15 +1088,24 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
 
       // Update project icon using the first frame if project still has default icon
-      if (widget.project.icon.contains('default_project_image') || widget.project.icon.contains('folder')) {
+      if (widget.project.icon.contains('default_project_image') ||
+          widget.project.icon.contains('folder')) {
         final firstFramePath = frameFiles.first.path;
-        final thumb = await generateThumbnailFromImage(File(firstFramePath), widget.project.id.toString());
+        final thumb = await generateThumbnailFromImage(
+          File(firstFramePath),
+          widget.project.id.toString(),
+        );
         if (thumb != null) {
-          await ProjectDatabase.instance.updateProjectIcon(widget.project.id!, thumb.path);
+          await ProjectDatabase.instance.updateProjectIcon(
+            widget.project.id!,
+            thumb.path,
+          );
         }
       }
 
-      await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+      await ProjectDatabase.instance.updateProjectLastUpdated(
+        widget.project.id!,
+      );
       widget.onUploadingChanged(false);
       widget.onUploadSuccess();
 
@@ -973,8 +1146,18 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                   const Divider(color: Colors.orangeAccent),
                   const SizedBox(height: 6),
                   Text(
-                    'Extracted ' + totalExtracted.toString() + ' frame' + (totalExtracted == 1 ? '' : 's') + ' and added to dataset.' + (usedFfmpeg ? ' (via FFmpeg)' : ' (via video_thumbnail)'),
-                    style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                    'Extracted ' +
+                        totalExtracted.toString() +
+                        ' frame' +
+                        (totalExtracted == 1 ? '' : 's') +
+                        ' and added to dataset.' +
+                        (usedFfmpeg
+                            ? ' (via FFmpeg)'
+                            : ' (via video_thumbnail)'),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontFamily: 'CascadiaCode',
+                    ),
                   ),
                 ],
               ),
@@ -985,12 +1168,21 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[800],
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Close', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
                     ),
                     const Spacer(),
                   ],
@@ -1011,141 +1203,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     }
   }
 
-  Future<String?> _resolveFfmpegPath({
-    required void Function(String) log,
-  }) async {
-    // Try persisted user setting first
-    try {
-      final saved = UserSession.instance.getUser().ffmpegPath;
-      if (saved != null && saved.isNotEmpty) {
-        final ver = await Process.run(saved, ['-version']);
-        if (ver.exitCode == 0) {
-          _ffmpegPathCache = saved;
-          log('Using ffmpeg from settings: ' + saved);
-          return saved;
-        } else {
-          log('ffmpeg from settings invalid (exit ${ver.exitCode}).');
-        }
-      }
-    } catch (e) {
-      log('Failed to validate ffmpeg from settings: ' + e.toString());
-    }
-
-    // If cached and valid, use it
-    if (_ffmpegPathCache != null) {
-      final p = _ffmpegPathCache!;
-      try {
-        final ver = await Process.run(p, ['-version']);
-        if (ver.exitCode == 0) {
-          log('Using cached ffmpeg: ' + p);
-          return p;
-        } else {
-          log('Cached ffmpeg path invalid (exit ${ver.exitCode}).');
-        }
-      } catch (e) {
-        log('Cached ffmpeg path failed: ' + e.toString());
-      }
-    }
-
-    // Try PATH
-    try {
-      final ver = await Process.run('ffmpeg', ['-version']);
-      if (ver.exitCode == 0) {
-        log('ffmpeg found on PATH.');
-        return 'ffmpeg';
-      } else {
-        log('ffmpeg on PATH returned exit: ' + ver.exitCode.toString());
-      }
-    } catch (e) {
-      log('ffmpeg not found on PATH: ' + e.toString());
-    }
-
-    // Prompt user to select ffmpeg.exe (Windows)
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.custom,
-        allowedExtensions: Platform.isWindows ? ['exe'] : null,
-        dialogTitle: 'Select ffmpeg executable',
-      );
-      if (result != null && result.files.isNotEmpty) {
-        final picked = result.files.first.path!;
-        final file = File(picked);
-        if (await file.exists()) {
-          final ver = await Process.run(picked, ['-version']);
-          if (ver.exitCode == 0) {
-            _ffmpegPathCache = picked;
-            try {
-              // Persist for future sessions on desktop platforms
-              if (!Platform.isAndroid && !Platform.isIOS) {
-                await UserSession.instance.setFfmpegPath(picked);
-              }
-            } catch (_) {}
-            log('User-selected ffmpeg validated: ' + picked);
-            return picked;
-          } else {
-            log('Selected ffmpeg returned exit: ' + ver.exitCode.toString());
-          }
-        } else {
-          log('Selected ffmpeg file does not exist: ' + picked);
-        }
-      } else {
-        log('User cancelled ffmpeg selection.');
-      }
-    } catch (e) {
-      log('Error during ffmpeg selection: ' + e.toString());
-    }
-
-    return null;
-  }
-
-  Future<bool> _tryExtractFramesWithFfmpeg({
-    required String ffmpegPath,
-    required String videoPath,
-    required String framesDir,
-    required String baseName,
-    required double fps,
-    required void Function(String) log,
-  }) async {
-    try {
-      final String outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
-      log('Running ffmpeg to extract frames at ' + fps.toString() + ' fps. Using: ' + ffmpegPath);
-      final result = await Process.run(
-        ffmpegPath,
-        [
-          '-y',
-          '-hide_banner',
-          '-loglevel', 'error',
-          '-i', videoPath,
-          '-vf', 'fps=' + fps.toString(),
-          outPattern,
-        ],
-        runInShell: true,
-      );
-      log('ffmpeg exitCode: ' + result.exitCode.toString());
-      if ((result.stdout as Object?) != null) {
-        final s = result.stdout.toString();
-        if (s.isNotEmpty) log('ffmpeg stdout: ' + s);
-      }
-      if ((result.stderr as Object?) != null) {
-        final s = result.stderr.toString();
-        if (s.isNotEmpty) log('ffmpeg stderr: ' + s);
-      }
-
-      final dir = Directory(framesDir);
-      final produced = dir
-          .listSync()
-          .whereType<File>()
-          .where((f) => f.path.toLowerCase().endsWith('.png'))
-          .length;
-      log('ffmpeg produced PNG files: ' + produced.toString());
-      return produced > 0;
-    } catch (e) {
-      log('FFmpeg execution failed: ' + e.toString());
-      return false;
-    }
-  }
-  
   Future<void> _openCamera(BuildContext context) async {
     try {
       // Check if running on Linux
@@ -1158,18 +1215,22 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         );
         return;
       }
-      
+
       // Note: Windows platform is handled in camera_capture_widget.dart
       // by using image_picker instead of direct camera access
-      
+
       widget.onUploadingChanged(true);
-      
+
       await CameraCaptureDialog.show(
         context,
         onMediaCaptured: (File file, String fileType) async {
           // Ensure captured media is persisted inside the Dataset application folder
           // to avoid permission loss (especially on iOS/macOS) after app relaunch.
-          String ext = (fileType.isNotEmpty ? fileType : path.extension(file.path).replaceFirst('.', '')).toLowerCase();
+          String ext =
+              (fileType.isNotEmpty
+                      ? fileType
+                      : path.extension(file.path).replaceFirst('.', ''))
+                  .toLowerCase();
           if (ext.isEmpty) {
             ext = 'jpg';
           }
@@ -1181,21 +1242,30 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           }
 
           // Build destination directory: <ImportRoot>/project_<id>/dataset_<datasetId>
-          final importRoot = await UserSession.instance.getCurrentUserDatasetImportFolder();
+          final importRoot =
+              await UserSession.instance.getCurrentUserDatasetImportFolder();
           final List<String> segments = [];
           segments.addAll(['project_' + ((widget.project.id ?? 0).toString())]);
           segments.addAll(['dataset_' + widget.datasetId]);
-          final destDir = Directory(path.join(importRoot, path.joinAll(segments)));
+          final destDir = Directory(
+            path.join(importRoot, path.joinAll(segments)),
+          );
           if (!destDir.existsSync()) {
             destDir.createSync(recursive: true);
           }
 
           // Create a unique, stable filename and copy the file there
-          final safeStamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+          final safeStamp = DateTime.now()
+              .toIso8601String()
+              .replaceAll(':', '-')
+              .replaceAll('.', '-');
           final originalBase = path.basenameWithoutExtension(file.path);
-          final destFilename = (originalBase.isNotEmpty
+          final destFilename =
+              (originalBase.isNotEmpty
                   ? (safeStamp + '_' + originalBase)
-                  : ('capture_' + safeStamp)) + '.' + ext;
+                  : ('capture_' + safeStamp)) +
+              '.' +
+              ext;
           final destPath = path.join(destDir.path, destFilename);
 
           File savedFile;
@@ -1203,7 +1273,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             savedFile = await file.copy(destPath);
             // Best effort: remove the temp/original file if different
             if (!path.equals(file.path, destPath)) {
-              try { await file.delete(); } catch (_) {}
+              try {
+                await file.delete();
+              } catch (_) {}
             }
           } catch (_) {
             // If copy fails for any reason, fall back to original file path
@@ -1218,13 +1290,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           final bool isVideo = (ext == 'mp4' || ext == 'mov');
 
           if (isVideo) {
-            final videoMeta = await getVideoMetadata(savedFile.path);
+            final videoMeta = await MediaMetadataService.instance
+                .getVideoMetadata(savedFile.path);
             width = videoMeta['width'];
             height = videoMeta['height'];
             duration = videoMeta['duration'];
             fps = videoMeta['fps'];
           } else {
-            final imageMeta = await getImageMetadata(savedFile.path);
+            final imageMeta = await MediaMetadataService.instance
+                .getImageMetadata(savedFile.path);
             width = imageMeta['width'];
             height = imageMeta['height'];
           }
@@ -1248,20 +1322,26 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               widget.project.icon.contains('folder')) {
             if (!isVideo) {
               final thumbnailFile = await generateThumbnailFromImage(
-                  savedFile, widget.project.id.toString());
+                savedFile,
+                widget.project.id.toString(),
+              );
               if (thumbnailFile != null) {
-                await ProjectDatabase.instance
-                    .updateProjectIcon(widget.project.id!, thumbnailFile.path);
+                await ProjectDatabase.instance.updateProjectIcon(
+                  widget.project.id!,
+                  thumbnailFile.path,
+                );
               }
             }
           }
 
-          await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+          await ProjectDatabase.instance.updateProjectLastUpdated(
+            widget.project.id!,
+          );
           widget.onUploadingChanged(false);
           widget.onUploadSuccess();
         },
       );
-      
+
       // If we get here without capturing media, reset the uploading state
       if (widget.isUploading) {
         widget.onUploadingChanged(false);
@@ -1270,7 +1350,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       print("_openCamera: Camera error: $e");
       widget.onUploadingChanged(false);
       widget.onUploadError?.call();
-      
+
       // Show a user-friendly error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1281,26 +1361,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     }
   }
 
-  Future<Map<String, dynamic>> getImageMetadata(String path) async {
-    final file = File(path);
-    final bytes = await file.readAsBytes();
-    final decodedImage = await decodeImageFromList(bytes);
-    return {
-      'width': decodedImage.width,
-      'height': decodedImage.height,
-    };
-  }
-
-  Future<Map<String, dynamic>> getVideoMetadata(String path) async {
-    // print('getVideoMetadata (stub with zeros) called for: $path');
-    return {
-      'width': 0,
-      'height': 0,
-      'duration': 0.0,
-      'fps': 0.0,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1308,12 +1368,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     final screenHeight = MediaQuery.of(context).size.height;
     final smallScreen = (screenWidth < 700) || (screenHeight < 750);
 
-    final bool showDeleteButton = widget.allSelected || ((widget.selectedCount < widget.itemsPerPage) && (widget.allSelected == false));
+    final bool showDeleteButton =
+        widget.allSelected ||
+        ((widget.selectedCount < widget.itemsPerPage) &&
+            (widget.allSelected == false));
 
     return Container(
-      height: screenWidth>1300 ? 120 : smallScreen ? 45 : 80,
+      height:
+          screenWidth > 1300
+              ? 120
+              : smallScreen
+              ? 45
+              : 80,
       width: double.infinity,
-        child: Row(
+      child: Row(
         children: [
           if (widget.totalCount > 0) ...[
             MouseRegion(
@@ -1321,8 +1389,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               child: IconButton(
                 icon: Icon(
                   widget.allSelected
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank,
                   color: Colors.white70,
                   size: 24,
                 ),
@@ -1331,7 +1399,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             ),
             SizedBox(width: smallScreen ? 10 : 20),
             Text(
-              screenWidth > 1300 ? "${widget.totalCount} files" : "${widget.totalCount}",
+              screenWidth > 1300
+                  ? "${widget.totalCount} files"
+                  : "${widget.totalCount}",
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: smallScreen ? 18 : 22,
@@ -1342,7 +1412,9 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
           if (showDeleteButton && widget.selectedCount > 0) ...[
             Text(
-              screenWidth > 1300 ? " / ${widget.selectedCount} selected " : " / ${widget.selectedCount}",
+              screenWidth > 1300
+                  ? " / ${widget.selectedCount} selected "
+                  : " / ${widget.selectedCount}",
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: smallScreen ? 18 : 22,
@@ -1360,15 +1432,17 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
-                    color: _hoveringDelete
-                        ? const Color(0x26FF0000)
-                        : Colors.transparent,
+                    color:
+                        _hoveringDelete
+                            ? const Color(0x26FF0000)
+                            : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     icon: Icon(
                       Icons.delete,
-                      color: _hoveringDelete ? Colors.redAccent : Colors.white70,
+                      color:
+                          _hoveringDelete ? Colors.redAccent : Colors.white70,
                     ),
                     tooltip: l10n.buttonDelete,
                     onPressed: widget.onDeleteSelected,
@@ -1380,7 +1454,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
           const Spacer(),
 
-          if (screenWidth > 1024)...[
+          if (screenWidth > 1024) ...[
             const SizedBox(width: 20),
             DropdownButton<int>(
               value: _currentItemsPerPage,
@@ -1388,19 +1462,20 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               style: const TextStyle(color: Colors.white, fontSize: 16),
               iconEnabledColor: Colors.white,
               underline: Container(height: 0),
-              items: [8, 16, 24, 36, 48].map((value) {
-                return DropdownMenuItem<int>(
-                  value: value,
-                  child: Text(
-                    '$value per page',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontFamily: 'CascadiaCode',
-                    ),
-                  ),
-                );
-              }).toList(),
+              items:
+                  [8, 16, 24, 36, 48].map((value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(
+                        '$value per page',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontFamily: 'CascadiaCode',
+                        ),
+                      ),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 if (value != null && value != _currentItemsPerPage) {
                   setState(() {
@@ -1424,7 +1499,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               await _uploadMedia(context);
             },
           ),
-          
+
           SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
@@ -1438,7 +1513,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             },
             tooltip: 'Extract frames to images',
           ),
-          
+
           SizedBox(width: smallScreen ? 10 : 20),
           _buildButton(
             context,
@@ -1447,9 +1522,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             borderColor: Colors.blue,
             screenWidth: screenWidth,
             smallScreen: smallScreen,
-            onPressed: Platform.isLinux ? null : () async {
-              await _openCamera(context);
-            },
+            onPressed:
+                Platform.isLinux
+                    ? null
+                    : () async {
+                      await _openCamera(context);
+                    },
             tooltip: Platform.isLinux ? 'Camera not supported on Linux' : null,
           ),
           SizedBox(width: smallScreen ? 10 : 5),
@@ -1471,11 +1549,10 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     final defaultOnPressed = () async {
       await _uploadMedia(context);
     };
-    
-    final buttonOnPressed = widget.isUploading
-        ? null
-        : (onPressed ?? defaultOnPressed);
-    
+
+    final buttonOnPressed =
+        widget.isUploading ? null : (onPressed ?? defaultOnPressed);
+
     if (screenWidth < 1024) {
       return Tooltip(
         message: tooltip ?? buttonName,
@@ -1504,7 +1581,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           ),
         ),
       );
-
     } else {
       return Tooltip(
         message: tooltip ?? buttonName,
@@ -1516,8 +1592,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
               side: BorderSide(
-                color: buttonOnPressed == null ? Colors.grey : borderColor, 
-                width: 2
+                color: buttonOnPressed == null ? Colors.grey : borderColor,
+                width: 2,
               ),
             ),
           ),
