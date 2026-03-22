@@ -81,6 +81,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         // iOS/macOS: use system Photos picker for images
         final images = await PhotoPickerService.pickMultipleImages();
         if (images.isEmpty) {
+          final pickerError = PhotoPickerService.takeLastError();
+          if (pickerError != null && mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(pickerError)));
+          }
           widget.onUploadingChanged(false);
           return;
         }
@@ -277,7 +283,17 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       widget.onUploadSuccess();
     } catch (e) {
       print("_uploadMedia: Upload error: $e");
+      widget.onUploadingChanged(false);
       widget.onUploadError?.call();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not import media from gallery. Please check Photos access and try again.',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -668,6 +684,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       if (Platform.isIOS) {
         final xfile = await PhotoPickerService.pickSingleVideo();
         if (xfile == null) {
+          final pickerError = PhotoPickerService.takeLastError();
+          if (pickerError != null && mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(pickerError)));
+          }
           logMsg('User cancelled Photos video picking.');
           return;
         }

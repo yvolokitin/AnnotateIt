@@ -47,13 +47,26 @@ post_install do |installer|
     t.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
       config.build_settings['SWIFT_VERSION'] = '5.0'
+      # MLKit/ffmpeg vendored frameworks don't provide arm64-simulator slices.
+      # Force simulator builds to x86_64.
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
     end
   end
 
   # Also update the user project build settings (Runner.xcodeproj)
-  installer.generated_projects.each do |proj|
-    proj.build_configurations.each do |config|
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
     end
+
+    aggregate_target.user_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+      end
+    end
+
+    aggregate_target.user_project.save
   end
 end
