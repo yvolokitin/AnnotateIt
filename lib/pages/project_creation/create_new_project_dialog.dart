@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
 import '../../widgets/project_creation_new/create_new_project_step_labels.dart';
 import '../../widgets/project_creation_new/create_new_project_step_task_selection.dart';
@@ -82,7 +83,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[850],
+          backgroundColor: AppColors.darkCard,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
           child: SizedBox(
             width: dialogWidth,
@@ -113,7 +114,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                                     style: TextStyle(
                                       fontSize: isLargeScreen ? 26 : 22,
                                       fontWeight: FontWeight.bold,
-                                      fontFamily: 'CascadiaCode',
                                       color: Colors.white,
                                     ),
                                   ),
@@ -130,7 +130,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                                       style: TextStyle(
                                         fontSize: isLargeScreen ? 22 : (screenWidth>660) ? 18 : 12,
                                         fontWeight: FontWeight.normal,
-                                        fontFamily: 'CascadiaCode',
                                         color: Colors.white24,
                                       ),
                                     ),
@@ -206,7 +205,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
             l10n.buttonCancel,
             style: TextStyle(
               color: Colors.white54,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),
@@ -219,7 +217,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
                   l10n.dialogBack,
                   style: TextStyle(
                     color: Colors.white54,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ),
@@ -228,18 +225,17 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
             ElevatedButton(
               onPressed: _handleStepButtonPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[850],
+                backgroundColor: AppColors.darkCard,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
-                  side: BorderSide(color: Colors.red, width: 2),
+                  side: BorderSide(color: AppColors.accent, width: 2),
                 ),
               ),
               child: Text(
                 currentStep == 0 ? l10n.dialogNext : l10n.buttonFinish,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),

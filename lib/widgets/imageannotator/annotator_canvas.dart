@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import '../../utils/theme.dart';
 
 import '../../repositories/annotation_repository.dart';
 import '../../repositories/sqlite_annotation_repository.dart';
@@ -697,7 +698,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      color: Colors.grey[850],
+      color: AppColors.darkCard,
       items: [
         PopupMenuItem<String>(
           value: 'change',
@@ -746,7 +747,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
           side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
-        color: Colors.grey[850],
+        color: AppColors.darkCard,
         items:
             widget.labels
                 .map(

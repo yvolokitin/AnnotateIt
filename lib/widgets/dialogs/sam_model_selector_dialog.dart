@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../gen_l10n/app_localizations.dart';
 import '../../utils/sam_model_utils.dart';
+import '../../utils/theme.dart';
 
 class SamModelSelectionResult {
   final String modelKey;
@@ -49,7 +50,7 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -66,7 +67,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
             '${l10n.toolbarSAM} Model',
             style: TextStyle(
               color: Colors.orangeAccent,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
@@ -109,7 +109,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
                     'Remember my choice and do not ask anymore',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                       fontSize: (screenWidth > 1200) ? 20 : 18,
                     ),
@@ -118,7 +117,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
                     'You can change this later in User settings',
                     style: TextStyle(
                       color: Colors.white54,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                       fontSize: (screenWidth > 1200) ? 18 : 16,
                     ),
@@ -135,7 +133,7 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(null),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -146,7 +144,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.normal,
-                  fontFamily: 'CascadiaCode',
                   fontSize: (screenWidth > 1200) ? 22 : 20,
                 ),
               ),
@@ -159,7 +156,7 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -173,7 +170,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
                     l10n.buttonConfirm,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: (screenWidth > 1200) ? 22 : 20,
                     ),
@@ -203,7 +199,6 @@ class _SamModelSelectorDialogState extends State<SamModelSelectorDialog> {
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: (screenWidth > 1200) ? 20 : 18,
               ),

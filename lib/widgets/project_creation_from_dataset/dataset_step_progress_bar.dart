@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class DatasetStepProgressBar extends StatelessWidget {
   // 1 = Select, 2 = Extract, 3 = Overview, 4 = Task Confirm, 5 = Create Project
@@ -71,7 +72,7 @@ class DatasetStepProgressBar extends StatelessWidget {
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: Colors.redAccent.withOpacity(0.6),
+                        color: AppColors.accent.withOpacity(0.6),
                         blurRadius: 12,
                         spreadRadius: 1,
                       ),
@@ -80,7 +81,7 @@ class DatasetStepProgressBar extends StatelessWidget {
               color: isCompleted
                   ? Colors.deepOrange[400]
                   : isActive
-                      ? Colors.redAccent
+                      ? AppColors.accent
                       : Colors.grey[700],
             ),
             child: Center(
@@ -97,7 +98,6 @@ class DatasetStepProgressBar extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           style: TextStyle(
             fontSize: fontSize,
-            fontFamily: 'CascadiaCode',
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             color: isActive || isCompleted ? Colors.white : Colors.white54,
           ),

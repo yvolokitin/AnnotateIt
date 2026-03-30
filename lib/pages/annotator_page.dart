@@ -37,6 +37,7 @@ import '../widgets/app_snackbar.dart';
 import '../utils/sam_model_utils.dart';
 import '../utils/platform_utils.dart';
 import '../utils/media_bytes_helper.dart';
+import '../utils/theme.dart';
 import 'image_editor.dart';
 
 class AnnotatorPage extends StatefulWidget {
@@ -1307,7 +1308,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                 const SizedBox(height: 24),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.redAccent,
+                                    color: AppColors.accent,
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
@@ -1339,7 +1340,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 22,
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),

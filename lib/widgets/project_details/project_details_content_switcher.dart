@@ -6,6 +6,7 @@ import '../../models/project.dart';
 import 'project_view_media_galery.dart';
 import 'project_view_datasets_overview.dart';
 import 'project_view_labels.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsContentSwitcher extends StatefulWidget {
   final int selectedIndex;
@@ -57,7 +58,7 @@ class _ProjectDetailsContentSwitcherState extends State<ProjectDetailsContentSwi
       flex: 8,
       child: Container(
         padding: EdgeInsets.all(contentPadding),
-        color: Colors.grey[900],
+        color: AppColors.darkRail,
         child: _getSelectedWidget(),
       ),
     );

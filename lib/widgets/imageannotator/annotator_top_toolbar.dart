@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import '../../models/label.dart';
 import '../../models/project.dart';
 import '../../gen_l10n/app_localizations.dart';
@@ -72,7 +73,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
     return Container(
       height: 62,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppColors.darkSurface,
         border: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
       ),
       child: Row(
@@ -107,14 +108,14 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey, width: 2),
                           borderRadius: BorderRadius.circular(6),
-                          color: Colors.grey[850],
+                          color: AppColors.darkCard,
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<Label?>(
                             value: selectedDefaultLabel,
-                            dropdownColor: Colors.grey[850],
+                            dropdownColor: AppColors.darkCard,
                             iconEnabledColor: Colors.white,
-                            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode'),
+                            style: const TextStyle(color: Colors.white),
                             icon: const SizedBox.shrink(),
                             borderRadius: BorderRadius.circular(6),
                             isExpanded: true,
@@ -123,7 +124,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                                 value: null,
                                 child: Text(
                                   l10n.annotatorTopToolbarSelectDefaultLabel,
-                                  style: const TextStyle(fontSize: 16, fontFamily: 'CascadiaCode'),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                               ...(widget.project.labels ?? []).map((label) {
@@ -140,7 +141,7 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                                       Flexible(
                                         child: Text(
                                           label.name,
-                                          style: const TextStyle(fontSize: 16, fontFamily: 'CascadiaCode'),
+                                          style: const TextStyle(fontSize: 16),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
@@ -167,10 +168,10 @@ class _AnnotatorTopToolbarState extends State<AnnotatorTopToolbar> {
                         icon: const Icon(Icons.add, size: 20),
                         label: const Text(
                           'Create Label',
-                          style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold, fontSize: 15),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
+                          backgroundColor: AppColors.accent,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 16),

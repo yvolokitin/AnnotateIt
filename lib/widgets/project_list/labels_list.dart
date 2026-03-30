@@ -62,7 +62,6 @@ class LabelList extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: fontLabelSize,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ),
@@ -110,7 +109,6 @@ class LabelList extends StatelessWidget {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontLabelSize,
-                fontFamily: 'CascadiaCode',
               ),
             ),
           ),
@@ -129,7 +127,7 @@ class LabelList extends StatelessWidget {
 
   static double _measureTextWidth(String text, {required double size}) {
     final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: TextStyle(fontSize: size, fontFamily: 'CascadiaCode',)),
+      text: TextSpan(text: text, style: TextStyle(fontSize: size, )),
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class OpacityDialog extends StatefulWidget {
   final double initialOpacity;
@@ -43,7 +44,7 @@ class _OpacityDialogState extends State<OpacityDialog> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -65,7 +66,6 @@ class _OpacityDialogState extends State<OpacityDialog> {
                 style: const TextStyle(
                   color: Colors.orangeAccent,
                   fontSize: 24,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -96,7 +96,6 @@ class _OpacityDialogState extends State<OpacityDialog> {
                       l10n.dialogOpacityExplanation,
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.normal,
                         fontSize: 22,
                       ),
@@ -118,7 +117,6 @@ class _OpacityDialogState extends State<OpacityDialog> {
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 22,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -141,7 +139,6 @@ class _OpacityDialogState extends State<OpacityDialog> {
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 22,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),
@@ -163,7 +160,6 @@ class _OpacityDialogState extends State<OpacityDialog> {
             style: const TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,
-              fontFamily: 'CascadiaCode',
               fontSize: 22,
             ),
           ),

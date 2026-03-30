@@ -90,7 +90,6 @@ class _CreateNewProjectStepLabelsState extends State<CreateNewProjectStepLabels>
             _getLabelCreationNote(widget.projectType),
             style: const TextStyle(
               fontSize: 20,
-              fontFamily: 'CascadiaCode',
               color: Colors.white70,
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'dataset_dialog_show_all_labels.dart';
 import '../../models/archive.dart';
+import '../../utils/theme.dart';
 
 class StepDatasetOverview extends StatelessWidget {
   final Archive archive;
@@ -20,7 +21,7 @@ class StepDatasetOverview extends StatelessWidget {
             children: [
               _buildCard(
                 context,
-                Icon(Icons.folder_copy_outlined, color: Colors.redAccent, size: 30),
+                Icon(Icons.folder_copy_outlined, color: AppColors.accent, size: 30),
                 "Dataset name, path, type and format(s)",
                 [
                   _buildRow(context, "ZIP Archive file name", archive.zipFileName),
@@ -33,7 +34,7 @@ class StepDatasetOverview extends StatelessWidget {
 
               _buildCard(
                 context,
-                Icon(Icons.new_label_outlined, color: Colors.redAccent, size: 30),
+                Icon(Icons.new_label_outlined, color: AppColors.accent, size: 30),
                 "Dataset Annotations and Labels",
                 [
                   _buildRow(context, "Number of Annotated Files", archive.annotatedFilesCount.toString()),
@@ -73,10 +74,10 @@ class StepDatasetOverview extends StatelessWidget {
           ],
         ),
         child: Material(
-          color: Colors.grey[850], // transparent,
+          color: AppColors.darkCard, // transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            splashColor: Colors.redAccent.withOpacity(0.2),
+            splashColor: AppColors.accent.withOpacity(0.2),
             onTap: () {},
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -92,7 +93,6 @@ class StepDatasetOverview extends StatelessWidget {
                           title,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'CascadiaCode',
                             color: colorScheme.onSurface,
                           ),
                         ),
@@ -123,7 +123,6 @@ class StepDatasetOverview extends StatelessWidget {
             "Dataset Task(s):",
             style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              fontFamily: 'CascadiaCode',
               color: colorScheme.onSurface,
             ),
           ),
@@ -135,7 +134,6 @@ class StepDatasetOverview extends StatelessWidget {
               .map((task) => Text(
                 task,
                 style: const TextStyle(
-                  fontFamily: 'CascadiaCode',
                   fontSize: 16,
                 ),
               ),
@@ -174,7 +172,7 @@ class StepDatasetOverview extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            splashColor: Colors.redAccent.withOpacity(0.2),
+            splashColor: AppColors.accent.withOpacity(0.2),
             onTap: () {},
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -183,14 +181,13 @@ class StepDatasetOverview extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.flutter_dash, color: Colors.redAccent, size: 30),
+                      const Icon(Icons.flutter_dash, color: AppColors.accent, size: 30),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           title,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'CascadiaCode',
                             color: colorScheme.onSurface,
                           ),
                         ),
@@ -202,7 +199,6 @@ class StepDatasetOverview extends StatelessWidget {
                     "Total: ${labels.length}",
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -216,10 +212,9 @@ class StepDatasetOverview extends StatelessWidget {
                                       label,
                                       style: const TextStyle(
                                         color: Colors.black,
-                                        fontFamily: 'CascadiaCode',
                                       ),
                                     ),
-                                    backgroundColor: Colors.redAccent,
+                                    backgroundColor: AppColors.accent,
                                   ))
                               .toList(),
                         )
@@ -227,14 +222,13 @@ class StepDatasetOverview extends StatelessWidget {
                         "No labels detected.",
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                   if (hasMore) ...[
                     const SizedBox(height: 10),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: AppColors.accent,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -244,7 +238,6 @@ class StepDatasetOverview extends StatelessWidget {
                       label: Text(
                         "Show all labels",
                         style: TextStyle(
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -285,7 +278,6 @@ class StepDatasetOverview extends StatelessWidget {
             "$key: ",
             style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              fontFamily: 'CascadiaCode',
               color: colorScheme.onSurface,
             ),
           ),
@@ -293,7 +285,6 @@ class StepDatasetOverview extends StatelessWidget {
             child: Text(
               value,
               style: textTheme.bodyMedium?.copyWith(
-                fontFamily: 'CascadiaCode',
                 color: colorScheme.onSurfaceVariant,
               ),
               overflow: TextOverflow.ellipsis,

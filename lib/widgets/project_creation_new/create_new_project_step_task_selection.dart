@@ -4,6 +4,7 @@ import '../../gen_l10n/app_localizations.dart';
 import 'project_tabs/detection_tab.dart';
 import 'project_tabs/classification_tab.dart';
 import 'project_tabs/segmentation_tab.dart';
+import '../../utils/theme.dart';
 
 class CreateNewProjectStepTaskSelection extends StatefulWidget {
   final TextEditingController nameController;
@@ -61,15 +62,14 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
           cursorColor: Colors.white, 
           style: TextStyle(
             color: Colors.white,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
             fontSize: screenWidth>1200 ? 22 : 18,
           ),
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.projectNameLabel,
-            labelStyle: const TextStyle(color: Colors.white24, fontFamily: 'CascadiaCode'),
+            labelStyle: const TextStyle(color: Colors.white24),
             filled: true,
-            fillColor: Colors.grey[850],
+            fillColor: AppColors.darkCard,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 10,
@@ -87,18 +87,16 @@ class _CreateNewProjectStepTaskSelectionState extends State<CreateNewProjectStep
 
         TabBar(
           controller: _tabController,
-          indicatorColor: Colors.red,
+          indicatorColor: AppColors.accent,
           indicatorWeight: 3.0,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white24,
           labelStyle: TextStyle(
             fontSize: screenWidth>1200 ? 24 : 20,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
           ),
           unselectedLabelStyle: TextStyle(
             fontSize: screenWidth>1200 ? 24 : 20,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
           ),
           tabs: _tabs.map((label) => Tab(text: label)).toList(),

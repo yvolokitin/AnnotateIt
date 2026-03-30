@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../buttons/hover_icon_button.dart';
 import '../dialogs/alert_error_dialog.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsAppBar extends StatelessWidget {
   final VoidCallback onBackPressed;
@@ -18,10 +19,10 @@ class ProjectDetailsAppBar extends StatelessWidget {
       height: screenWidth >= 1800 ? 80 : screenWidth > 550 ? 60 : 50,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppColors.darkSurface,
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey[900]!,
+            color: AppColors.darkRail,
             width: 2,
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/theme.dart';
 
 class UploadProgressBar extends StatelessWidget {
   final String filename;
@@ -29,7 +30,7 @@ class UploadProgressBar extends StatelessWidget {
         margin: const EdgeInsets.all(12),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.grey[900],
+          color: AppColors.darkRail,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: backgroundColor, width: 2),
         ),
@@ -49,7 +50,7 @@ class UploadProgressBar extends StatelessWidget {
                   LinearProgressIndicator(
                     value: progress,
                     color: backgroundColor,
-                    backgroundColor: Colors.grey[800],
+                    backgroundColor: AppColors.darkSurface,
                   ),
                 ],
               ),

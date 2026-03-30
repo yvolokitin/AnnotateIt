@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 class DatasetImportProjectTypeHelper extends StatefulWidget {
   const DatasetImportProjectTypeHelper({super.key});
@@ -59,7 +60,7 @@ ${l10n.projectTypeWhenUseBody}''';
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[800],
+          backgroundColor: AppColors.darkSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -99,7 +100,6 @@ ${l10n.projectTypeWhenUseBody}''';
               l10n.projectTypeHelpTitle,
               style: TextStyle(
                 color: Colors.orangeAccent,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 fontSize: fontSize,
               ),
@@ -121,7 +121,6 @@ ${l10n.projectTypeWhenUseBody}''';
         message,
         style: TextStyle(
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
           fontWeight: FontWeight.normal,
           fontSize: fontSize,
         ),
@@ -137,7 +136,6 @@ ${l10n.projectTypeWhenUseBody}''';
         l10n.deleteProjectOptionDontAskAgain,
         style: TextStyle(
           color: Colors.white,
-          fontFamily: 'CascadiaCode',
           fontWeight: FontWeight.normal,
           fontSize: fontSize,
         ),
@@ -164,7 +162,6 @@ ${l10n.projectTypeWhenUseBody}''';
           l10n.buttonClose,
           style: TextStyle(
             color: Colors.orangeAccent,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.bold,
             fontSize: fontSize,
           ),

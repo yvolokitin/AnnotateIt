@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import '../../utils/platform_utils.dart';
 
 import '../../models/media_item.dart';
@@ -110,7 +111,7 @@ class _EditorBottomToolbarState extends State<EditorBottomToolbar> {
                   onPressed: widget.onWarning,
                   icon: Icon(
                     Icons.error_outline_rounded,
-                    color: Colors.red,
+                    color: AppColors.accent,
                     size: 36,
                   ),
                 ),

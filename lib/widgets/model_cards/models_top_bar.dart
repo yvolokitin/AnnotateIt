@@ -42,7 +42,6 @@ class ModelsTopBar extends StatelessWidget {
             style: TextStyle(
               fontSize: screenWidth > 1600 ? 26 : (screenWidth > 1200) ? 22 : 18,
               color: Colors.white,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),

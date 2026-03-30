@@ -26,7 +26,6 @@ class StepDescriptionWidget extends StatelessWidget {
         style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
         ),
       );
     } else if (currentStep == 2) {
@@ -35,7 +34,6 @@ class StepDescriptionWidget extends StatelessWidget {
         style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
         ),
       );
     } else if (currentStep == 3) {
@@ -56,7 +54,6 @@ class StepDescriptionWidget extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         fontSize: 18,
-                        fontFamily: 'CascadiaCode',
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -66,7 +63,6 @@ class StepDescriptionWidget extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.blueAccent,
                       fontSize: 18,
-                      fontFamily: 'CascadiaCode',
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -77,7 +73,6 @@ class StepDescriptionWidget extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               color: Colors.white70,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ],
@@ -88,7 +83,6 @@ class StepDescriptionWidget extends StatelessWidget {
         style: const TextStyle(
           fontSize: 22,
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
         ),
       );
     }

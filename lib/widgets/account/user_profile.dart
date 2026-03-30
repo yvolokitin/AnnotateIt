@@ -67,7 +67,7 @@ class _UserProfileState extends State<UserProfile> {
           AppSnackbar.show(
             context,
             'Reviews are not available right now.',
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.accent,
             textColor: Colors.white,
           );
         }
@@ -76,7 +76,7 @@ class _UserProfileState extends State<UserProfile> {
       AppSnackbar.show(
         context,
         'Could not open the review dialog.',
-        backgroundColor: Colors.redAccent,
+        backgroundColor: AppColors.accent,
         textColor: Colors.white,
       );
     }
@@ -114,7 +114,6 @@ class _UserProfileState extends State<UserProfile> {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenWidth > 1200 ? 24 : 18,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -128,7 +127,7 @@ class _UserProfileState extends State<UserProfile> {
                             AppSnackbar.show(
                               context,
                               'In-app reviews are not supported on web.',
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: AppColors.accent,
                               textColor: Colors.white,
                             );
                             return;
@@ -141,7 +140,7 @@ class _UserProfileState extends State<UserProfile> {
                               AppSnackbar.show(
                                 context,
                                 'Could not open Microsoft Store.',
-                                backgroundColor: Colors.redAccent,
+                                backgroundColor: AppColors.accent,
                                 textColor: Colors.white,
                               );
                             }
@@ -158,7 +157,7 @@ class _UserProfileState extends State<UserProfile> {
                           AppSnackbar.show(
                             context,
                             'In-app reviews are not supported on this platform.',
-                            backgroundColor: Colors.redAccent,
+                            backgroundColor: AppColors.accent,
                             textColor: Colors.white,
                           );
                         },
@@ -169,7 +168,6 @@ class _UserProfileState extends State<UserProfile> {
                           fdbkButton,
                           style: TextStyle(
                             fontSize: screenWidth > 1200 ? 22 : 16,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                         icon: const Icon(Icons.feedback_outlined),
@@ -182,7 +180,7 @@ class _UserProfileState extends State<UserProfile> {
                             AppSnackbar.show(
                               context,
                               'No user found to edit.',
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: AppColors.accent,
                               textColor: Colors.white,
                             );
                             return;
@@ -199,7 +197,7 @@ class _UserProfileState extends State<UserProfile> {
                               return StatefulBuilder(
                                 builder: (context, setState) {
                                   return AlertDialog(
-                                    backgroundColor: Colors.grey[800],
+                                    backgroundColor: AppColors.darkSurface,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -216,7 +214,6 @@ class _UserProfileState extends State<UserProfile> {
                                           AppLocalizations.of(context)!.userProfileEditProfileButton,
                                           style: TextStyle(
                                             color: Theme.of(context).colorScheme.info,
-                                            fontFamily: 'CascadiaCode',
                                             fontWeight: FontWeight.bold,
                                             fontSize: (screenWidth > 1200) ? 26 : 20,
                                           ),
@@ -237,7 +234,6 @@ class _UserProfileState extends State<UserProfile> {
                                               hintText: 'First name',
                                               hintStyle: TextStyle(
                                                 color: Theme.of(context).colorScheme.muted,
-                                                fontFamily: 'CascadiaCode',
                                                 fontWeight: FontWeight.normal,
                                                 fontSize: screenWidth > 1200 ? 22 : 18,
                                               ),
@@ -255,7 +251,6 @@ class _UserProfileState extends State<UserProfile> {
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: FontWeight.normal,
                                             ),
                                           ),
@@ -269,7 +264,6 @@ class _UserProfileState extends State<UserProfile> {
                                               hintText: 'Last name',
                                               hintStyle: TextStyle(
                                                 color: Theme.of(context).colorScheme.muted,
-                                                fontFamily: 'CascadiaCode',
                                                 fontWeight: FontWeight.normal,
                                                 fontSize: screenWidth > 1200 ? 22 : 18,
                                               ),
@@ -287,7 +281,6 @@ class _UserProfileState extends State<UserProfile> {
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: FontWeight.normal,
                                             ),
                                           ),
@@ -300,7 +293,7 @@ class _UserProfileState extends State<UserProfile> {
                                           ElevatedButton(
                                             onPressed: () => Navigator.pop(dialogContext, false),
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.grey[800],
+                                              backgroundColor: AppColors.darkSurface,
                                               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
@@ -311,7 +304,6 @@ class _UserProfileState extends State<UserProfile> {
                                               style: TextStyle(
                                                 color: Theme.of(context).colorScheme.muted,
                                                 fontWeight: FontWeight.normal,
-                                                fontFamily: 'CascadiaCode',
                                                 fontSize: (screenWidth > 1200) ? 22 : 20,
                                               ),
                                             ),
@@ -327,7 +319,7 @@ class _UserProfileState extends State<UserProfile> {
                                                 AppSnackbar.show(
                                                   context,
                                                   'Please enter both first and last name.',
-                                                  backgroundColor: Colors.redAccent,
+                                                  backgroundColor: AppColors.accent,
                                                   textColor: Colors.white,
                                                 );
                                                 return;
@@ -345,7 +337,7 @@ class _UserProfileState extends State<UserProfile> {
                                               }
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.grey[800],
+                                              backgroundColor: AppColors.darkSurface,
                                               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
@@ -359,7 +351,6 @@ class _UserProfileState extends State<UserProfile> {
                                                   AppLocalizations.of(context)!.buttonSave,
                                                   style: TextStyle(
                                                     color: Colors.white,
-                                                    fontFamily: 'CascadiaCode',
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: (screenWidth > 1200) ? 22 : 20,
                                                   ),
@@ -390,12 +381,11 @@ class _UserProfileState extends State<UserProfile> {
                           }
                         },
                         elevation: 0,
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: AppColors.accent,
                         label: Text(
                           editButton,
                           style: TextStyle(
                             fontSize: screenWidth > 1200 ? 22 : 16,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                         icon: const Icon(Icons.edit),
@@ -567,7 +557,6 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
               item.value.toString(),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontFamily: 'CascadiaCode',
                 fontSize: 20,
               ),
             ),
@@ -577,7 +566,6 @@ class _ProfileInfoRowState extends State<_ProfileInfoRow> {
             item.title,
             style: TextStyle(
               fontSize: screenWidth > 1200 ? 16 : 12,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),

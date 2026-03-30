@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dataset_dialog_project_type_helper.dart';
 import '../../models/archive.dart';
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 class StepDatasetTaskConfirmation extends StatefulWidget {
   final Archive archive;
@@ -69,7 +70,6 @@ class StepDatasetTaskConfirmationState
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'CascadiaCode',
                         color: Colors.white),
                   ),
                   const SizedBox(height: 8),
@@ -81,7 +81,6 @@ class StepDatasetTaskConfirmationState
                           "Allow Project Type Change",
                           style: TextStyle(
                             color: Colors.white70,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                         Switch(
@@ -101,7 +100,7 @@ class StepDatasetTaskConfirmationState
                               }
                             }
                           },
-                          activeColor: Colors.redAccent,
+                          activeColor: AppColors.accent,
                         ),
                         const SizedBox(width: 4),
                         IconButton(
@@ -124,7 +123,6 @@ class StepDatasetTaskConfirmationState
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'CascadiaCode',
                           color: Colors.white),
                     ),
                   ),
@@ -135,7 +133,6 @@ class StepDatasetTaskConfirmationState
                           "Allow Project Type Change",
                           style: TextStyle(
                             color: Colors.white70,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                         Switch(
@@ -155,7 +152,7 @@ class StepDatasetTaskConfirmationState
                               }
                             }
                           },
-                          activeColor: Colors.redAccent,
+                          activeColor: AppColors.accent,
                         ),
                         const SizedBox(width: 4),
                         IconButton(
@@ -182,7 +179,6 @@ class StepDatasetTaskConfirmationState
                             "Convert polygon annotations to bounding boxes",
                             style: TextStyle(
                               fontSize: 16,
-                              fontFamily: 'CascadiaCode',
                               color: Colors.white70,
                             ),
                           ),
@@ -197,7 +193,7 @@ class StepDatasetTaskConfirmationState
                                     convertPolygonsToBbox = value;
                                   });
                                 },
-                                activeColor: Colors.redAccent,
+                                activeColor: AppColors.accent,
                               ),
                               const SizedBox(width: 4),
                               IconButton(
@@ -234,7 +230,6 @@ class StepDatasetTaskConfirmationState
                               "Convert polygon annotations to bounding boxes",
                               style: TextStyle(
                                 fontSize: 16,
-                                fontFamily: 'CascadiaCode',
                                 color: Colors.white70,
                               ),
                             ),
@@ -246,7 +241,7 @@ class StepDatasetTaskConfirmationState
                                 convertPolygonsToBbox = value;
                               });
                             },
-                            activeColor: Colors.redAccent,
+                            activeColor: AppColors.accent,
                           ),
                           const SizedBox(width: 4),
                           IconButton(
@@ -312,10 +307,10 @@ class StepDatasetTaskConfirmationState
                               width: cardSize,
                               height: cardSize,
                               decoration: BoxDecoration(
-                                color: Colors.grey[800],
+                                color: AppColors.darkSurface,
                                 borderRadius: BorderRadius.circular(12),
                                 border: isSelected
-                                    ? Border.all(color: Colors.redAccent, width: 3)
+                                    ? Border.all(color: AppColors.accent, width: 3)
                                     : null,
                                 boxShadow: enabled
                                     ? [
@@ -349,7 +344,6 @@ class StepDatasetTaskConfirmationState
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                             ),
                                           ),

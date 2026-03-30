@@ -10,6 +10,7 @@ import '../../dialogs/image_details_dialog.dart';
 import '../../dialogs/set_image_icon_dialog.dart';
 import '../../dialogs/delete_image_dialog.dart';
 import '../../dialogs/duplicate_image_dialog.dart';
+import '../../../utils/theme.dart';
 
 class ImageTileMenuButton extends StatelessWidget {
   final Project project;
@@ -36,7 +37,7 @@ class ImageTileMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
-      color: Colors.grey[800],
+      color: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
         side: const BorderSide(color: Colors.white70, width: 1),
@@ -132,7 +133,6 @@ class _MenuItemRow extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: screenWidth > 1200 ? 22 : 18,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.normal,
           ),
         ),

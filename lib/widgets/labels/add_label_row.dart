@@ -5,6 +5,7 @@ import '../../utils/color_utils.dart';
 import '../dialogs/alert_error_dialog.dart';
 import '../dialogs/color_picker_dialog.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 /// Shared inline row for creating a new label: [color swatch] [name field] [add button].
 ///
@@ -136,14 +137,13 @@ class _AddLabelRowState extends State<AddLabelRow> {
             height: swatchSize,
             child: TextField(
               controller: _controller,
-              cursorColor: Colors.redAccent,
+              cursorColor: AppColors.accent,
               onSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 hintText: l10n.labelNameHint,
                 hintStyle: TextStyle(
                   color: Colors.white54,
                   fontSize: fontSize,
-                  fontFamily: 'CascadiaCode',
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
                 enabledBorder: OutlineInputBorder(
@@ -152,13 +152,12 @@ class _AddLabelRowState extends State<AddLabelRow> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                  borderSide: const BorderSide(color: AppColors.accent, width: 1),
                 ),
               ),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontSize,
-                fontFamily: 'CascadiaCode',
               ),
             ),
           ),
@@ -169,7 +168,7 @@ class _AddLabelRowState extends State<AddLabelRow> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.redAccent, width: 2),
+              border: Border.all(color: AppColors.accent, width: 2),
               borderRadius: BorderRadius.circular(30),
             ),
             child: IconButton(
@@ -190,7 +189,7 @@ class _AddLabelRowState extends State<AddLabelRow> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
-                  side: const BorderSide(color: Colors.redAccent, width: 2),
+                  side: const BorderSide(color: AppColors.accent, width: 2),
                 ),
               ),
               child: Text(
@@ -199,7 +198,6 @@ class _AddLabelRowState extends State<AddLabelRow> {
                   color: Colors.white,
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ),

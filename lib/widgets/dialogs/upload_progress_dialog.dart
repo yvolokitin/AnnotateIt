@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 /// A dialog that shows the progress of file uploads.
 /// It can be minimized to a snackbar and restored from the snackbar.
@@ -80,7 +81,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
           width: isCompact ? size.width : size.width * 0.9,
           height: isCompact ? size.height : size.height * 0.9,
           decoration: BoxDecoration(
-            color: Colors.grey[800],
+            color: AppColors.darkSurface,
             border: Border.all(color: Colors.orangeAccent, width: 1),
             borderRadius: isCompact ? null : BorderRadius.circular(16),
           ),
@@ -99,7 +100,6 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                       color: isCancelling ? Colors.orangeAccent : Colors.white,
                       fontSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                   IconButton(
@@ -115,7 +115,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
               // Overall progress
               Text(
                 'Overall Progress: ${(overallProgress * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
@@ -130,7 +130,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
               // Counts and notice
               Text(
                 'Files: $currentFileIndex/$totalFiles',
-                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -139,7 +139,6 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                   color: Colors.white70,
                   fontStyle: FontStyle.italic,
                   fontSize: 12,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
               if (isCancelling)
@@ -151,7 +150,6 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                       color: Colors.orangeAccent,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                 ),
@@ -177,7 +175,6 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
                                     color: file.isCancelling ? Colors.orangeAccent : Colors.white,
                                     fontStyle: file.isCancelling ? FontStyle.italic : null,
                                     fontWeight: file.isCancelling ? FontWeight.bold : null,
-                                    fontFamily: 'CascadiaCode',
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -231,7 +228,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isCancelling ? Colors.orange[800] : Colors.grey[800],
+          color: isCancelling ? Colors.orange[800] : AppColors.darkSurface,
           borderRadius: BorderRadius.circular(8),
         ),
         // Wrap with a SizedBox to provide a bounded width constraint

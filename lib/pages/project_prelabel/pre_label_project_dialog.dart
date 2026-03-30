@@ -841,7 +841,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
 
     return Dialog(
       insetPadding: EdgeInsets.zero,
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape:
           isWide
               ? RoundedRectangleBorder(
@@ -877,7 +877,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                           fontSize: isWide ? 26 : 20,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.purple,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ],
@@ -925,7 +924,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.purple,
-                                fontFamily: 'CascadiaCode',
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -1261,7 +1259,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.purple,
-                                fontFamily: 'CascadiaCode',
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -1432,7 +1429,6 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.purple,
-                              fontFamily: 'CascadiaCode',
                             ),
                             textAlign: TextAlign.center,
                           ),

@@ -6,6 +6,7 @@ import '../../../models/annotated_labeled_media.dart';
 import '../../dialogs/image_details_dialog.dart';
 import '../../dialogs/delete_image_dialog.dart';
 import 'select_checkbox_overlay.dart';
+import '../../../utils/theme.dart';
 
 class ErrorImageTile extends StatefulWidget {
   final String message;
@@ -44,11 +45,11 @@ class _ErrorImageTileState extends State<ErrorImageTile> {
         height: 140,
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? Colors.redAccent : Colors.white24,
+            color: isSelected ? AppColors.accent : Colors.white24,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          color: Colors.grey[850],
+          color: AppColors.darkCard,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
@@ -67,7 +68,6 @@ class _ErrorImageTileState extends State<ErrorImageTile> {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white38,
-                        fontFamily: 'CascadiaCode',
                         fontSize: 12,
                       ),
                     ),
@@ -94,7 +94,7 @@ class _ErrorImageTileState extends State<ErrorImageTile> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _hovered ? 1.0 : 0.0,
                   child: PopupMenuButton<String>(
-                    color: Colors.grey[800],
+                    color: AppColors.darkSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                       side: const BorderSide(color: Colors.white70, width: 1),
@@ -128,7 +128,6 @@ class _ErrorImageTileState extends State<ErrorImageTile> {
                       final screenWidth = MediaQuery.of(context).size.width;
                       TextStyle textStyle = TextStyle(
                         fontSize: screenWidth > 1200 ? 22 : 18,
-                        fontFamily: 'CascadiaCode',
                       );
                       return [
                         PopupMenuItem(

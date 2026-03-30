@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 /// A reusable dialog to check/select FFmpeg executable on Windows.
 /// Returns a resolved ffmpeg path (e.g., "ffmpeg" from PATH or an absolute path),
@@ -134,7 +135,7 @@ class FfmpegCheckDialog {
             }
 
             return AlertDialog(
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.darkSurface,
               insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context2).size.width * 0.05, vertical: MediaQuery.of(context2).size.height * 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -152,7 +153,6 @@ class FfmpegCheckDialog {
                     'Video frames extraction',
                     style: TextStyle(
                       color: Colors.orangeAccent,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
@@ -182,13 +182,13 @@ class FfmpegCheckDialog {
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text('Step 1: Check FFmpeg',
-                              style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                              style: TextStyle(color: Colors.white,  fontWeight: FontWeight.bold)),
                         ),
                       ]),
                       const SizedBox(height: 6),
                       const Text(
                         'FFmpeg is a free, open‑source suite for processing video and audio. AnnotateIt uses FFmpeg on Windows to extract individual frames from your video for annotation.',
-                        style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -202,7 +202,7 @@ class FfmpegCheckDialog {
                               await launchUrl(uri, mode: LaunchMode.externalApplication);
                             },
                             icon: const Icon(Icons.open_in_new),
-                            label: const Text('FFmpeg website', style: TextStyle(fontFamily: 'CascadiaCode')),
+                            label: const Text('FFmpeg website'),
                           ),
                           TextButton.icon(
                             style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
@@ -211,14 +211,14 @@ class FfmpegCheckDialog {
                               await launchUrl(uri, mode: LaunchMode.externalApplication);
                             },
                             icon: const Icon(Icons.download),
-                            label: const Text('Windows builds', style: TextStyle(fontFamily: 'CascadiaCode')),
+                            label: const Text('Windows builds'),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       const Text(
                         'Tip: After installing, either add ffmpeg.exe to your PATH or click "Select FFmpeg" to choose the executable.',
-                        style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       const SizedBox(height: 10),
                       if (checking) const LinearProgressIndicator(),
@@ -227,20 +227,20 @@ class FfmpegCheckDialog {
                           resolved
                               ? 'Using: ' + (ffmpegPath ?? '')
                               : 'FFmpeg not available. Select ffmpeg.exe first.',
-                          style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'CascadiaCode'),
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       const SizedBox(height: 12),
                       Row(children: [
                         TextButton(
                           onPressed: checking || extracting ? null : () => selectFfmpeg(setState2),
                           style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                          child: const Text('Select FFmpeg', style: TextStyle(fontFamily: 'CascadiaCode')),
+                          child: const Text('Select FFmpeg'),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
                           onPressed: checking || extracting ? null : () => runQuickCheck(setState2),
                           style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
-                          child: const Text('Re-check', style: TextStyle(fontFamily: 'CascadiaCode')),
+                          child: const Text('Re-check'),
                         ),
                       ]),
                       const SizedBox(height: 10),
@@ -249,7 +249,7 @@ class FfmpegCheckDialog {
                         SizedBox(width: 8),
                         Expanded(
                           child: Text('Frames per second',
-                              style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                              style: TextStyle(color: Colors.white,  fontWeight: FontWeight.bold)),
                         ),
                       ]),
                       Row(
@@ -274,7 +274,7 @@ class FfmpegCheckDialog {
                           ),
                           const SizedBox(width: 8),
                           Text(fpsValue.toStringAsFixed(1) + ' fps',
-                              style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                              style: const TextStyle(color: Colors.white70)),
                         ],
                       ),
                       const Divider(height: 20, color: Colors.orangeAccent),
@@ -283,19 +283,19 @@ class FfmpegCheckDialog {
                         SizedBox(width: 8),
                         Expanded(
                           child: Text('Step 2: Select video file',
-                              style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                              style: TextStyle(color: Colors.white,  fontWeight: FontWeight.bold)),
                         ),
                       ]),
                       const SizedBox(height: 6),
                       if (existingVideoPath != null)
                         Text(
                           'Video already in gallery: ' + existingVideoPath.split('\\').last + '. Press Continue to extract frames.',
-                          style: const TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                          style: const TextStyle(color: Colors.white70, fontSize: 13),
                         )
                       else
                         const Text(
                           'After FFmpeg is resolved, click Continue to choose a video to import.',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'CascadiaCode'),
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       const SizedBox(height: 12),
                       AnimatedSwitcher(
@@ -320,7 +320,7 @@ class FfmpegCheckDialog {
                                       const Expanded(
                                         child: Text(
                                           'Extracting frames... this may take a while.',
-                                          style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                                          style: TextStyle(color: Colors.white70),
                                         ),
                                       ),
                                     ],
@@ -333,7 +333,7 @@ class FfmpegCheckDialog {
                                   if (errorMsg != null) ...[
                                     const SizedBox(height: 8),
                                     Text(errorMsg!,
-                                        style: const TextStyle(color: Colors.redAccent, fontFamily: 'CascadiaCode', fontSize: 12)),
+                                        style: const TextStyle(color: AppColors.accent,  fontSize: 12)),
                                   ],
                                 ],
                               )
@@ -349,20 +349,20 @@ class FfmpegCheckDialog {
                     ElevatedButton(
                       onPressed: extracting ? null : () => Navigator.of(ctx).pop(null),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
                     ),
                     const Spacer(),
                     if (resolved)
                       ElevatedButton(
                         onPressed: extracting ? null : onContinuePressed,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -370,7 +370,7 @@ class FfmpegCheckDialog {
                           ),
                         ),
                         child: const Text('Continue',
-                            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold)),
+                            style: TextStyle(color: Colors.white,  fontWeight: FontWeight.bold)),
                       ),
                   ],
                 ),

@@ -8,6 +8,7 @@ import '../../models/project.dart';
 
 import 'image_tile.dart';
 import 'media_tile.dart';
+import '../../utils/theme.dart';
 
 class PaginatedImageGrid extends StatefulWidget {
   final void Function(AnnotatedLabeledMedia media, bool withAnnotations)? onImageDuplicated;
@@ -142,13 +143,12 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.red, width: 1),
+                    side: BorderSide(color: AppColors.accent, width: 1),
                   ),
                 ),
                 child: Text(
                   screenWidth > 700 ? l10n.dialogBack : '<-',
                   style: const TextStyle(
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ),
@@ -157,7 +157,6 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                 getPaginationText(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
               const SizedBox(width: 20),
@@ -170,14 +169,13 @@ class _PaginatedImageGridState extends State<PaginatedImageGrid> {
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.red, width: 1),
+                    side: BorderSide(color: AppColors.accent, width: 1),
                   ),
                 ),
                 child: Text(
                   screenWidth > 700 ? l10n.dialogNext : '->',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ),

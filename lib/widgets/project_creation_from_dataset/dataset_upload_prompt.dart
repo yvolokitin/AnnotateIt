@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class UploadPrompt extends StatelessWidget {
   final VoidCallback onPickFile;
@@ -32,7 +33,6 @@ class UploadPrompt extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: fontSize,
-                    fontFamily: 'CascadiaCode',
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -40,7 +40,7 @@ class UploadPrompt extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onPickFile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -49,7 +49,6 @@ class UploadPrompt extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
                       fontSize: fontSize,
                     ),
                   ),
@@ -60,7 +59,6 @@ class UploadPrompt extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: fontSize,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
                 SizedBox(height: spacing / 2),
@@ -69,7 +67,6 @@ class UploadPrompt extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: fontSize,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
                 SizedBox(height: spacing / 2),
@@ -78,7 +75,7 @@ class UploadPrompt extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: fontSize,
-                    fontFamily: 'CascadiaCode',),
+),
                 ),
               ],
             ),

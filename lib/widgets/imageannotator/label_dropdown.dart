@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import '../../models/label.dart';
 
 class LabelDropdown extends StatefulWidget {
@@ -36,7 +37,7 @@ class _LabelDropdownState extends State<LabelDropdown> {
         side: BorderSide(color: widget.theme.dividerColor, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      color: Colors.grey[850],
+      color: AppColors.darkCard,
       onSelected: (label) {
         if (mounted) {
           widget.onLabelSelected(label);
@@ -67,7 +68,6 @@ class _LabelDropdownState extends State<LabelDropdown> {
                   label.name,
                   style: widget.theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ],

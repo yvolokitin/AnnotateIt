@@ -10,6 +10,7 @@ import '../../models/label.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../data/labels_database.dart';
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 class NoLabelsDialog extends StatelessWidget {
   final int projectId;
@@ -57,7 +58,6 @@ class NoLabelsDialog extends StatelessWidget {
                       l10n.noLabelsTitle,
                       style: TextStyle(
                         color: Colors.white,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.bold,
                         fontSize: screenWidth > 1450 ? 24 : smallScreen ? 14 : 20,
                       ),
@@ -79,7 +79,6 @@ class NoLabelsDialog extends StatelessWidget {
                           color: Colors.lightGreenAccent,
                           fontSize: smallScreen ? 16 : 18,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -89,7 +88,6 @@ class NoLabelsDialog extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: screenWidth > 640 ? 18 : 14,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                     Text(
@@ -97,7 +95,6 @@ class NoLabelsDialog extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: smallScreen ? 14 : 18,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                     Text(
@@ -105,7 +102,6 @@ class NoLabelsDialog extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: smallScreen ? 14 : 18,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                     SizedBox(
@@ -127,7 +123,6 @@ class NoLabelsDialog extends StatelessWidget {
                         l10n.noLabelsExplain4,
                         style: TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -135,7 +130,6 @@ class NoLabelsDialog extends StatelessWidget {
                         l10n.noLabelsExplain5,
                         style: TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -143,7 +137,6 @@ class NoLabelsDialog extends StatelessWidget {
                         l10n.noLabelsExplain6,
                         style: TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -171,7 +164,7 @@ class NoLabelsDialog extends StatelessWidget {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: AppColors.darkRail,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.lightGreenAccent, width: 1),
@@ -183,7 +176,6 @@ class NoLabelsDialog extends StatelessWidget {
               l10n.importLabelsPreviewTitle,
               style: const TextStyle(
                 color: Colors.lightGreenAccent,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -194,13 +186,12 @@ class NoLabelsDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.red[900],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.redAccent, width: 1),
+                  border: Border.all(color: AppColors.accent, width: 1),
                 ),
                 child: const Text(
                   'Only the first 2 labels will be imported for binary classification.',
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontSize: 13,
                   ),
                 ),
@@ -215,7 +206,6 @@ class NoLabelsDialog extends StatelessWidget {
               const JsonEncoder.withIndent('  ').convert(rawJson),
               style: const TextStyle(
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
                 fontSize: 14,
               ),
             ),
@@ -228,7 +218,6 @@ class NoLabelsDialog extends StatelessWidget {
               l10n.buttonCancel,
               style: const TextStyle(
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
               ),
             ),
           ),
@@ -298,7 +287,6 @@ class NoLabelsDialog extends StatelessWidget {
               l10n.buttonImport,
               style: const TextStyle(
                 color: Colors.lightGreenAccent,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),

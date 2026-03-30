@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import 'constants.dart';
 
 class ToolbarButton extends StatefulWidget {
@@ -59,9 +60,9 @@ class _ToolbarButtonState extends State<ToolbarButton> {
               color: _isPressed
                   ? Constants.activeBackgroundColor
                   : widget.isActive
-                      ? Colors.grey[850]
+                      ? AppColors.darkCard
                       : _isHovered
-                          ? Colors.grey[850]
+                          ? AppColors.darkCard
                           : Colors.transparent,
               borderRadius: Constants.buttonBorderRadius,
             ),

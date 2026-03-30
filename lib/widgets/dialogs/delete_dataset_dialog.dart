@@ -5,6 +5,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../models/dataset.dart';
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
+import '../../utils/theme.dart';
 
 class DeleteDatasetDialog extends StatefulWidget {
   final Dataset dataset;
@@ -40,10 +41,10 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
     if (screenWidth < 800) {
       return Dialog(
         insetPadding: EdgeInsets.zero,
-        backgroundColor: Colors.grey[800],
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
-          side: const BorderSide(color: Colors.redAccent, width: 1),
+          side: const BorderSide(color: AppColors.accent, width: 1),
         ),
         child: SafeArea(
           child: LayoutBuilder(
@@ -61,13 +62,12 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.delete_sweep_outlined, size: 32, color: Colors.redAccent),
+                              const Icon(Icons.delete_sweep_outlined, size: 32, color: AppColors.accent),
                               const SizedBox(width: 12),
                               Text(
                                 l10n.deleteDatasetTitle,
                                 style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontFamily: 'CascadiaCode',
+                                  color: AppColors.accent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth > 700 ? 24 : 20,
                                 ),
@@ -76,7 +76,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                           ),
                           if (!_isDeleting)
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.redAccent),
+                              icon: const Icon(Icons.close, color: AppColors.accent),
                               tooltip: l10n.buttonClose,
                               onPressed: () => Navigator.pop(context),
                             ),
@@ -84,7 +84,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     const SizedBox(height: 12),
                     Expanded(
                       child: SingleChildScrollView(
@@ -95,13 +95,12 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const SizedBox(height: 40),
-                                    const CircularProgressIndicator(color: Colors.redAccent),
+                                    const CircularProgressIndicator(color: AppColors.accent),
                                     const SizedBox(height: 20),
                                     Text(
                                       l10n.deleteDatasetInProgress,
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: screenWidth > 700 ? 22 : 18,
                                       ),
                                     ),
@@ -113,7 +112,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                     Text(
                                       l10n.deleteDatasetConfirm(widget.dataset.name),
                                       style: TextStyle(
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
                                         color: Colors.white70,
                                         fontSize: screenWidth > 700 ? 22 : 18,
@@ -129,7 +127,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                           child: Text(
                                             l10n.deleteDatasetInfoLine(creationDate, widget.dataset.mediaCount, widget.dataset.annotationCount),
                                             style: TextStyle(
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: FontWeight.normal,
                                               color: Colors.white54,
                                               fontSize: screenWidth > 700 ? 22 : 18,
@@ -145,14 +142,13 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                       title: Text(
                                         l10n.deleteProjectOptionDeleteFromDisk,
                                         style: TextStyle(
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.normal,
                                           color: Colors.white,
                                           fontSize: screenWidth > 700 ? 22 : 18,
                                         ),
                                       ),
                                       controlAffinity: ListTileControlAffinity.leading,
-                                      activeColor: Colors.redAccent,
+                                      activeColor: AppColors.accent,
                                     ),
                                     CheckboxListTile(
                                       value: _dontAskAgain,
@@ -161,7 +157,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                         l10n.deleteProjectOptionDontAskAgain,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.normal,
                                           fontSize: screenWidth > 700 ? 22 : 18,
                                         ),
@@ -174,7 +169,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                         ),
                       ),
                     ),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     if (!_isDeleting)
                       Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -184,7 +179,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -195,7 +190,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                 l10n.buttonCancel,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth > 700 ? 22 : 18,
                                 ),
@@ -205,7 +199,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                             ElevatedButton(
                               onPressed: _handleDelete,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -216,7 +210,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                 l10n.buttonDelete,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth > 700 ? 22 : 18,
                                 ),
@@ -235,10 +228,10 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.redAccent, width: 1),
+        side: const BorderSide(color: AppColors.accent, width: 1),
       ),
       titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
@@ -246,13 +239,12 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
         children: [
           Row(
             children: [
-              const Icon(Icons.delete_sweep_outlined, size: 32, color: Colors.redAccent),
+              const Icon(Icons.delete_sweep_outlined, size: 32, color: AppColors.accent),
               const SizedBox(width: 12),
               Text(
                 l10n.deleteDatasetTitle,
                 style: TextStyle(
-                  color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: screenWidth > 700 ? 24 : 20,
                 ),
@@ -261,7 +253,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
           ),
           if (!_isDeleting)
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.redAccent),
+              icon: const Icon(Icons.close, color: AppColors.accent),
               tooltip: l10n.buttonClose,
               onPressed: () => Navigator.pop(context),
             ),
@@ -273,7 +265,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: _isDeleting
@@ -281,13 +273,12 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 40),
-                          const CircularProgressIndicator(color: Colors.redAccent),
+                          const CircularProgressIndicator(color: AppColors.accent),
                           const SizedBox(height: 20),
                           Text(
                             l10n.deleteDatasetInProgress,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: screenWidth > 700 ? 22 : 18,
                             ),
                           ),
@@ -299,7 +290,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                           Text(
                             l10n.deleteDatasetConfirm(widget.dataset.name),
                             style: TextStyle(
-                              fontFamily: 'CascadiaCode',
                               fontWeight: FontWeight.normal,
                               color: Colors.white70,
                               fontSize: screenWidth > 700 ? 22 : 18,
@@ -315,7 +305,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                                 child: Text(
                                   l10n.deleteDatasetInfoLine(creationDate, widget.dataset.mediaCount, widget.dataset.annotationCount),
                                   style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
                                     color: Colors.white54,
                                     fontSize: screenWidth > 700 ? 22 : 18,
@@ -331,14 +320,13 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                             title: Text(
                               l10n.deleteProjectOptionDeleteFromDisk,
                               style: TextStyle(
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.normal,
                                 color: Colors.white,
                                 fontSize: screenWidth > 700 ? 22 : 18,
                               ),
                             ),
                             controlAffinity: ListTileControlAffinity.leading,
-                            activeColor: Colors.redAccent,
+                            activeColor: AppColors.accent,
                           ),
                           CheckboxListTile(
                             value: _dontAskAgain,
@@ -347,7 +335,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                               l10n.deleteProjectOptionDontAskAgain,
                               style: TextStyle(
                                 color: Colors.white,
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.normal,
                                 fontSize: screenWidth > 700 ? 22 : 18,
                               ),
@@ -358,7 +345,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                         ],
                       ),
               ),
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
             ],
           ),
         ),
@@ -369,7 +356,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -380,7 +367,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                   l10n.buttonCancel,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth > 700 ? 22 : 18,
                   ),
@@ -389,7 +375,7 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
               ElevatedButton(
                 onPressed: _handleDelete,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -400,7 +386,6 @@ class _DeleteDatasetDialogState extends State<DeleteDatasetDialog> {
                   l10n.buttonDelete,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth > 700 ? 22 : 18,
                   ),

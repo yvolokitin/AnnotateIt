@@ -22,7 +22,6 @@ class AppSnackbar {
         message,
         style: TextStyle(
           color: textColor,
-          fontFamily: 'CascadiaCode',
           fontSize: 16,
         ),
       ),

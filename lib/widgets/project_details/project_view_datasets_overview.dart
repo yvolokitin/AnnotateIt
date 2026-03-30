@@ -10,6 +10,7 @@ import "../../utils/date_utils.dart";
 import '../project_list/labels_list.dart';
 import '../../widgets/dialogs/edit_dataset_name_dialog.dart';
 import '../../pages/project_export/export_project_dialog.dart';
+import '../../utils/theme.dart';
 
 class ProjectViewDatasetsOverview extends StatefulWidget {
   final Project project;
@@ -143,7 +144,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                   fontSize: 24,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ],
@@ -158,7 +158,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
               ? const Center(
                 child: Text(
                   'No datasets found.',
-                  style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode'),
+                  style: TextStyle(color: Colors.white),
                   ),
                 )
               : SingleChildScrollView(
@@ -195,7 +195,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
     return Container(
       padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppColors.darkSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
@@ -231,7 +231,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                   style: TextStyle(
                     fontSize: titleFontSize, 
                     fontWeight: FontWeight.normal, 
-                    fontFamily: 'CascadiaCode'
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
@@ -283,7 +282,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                       style: TextStyle(
                         fontSize: contentFontSize, 
                         fontWeight: FontWeight.normal, 
-                        fontFamily: 'CascadiaCode'
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -301,7 +299,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                       style: TextStyle(
                         fontSize: contentFontSize,
                         fontWeight: FontWeight.normal,
-                        fontFamily: 'CascadiaCode'
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -324,7 +321,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                   style: TextStyle(
                     fontSize: contentFontSize, 
                     fontWeight: FontWeight.normal, 
-                    fontFamily: 'CascadiaCode'
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
@@ -339,7 +335,6 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
             style: TextStyle(
               fontSize: contentFontSize, 
               fontWeight: FontWeight.bold, 
-              fontFamily: 'CascadiaCode'
             )
           ),
           SizedBox(height: screenWidth < 600 ? 10 : 20),
@@ -424,7 +419,7 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
     return Container(
         padding: EdgeInsets.all(padding),
         decoration: BoxDecoration(
-          color: Colors.grey[850],
+          color: AppColors.darkCard,
           borderRadius: BorderRadius.circular(12),
           boxShadow: const [
             BoxShadow(
@@ -454,12 +449,12 @@ class ProjectViewDatasetsOverviewState extends State<ProjectViewDatasetsOverview
                 children: [
                   Text(
                     title, 
-                    style: TextStyle(fontSize: fontSize, fontFamily: 'CascadiaCode'),
+                    style: TextStyle(fontSize: fontSize),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     value, 
-                    style: TextStyle(fontSize: fontSize, color: Colors.grey, fontFamily: 'CascadiaCode'),
+                    style: TextStyle(fontSize: fontSize, color: Colors.grey),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

@@ -13,6 +13,7 @@ import '../../session/user_session.dart';
 import '../../utils/dataset_import_utils.dart';
 import '../../utils/dataset_import_project_creation.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
+import '../../utils/theme.dart';
 import '../../widgets/project_creation_from_dataset/dataset_upload_prompt.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_description_widget.dart';
 import '../../widgets/project_creation_from_dataset/dataset_step_progress_bar.dart';
@@ -409,7 +410,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
           },
           child: Dialog(
             insetPadding: EdgeInsets.zero,
-            backgroundColor: Colors.grey[850],
+            backgroundColor: AppColors.darkCard,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
             ),
@@ -440,7 +441,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               l10n.datasetDialogTitle,
               style: TextStyle(
                 fontSize: screenWidth > 1200 ? 26 : 22,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -485,7 +485,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CircularProgressIndicator(
-          color: Colors.redAccent,
+          color: AppColors.accent,
           strokeWidth: 5,
           value:
               _processingProgress == 0.0 || _processingProgress == 1.0
@@ -499,7 +499,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               : "${l10n.datasetDialogProcessingProgress} ${(100 * _processingProgress).toInt()}%",
           style: const TextStyle(
             color: Colors.white70,
-            fontFamily: 'CascadiaCode',
             fontSize: 18,
           ),
         ),
@@ -510,7 +509,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
               : l10n.datasetDialogModeNormal,
           style: const TextStyle(
             color: Colors.white38,
-            fontFamily: 'CascadiaCode',
             fontSize: 14,
           ),
         ),
@@ -565,7 +563,7 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
     final Widget primaryButton = ElevatedButton(
       onPressed: _isCreatingProject ? null : _goToNextStep,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.accent,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -578,7 +576,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                     : l10n.buttonCreateProject,
                 style: const TextStyle(
                   color: Colors.black,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -596,7 +593,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
                 l10n.buttonCancel,
                 style: const TextStyle(
                   color: Colors.white54,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ),
@@ -618,7 +614,6 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
             l10n.buttonCancel,
             style: const TextStyle(
               color: Colors.white54,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),

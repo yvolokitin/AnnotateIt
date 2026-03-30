@@ -4,6 +4,7 @@ import '../../models/user.dart';
 import '../../main.dart';
 import '../../services/file_logger.dart';
 import '../../utils/sam_model_utils.dart';
+import '../../utils/theme.dart';
 
 class ApplicationSettings extends StatelessWidget {
   final User user;
@@ -22,7 +23,7 @@ class ApplicationSettings extends StatelessWidget {
     final isTablet = MediaQuery.of(context).size.width > 500;
 
     return Container(
-      color: Colors.grey[800],
+      color: AppColors.darkSurface,
       child: SingleChildScrollView(
         padding: isWide ? const EdgeInsets.all(24) : const EdgeInsets.all(12),
         child: Column(
@@ -149,7 +150,7 @@ class ApplicationSettings extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(7),
       ),
       child: ExpansionTileTheme(
@@ -168,7 +169,6 @@ class ApplicationSettings extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 24,
-              fontFamily: 'CascadiaCode',
               color: Colors.white,
             ),
           ),
@@ -191,7 +191,6 @@ class ApplicationSettings extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 20,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.normal,
               color: Colors.white70,
             ),
@@ -229,7 +228,6 @@ class ApplicationSettings extends StatelessWidget {
             note,
             style: const TextStyle(
               fontSize: 18,
-              fontFamily: 'CascadiaCode',
               color: Colors.white60,
             ),
           ),
@@ -250,7 +248,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
         label,
         style: const TextStyle(
           color: Colors.white,
-          fontFamily: 'CascadiaCode',
         ),
       ),
       Row(
@@ -301,7 +298,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
           l10n.settingsThemeTitle,
           style: TextStyle(
             fontSize: 20,
-            fontFamily: 'CascadiaCode',
             color: Colors.white70,
           ),
         ),
@@ -319,7 +315,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                   ? null // Prevent tap
                   : () => onUserChange(user.copyWith(themeMode: mode)),
                 child: Card(
-                  color: user.themeMode == mode ? Colors.amber : Colors.grey[900],
+                  color: user.themeMode == mode ? Colors.amber : AppColors.darkRail,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -329,7 +325,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                         style: TextStyle(
                           color: user.themeMode == mode ? Colors.black : Colors.white70,
                           fontWeight: user.themeMode == mode ? FontWeight.bold : FontWeight.normal,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -362,7 +357,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
           AppLocalizations.of(context)!.settingsLanguageTitle,
           style: TextStyle(
             fontSize: 20,
-            fontFamily: 'CascadiaCode',
             color: Colors.white70,
           ),
         ),
@@ -392,7 +386,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                   }
                 },
                 child: Card(
-                  color: isSelected ? Colors.amber : Colors.grey[900],
+                  color: isSelected ? Colors.amber : AppColors.darkRail,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -404,7 +398,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
-                          fontFamily: 'CascadiaCode',
                           color: isSelected ? Colors.black : Colors.white70,
                         ),
                       ),
@@ -448,7 +441,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
               AppLocalizations.of(context)!.accountStorageLogFileTitle + sizeLabel,
               style: const TextStyle(
                 fontSize: 20,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70,
               ),
@@ -473,7 +465,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[900],
+                color: AppColors.darkRail,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.amber.withOpacity(0.3)),
               ),
@@ -490,7 +482,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                       logFilePath,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontFamily: 'CascadiaCode',
                         color: Colors.amber,
                         decoration: TextDecoration.underline,
                       ),
@@ -511,7 +502,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             AppLocalizations.of(context)!.accountStorageLogFileHelp,
             style: const TextStyle(
               fontSize: 16,
-              fontFamily: 'CascadiaCode',
               color: Colors.white60,
             ),
           ),
@@ -519,7 +509,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[900],
+              color: AppColors.darkRail,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.red.withOpacity(0.3)),
             ),
@@ -536,7 +526,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                     AppLocalizations.of(context)!.accountStorageLogFileNotAvailable,
                     style: const TextStyle(
                       fontSize: 16,
-                      fontFamily: 'CascadiaCode',
                       color: Colors.red,
                     ),
                   ),
@@ -549,7 +538,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             AppLocalizations.of(context)!.accountStorageLogFileInitError,
             style: const TextStyle(
               fontSize: 16,
-              fontFamily: 'CascadiaCode',
               color: Colors.white60,
             ),
           ),
@@ -576,7 +564,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
             title,
             style: const TextStyle(
               fontSize: 20,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.normal,
               color: Colors.white70,
             ),
@@ -584,7 +571,7 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
         ),
         DropdownButton<String>(
           value: effectiveValue,
-          dropdownColor: Colors.grey[850],
+          dropdownColor: AppColors.darkCard,
           items: options.entries
               .map(
                 (e) => DropdownMenuItem<String>(
@@ -594,7 +581,6 @@ Widget _buildSliderWithButtons(BuildContext context, String label, double value,
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 20,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                     ),
                   ),

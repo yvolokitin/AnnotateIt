@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class PreLabelCancelConfirmationDialog extends StatelessWidget {
   const PreLabelCancelConfirmationDialog({super.key});
@@ -17,10 +18,10 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.redAccent, width: 1),
+        side: const BorderSide(color: AppColors.accent, width: 1),
       ),
       titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
@@ -28,13 +29,12 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.warning_outlined, size: 32, color: Colors.redAccent),
+              const Icon(Icons.warning_outlined, size: 32, color: AppColors.accent),
               const SizedBox(width: 12),
               Text(
                 'Cancel pre-labeling?',
                 style: TextStyle(
-                  color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: screenWidth > 700 ? 24 : 20,
                 ),
@@ -42,7 +42,7 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.redAccent),
+            icon: const Icon(Icons.close, color: AppColors.accent),
             tooltip: 'Close',
             onPressed: () => Navigator.pop(context, false),
           ),
@@ -53,7 +53,6 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
         'Scanning is in progress. Do you want to stop and close the dialog?',
         style: TextStyle(
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
           fontSize: screenWidth > 700 ? 16 : 14,
         ),
       ),
@@ -69,7 +68,6 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
             'Continue',
             style: TextStyle(
               color: Colors.white54,
-              fontFamily: 'CascadiaCode',
               fontSize: screenWidth > 700 ? 16 : 14,
             ),
           ),
@@ -87,7 +85,6 @@ class PreLabelCancelConfirmationDialog extends StatelessWidget {
             'Stop and Close',
             style: TextStyle(
               color: Colors.white,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: screenWidth > 700 ? 16 : 14,
             ),

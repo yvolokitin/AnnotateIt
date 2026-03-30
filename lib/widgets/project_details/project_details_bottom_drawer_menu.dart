@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsBottomDrawerMenu extends StatelessWidget {
   final int selectedIndex;
@@ -16,7 +17,7 @@ class ProjectDetailsBottomDrawerMenu extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     Widget boxedIcon(IconData iconData, {bool active = false}) {
-      final Color iconColor = active ? Colors.red : Colors.white70;
+      final Color iconColor = active ? AppColors.accent : Colors.white70;
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
@@ -29,7 +30,7 @@ class ProjectDetailsBottomDrawerMenu extends StatelessWidget {
       currentIndex: selectedIndex,
       onTap: onItemSelected,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.red,
+      selectedItemColor: AppColors.accent,
       unselectedItemColor: Colors.white70,
       backgroundColor: Colors.transparent,
       iconSize: 28,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class StepProjectTypeSelection extends StatefulWidget {
   final String projectType;
@@ -70,10 +71,10 @@ class StepProjectTypeSelectionState extends State<StepProjectTypeSelection> {
                             width: cardSize,
                             height: cardSize,
                             decoration: BoxDecoration(
-                              color: Colors.grey[800],
+                              color: AppColors.darkSurface,
                               borderRadius: BorderRadius.circular(12),
                               border: isSelected
-                                  ? Border.all(color: Colors.redAccent, width: 3)
+                                  ? Border.all(color: AppColors.accent, width: 3)
                                   : null,
                               boxShadow: const [
                                 BoxShadow(
@@ -105,7 +106,6 @@ class StepProjectTypeSelectionState extends State<StepProjectTypeSelection> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontFamily: 'CascadiaCode',
                                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                           ),
                                         ),

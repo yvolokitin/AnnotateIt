@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import '../../utils/platform_utils.dart';
 import '../../gen_l10n/app_localizations.dart';
 
@@ -199,7 +200,6 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'CascadiaCode',
                     fontSize: 12,
                   ),
                 ),
@@ -266,7 +266,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
                         child: Container(
                           width: 24,
                           height: 2,
-                          color: Colors.redAccent,
+                          color: AppColors.accent,
                         ),
                       ),
                     ],

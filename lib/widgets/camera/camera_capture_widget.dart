@@ -153,7 +153,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.darkSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -170,7 +170,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                     'Windows Camera',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.info,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: (screenWidth > 1200) ? 26 : 20,
                     ),
@@ -188,7 +187,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       'We will open the native Windows Camera app. After taking a photo, save it and return here to select it.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.muted,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.normal,
                         fontSize: (screenWidth > 1200) ? 24 : 20,
                       ),
@@ -215,7 +213,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -226,7 +224,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.muted,
                           fontWeight: FontWeight.normal,
-                          fontFamily: 'CascadiaCode',
                           fontSize: (screenWidth > 1200) ? 22 : 20,
                         ),
                       ),
@@ -235,7 +232,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -249,7 +246,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                             l10n.buttonContinue,
                             style: TextStyle(
                               color: Colors.white,
-                              fontFamily: 'CascadiaCode',
                               fontWeight: FontWeight.bold,
                               fontSize: (screenWidth > 1200) ? 22 : 20,
                             ),
@@ -285,7 +281,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
               final screenWidth = MediaQuery.of(context).size.width;
               final l10n = AppLocalizations.of(context)!;
               return AlertDialog(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -302,7 +298,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       'Select Your Photo',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.info,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.bold,
                         fontSize: (screenWidth > 1200) ? 26 : 20,
                       ),
@@ -315,7 +310,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                     'After taking and saving your photo with the Windows Camera app, click Continue to select the saved photo.',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.muted,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                       fontSize: (screenWidth > 1200) ? 24 : 20,
                     ),
@@ -327,7 +321,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -338,7 +332,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.muted,
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'CascadiaCode',
                             fontSize: (screenWidth > 1200) ? 22 : 20,
                           ),
                         ),
@@ -347,7 +340,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -361,7 +354,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                               l10n.buttonContinue,
                               style: TextStyle(
                                 color: Colors.white,
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.bold,
                                 fontSize: (screenWidth > 1200) ? 22 : 20,
                               ),
@@ -389,7 +381,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             builder: (context) {
               final screenWidth = MediaQuery.of(context).size.width;
               return AlertDialog(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -406,7 +398,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       'Camera Error',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.info,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.bold,
                         fontSize: (screenWidth > 1200) ? 26 : 20,
                       ),
@@ -423,7 +414,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                         'Could not launch Windows Camera app: ${e.toString().split('\n')[0]}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.muted,
-                          fontFamily: 'CascadiaCode',
                           fontWeight: FontWeight.normal,
                           fontSize: (screenWidth > 1200) ? 24 : 20,
                         ),
@@ -442,7 +432,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -453,7 +443,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.muted,
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'CascadiaCode',
                             fontSize: (screenWidth > 1200) ? 22 : 20,
                           ),
                         ),
@@ -462,7 +451,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -476,7 +465,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                               'Continue with Gallery',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.bold,
                                 fontSize: (screenWidth > 1200) ? 22 : 20,
                               ),
@@ -556,7 +544,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[800],
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -573,7 +561,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
               'Camera Error',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.info,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 fontSize: (screenWidth > 1200) ? 26 : 20,
               ),
@@ -586,7 +573,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             message,
             style: TextStyle(
               color: Theme.of(context).colorScheme.muted,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.normal,
               fontSize: (screenWidth > 1200) ? 24 : 20,
             ),
@@ -601,7 +587,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                   widget.onCancel();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -612,7 +598,6 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.muted,
                     fontWeight: FontWeight.normal,
-                    fontFamily: 'CascadiaCode',
                     fontSize: (screenWidth > 1200) ? 22 : 20,
                   ),
                 ),
@@ -796,7 +781,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                   width: 400,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[850],
+                    color: AppColors.darkCard,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Column(

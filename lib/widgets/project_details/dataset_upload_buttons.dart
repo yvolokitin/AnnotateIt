@@ -19,6 +19,7 @@ import '../dialogs/ffmpeg_check_dialog.dart';
 import '../../services/video_frame_extractor.dart';
 import '../../services/media_metadata_service.dart';
 import '../../services/photo_picker_service.dart';
+import '../../utils/theme.dart';
 
 class DatasetUploadButtons extends StatefulWidget {
   final Project project;
@@ -554,7 +555,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -571,7 +572,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       'Import complete',
                       style: TextStyle(
                         color: Colors.orangeAccent,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
@@ -592,7 +592,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                           ' and added to dataset. (via FFmpeg)',
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                   ],
@@ -603,7 +602,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 12,
@@ -616,7 +615,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                           'Close',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                       ),
@@ -640,7 +638,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           builder: (ctx) {
             final screenWidth = MediaQuery.of(ctx).size.width;
             return AlertDialog(
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.darkSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -657,7 +655,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     'Video import',
                     style: TextStyle(
                       color: Colors.orangeAccent,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
@@ -675,7 +672,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                   SizedBox(height: 10),
@@ -684,7 +680,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                 ],
@@ -695,7 +690,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -708,7 +703,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         'Cancel',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -716,7 +710,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(ctx).pop(true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -733,7 +727,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         'Continue',
                         style: TextStyle(
                           color: Colors.white,
-                          fontFamily: 'CascadiaCode',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1054,7 +1047,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -1071,7 +1064,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       'Import not completed',
                       style: TextStyle(
                         color: Colors.orangeAccent,
-                        fontFamily: 'CascadiaCode',
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
@@ -1091,7 +1083,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ],
@@ -1103,7 +1094,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                       ElevatedButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: AppColors.darkSurface,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 12,
@@ -1116,7 +1107,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                           'Close',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                       ),
@@ -1208,7 +1198,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
           context: context,
           builder: (ctx) {
             return AlertDialog(
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.darkSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -1225,7 +1215,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     'Import complete',
                     style: TextStyle(
                       color: Colors.orangeAccent,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
@@ -1249,7 +1238,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                             : ' (via video_thumbnail)'),
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                 ],
@@ -1260,7 +1248,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -1273,7 +1261,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         'Close',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ),
@@ -1498,7 +1485,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: smallScreen ? 18 : 22,
-                fontFamily: 'CascadiaCode',
               ),
             ),
           ],
@@ -1511,7 +1497,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: smallScreen ? 18 : 22,
-                fontFamily: 'CascadiaCode',
               ),
             ),
             SizedBox(width: smallScreen ? 10 : 20),
@@ -1551,7 +1536,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             const SizedBox(width: 20),
             DropdownButton<int>(
               value: _currentItemsPerPage,
-              dropdownColor: Colors.grey[900],
+              dropdownColor: AppColors.darkRail,
               style: const TextStyle(color: Colors.white, fontSize: 16),
               iconEnabledColor: Colors.white,
               underline: Container(height: 0),
@@ -1564,7 +1549,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     );
@@ -1585,7 +1569,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             context,
             buttonName: l10n.uploadMedia,
             buttonIcon: Icons.add_to_photos,
-            borderColor: Colors.red,
+            borderColor: AppColors.accent,
             screenWidth: screenWidth,
             smallScreen: smallScreen,
             onPressed: () async {
@@ -1696,7 +1680,6 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
               color: buttonOnPressed == null ? Colors.grey : Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),

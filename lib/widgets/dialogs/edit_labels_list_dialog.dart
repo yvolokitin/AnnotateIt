@@ -10,6 +10,7 @@ import '../../session/user_session.dart';
 
 import 'alert_error_dialog.dart';
 import 'no_labels_dialog.dart';
+import '../../utils/theme.dart';
 
 class EditLabelsListDialog extends StatefulWidget {
   final int projectId;
@@ -154,7 +155,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[800],
+                                  color: AppColors.darkSurface,
                                 ),
                                 child: SizedBox(
                                   height: smallScreen ? 38 : 48,
@@ -202,7 +203,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           height: smallScreen ? 32 : 42,
                                           child: TextField(
                                             controller: controller,
-                                            cursorColor: Colors.redAccent,
+                                            cursorColor: AppColors.accent,
                                             enabled: isEditing,
                                             onSubmitted: (value) {
                                               final newName = value.trim();
@@ -227,7 +228,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                             style: TextStyle(
                                               fontSize: smallScreen ? 16 : 20,
                                               color: Colors.white,
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: label.isDefault ? FontWeight.bold : FontWeight.normal,
                                             ),
                                             decoration: InputDecoration(
@@ -269,7 +269,7 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                         Theme(
                                           data: Theme.of(context).copyWith(
                                           popupMenuTheme: PopupMenuThemeData(
-                                          color: Colors.grey[800],
+                                          color: AppColors.darkSurface,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color: Colors.white70,
@@ -280,7 +280,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                                           textStyle: TextStyle(
                                             fontSize: screenWidth>1800 ? 22 : smallScreen ? 18 : 14,
                                             fontWeight: FontWeight.normal,
-                                            fontFamily: 'CascadiaCode',
                                             ),
                                           ),
                                         ),
@@ -537,7 +536,6 @@ class _EditLabelsListDialogState extends State<EditLabelsListDialog> {
                         color: Colors.white70,
                         fontSize: screenWidth > 1200 ? 18 : 16,
                         fontWeight: FontWeight.normal,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                   ),

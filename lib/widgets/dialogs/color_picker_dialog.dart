@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../utils/color_utils.dart' as app_colors;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '../../utils/theme.dart';
 
 class ColorPickerDialog extends StatefulWidget {
   final String initialColor;
@@ -30,7 +31,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.white24, width: 1),
@@ -46,7 +47,6 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 l10n.colorPickerTitle,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -76,7 +76,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               alignment: Alignment.centerLeft,
               child: Text(
                 l10n.colorPickerBasicColors,
-                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+                style: const TextStyle(color: Colors.white70),
               ),
             ),
             const SizedBox(height: 15),
@@ -121,7 +121,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             l10n.buttonCancel,
-            style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
+            style: const TextStyle(color: Colors.white70),
           ),
         ),
         ElevatedButton(
@@ -130,13 +130,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.accent,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Text(
             l10n.buttonConfirm,
-            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.white,  fontWeight: FontWeight.bold),
           ),
         ),
       ],

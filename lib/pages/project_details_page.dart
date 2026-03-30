@@ -8,6 +8,7 @@ import '../widgets/project_details/project_details_content_switcher.dart';
 import '../widgets/project_details/project_details_bottom_drawer_menu.dart';
 
 import '../gen_l10n/app_localizations.dart';
+import '../utils/theme.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   final Project project;
@@ -91,7 +92,7 @@ class ProjectDetailsPageState extends State<ProjectDetailsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.grey[850],
+        backgroundColor: AppColors.darkCard,
         bottomNavigationBar: screenWidth < 800
             ? ProjectDetailsBottomDrawerMenu(
                 selectedIndex: selectedIndex,

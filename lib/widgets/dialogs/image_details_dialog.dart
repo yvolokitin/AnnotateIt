@@ -9,6 +9,7 @@ import '../../data/user_database.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
 import '../../models/media_item.dart';
+import '../../utils/theme.dart';
 
 class ImageDetailsDialog extends StatefulWidget {
   final AnnotatedLabeledMedia media;
@@ -68,7 +69,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
     final isFullscreen = isMobile || isTablet;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -89,7 +90,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                 l10n.dialogImageDetailsTitle,
                 style: TextStyle(
                   color: Colors.orangeAccent,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -121,7 +121,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
                         media.filePath,
                         style: const TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -214,7 +213,7 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         ElevatedButton(
           onPressed: () => Navigator.pop(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[800],
+            backgroundColor: AppColors.darkSurface,
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -225,7 +224,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
             l10n.buttonClose,
             style: TextStyle(
               color: Colors.orangeAccent,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),
@@ -309,7 +307,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         "No annotations",
         style: TextStyle(
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
           fontSize: 18,
         ),
       );
@@ -321,7 +318,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
           "Annotations:",
           style: TextStyle(
             color: Colors.white,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -341,7 +337,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               "$type / $createdAt",
               style: const TextStyle(
                 color: Colors.white,
-                fontFamily: 'CascadiaCode',
                 fontSize: 16,
               ),
             ),
@@ -362,7 +357,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'CascadiaCode',
                 fontSize: 18,
               ),
             ),
@@ -370,7 +364,6 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
               text: value,
               style: const TextStyle(
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
                 fontSize: 18,
               ),
             ),

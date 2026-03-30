@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsDrawerItem extends StatelessWidget {
   final IconData icon;
@@ -20,7 +21,7 @@ class ProjectDetailsDrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color baseRed = Colors.red;
+    final Color baseRed = AppColors.accent;
     final Color lighterRed = baseRed.withAlpha(26); // 10% of 255
     
     return Stack(
@@ -41,7 +42,7 @@ class ProjectDetailsDrawerItem extends StatelessWidget {
                   Icon(
                     icon,
                     size: 28,
-                    color: isSelected ? Colors.red : null,
+                    color: isSelected ? AppColors.accent : null,
                   ),
                   if (fullMode) SizedBox(width: 16),
                   if (fullMode)
@@ -51,7 +52,6 @@ class ProjectDetailsDrawerItem extends StatelessWidget {
                         fontSize: textSize,
                         color: isSelected ? Colors.white : Colors.white,
                         fontWeight: FontWeight.normal,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                 ],
@@ -68,7 +68,7 @@ class ProjectDetailsDrawerItem extends StatelessWidget {
             bottom: 0,
             child: Container(
               width: 10,
-              color: Colors.red,
+              color: AppColors.accent,
             ),
           ),
       ],

@@ -78,7 +78,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[850],
+          backgroundColor: AppColors.darkCard,
           shape: (screenWidth > 1600)
               ? RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -142,7 +142,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
               style: TextStyle(
                 fontSize: isSmall ? 20 : (screenWidth >= 1600 ? 26 : 22),
                 fontWeight: FontWeight.bold,
-                fontFamily: 'CascadiaCode',
                 color: Theme.of(context).colorScheme.success,
               ),
             ),
@@ -155,7 +154,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             style: TextStyle(
               fontSize: screenWidth >= 1600 ? 22 : (screenWidth > 660) ? 18 : 12,
               fontWeight: FontWeight.normal,
-              fontFamily: 'CascadiaCode',
               color: Theme.of(context).colorScheme.muted,
             ),
           ),
@@ -175,7 +173,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             style: TextStyle(
               fontSize: isSmall ? 16 : (screenWidth > 1200 ? 22 : 18),
               fontWeight: FontWeight.bold,
-              fontFamily: 'CascadiaCode',
               color: Colors.white,
             ),
           ),
@@ -197,7 +194,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             style: TextStyle(
               fontSize: isSmall ? 16 : (screenWidth > 1200 ? 22 : 18),
               fontWeight: FontWeight.bold,
-              fontFamily: 'CascadiaCode',
               color: Colors.white,
             ),
           ),
@@ -208,7 +204,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
               'Merge all datasets into one images folder',
               style: TextStyle(
                 fontSize: isSmall ? 14 : (screenWidth > 1200 ? 20 : 16),
-                fontFamily: 'CascadiaCode',
                 color: Colors.white,
               ),
             ),
@@ -217,7 +212,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                     'All datasets will be placed in separate folders by dataset name',
                     style: TextStyle(
                       fontSize: isSmall ? 11 : (screenWidth > 1200 ? 14 : 12),
-                      fontFamily: 'CascadiaCode',
                       color: Theme.of(context).colorScheme.muted,
                     ),
                   )
@@ -262,7 +256,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         height: isSmall ? 130 : 160,
         padding: EdgeInsets.all(isSmall ? 12 : 16),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.success.withOpacity(0.2) : Colors.grey[800],
+          color: isSelected ? Theme.of(context).colorScheme.success.withOpacity(0.2) : AppColors.darkSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? Theme.of(context).colorScheme.success : Colors.transparent,
@@ -289,7 +283,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                     style: TextStyle(
                       fontSize: isSmall ? 16 : 20,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
                       color: isSelected ? Theme.of(context).colorScheme.success : Colors.white,
                     ),
                   ),
@@ -304,7 +297,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: isSmall ? 12 : 15,
-                  fontFamily: 'CascadiaCode',
                   color: Theme.of(context).colorScheme.muted,
                 ),
               ),
@@ -327,7 +319,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         title,
         style: TextStyle(
           fontSize: isSmall ? 14 : (screenWidth > 1200 ? 20 : 16),
-          fontFamily: 'CascadiaCode',
           color: Colors.white,
         ),
       ),
@@ -349,7 +340,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             l10n.buttonCancel,
             style: TextStyle(
               color: Theme.of(context).colorScheme.muted,
-              fontFamily: 'CascadiaCode',
               fontSize: isSmall ? 16 : null,
             ),
           ),
@@ -357,7 +347,7 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         ElevatedButton(
           onPressed: _isExporting ? null : _handleExport,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[850],
+            backgroundColor: AppColors.darkCard,
             padding: EdgeInsets.symmetric(horizontal: isSmall ? 12 : 16, vertical: isSmall ? 10 : 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
@@ -368,7 +358,6 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
             'Export',
             style: TextStyle(
               color: Colors.white,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: isSmall ? 18 : 20,
             ),

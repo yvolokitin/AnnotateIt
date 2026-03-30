@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class AnnotationsSettingsDialog extends StatefulWidget {
   final double initialOpacity;
@@ -66,7 +67,7 @@ class _AnnotationsSettingsDialogState extends State<AnnotationsSettingsDialog> {
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[800],
+          backgroundColor: AppColors.darkSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -105,7 +106,6 @@ class _AnnotationsSettingsDialogState extends State<AnnotationsSettingsDialog> {
               style: TextStyle(
                 color: Colors.orangeAccent,
                 fontSize: 24,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -173,7 +173,6 @@ class _AnnotationsSettingsDialogState extends State<AnnotationsSettingsDialog> {
           '$label: ${labelFormatter != null ? labelFormatter(value) : value.toStringAsFixed(1)}',
           style: const TextStyle(
             color: Colors.white70,
-            fontFamily: 'CascadiaCode',
             fontSize: 20,
           ),
         ),
@@ -205,7 +204,6 @@ class _AnnotationsSettingsDialogState extends State<AnnotationsSettingsDialog> {
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 22,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),
@@ -227,7 +225,6 @@ class _AnnotationsSettingsDialogState extends State<AnnotationsSettingsDialog> {
             style: const TextStyle(
               color: Colors.orangeAccent,
               fontWeight: FontWeight.bold,
-              fontFamily: 'CascadiaCode',
               fontSize: 22,
             ),
           ),

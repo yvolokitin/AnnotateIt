@@ -304,7 +304,7 @@ class ErrorApp extends StatelessWidget {
       title: "AnnotateIt - Error",
       theme: ThemeData.dark(),
       home: Scaffold(
-        backgroundColor: Colors.red.shade900,
+        backgroundColor: AppColors.darkBg,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(32.0),

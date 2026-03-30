@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class AlertErrorDialog extends StatelessWidget {
   final String title;
@@ -48,7 +49,7 @@ class AlertErrorDialog extends StatelessWidget {
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[800],
+          backgroundColor: AppColors.darkSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -87,7 +88,6 @@ class AlertErrorDialog extends StatelessWidget {
               title,
               style: TextStyle(
                 color: Colors.orangeAccent,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 fontSize: fontSize,
               ),
@@ -112,7 +112,6 @@ class AlertErrorDialog extends StatelessWidget {
             message,
             style: TextStyle(
               color: Colors.white70,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.normal,
               fontSize: fontSize,
             ),
@@ -123,7 +122,6 @@ class AlertErrorDialog extends StatelessWidget {
               tips!,
               style: TextStyle(
                 color: Colors.white60,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: fontSize,
               ),
@@ -151,7 +149,6 @@ class AlertErrorDialog extends StatelessWidget {
           l10n.buttonClose,
           style: TextStyle(
             color: Colors.orangeAccent,
-            fontFamily: 'CascadiaCode',
             fontWeight: FontWeight.bold,
             fontSize: fontSize,
           ),

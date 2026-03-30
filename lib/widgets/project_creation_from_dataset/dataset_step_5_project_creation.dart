@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 typedef ProgressCallback = void Function(int current, int total);
 
@@ -30,12 +31,12 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
         children: [
           hasProgress
               ? CircularProgressIndicator(
-                  color: Colors.redAccent,
+                  color: AppColors.accent,
                   strokeWidth: 5,
                   value: progress.clamp(0.0, 1.0),
                 )
               : const CircularProgressIndicator(
-                  color: Colors.redAccent,
+                  color: AppColors.accent,
                   strokeWidth: 5,
                 ),
           const SizedBox(height: 24),
@@ -46,7 +47,6 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
-              fontFamily: 'CascadiaCode',
             ),
           ),
           const SizedBox(height: 12),
@@ -58,7 +58,6 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
             style: TextStyle(
               color: Colors.white70,
               fontSize: 14,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ],
@@ -69,14 +68,13 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.accent),
             const SizedBox(height: 24),
             const Text(
               'Project Creation Failed',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -87,7 +85,6 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
-                fontFamily: 'CascadiaCode',
               ),
             ),
             const SizedBox(height: 24),
@@ -97,15 +94,14 @@ class _StepDatasetProjectCreationState extends State<StepDatasetProjectCreation>
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
-                fontFamily: 'CascadiaCode',
               ),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               icon: const Icon(Icons.close, color: Colors.black),
-              label: const Text('Close', style: TextStyle(color: Colors.black, fontFamily: 'CascadiaCode',)),
+              label: const Text('Close', style: TextStyle(color: Colors.black, )),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
+                backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),

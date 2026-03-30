@@ -65,7 +65,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.grey[850],
+          backgroundColor: AppColors.darkCard,
           shape: (screenWidth > 1600)
               ? RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -100,7 +100,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
                                     l10n.changeProjectTypeTitle,
                                     style: TextStyle(
                                       fontSize: isLargeScreen ? 26 : 22,
-                                      fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).colorScheme.warning,
                                     ),
@@ -117,7 +116,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
                                         : l10n.changeProjectTypeStepTwoSubtitle,
                                       style: TextStyle(
                                         fontSize: screenWidth > 1200 ? 22 : 18,
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
                                         color: Theme.of(context).colorScheme.muted,
                                       ),
@@ -226,7 +224,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
             l10n.buttonCancel,
             style: TextStyle(
               color: Theme.of(context).colorScheme.muted,
-              fontFamily: 'CascadiaCode',
             ),
           ),
         ),
@@ -239,7 +236,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
                   l10n.buttonBack,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.muted,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ),
@@ -247,7 +243,7 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
             ElevatedButton(
               onPressed: currentStep == 3 ? null : _handleStepButtonPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[850],
+                backgroundColor: AppColors.darkCard,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -258,7 +254,6 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
                 currentStep == 1 ? l10n.buttonNext : l10n.buttonConfirm,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),

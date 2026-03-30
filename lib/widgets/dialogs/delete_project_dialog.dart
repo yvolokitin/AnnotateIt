@@ -4,6 +4,7 @@ import '../../gen_l10n/app_localizations.dart';
 
 import '../../models/project.dart';
 import '../../utils/project_utils.dart';
+import '../../utils/theme.dart';
 
 class DeleteProjectDialog extends StatefulWidget {
   final Project project;
@@ -99,10 +100,10 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
     if (screenWidth < 800) {
       return Dialog(
         insetPadding: EdgeInsets.zero,
-        backgroundColor: Colors.grey[800],
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
-          side: const BorderSide(color: Colors.redAccent, width: 1),
+          side: const BorderSide(color: AppColors.accent, width: 1),
         ),
         child: SafeArea(
           child: LayoutBuilder(
@@ -123,14 +124,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                               const Icon(
                                 Icons.delete_sweep_outlined,
                                 size: 32,
-                                color: Colors.redAccent,
+                                color: AppColors.accent,
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 l10n.deleteProjectTitle,
                                 style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontFamily: 'CascadiaCode',
+                                  color: AppColors.accent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth>700 ? 24 : 20,
                                 ),
@@ -139,7 +139,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                           ),
                           if (!_isDeleting)
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.redAccent),
+                              icon: const Icon(Icons.close, color: AppColors.accent),
                               tooltip: l10n.buttonClose,
                               onPressed: () => Navigator.pop(context),
                             ),
@@ -147,7 +147,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     const SizedBox(height: 12),
                     Expanded(
                       child: SingleChildScrollView(
@@ -161,7 +161,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                     LinearProgressIndicator(
                                       value: _progress,
                                       backgroundColor: Colors.grey[700],
-                                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
                                       minHeight: 8,
                                     ),
                                     const SizedBox(height: 20),
@@ -169,7 +169,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                       _currentStep,
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: screenWidth>700 ? 20 : 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -180,7 +179,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                       '${(_progress * 100).toInt()}%',
                                       style: TextStyle(
                                         color: Colors.white54,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: screenWidth>700 ? 18 : 14,
                                       ),
                                     ),
@@ -190,7 +188,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: Colors.red.withOpacity(0.1),
-                                          border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                                          border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: Row(
@@ -202,7 +200,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                                 _errorMessage!,
                                                 style: TextStyle(
                                                   color: Colors.orange,
-                                                  fontFamily: 'CascadiaCode',
                                                   fontSize: screenWidth>700 ? 16 : 12,
                                                 ),
                                               ),
@@ -216,18 +213,17 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                       ElevatedButton(
                                         onPressed: () => Navigator.of(context).pop(),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.grey[800],
+                                          backgroundColor: AppColors.darkSurface,
                                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),
-                                            side: const BorderSide(color: Colors.redAccent, width: 1),
+                                            side: const BorderSide(color: AppColors.accent, width: 1),
                                           ),
                                         ),
                                         child: Text(
                                           'Close',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontFamily: 'CascadiaCode',
                                             fontSize: screenWidth>700 ? 16 : 14,
                                           ),
                                         ),
@@ -240,7 +236,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                     Text(
                                       l10n.deleteProjectConfirm(widget.project.name),
                                       style: TextStyle(
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
                                         color: Colors.white70,
                                         fontSize: screenWidth>700 ? 22 : 18,
@@ -256,7 +251,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                           child: Text(
                                             l10n.deleteProjectInfoLine(creationDate, _labelCount),
                                             style: TextStyle(
-                                              fontFamily: 'CascadiaCode',
                                               fontWeight: FontWeight.normal,
                                               color: Colors.white54,
                                               fontSize: screenWidth>700 ? 22 : 18,
@@ -272,14 +266,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                       title: Text(
                                         l10n.deleteProjectOptionDeleteFromDisk,
                                         style: TextStyle(
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.normal,
                                           color: Colors.white,
                                           fontSize: screenWidth>700 ? 22 : 18,
                                         ),
                                       ),
                                       controlAffinity: ListTileControlAffinity.leading,
-                                      activeColor: Colors.redAccent,
+                                      activeColor: AppColors.accent,
                                     ),
                                     CheckboxListTile(
                                       value: _dontAskAgain,
@@ -288,7 +281,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                         l10n.deleteProjectOptionDontAskAgain,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.normal,
                                           fontSize: screenWidth>700 ? 22 : 18,
                                         ),
@@ -301,7 +293,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                         ),
                       ),
                     ),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     if (!_isDeleting)
                       Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -311,7 +303,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -322,7 +314,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                 l10n.buttonCancel,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth>700 ? 22 : 18,
                                 ),
@@ -332,7 +323,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             ElevatedButton(
                               onPressed: _handleDelete,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -343,7 +334,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                 l10n.buttonDelete,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: screenWidth>700 ? 22 : 18,
                                 ),
@@ -362,10 +352,10 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.redAccent, width: 1),
+        side: const BorderSide(color: AppColors.accent, width: 1),
       ),
       titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
@@ -376,14 +366,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
               const Icon(
                 Icons.delete_sweep_outlined,
                 size: 32,
-                color: Colors.redAccent,
+                color: AppColors.accent,
               ),
               const SizedBox(width: 12),
               Text(
                 l10n.deleteProjectTitle,
                 style: TextStyle(
-                  color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: screenWidth>700 ? 24 : 20,
                 ),
@@ -392,7 +381,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
           ),
           if (!_isDeleting)
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.redAccent),
+              icon: const Icon(Icons.close, color: AppColors.accent),
               tooltip: l10n.buttonClose,
               onPressed: () => Navigator.pop(context),
             ),
@@ -406,7 +395,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: _isDeleting
@@ -418,7 +407,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                           LinearProgressIndicator(
                             value: _progress,
                             backgroundColor: Colors.grey[700],
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
                             minHeight: 8,
                           ),
                           const SizedBox(height: 20),
@@ -427,7 +416,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             _currentStep,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: screenWidth>700 ? 20 : 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -439,7 +427,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             '${(_progress * 100).toInt()}%',
                             style: TextStyle(
                               color: Colors.white54,
-                              fontFamily: 'CascadiaCode',
                               fontSize: screenWidth>700 ? 18 : 14,
                             ),
                           ),
@@ -450,7 +437,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.red.withOpacity(0.1),
-                                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -462,7 +449,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                       _errorMessage!,
                                       style: TextStyle(
                                         color: Colors.orange,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: screenWidth>700 ? 16 : 12,
                                       ),
                                     ),
@@ -477,18 +463,17 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             ElevatedButton(
                               onPressed: () => Navigator.of(context).pop(),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(color: Colors.redAccent, width: 1),
+                                  side: const BorderSide(color: AppColors.accent, width: 1),
                                 ),
                               ),
                               child: Text(
                                 'Close',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontSize: screenWidth>700 ? 16 : 14,
                                 ),
                               ),
@@ -501,7 +486,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                           Text(
                             l10n.deleteProjectConfirm(widget.project.name),
                             style: TextStyle(
-                              fontFamily: 'CascadiaCode',
                               fontWeight: FontWeight.normal,
                               color: Colors.white70,
                               fontSize: screenWidth>700 ? 22 : 18,
@@ -519,7 +503,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                                   l10n.deleteProjectInfoLine(
                                       creationDate, _labelCount),
                                   style: TextStyle(
-                                    fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.normal,
                                     color: Colors.white54,
                                     fontSize: screenWidth>700 ? 22 : 18,
@@ -536,14 +519,13 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                             title: Text(
                               l10n.deleteProjectOptionDeleteFromDisk,
                               style: TextStyle(
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.normal,
                                 color: Colors.white,
                                 fontSize: screenWidth>700 ? 22 : 18,
                               ),
                             ),
                             controlAffinity: ListTileControlAffinity.leading,
-                            activeColor: Colors.redAccent,
+                            activeColor: AppColors.accent,
                           ),
                           CheckboxListTile(
                             value: _dontAskAgain,
@@ -553,7 +535,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                               l10n.deleteProjectOptionDontAskAgain,
                               style: TextStyle(
                                 color: Colors.white,
-                                fontFamily: 'CascadiaCode',
                                 fontWeight: FontWeight.normal,
                                 fontSize: screenWidth>700 ? 22 : 18,
                               ),
@@ -564,7 +545,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                         ],
                       ),
               ),
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
             ],
           ),
         ),
@@ -575,7 +556,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -587,7 +568,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                   l10n.buttonCancel,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth>700 ? 22 : 18,
                   ),
@@ -596,7 +576,7 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
               ElevatedButton(
                 onPressed: _handleDelete,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -608,7 +588,6 @@ class _DeleteProjectDialogState extends State<DeleteProjectDialog> {
                   l10n.buttonDelete,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth>700 ? 22 : 18,
                   ),

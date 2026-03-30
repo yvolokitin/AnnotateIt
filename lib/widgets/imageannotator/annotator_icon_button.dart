@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class AnnotatorIconButton extends StatefulWidget {
   final VoidCallback onPressed;
@@ -39,7 +40,7 @@ class _AnnotatorIconButtonState extends State<AnnotatorIconButton> {
             height: widget.size,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: _hovered ? Colors.grey[850] : Colors.transparent,
+              color: _hovered ? AppColors.darkCard : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: widget.icon,

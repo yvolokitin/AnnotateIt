@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/notification.dart' as NotificationModel;
 import '../../data/notification_database.dart';
 import '../../utils/color_utils.dart';
+import '../../utils/theme.dart';
 
 class NotificationsDialog extends StatefulWidget {
   const NotificationsDialog({super.key});
@@ -141,7 +142,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
 
     return Dialog(
       insetPadding: EdgeInsets.zero,
-      backgroundColor: Colors.grey[850],
+      backgroundColor: AppColors.darkCard,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isMobile ? 0 : 8)),
       child: SizedBox(
         width: dialogWidth,
@@ -152,7 +153,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[800],
+                color: AppColors.darkSurface,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(8),
                   topRight: Radius.circular(8),
@@ -170,7 +171,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                         color: Colors.white,
                         fontSize: isMobile ? 18 : 20,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                   ),
@@ -261,7 +261,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                                 style: TextStyle(
                                   color: Colors.grey[400],
                                   fontSize: 18,
-                                  fontFamily: 'CascadiaCode',
                                 ),
                               ),
                             ],
@@ -282,7 +281,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[800],
+                  color: AppColors.darkSurface,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(8),
                     bottomRight: Radius.circular(8),
@@ -300,7 +299,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
-                              fontFamily: 'CascadiaCode',
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -316,7 +314,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
-                                  fontFamily: 'CascadiaCode',
                                 ),
                               ),
                               IconButton(
@@ -336,7 +333,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
-                              fontFamily: 'CascadiaCode',
                             ),
                           ),
                           Row(
@@ -350,7 +346,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
-                                  fontFamily: 'CascadiaCode',
                                 ),
                               ),
                               IconButton(
@@ -378,7 +373,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: notification.isRead ? Colors.grey[800] : Colors.red[900],
+      color: notification.isRead ? AppColors.darkSurface : Colors.red[900],
       child: InkWell(
         onTap: !notification.isRead ? () => _markAsRead(notification.id!) : null,
         borderRadius: BorderRadius.circular(4),
@@ -419,7 +414,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                             color: backgroundColor,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'CascadiaCode',
                           ),
                         ),
                       ),
@@ -439,7 +433,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                         style: TextStyle(
                           color: Colors.grey[400],
                           fontSize: 12,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
                     ],
@@ -450,7 +443,6 @@ class NotificationsDialogState extends State<NotificationsDialog> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
-                      fontFamily: 'CascadiaCode',
                     ),
                   ),
                 ],

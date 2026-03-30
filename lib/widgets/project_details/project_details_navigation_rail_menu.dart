@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsNavigationRailMenu extends StatelessWidget {
   final int selectedIndex;
@@ -18,15 +19,15 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
 
     return Container(
       width: screenWidth > 550 ? 70 : 60,
-      color: Colors.grey[800],
+      color: AppColors.darkSurface,
       child: NavigationRail(
         selectedIndex: selectedIndex,
         onDestinationSelected: onItemSelected,
-        selectedIconTheme: const IconThemeData(color: Colors.red),
-        selectedLabelTextStyle: const TextStyle(color: Colors.red, fontFamily: 'CascadiaCode',),
+        selectedIconTheme: const IconThemeData(color: AppColors.accent),
+        selectedLabelTextStyle: const TextStyle(color: AppColors.accent, ),
         unselectedIconTheme: const IconThemeData(color: Colors.white70),
-        unselectedLabelTextStyle: const TextStyle(color: Colors.white54, fontFamily: 'CascadiaCode',),
-        backgroundColor: Colors.grey[800],
+        unselectedLabelTextStyle: const TextStyle(color: Colors.white54, ),
+        backgroundColor: AppColors.darkSurface,
 
         destinations: [
           _buildDestination(0, Icons.wallpaper_rounded, l10n.userProfileMedia, screenWidth),
@@ -43,7 +44,7 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
         width: width > 550 ? 48 : 44,
         height: width > 550 ? 48 : 44,
         decoration: BoxDecoration(
-          color: selectedIndex == index ? Colors.grey[850] : Colors.transparent,
+          color: selectedIndex == index ? AppColors.darkCard : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(size: 28, icon),
@@ -52,7 +53,6 @@ class ProjectDetailsNavigationRailMenu extends StatelessWidget {
         label,
         style: TextStyle(
           color: Colors.white54,
-          fontFamily: 'CascadiaCode',
         ),
       ),
     );

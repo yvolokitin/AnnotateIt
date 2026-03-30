@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotated_labeled_media.dart';
+import '../../utils/theme.dart';
 
 class DuplicateImageDialog extends StatefulWidget {
   final AnnotatedLabeledMedia media;
@@ -25,7 +26,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 8, 0),
       contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
@@ -37,7 +38,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
             l10n.duplicateImage,
             style: const TextStyle(
               fontSize: 24,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               color: Colors.white
             ),
@@ -65,7 +65,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateWithAnnotations,
               style: const TextStyle(
                 fontSize: 22,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white
               ),
@@ -74,7 +73,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateWithAnnotationsHint,
               style: const TextStyle(
                 fontSize: 20,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70
               ),
@@ -89,7 +87,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateImageOnly,
               style: const TextStyle(
                 fontSize: 22,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white
               ),
@@ -98,7 +95,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.duplicateImageOnlyHint,
               style: const TextStyle(
                 fontSize: 20,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70
               ),
@@ -115,7 +111,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
               l10n.saveDuplicateChoiceAsDefault,
               style: const TextStyle(
                 fontSize: 16,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 color: Colors.white70,
               ),
@@ -128,7 +123,7 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[900],
+            backgroundColor: AppColors.darkRail,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
@@ -141,18 +136,17 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 22,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[900],
+            backgroundColor: AppColors.darkRail,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
-              side: const BorderSide(color: Colors.redAccent, width: 2),
+              side: const BorderSide(color: AppColors.accent, width: 2),
             ),
           ),
           onPressed: () {
@@ -164,7 +158,6 @@ class _DuplicateImageDialogState extends State<DuplicateImageDialog> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
             ),
           ),

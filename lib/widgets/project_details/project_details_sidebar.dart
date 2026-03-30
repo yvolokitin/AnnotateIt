@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../utils/date_utils.dart';
 import '../../models/project.dart';
 import '../dialogs/edit_project_name_dialog.dart';
+import '../../utils/theme.dart';
 
 class ProjectDetailsSidebar extends StatefulWidget {
   final Project project;
@@ -48,7 +49,7 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(25.0),
-      color: Colors.grey[850],
+      color: AppColors.darkCard,
       height: 400, // increased to fit all with spacing
       width: double.infinity,
       child: Column(
@@ -77,7 +78,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'CascadiaCode',
                         fontSize: 24,
                       ),
                     ),
@@ -130,7 +130,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.normal,
-              fontFamily: 'CascadiaCode',
               fontSize: 22,
             ),
             maxLines: 2,
@@ -143,7 +142,6 @@ class _ProjectDetailsSidebarState extends State<ProjectDetailsSidebar> {
             style: const TextStyle(
               color: Colors.white60,
               fontWeight: FontWeight.normal,
-              fontFamily: 'CascadiaCode',
               fontSize: 18,
             ),
           ),

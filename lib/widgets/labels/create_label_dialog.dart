@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/label.dart';
 import '../../utils/color_utils.dart';
 import '../dialogs/color_picker_dialog.dart';
+import '../../utils/theme.dart';
 
 /// Compact dialog for creating a single label (name + color).
 ///
@@ -86,7 +87,7 @@ class _CreateLabelDialogState extends State<CreateLabelDialog> {
   Widget build(BuildContext context) {
     final displayColor = colorFromHex(_color);
     return AlertDialog(
-      backgroundColor: Colors.grey[850],
+      backgroundColor: AppColors.darkCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.white24, width: 1),
@@ -99,7 +100,6 @@ class _CreateLabelDialogState extends State<CreateLabelDialog> {
             'Create Label',
             style: TextStyle(
               color: Colors.white,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
@@ -135,14 +135,13 @@ class _CreateLabelDialogState extends State<CreateLabelDialog> {
                     autofocus: true,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontFamily: 'CascadiaCode',
                       fontSize: 16,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Label name',
-                      hintStyle: TextStyle(color: Colors.grey[500], fontFamily: 'CascadiaCode'),
+                      hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
-                      fillColor: Colors.grey[800],
+                      fillColor: AppColors.darkSurface,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -154,7 +153,7 @@ class _CreateLabelDialogState extends State<CreateLabelDialog> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                        borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
                       ),
                     ),
                     onSubmitted: (_) => _submit(),
@@ -193,18 +192,18 @@ class _CreateLabelDialogState extends State<CreateLabelDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode')),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
         ),
         ElevatedButton(
           onPressed: _submitting ? null : _submit,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.accent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
           child: const Text(
             'Create',
-            style: TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white,  fontWeight: FontWeight.bold),
           ),
         ),
       ],

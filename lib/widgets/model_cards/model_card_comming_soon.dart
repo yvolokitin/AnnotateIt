@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class ModelCardCommingSoon extends StatelessWidget {
   final String id;
@@ -24,7 +25,7 @@ class ModelCardCommingSoon extends StatelessWidget {
     return Card(
       elevation: 3,
       clipBehavior: Clip.antiAlias,
-      color: Colors.grey[850],
+      color: AppColors.darkCard,
       shape: RoundedRectangleBorder(
         borderRadius: radius,
         side: BorderSide(

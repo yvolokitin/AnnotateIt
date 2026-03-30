@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/dataset.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class DatasetTabBar extends StatelessWidget {
   final List<Dataset> datasets;
@@ -21,8 +22,8 @@ class DatasetTabBar extends StatelessWidget {
     return TabBar(
       controller: controller,
       isScrollable: true,
-      indicatorColor: Colors.redAccent,
-      labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'CascadiaCode',),
+      indicatorColor: AppColors.accent,
+      labelStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, ),
       unselectedLabelColor: Colors.white60,
       tabs: List.generate(datasets.length, (i) {
         final dataset = datasets[i];
@@ -39,7 +40,6 @@ class DatasetTabBar extends StatelessWidget {
               Text(
                 dataset.name,
                 style: TextStyle(
-                  fontFamily: 'CascadiaCode',
                   fontSize: screenWidth > 1200 ? 22 : 18,
                   fontWeight: isDefault ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -64,7 +64,6 @@ class DatasetTabBar extends StatelessWidget {
                         l10n.rename,
                         style: TextStyle(
                           fontWeight: FontWeight.normal,
-                          fontFamily: 'CascadiaCode',
                           fontSize: screenWidth > 1200 ? 22 : 18,
                         ),
                       ),
@@ -76,7 +75,6 @@ class DatasetTabBar extends StatelessWidget {
                           l10n.setAsDefault,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'CascadiaCode',
                             fontSize: screenWidth > 1200 ? 22 : 18,
                           ),
                         ),
@@ -88,7 +86,6 @@ class DatasetTabBar extends StatelessWidget {
                           l10n.delete,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'CascadiaCode',
                             fontSize: screenWidth > 1200 ? 22 : 18,
                           ),
                         ),

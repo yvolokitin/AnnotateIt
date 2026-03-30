@@ -52,27 +52,24 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
     if (screenWidth < 800) {
       final titleStyle = TextStyle(
         color: Theme.of(context).colorScheme.info,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.bold,
         fontSize: 22,
       );
       final bodyStyle = TextStyle(
         color: Theme.of(context).colorScheme.muted,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.normal,
         fontSize: 18,
       );
       final inputTextStyle = TextStyle(
         color: Colors.white,
         fontSize: 18,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.normal,
       );
 
       return Dialog.fullscreen(
         child: SafeArea(
           child: Container(
-            color: Colors.grey[800],
+            color: AppColors.darkSurface,
             padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +131,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -145,7 +142,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.muted,
                           fontWeight: FontWeight.normal,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -154,7 +150,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                     ElevatedButton(
                       onPressed: _saveChanges,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -168,7 +164,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                             l10n.buttonSave,
                             style: TextStyle(
                               color: Colors.white,
-                              fontFamily: 'CascadiaCode',
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
                             ),
@@ -186,7 +181,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Theme.of(context).colorScheme.info, width: 1),
@@ -203,7 +198,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
             l10n.editProjectTitle,
             style: TextStyle(
               color: Theme.of(context).colorScheme.info,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
@@ -228,7 +222,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
               l10n.editProjectDescription,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.muted,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: (screenWidth > 1200) ? 24 : 20,
               ),
@@ -245,7 +238,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
                     color: Theme.of(context).colorScheme.muted,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: screenWidth > 1200 ? 22 : 18,
                   ),
@@ -266,7 +258,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: (screenWidth > 1200) ? 22 : 18,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -280,7 +271,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -291,7 +282,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.muted,
                   fontWeight: FontWeight.normal,
-                  fontFamily: 'CascadiaCode',
                   fontSize: (screenWidth > 1200) ? 22 : 20,
                 ),
               ),
@@ -302,7 +292,7 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
             ElevatedButton(
               onPressed: _saveChanges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -316,7 +306,6 @@ class EditProjectNameDialogState extends State<EditProjectNameDialog> {
                     l10n.buttonSave,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: (screenWidth > 1200) ? 22 : 20,
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class DatasetTaskTypeGrid extends StatelessWidget {
   final String? selectedTaskType;
@@ -49,8 +50,8 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
                   color: isSelected
-                    ? Colors.deepOrangeAccent
-                    : Colors.grey[800]!,
+                    ? AppColors.accent
+                    : AppColors.darkSurface,
                   width: 2,
                 ),
               ),
@@ -81,7 +82,7 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                                   : Icons.radio_button_off,
                                 size: 20,
                                 color: isSelected 
-                                  ? Colors.deepOrangeAccent 
+                                  ? AppColors.accent 
                                   : Colors.white70,
                               ),
                               const SizedBox(width: 8),
@@ -90,7 +91,6 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                                   task['title']!,
                                   style: TextStyle(
                                     fontSize: width>1200 ? 20 : 18,
-                                    fontFamily: 'CascadiaCode',
                                     fontWeight: FontWeight.bold,
                                   ),
                                   maxLines: 1,
@@ -104,7 +104,6 @@ class DatasetTaskTypeGrid extends StatelessWidget {
                             task['description']!,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: width>1200 ? 16 : 10,
                             ),
                             maxLines: width > 600 ? 2 : 3,

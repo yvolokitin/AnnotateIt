@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 import '../../models/label.dart';
 import '../../models/annotation.dart';
@@ -81,7 +82,6 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: (screenWidth > 700) ? 18 : 16,
-                      fontFamily: 'CascadiaCode',
                       color: colorScheme.onSurface,
                     ),
                   ),
@@ -102,10 +102,10 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                               final screenWidth = MediaQuery.of(ctx).size.width;
                               final isLargeScreen = screenWidth > 700;
                               return AlertDialog(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  side: const BorderSide(color: Colors.redAccent, width: 1),
+                                  side: BorderSide(color: AppColors.accent, width: 1),
                                 ),
                                 titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
                                 title: Row(
@@ -113,17 +113,16 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.delete_sweep_outlined,
                                           size: 32,
-                                          color: Colors.redAccent,
+                                          color: AppColors.accent,
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
                                           l10n.deleteAllAnnotations,
                                           style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontFamily: 'CascadiaCode',
+                                            color: AppColors.accent,
                                             fontWeight: FontWeight.bold,
                                             fontSize: isLargeScreen ? 24 : 20,
                                           ),
@@ -131,7 +130,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                       ],
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.close, color: Colors.redAccent),
+                                      icon: Icon(Icons.close, color: AppColors.accent),
                                       tooltip: l10n.buttonClose,
                                       onPressed: () => Navigator.pop(ctx, false),
                                     ),
@@ -145,19 +144,18 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Divider(color: Colors.redAccent),
+                                        Divider(color: AppColors.accent),
                                         Padding(
                                           padding: EdgeInsets.all(20.0),
                                           child: Text(
                                             l10n.deleteAllAnnotationsConfirm,
                                             style: TextStyle(
                                               color: Colors.white70,
-                                              fontFamily: 'CascadiaCode',
                                               fontSize: 18,
                                             ),
                                           ),
                                         ),
-                                        const Divider(color: Colors.redAccent),
+                                        Divider(color: AppColors.accent),
                                       ],
                                     ),
                                   ),
@@ -166,7 +164,7 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                   ElevatedButton(
                                     onPressed: () => Navigator.pop(ctx, false),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey[800],
+                                      backgroundColor: AppColors.darkSurface,
                                       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -177,7 +175,6 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                       l10n.buttonCancel,
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       ),
@@ -186,18 +183,17 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
                                   ElevatedButton(
                                     onPressed: () => Navigator.pop(ctx, true),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey[800],
+                                      backgroundColor: AppColors.darkSurface,
                                       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
-                                        side: const BorderSide(color: Colors.redAccent, width: 2),
+                                        side: BorderSide(color: AppColors.accent, width: 2),
                                       ),
                                     ),
                                     child: Text(
                                       l10n.buttonDelete,
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       ),
@@ -238,7 +234,6 @@ class _AnnotatorRightSidebarState extends State<AnnotatorRightSidebar> {
           "No annotations yet",
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.hintColor,
-            fontFamily: 'CascadiaCode',
           ),
         ),
       ),

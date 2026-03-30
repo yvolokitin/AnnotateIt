@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
   const DatasetImportDiscardConfirmationDialog({super.key});
@@ -18,7 +19,7 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.redAccent, width: 1),
@@ -35,7 +36,6 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
                 l10n.discardDatasetImportTitle,
                 style: TextStyle(
                   color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: screenWidth > 700 ? 24 : 20,
                 ),
@@ -54,7 +54,6 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
         l10n.discardDatasetImportMessage,
         style: TextStyle(
           color: Colors.white70,
-          fontFamily: 'CascadiaCode',
           fontSize: screenWidth > 700 ? 16 : 14,
         ),
       ),
@@ -70,7 +69,6 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             l10n.buttonKeep,
             style: TextStyle(
               color: Colors.white54,
-              fontFamily: 'CascadiaCode',
               fontSize: screenWidth > 700 ? 16 : 14,
             ),
           ),
@@ -88,7 +86,6 @@ class DatasetImportDiscardConfirmationDialog extends StatelessWidget {
             l10n.buttonDiscard,
             style: TextStyle(
               color: Colors.white,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: screenWidth > 700 ? 16 : 14,
             ),

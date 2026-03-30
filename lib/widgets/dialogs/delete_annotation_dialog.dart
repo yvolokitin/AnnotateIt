@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/annotation.dart';
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 class DeleteAnnotationResult {
   final bool shouldDelete;
@@ -71,7 +72,7 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
       child: (screenWidth < 800)
           ? Dialog(
               insetPadding: EdgeInsets.zero,
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.darkSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(0),
                 side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -102,7 +103,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                                       l10n.deleteAnnotationTitle,
                                       style: TextStyle(
                                         color: Colors.orangeAccent,
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.bold,
                                         fontSize: screenWidth > 700 ? 24 : 20,
                                       ),
@@ -133,7 +133,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                                       '${l10n.deleteAnnotationMessage} "${widget.annotation.name ?? l10n.unnamedAnnotation}"?',
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontFamily: 'CascadiaCode',
                                         fontWeight: FontWeight.normal,
                                         fontSize: screenWidth > 700 ? 22 : 18,
                                       ),
@@ -157,7 +156,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                                           "Remove annotations without confirmation in the future",
                                           style: TextStyle(
                                             color: Colors.white70,
-                                            fontFamily: 'CascadiaCode',
                                             fontSize: screenWidth > 700 ? 16 : 14,
                                           ),
                                         ),
@@ -187,7 +185,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                                     l10n.buttonCancel,
                                     style: TextStyle(
                                       color: Colors.white70,
-                                      fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.bold,
                                       fontSize: screenWidth > 700 ? 22 : 18,
                                     ),
@@ -211,7 +208,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                                     l10n.buttonDelete,
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontFamily: 'CascadiaCode',
                                       fontWeight: FontWeight.bold,
                                       fontSize: screenWidth > 700 ? 22 : 18,
                                     ),
@@ -228,7 +224,7 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
               ),
             )
           : AlertDialog(
-        backgroundColor: Colors.grey[800],
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.orangeAccent, width: 1),
@@ -249,7 +245,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                   l10n.deleteAnnotationTitle,
                   style: const TextStyle(
                     color: Colors.orangeAccent,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
                   ),
@@ -280,7 +275,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                     '${l10n.deleteAnnotationMessage} "${widget.annotation.name ?? l10n.unnamedAnnotation}"?',
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                       fontSize: 22,
                     ),
@@ -305,7 +299,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
                         "Remove annotations without confirmation in the future",
                         style: const TextStyle(
                           color: Colors.white70,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 16,
                         ),
                       ),
@@ -331,7 +324,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
               l10n.buttonCancel,
               style: const TextStyle(
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),
@@ -354,7 +346,6 @@ class _DeleteAnnotationDialogState extends State<DeleteAnnotationDialog> {
               l10n.buttonDelete,
               style: const TextStyle(
                 color: Colors.white,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),

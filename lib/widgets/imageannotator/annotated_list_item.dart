@@ -79,7 +79,6 @@ class AnnotatedListItem extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.normal,
                     ),
                     maxLines: 1,

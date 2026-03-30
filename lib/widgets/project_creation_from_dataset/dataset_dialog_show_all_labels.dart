@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class ShowAllLabelsDialog extends StatelessWidget {
   final List<String> labels;
@@ -12,7 +13,7 @@ class ShowAllLabelsDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: AppColors.darkRail,
       title: Text(
         l10n.allLabels,
         style: const TextStyle(color: Colors.white),
@@ -29,10 +30,9 @@ class ShowAllLabelsDialog extends StatelessWidget {
                         label,
                         style: const TextStyle(
                           color: Colors.black,
-                          fontFamily: 'CascadiaCode',
                         ),
                       ),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: AppColors.accent,
                     ))
                 .toList(),
           ),
@@ -44,8 +44,7 @@ class ShowAllLabelsDialog extends StatelessWidget {
           child: Text(
             l10n.buttonClose,
             style: const TextStyle(
-              color: Colors.redAccent,
-              fontFamily: 'CascadiaCode',
+              color: AppColors.accent,
             ),
           ),
         ),

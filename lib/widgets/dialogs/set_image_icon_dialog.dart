@@ -6,6 +6,7 @@ import '../../models/media_item.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import '../../utils/image_utils.dart';
+import '../../utils/theme.dart';
 
 class SetImageIconDialog extends StatefulWidget {
   final MediaItem media;
@@ -61,7 +62,7 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
     final fileName = widget.media.filePath.split('/').last;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Colors.blueAccent, width: 1),
@@ -82,7 +83,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                 l10n.setAsProjectIcon,
                 style: TextStyle(
                   color: _hasError ? Colors.orange : Colors.blueAccent,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                   fontSize: isLargeScreen ? 24 : 20,
                 ),
@@ -121,7 +121,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                             l10n.thumbnailGenerationInProgress,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -134,7 +133,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                             _hasError ? l10n.thumbnailGenerationFailed : l10n.setAsProjectIconConfirm(widget.media.filePath),
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -154,7 +152,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                                   fileName,
                                   style: TextStyle(
                                     color: _hasError ? Colors.orange : Colors.white54,
-                                    fontFamily: 'CascadiaCode',
                                     fontSize: isLargeScreen ? 20 : 16,
                                   ),
                                 ),
@@ -168,7 +165,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                               l10n.thumbnailGenerationTryAgainLater,
                               style: TextStyle(
                                 color: Colors.orange,
-                                fontFamily: 'CascadiaCode',
                                 fontSize: isLargeScreen ? 20 : 16,
                               ),
                             ),
@@ -187,7 +183,7 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -201,7 +197,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                   _hasError ? l10n.buttonClose : l10n.buttonCancel,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: isLargeScreen ? 22 : 18,
                   ),
@@ -211,7 +206,7 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                 ElevatedButton(
                   onPressed: _generateAndSetThumbnail,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[800],
+                    backgroundColor: AppColors.darkSurface,
                     padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -222,7 +217,6 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
                     l10n.setAsProjectIcon,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: isLargeScreen ? 22 : 18,
                     ),

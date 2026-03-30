@@ -13,6 +13,7 @@ import '../dialogs/remove_all_labels_dialog.dart';
 import '../app_snackbar.dart';
 
 import 'project_details_add_label.dart';
+import '../../utils/theme.dart';
 
 class ProjectViewLabels extends StatefulWidget {
   final Project project;
@@ -130,7 +131,6 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
                 style: TextStyle(
                   fontSize: smallScreen ? 18 : 22,
                   color: Colors.white,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -171,7 +171,7 @@ class ProjectViewLabelsState extends State<ProjectViewLabels> with TickerProvide
           margin: EdgeInsets.all(screenWidth > 1600 ? 20 : 6),
           padding: EdgeInsets.all(screenWidth > 1600 ? 20 : 6),
           decoration: BoxDecoration(
-            color: Colors.grey[800],
+            color: AppColors.darkSurface,
           ),
           child: ProjectDetailsAddLabel(
             labels: labels,

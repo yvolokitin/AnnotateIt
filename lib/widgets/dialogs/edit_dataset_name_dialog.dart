@@ -3,6 +3,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../models/dataset.dart';
 import '../../data/dataset_database.dart';
 import '../../data/project_database.dart';
+import '../../utils/theme.dart';
 
 class EditDatasetNameDialog extends StatefulWidget {
   final Dataset dataset;
@@ -54,27 +55,24 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
     if (screenWidth < 800) {
       final titleStyle = TextStyle(
         color: Colors.orangeAccent,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.bold,
         fontSize: 22,
       );
       final bodyStyle = TextStyle(
         color: Colors.white70,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.normal,
         fontSize: 18,
       );
       final inputTextStyle = TextStyle(
         color: Colors.white,
         fontSize: 18,
-        fontFamily: 'CascadiaCode',
         fontWeight: FontWeight.normal,
       );
 
       return Dialog.fullscreen(
         child: SafeArea(
           child: Container(
-            color: Colors.grey[800],
+            color: AppColors.darkSurface,
             padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +135,7 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -148,7 +146,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                         style: const TextStyle(
                           color: Colors.white70,
                           fontWeight: FontWeight.normal,
-                          fontFamily: 'CascadiaCode',
                           fontSize: 18,
                         ),
                       ),
@@ -157,7 +154,7 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                     ElevatedButton(
                       onPressed: _saveChanges,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                        backgroundColor: AppColors.darkSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -171,7 +168,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                             l10n.buttonSave,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontFamily: 'CascadiaCode',
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
                             ),
@@ -189,7 +185,7 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.orangeAccent, width: 1),
@@ -206,7 +202,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
             l10n.editDatasetTitle,
             style: TextStyle(
               color: Colors.orangeAccent,
-              fontFamily: 'CascadiaCode',
               fontWeight: FontWeight.bold,
               fontSize: (screenWidth > 1200) ? 26 : 20,
             ),
@@ -231,7 +226,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
               l10n.editDatasetDescription,
               style: TextStyle(
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
                 fontSize: (screenWidth > 1200) ? 24 : 20,
               ),
@@ -248,7 +242,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
                     color: Colors.white54,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.normal,
                     fontSize: screenWidth > 1200 ? 22 : 18,
                   ),
@@ -269,7 +262,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: (screenWidth > 1200) ? 22 : 18,
-                  fontFamily: 'CascadiaCode',
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -283,7 +275,7 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -294,7 +286,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.normal,
-                  fontFamily: 'CascadiaCode',
                   fontSize: (screenWidth > 1200) ? 22 : 20,
                 ),
               ),
@@ -305,7 +296,7 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
             ElevatedButton(
               onPressed: _saveChanges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.darkSurface,
                 padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -319,7 +310,6 @@ class EditDatasetNameDialogState extends State<EditDatasetNameDialog> {
                     l10n.buttonSave,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'CascadiaCode',
                       fontWeight: FontWeight.bold,
                       fontSize: (screenWidth > 1200) ? 22 : 20,
                     ),

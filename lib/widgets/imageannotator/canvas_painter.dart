@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 import '../../models/shape/shape.dart';
 import '../../models/annotation.dart';
@@ -96,7 +97,7 @@ class CanvasPainter extends CustomPainter {
       final shape = Shape.fromAnnotation(selectedAnnotation!);
       if (shape != null) {
         final highlightPaint = Paint()
-          ..color = Colors.red
+          ..color = AppColors.accent
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke;
         shape.paint(canvas, highlightPaint);
@@ -230,7 +231,6 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
     color: foregroundColorByLuminance(annotation.color ?? Colors.grey),
     fontSize: 16,
     fontWeight: FontWeight.bold,
-    fontFamily: 'CascadiaCode',
   );
   final textPainter = TextPainter(
     text: TextSpan(text: text, style: textStyle),
@@ -279,7 +279,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
   // Draw border if selected
   if (annotation.id == selectedAnnotation?.id) {
     final borderPaint = Paint()
-      ..color = Colors.red
+      ..color = AppColors.accent
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
     canvas.drawRRect(
@@ -307,7 +307,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
-      ..color = Colors.red
+      ..color = AppColors.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth;
 
@@ -338,7 +338,6 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       color: foregroundColorByLuminance(color),
       fontSize: 17 / scale,
       height: 1.0,
-      fontFamily: 'CascadiaCode',
       fontWeight: FontWeight.bold,
     );
 

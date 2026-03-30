@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 import '../../models/label.dart';
 
 class AnnotatorLabels extends StatelessWidget {
@@ -76,7 +77,7 @@ Widget _buildChip(BuildContext context, Label label) {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
         margin: const EdgeInsets.only(right: 4),
         decoration: BoxDecoration(
-          color: Colors.grey[800],
+          color: AppColors.darkSurface,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: Colors.white24,
@@ -113,7 +114,6 @@ Widget _buildChip(BuildContext context, Label label) {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
-                    fontFamily: 'CascadiaCode',
                   ),
                 ),
               ),
@@ -128,7 +128,7 @@ Widget _buildChip(BuildContext context, Label label) {
 Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
   return PopupMenuButton<Label>(
     tooltip: 'More',
-    color: Colors.grey[850],
+    color: AppColors.darkCard,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
       side: const BorderSide(color: Colors.white24, width: 1),
@@ -166,7 +166,6 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
                       softWrap: false,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                   ),
@@ -203,7 +202,6 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
-              fontFamily: 'CascadiaCode',
             ),
           ),
           SizedBox(width: 6),
@@ -226,7 +224,7 @@ Widget _buildMoreDropdown(BuildContext context, List<Label> hiddenLabels) {
 
   static double _measureTextWidth(String text, {required double size}) {
     final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: TextStyle(fontSize: size, fontFamily: 'CascadiaCode',)),
+      text: TextSpan(text: text, style: TextStyle(fontSize: size)),
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width;

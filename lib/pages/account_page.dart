@@ -11,6 +11,7 @@ import '../widgets/account/application_settings.dart';
 import '../widgets/responsive/responsive_layout.dart';
 
 import '../gen_l10n/app_localizations.dart';
+import '../utils/theme.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -146,12 +147,12 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
                         children: [
                           TabBar(
                             controller: _tabController,
-                            indicatorColor: Colors.red,
+                            indicatorColor: AppColors.accent,
                             indicatorWeight: 3.0,
                             labelColor: Colors.white,
                             unselectedLabelColor: Colors.grey,
-                            labelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
-                            unselectedLabelStyle: const TextStyle(fontSize: 22, fontFamily: 'CascadiaCode'),
+                            labelStyle: const TextStyle(fontSize: 22),
+                            unselectedLabelStyle: const TextStyle(fontSize: 22),
                             tabs: [
                               _buildResponsiveTab(
                                 icon: Icons.person_outline,
@@ -257,7 +258,6 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
             Text(
               shortLabel,
               style: const TextStyle(
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -267,7 +267,6 @@ class AccountPageState extends State<AccountPage> with SingleTickerProviderState
             Text(
               fullLabel,
               style: const TextStyle(
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.normal,
               ),
             ),

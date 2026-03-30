@@ -7,6 +7,7 @@ import '../../data/annotation_database.dart';
 import '../../session/user_session.dart';
 import '../app_snackbar.dart';
 import 'alert_error_dialog.dart';
+import '../../utils/theme.dart';
 
 class RemoveAllLabelsDialog extends StatefulWidget {
   final Project project;
@@ -91,10 +92,10 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
     final shouldDeleteAnnotations = UserSession.instance.getUser().labelsDeleteAnnotations;
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.redAccent, width: 1),
+        side: const BorderSide(color: AppColors.accent, width: 1),
       ),
       titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
@@ -105,14 +106,13 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
               const Icon(
                 Icons.delete_sweep_outlined,
                 size: 32,
-                color: Colors.redAccent,
+                color: AppColors.accent,
               ),
               const SizedBox(width: 12),
               Text(
                 'Remove All Labels',
                 style: TextStyle(
-                  color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: isLargeScreen ? 24 : 20,
                 ),
@@ -121,7 +121,7 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
           ),
           if (!_isRemoving)
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.redAccent),
+              icon: const Icon(Icons.close, color: AppColors.accent),
               tooltip: l10n.buttonClose,
               onPressed: () => Navigator.pop(context),
             ),
@@ -135,7 +135,7 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: _isRemoving
@@ -144,14 +144,13 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                         children: [
                           const SizedBox(height: 40),
                           const CircularProgressIndicator(
-                            color: Colors.redAccent,
+                            color: AppColors.accent,
                           ),
                           const SizedBox(height: 20),
                           Text(
                             'Removing all labels...',
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -164,7 +163,6 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                             'Are you sure you want to remove all labels from this project?',
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -175,13 +173,12 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                               decoration: BoxDecoration(
                                 color: Colors.red.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.redAccent),
+                                border: Border.all(color: AppColors.accent),
                               ),
                               child: Text(
                                 'Warning: All annotations associated with these labels will also be deleted.',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: isLargeScreen ? 20 : 16,
                                 ),
@@ -192,7 +189,6 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                               'All annotations will be marked as Unknown and will need to be re-labeled.',
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontFamily: 'CascadiaCode',
                                 fontStyle: FontStyle.italic,
                                 fontSize: isLargeScreen ? 20 : 16,
                               ),
@@ -200,7 +196,7 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                         ],
                       ),
               ),
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
             ],
           ),
         ),
@@ -211,7 +207,7 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -222,7 +218,6 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                   l10n.buttonCancel,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: isLargeScreen ? 22 : 18,
                   ),
@@ -231,7 +226,7 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
               ElevatedButton(
                 onPressed: _removeAllLabels,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -242,7 +237,6 @@ class _RemoveAllLabelsDialogState extends State<RemoveAllLabelsDialog> {
                   'Remove All',
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: isLargeScreen ? 22 : 18,
                   ),

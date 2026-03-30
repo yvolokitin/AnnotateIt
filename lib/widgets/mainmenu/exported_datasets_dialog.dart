@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
 import '../../session/user_session.dart';
+import '../../utils/theme.dart';
 
 class ExportedDatasetsDialog extends StatefulWidget {
   const ExportedDatasetsDialog({super.key});
@@ -193,7 +194,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
         width: dialogWidth,
         height: dialogHeight,
         decoration: BoxDecoration(
-          color: Colors.grey[850],
+          color: AppColors.darkCard,
           border: isWideLarge ? Border.all(color: Colors.grey, width: 1) : null,
           borderRadius: BorderRadius.circular(isWideLarge ? 12 : 0),
         ),
@@ -203,7 +204,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.grey[800],
+                color: AppColors.darkSurface,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(isWideLarge ? 12 : 0),
                   topRight: Radius.circular(isWideLarge ? 12 : 0),
@@ -221,7 +222,6 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'CascadiaCode',
                       ),
                     ),
                   ),
@@ -249,9 +249,9 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: AppColors.darkRail,
                         border: Border(
-                          bottom: BorderSide(color: Colors.grey[800]!, width: 1),
+                          bottom: BorderSide(color: AppColors.darkSurface!, width: 1),
                         ),
                       ),
                       child: Row(
@@ -266,7 +266,6 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
-                                  fontFamily: 'CascadiaCode',
                                 ),
                               ),
                             ),
@@ -291,7 +290,6 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontSize: 16,
-                                        fontFamily: 'CascadiaCode',
                                       ),
                                     ),
                                   ],
@@ -308,7 +306,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                   final sizeStr = _formatBytes(stat.size);
                                   final dateStr = dateFormat.format(stat.modified);
                                   return Material(
-                                    color: Colors.grey[800],
+                                    color: AppColors.darkSurface,
                                     borderRadius: BorderRadius.circular(8),
                                     child: ListTile(
                                       shape: RoundedRectangleBorder(
@@ -322,7 +320,6 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
-                                          fontFamily: 'CascadiaCode',
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -333,7 +330,6 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
                                         style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 12,
-                                          fontFamily: 'CascadiaCode',
                                         ),
                                       ),
                                       trailing: Wrap(

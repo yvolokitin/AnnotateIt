@@ -11,6 +11,7 @@ import '../app_snackbar.dart';
 import '../../session/user_session.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../dialogs/alert_error_dialog.dart';
+import '../../utils/theme.dart';
 
 class ModelCard extends StatefulWidget {
   final String id;
@@ -940,7 +941,7 @@ class _ModelCardState extends State<ModelCard> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           _hasDownloadSources
-                                              ? Colors.red
+                                              ? AppColors.accent
                                               : Colors.grey,
                                       padding: EdgeInsets.symmetric(
                                         horizontal: compact ? 10 : 14,

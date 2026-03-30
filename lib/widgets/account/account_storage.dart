@@ -12,6 +12,7 @@ import '../dialogs/alert_error_dialog.dart';
 import '../../models/user.dart';
 import '../../session/user_session.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class AccountStorage extends StatefulWidget {
   final User user;
@@ -218,7 +219,6 @@ class _AccountStorageState extends State<AccountStorage> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: isWide ? 24 : 18,
-                  fontFamily: 'CascadiaCode',
                 ),
                 maxLines: 2,
                 minLines: 1,
@@ -322,7 +322,7 @@ class _AccountStorageState extends State<AccountStorage> {
     final isWide = MediaQuery.of(context).size.width > 800;
 
     return Container(
-      color: Colors.grey[800],
+      color: AppColors.darkSurface,
       child: SingleChildScrollView(
         padding: isWide ? const EdgeInsets.all(24) : const EdgeInsets.all(12),
         child: Column(
@@ -395,7 +395,7 @@ class _AccountStorageState extends State<AccountStorage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(7),
       ),
       child: Column(
@@ -407,7 +407,6 @@ class _AccountStorageState extends State<AccountStorage> {
               title,
               style: const TextStyle(
                 fontSize: 24,
-                fontFamily: 'CascadiaCode',
                 color: Colors.white,
               ),
             ),
@@ -465,7 +464,6 @@ class _AccountStorageState extends State<AccountStorage> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: isWide ? 24 : 18,
-                  fontFamily: 'CascadiaCode',
                 ),
                 maxLines: 2,
                 minLines: 1,
@@ -590,7 +588,6 @@ class _AccountStorageState extends State<AccountStorage> {
     required VoidCallback onPressed,
   }) {
     final textStyle = const TextStyle(
-      fontFamily: 'CascadiaCode',
       fontSize: 14,
       color: Colors.white,
     );

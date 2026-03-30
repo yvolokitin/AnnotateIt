@@ -5,6 +5,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../models/media_item.dart';
 import '../../data/dataset_database.dart';
 import '../../widgets/dialogs/alert_error_dialog.dart';
+import '../../utils/theme.dart';
 
 class DeleteImageDialog extends StatefulWidget {
   final List<MediaItem> mediaItems;
@@ -119,10 +120,10 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
     if (screenWidth < 800) {
       return Dialog(
         insetPadding: EdgeInsets.zero,
-        backgroundColor: Colors.grey[800],
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
-          side: const BorderSide(color: Colors.redAccent, width: 1),
+          side: const BorderSide(color: AppColors.accent, width: 1),
         ),
         child: SafeArea(
           child: LayoutBuilder(
@@ -143,14 +144,13 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                               const Icon(
                                 Icons.delete_outline,
                                 size: 32,
-                                color: Colors.redAccent,
+                                color: AppColors.accent,
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 l10n.removeFilesFromDataset,
                                 style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontFamily: 'CascadiaCode',
+                                  color: AppColors.accent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: isLargeScreen ? 24 : 20,
                                 ),
@@ -159,7 +159,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                           ),
                           if (!_isDeleting)
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.redAccent),
+                              icon: const Icon(Icons.close, color: AppColors.accent),
                               tooltip: l10n.buttonClose,
                               onPressed: () => Navigator.pop(context),
                             ),
@@ -167,7 +167,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     const SizedBox(height: 12),
                     Expanded(
                       child: SingleChildScrollView(
@@ -179,14 +179,13 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                   children: [
                                     const SizedBox(height: 40),
                                     const CircularProgressIndicator(
-                                      color: Colors.redAccent,
+                                      color: AppColors.accent,
                                     ),
                                     const SizedBox(height: 20),
                                     Text(
                                       l10n.removeFilesFromDatasetInProgress,
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: isLargeScreen ? 22 : 18,
                                       ),
                                     ),
@@ -199,7 +198,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                       l10n.removeFilesFromDatasetConfirm(widget.mediaItems.length),
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: isLargeScreen ? 22 : 18,
                                       ),
                                     ),
@@ -208,13 +206,12 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                       value: !_dbOnly,
                                       onChanged: (v) => setState(() => _dbOnly = !(v ?? false)),
                                       controlAffinity: ListTileControlAffinity.leading,
-                                      activeColor: Colors.redAccent,
+                                      activeColor: AppColors.accent,
                                       checkColor: Colors.black,
                                       title: Text(
                                         l10n.deleteProjectOptionDeleteFromDisk,
                                         style: TextStyle(
                                           color: Colors.white70,
-                                          fontFamily: 'CascadiaCode',
                                           fontSize: isLargeScreen ? 20 : 16,
                                         ),
                                       ),
@@ -232,7 +229,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                               l10n.removeFilesDbOnlyNote,
                                               style: const TextStyle(
                                                 color: Colors.amberAccent,
-                                                fontFamily: 'CascadiaCode',
                                               ),
                                             ),
                                           ),
@@ -253,7 +249,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                                 fileName,
                                                 style: TextStyle(
                                                   color: Colors.white54,
-                                                  fontFamily: 'CascadiaCode',
                                                   fontSize: isLargeScreen ? 20 : 16,
                                                 ),
                                               ),
@@ -267,7 +262,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                         ),
                       ),
                     ),
-                    const Divider(color: Colors.redAccent),
+                    const Divider(color: AppColors.accent),
                     if (!_isDeleting)
                       Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -277,7 +272,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -288,7 +283,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                 l10n.buttonCancel,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: isLargeScreen ? 22 : 18,
                                 ),
@@ -298,7 +292,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             ElevatedButton(
                               onPressed: _deleteFiles,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: AppColors.darkSurface,
                                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -309,7 +303,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                 l10n.buttonDelete,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontFamily: 'CascadiaCode',
                                   fontWeight: FontWeight.bold,
                                   fontSize: isLargeScreen ? 22 : 18,
                                 ),
@@ -328,10 +321,10 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: AppColors.darkSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.redAccent, width: 1),
+        side: const BorderSide(color: AppColors.accent, width: 1),
       ),
       titlePadding: const EdgeInsets.only(left: 16, top: 16, right: 8),
       title: Row(
@@ -342,14 +335,13 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
               const Icon(
                 Icons.delete_outline,
                 size: 32,
-                color: Colors.redAccent,
+                color: AppColors.accent,
               ),
               const SizedBox(width: 12),
               Text(
                 l10n.removeFilesFromDataset,
                 style: TextStyle(
-                  color: Colors.redAccent,
-                  fontFamily: 'CascadiaCode',
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: isLargeScreen ? 24 : 20,
                 ),
@@ -358,7 +350,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
           ),
           if (!_isDeleting)
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.redAccent),
+              icon: const Icon(Icons.close, color: AppColors.accent),
               tooltip: l10n.buttonClose,
               onPressed: () => Navigator.pop(context),
             ),
@@ -372,7 +364,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: _isDeleting
@@ -381,14 +373,13 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                         children: [
                           const SizedBox(height: 40),
                           const CircularProgressIndicator(
-                            color: Colors.redAccent,
+                            color: AppColors.accent,
                           ),
                           const SizedBox(height: 20),
                           Text(
                             l10n.removeFilesFromDatasetInProgress,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -401,7 +392,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             l10n.removeFilesFromDatasetConfirm(widget.mediaItems.length),
                             style: TextStyle(
                               color: Colors.white70,
-                              fontFamily: 'CascadiaCode',
                               fontSize: isLargeScreen ? 22 : 18,
                             ),
                           ),
@@ -410,13 +400,12 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                             value: !_dbOnly,
                             onChanged: (v) => setState(() => _dbOnly = !(v ?? false)),
                             controlAffinity: ListTileControlAffinity.leading,
-                            activeColor: Colors.redAccent,
+                            activeColor: AppColors.accent,
                             checkColor: Colors.black,
                             title: Text(
                               l10n.deleteProjectOptionDeleteFromDisk,
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontFamily: 'CascadiaCode',
                                 fontSize: isLargeScreen ? 20 : 16,
                               ),
                             ),
@@ -434,7 +423,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                     l10n.removeFilesDbOnlyNote,
                                     style: const TextStyle(
                                       color: Colors.amberAccent,
-                                      fontFamily: 'CascadiaCode',
                                     ),
                                   ),
                                 ),
@@ -455,7 +443,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                                       fileName,
                                       style: TextStyle(
                                         color: Colors.white54,
-                                        fontFamily: 'CascadiaCode',
                                         fontSize: isLargeScreen ? 20 : 16,
                                       ),
                                     ),
@@ -467,7 +454,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                         ],
                       ),
               ),
-              const Divider(color: Colors.redAccent),
+              const Divider(color: AppColors.accent),
             ],
           ),
         ),
@@ -478,7 +465,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -489,7 +476,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                   l10n.buttonCancel,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: isLargeScreen ? 22 : 18,
                   ),
@@ -498,7 +484,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
               ElevatedButton(
                 onPressed: _deleteFiles,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -509,7 +495,6 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
                   l10n.buttonDelete,
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'CascadiaCode',
                     fontWeight: FontWeight.bold,
                     fontSize: isLargeScreen ? 22 : 18,
                   ),

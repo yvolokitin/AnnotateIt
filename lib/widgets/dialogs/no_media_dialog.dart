@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import 'alert_error_dialog.dart';
+import '../../utils/theme.dart';
 
 class NoMediaDialog extends StatefulWidget {
   final int projectId;
@@ -69,7 +70,6 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'CascadiaCode',
                               fontSize: titleSize,
                             ),
                           ),
@@ -89,7 +89,6 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey,
-                              fontFamily: 'CascadiaCode',
                               fontSize: textSize,
                             ),
                           ),
@@ -99,7 +98,6 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey,
-                              fontFamily: 'CascadiaCode',
                               fontSize: textSize,
                             ),
                           ),
@@ -112,7 +110,6 @@ class NoMediaDialogState extends State<NoMediaDialog> {
                               style: TextStyle(
                                 color: Colors.white54,
                                 decoration: TextDecoration.underline,
-                                fontFamily: 'CascadiaCode',
                                 fontSize: textSize,
                               ),
                             ),

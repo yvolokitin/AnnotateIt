@@ -15,6 +15,7 @@ import 'image_tile/image_preview.dart';
 import 'image_tile/image_tile_menu_button.dart';
 import 'image_tile/select_checkbox_overlay.dart';
 import 'image_tile/error_image_tile.dart';
+import '../../utils/theme.dart';
 
 class ImageTile extends StatefulWidget {
   final Project project;
@@ -80,7 +81,7 @@ class _ImageTileState extends State<ImageTile> {
         width: 140,
         height: 140,
         decoration: BoxDecoration(
-          border: Border.all(color: isSelected ? Colors.redAccent : Colors.transparent, width: 2),
+          border: Border.all(color: isSelected ? AppColors.accent : Colors.transparent, width: 2),
         ),
         child: ClipRRect(
           child: Stack(

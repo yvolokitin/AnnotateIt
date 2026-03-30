@@ -18,6 +18,7 @@ import '../dialogs/ffmpeg_check_dialog.dart';
 import '../../services/video_frame_extractor.dart';
 import '../dialogs/delete_image_dialog.dart';
 import '../app_snackbar.dart';
+import '../../utils/theme.dart';
 
 class MediaTile extends StatefulWidget {
   final AnnotatedLabeledMedia mediaItem;
@@ -134,7 +135,7 @@ class _MediaTileState extends State<MediaTile> {
         height: 140,
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? Colors.redAccent : Colors.transparent,
+            color: isSelected ? AppColors.accent : Colors.transparent,
             width: 2,
           ),
         ),
@@ -158,7 +159,7 @@ class _MediaTileState extends State<MediaTile> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _hovered ? 1.0 : 0.0,
                   child: PopupMenuButton<String>(
-                    color: Colors.grey[800],
+                    color: AppColors.darkSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                       side: const BorderSide(color: Colors.white70, width: 1),
@@ -203,7 +204,6 @@ class _MediaTileState extends State<MediaTile> {
                       final screenWidth = MediaQuery.of(context).size.width;
                       TextStyle textStyle = TextStyle(
                         fontSize: screenWidth > 1200 ? 22 : 18,
-                        fontFamily: 'CascadiaCode',
                       );
                       final items = <PopupMenuEntry<String>>[
                         PopupMenuItem(
@@ -530,7 +530,7 @@ class _MediaTileState extends State<MediaTile> {
   Widget _buildLoadingTile() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(child: CircularProgressIndicator()),

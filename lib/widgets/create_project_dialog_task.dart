@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/theme.dart';
 
 class TaskTypeGrid extends StatelessWidget {
   final List<Map<String, String>> tasks;
@@ -66,10 +67,10 @@ class _TaskOptionCard extends StatelessWidget {
       onTap: onSelected,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[850],
+          color: AppColors.darkCard,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? Colors.red : Colors.grey[700]!,
+            color: selected ? AppColors.accent : Colors.grey[700]!,
             width: 2,
           ),
         ),
@@ -98,7 +99,7 @@ class _TaskOptionCard extends StatelessWidget {
                       value: title,
                       groupValue: selected ? title : '',
                       onChanged: (_) => onSelected(),
-                      activeColor: Colors.red,
+                      activeColor: AppColors.accent,
                     ),
                     SizedBox(width: 4),
                     Expanded(

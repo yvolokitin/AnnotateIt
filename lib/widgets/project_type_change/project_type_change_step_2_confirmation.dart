@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
-
 class StepProjectTypeSelectionConfirmation extends StatelessWidget {
   final String currentProjectType;
   final String newProjectType;
@@ -32,7 +31,6 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 20,
                 color: Colors.redAccent,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -42,7 +40,6 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 20,
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -52,7 +49,6 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.white,
-                fontFamily: 'CascadiaCode',
               ),
             ),
             const SizedBox(height: 8),
@@ -62,7 +58,6 @@ class StepProjectTypeSelectionConfirmation extends StatelessWidget {
                 height: 1.4,
                 fontSize: 16,
                 color: Colors.white70,
-                fontFamily: 'CascadiaCode',
               ),
             ),
           ],
