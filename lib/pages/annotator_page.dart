@@ -1275,6 +1275,24 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     onHelp: () {},
                     onAssignedLabel: _handleLabelSelected,
                     onDefaultLabelSelected: _handleDefaultLabelSelected,
+                    onCreateLabel: (name, color) async {
+                      final newLabel = Label(
+                        id: -1,
+                        projectId: widget.project.id!,
+                        name: name,
+                        color: color,
+                        labelOrder: (widget.project.labels?.length ?? 0),
+                      );
+                      final labelDb = LabelsDatabase.instance;
+                      final labelId = await labelDb.insertLabel(newLabel);
+                      if (labelId <= 0) return null;
+                      final created = newLabel.copyWith(id: labelId);
+                      setState(() {
+                        widget.project.labels.add(created);
+                        selectedLabel = created;
+                      });
+                      return created;
+                    },
                   ),
                   Expanded(
                     child: PageView.builder(
