@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/color_utils.dart' as app_colors;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class ColorPickerDialog extends StatefulWidget {
@@ -19,39 +20,10 @@ class ColorPickerDialog extends StatefulWidget {
 class _ColorPickerDialogState extends State<ColorPickerDialog> {
   late Color selectedColor;
 
-  static const List<Color> basicColors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.yellow,
-    Colors.orange,
-    Colors.purple,
-    Colors.cyan,
-    Colors.brown,
-    Colors.pink,
-    Colors.teal,
-    Color(0xFF336666),
-    Color(0xFF888888),
-    Color(0xFFCCCCCC),
-    Color(0xFFFFC107),
-    Colors.black,
-    Colors.white,
-  ];
-
   @override
   void initState() {
     super.initState();
-    selectedColor = _fromHex(widget.initialColor);
-  }
-
-  Color _fromHex(String hex) {
-    hex = hex.replaceAll('#', '');
-    if (hex.length == 6) hex = 'FF$hex'; // Add full opacity
-    return Color(int.parse(hex, radix: 16));
-  }
-
-  String _toHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    selectedColor = app_colors.colorFromHex(widget.initialColor);
   }
 
   @override
@@ -68,11 +40,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.palette,
-                size: 32,
-                color: Colors.white,
-              ),
+              const Icon(Icons.palette, size: 32, color: Colors.white),
               const SizedBox(width: 12),
               Text(
                 l10n.colorPickerTitle,
@@ -97,14 +65,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           children: [
             const Divider(thickness: 1, color: Colors.white),
             const SizedBox(height: 20),
-
             ColorPicker(
               pickerColor: selectedColor,
-              onColorChanged: (color) {
-                setState(() {
-                  selectedColor = color;
-                });
-              },
+              onColorChanged: (color) => setState(() => selectedColor = color),
               showLabel: true,
               pickerAreaHeightPercent: 0.8,
             ),
@@ -113,18 +76,14 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               alignment: Alignment.centerLeft,
               child: Text(
                 l10n.colorPickerBasicColors,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontFamily: 'CascadiaCode',
-                ),
+                style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
               ),
             ),
             const SizedBox(height: 15),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: basicColors.map((color) {
+              children: app_colors.basicColors.map((color) {
                 final isSelected = selectedColor == color;
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
@@ -132,9 +91,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(6),
-                      onTap: () {
-                        setState(() => selectedColor = color);
-                      },
+                      onTap: () => setState(() => selectedColor = color),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         width: 36,
@@ -146,14 +103,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                             width: 2,
                           ),
                           boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: Colors.white.withOpacity(0.4),
-                                  blurRadius: 4,
-                                  spreadRadius: 1,
-                                ),
-                              ]
-                            : [],
+                              ? [BoxShadow(color: Colors.white.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)]
+                              : [],
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
@@ -170,15 +121,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             l10n.buttonCancel,
-            style: TextStyle(
-              color: Colors.white70,
-              fontFamily: 'CascadiaCode',
-            ),
+            style: const TextStyle(color: Colors.white70, fontFamily: 'CascadiaCode'),
           ),
         ),
         ElevatedButton(
           onPressed: () {
-            widget.onColorSelected(_toHex(selectedColor));
+            widget.onColorSelected(app_colors.colorToHex(selectedColor));
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
@@ -188,11 +136,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           ),
           child: Text(
             l10n.buttonConfirm,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'CascadiaCode',
-              fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(color: Colors.white, fontFamily: 'CascadiaCode', fontWeight: FontWeight.bold),
           ),
         ),
       ],

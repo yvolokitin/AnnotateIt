@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
 import '../data/labels_database.dart';
 import '../data/dataset_database.dart';
+import '../utils/color_utils.dart';
 
 import '../models/label.dart';
 import '../models/project.dart';
@@ -1190,45 +1190,25 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     );
   }
 
-  /// Add a new label to the project and return the created label.
-  /// If [showNotification] is true, a SnackBar or error dialog is shown.
-  Future<Label?> _addLabelToProject(String labelName, {bool showNotification = true}) async {
+  Future<Label?> _addLabelToProject(String labelName, {String? labelColor, bool showNotification = true}) async {
     try {
-      final random = Random();
-      final r = random.nextInt(200) + 55;
-      final g = random.nextInt(200) + 55;
-      final b = random.nextInt(200) + 55;
-      final color =
-          '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+      final color = labelColor ?? generateColorByIndex(widget.project.labels?.length ?? 0);
 
       final newLabel = Label(
         id: -1,
         projectId: widget.project.id!,
         name: labelName,
         color: color,
-        labelOrder: (widget.project.labels?.length ?? 0) + 1,
+        labelOrder: widget.project.labels?.length ?? 0,
       );
 
       final labelDb = LabelsDatabase.instance;
       final labelId = await labelDb.insertLabel(newLabel);
 
-      if (labelId != -1) {
-        final completeLabel = Label(
-          id: labelId,
-          projectId: newLabel.projectId,
-          name: newLabel.name,
-          color: newLabel.color,
-          labelOrder: newLabel.labelOrder,
-          isDefault: false,
-          description: null,
-          createdAt: DateTime.now(),
-        );
-
+      if (labelId > 0) {
+        final created = newLabel.copyWith(id: labelId);
         setState(() {
-          final updatedLabels = List<Label>.from(widget.project.labels ?? []);
-          updatedLabels.add(completeLabel);
-          widget.project.labels?.clear();
-          widget.project.labels?.addAll(updatedLabels);
+          widget.project.labels?.add(created);
         });
 
         if (showNotification && mounted) {
@@ -1239,8 +1219,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             ),
           );
         }
-
-        return completeLabel;
+        return created;
       }
       return null;
     } catch (e) {
@@ -1276,21 +1255,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                     onAssignedLabel: _handleLabelSelected,
                     onDefaultLabelSelected: _handleDefaultLabelSelected,
                     onCreateLabel: (name, color) async {
-                      final newLabel = Label(
-                        id: -1,
-                        projectId: widget.project.id!,
-                        name: name,
-                        color: color,
-                        labelOrder: (widget.project.labels?.length ?? 0),
-                      );
-                      final labelDb = LabelsDatabase.instance;
-                      final labelId = await labelDb.insertLabel(newLabel);
-                      if (labelId <= 0) return null;
-                      final created = newLabel.copyWith(id: labelId);
-                      setState(() {
-                        widget.project.labels.add(created);
-                        selectedLabel = created;
-                      });
+                      final created = await _addLabelToProject(name, labelColor: color, showNotification: false);
+                      if (created != null) {
+                        setState(() => selectedLabel = created);
+                      }
                       return created;
                     },
                   ),

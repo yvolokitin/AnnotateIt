@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/notification.dart' as NotificationModel;
 import '../../data/notification_database.dart';
+import '../../utils/color_utils.dart';
 
 class NotificationsDialog extends StatefulWidget {
   const NotificationsDialog({super.key});
@@ -121,7 +122,7 @@ class NotificationsDialogState extends State<NotificationsDialog> {
 
   Color _parseColor(String colorHex) {
     try {
-      return Color(int.parse(colorHex.replaceFirst('#', '0x')));
+      return colorFromHex(colorHex);
     } catch (e) {
       return Colors.grey;
     }
