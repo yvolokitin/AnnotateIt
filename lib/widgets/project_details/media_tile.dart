@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vthumb;
@@ -190,7 +191,7 @@ class _MediaTileState extends State<MediaTile> {
                                 ),
                           );
                           if (deleted != null && deleted.isNotEmpty) {
-                            debugPrint('Media deleted: \\${media.filePath}');
+                            if (kDebugMode) debugPrint('Media deleted: \\${media.filePath}');
                             widget.onRefreshNeeded?.call();
                           }
                           break;
@@ -331,7 +332,9 @@ class _MediaTileState extends State<MediaTile> {
     }
 
     final logPrefix = '[MEDIA_TILE_VIDEO] ';
-    void log(String msg) => print(logPrefix + msg);
+    void log(String msg) {
+      if (kDebugMode) print(logPrefix + msg);
+    }
 
     try {
       final currentUser = UserSession.instance.getUser();

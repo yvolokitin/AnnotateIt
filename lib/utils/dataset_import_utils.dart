@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:isolate';
+
+import 'package:flutter/foundation.dart';
 import 'package:archive/archive_io.dart' as zip;
 import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
@@ -110,7 +112,7 @@ Future<DatasetAnnotationStats> countDatasetAnnotationsAndLabels(
     }
   }
 
-  print('labels: $labels');
+  if (kDebugMode) print('labels: $labels');
   return DatasetAnnotationStats(
     annotationCount: annotationCount,
     annotatedFilesCount: annotatedMediaFiles.length,

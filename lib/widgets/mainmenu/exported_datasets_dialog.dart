@@ -85,7 +85,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
       if (!(Platform.isAndroid || Platform.isIOS)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Save is available on Android/iOS only')),
+            const SnackBar(content: Text('Save is available on mobile devices only')),
           );
         }
         return;

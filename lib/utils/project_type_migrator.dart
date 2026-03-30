@@ -97,7 +97,7 @@ class ProjectTypeMigrator {
       return deletedCount;
     });
 
-    debugPrint('Deleted $deleted annotations');
+    if (kDebugMode) debugPrint('Deleted $deleted annotations');
   }
 
   /// Deletes all labels except the first two (by order), and removes annotations that refer to removed labels.
@@ -271,7 +271,7 @@ class ProjectTypeMigrator {
       }
 
       if (x == null || y == null || w == null || h == null) {
-        debugPrint('Skipping invalid bbox (missing values): $data');
+        if (kDebugMode) debugPrint('Skipping invalid bbox (missing values): $data');
         return {};
       }
 
@@ -284,7 +284,7 @@ class ProjectTypeMigrator {
         ]
       };
     } catch (e) {
-      debugPrint('Exception in _convertBboxToPolygon: $e\nData: $data');
+      if (kDebugMode) debugPrint('Exception in _convertBboxToPolygon: $e\nData: $data');
       return {};
     }
   }
@@ -319,7 +319,7 @@ static Map<String, dynamic> _convertPolygonToBbox(Map<String, dynamic> data) {
         }
       }
     } else {
-      debugPrint('⚠️ Unknown point format: $rawPoints');
+      if (kDebugMode) debugPrint('⚠️ Unknown point format: $rawPoints');
       return {};
     }
 
@@ -337,7 +337,7 @@ static Map<String, dynamic> _convertPolygonToBbox(Map<String, dynamic> data) {
       'height': yMax - yMin,
     };
   } catch (e) {
-    debugPrint('⚠️ Exception in _convertPolygonToBbox: $e\nData: $data');
+    if (kDebugMode) debugPrint('⚠️ Exception in _convertPolygonToBbox: $e\nData: $data');
     return {};
   }
 }

@@ -1,4 +1,7 @@
 import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+
 import 'shape.dart';
 
 /// A polygon shape represented by a list of points (Offset).
@@ -10,7 +13,7 @@ class PolygonShape extends Shape {
   /// Parses a PolygonShape from a JSON map.
   static PolygonShape? fromJson(Map<String, dynamic> json) {
     if (!json.containsKey('points') || json['points'] is! List) {
-      print('[PolygonShape] Warning: Missing or invalid "points" key. Data: $json');
+      if (kDebugMode) print('[PolygonShape] Warning: Missing or invalid "points" key. Data: $json');
       return null;
     }
 
@@ -50,13 +53,13 @@ class PolygonShape extends Shape {
       }
 
       if (parsedPoints.isEmpty) {
-        print('[PolygonShape] Warning: No valid points found. Raw points: $rawPoints');
+        if (kDebugMode) print('[PolygonShape] Warning: No valid points found. Raw points: $rawPoints');
         return null;
       }
 
       return PolygonShape(parsedPoints);
     } catch (e) {
-      print('[PolygonShape] Failed to parse points. Error: $e. Raw: $rawPoints');
+      if (kDebugMode) print('[PolygonShape] Failed to parse points. Error: $e. Raw: $rawPoints');
       return null;
     }
   }

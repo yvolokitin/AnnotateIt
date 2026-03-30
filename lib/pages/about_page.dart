@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../gen_l10n/app_localizations.dart';
 import '../widgets/responsive/responsive_layout.dart';
 import '../widgets/responsive/responsive_text.dart';
@@ -7,10 +8,17 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutWidget extends StatelessWidget {
   const AboutWidget({super.key});
-  
+
+  static const String _privacyPolicyUrl = 'https://annotateit.ai/privacy';
+
   Future<String> getAppVersion() async {
     final info = await PackageInfo.fromPlatform();
     return 'v${info.version} (Build ${info.buildNumber})';
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    final uri = Uri.parse(_privacyPolicyUrl);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -103,17 +111,21 @@ class AboutWidget extends StatelessWidget {
                       );
                     },
                   ),
-/*
-                  ResponsiveText(
-                    'Version: $appVersion',
-                    maxSize: 16,
-                    minSize: 12,
-                    style: TextStyle(
-                      fontFamily: 'CascadiaCode',
-                      color: Colors.grey[400],
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: _openPrivacyPolicy,
+                    child: ResponsiveText(
+                      'Privacy Policy',
+                      maxSize: 16,
+                      minSize: 12,
+                      style: TextStyle(
+                        fontFamily: 'CascadiaCode',
+                        color: Colors.blueAccent,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blueAccent,
+                      ),
                     ),
                   ),
-*/                  
                 ],
               ),
             ),

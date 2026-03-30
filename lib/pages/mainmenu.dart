@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
 import "../data/project_database.dart";
@@ -41,7 +42,7 @@ class MainPageState extends State<MainPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        print('Height $screenHeight, Width $screenWidth');
+        if (kDebugMode) print('Height $screenHeight, Width $screenWidth');
         return Scaffold(
           key: _scaffoldKey,
           bottomNavigationBar: screenWidth < 800

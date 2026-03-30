@@ -1,4 +1,7 @@
 import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+
 import 'shape.dart';
 
 /// A simple rectangle shape with top-left origin and size (width, height).
@@ -24,7 +27,7 @@ class RectShape extends Shape {
             (list[3] as num).toDouble(),
           );
         } else {
-          print('[RectShape] Warning: bbox list too short: $json');
+          if (kDebugMode) print('[RectShape] Warning: bbox list too short: $json');
           return null;
         }
       }
@@ -37,7 +40,7 @@ class RectShape extends Shape {
       if (!json.containsKey('height')) missing.add('height');
 
       if (missing.isNotEmpty) {
-        print('[RectShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
+        if (kDebugMode) print('[RectShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
         return null;
       }
 
@@ -48,7 +51,7 @@ class RectShape extends Shape {
         (json['height'] as num).toDouble(),
       );
     } catch (e) {
-      print('[RectShape] Failed to parse shape: $e. Raw: $json');
+      if (kDebugMode) print('[RectShape] Failed to parse shape: $e. Raw: $json');
       return null;
     }
   }

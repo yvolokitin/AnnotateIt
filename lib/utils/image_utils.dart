@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path;
 
@@ -29,11 +30,11 @@ Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async
     final thumbnailFile = File(thumbnailPath);
     await thumbnailFile.writeAsBytes(thumbnailBytes);
 
-    print('Thumbnail created at: $thumbnailPath');
+    if (kDebugMode) print('Thumbnail created at: $thumbnailPath');
     return thumbnailFile;
 
   } catch (e) {
-    print('Error when tried to create thumbnail: $e');
+    if (kDebugMode) print('Error when tried to create thumbnail: $e');
     return null;
   }
 }
@@ -140,9 +141,9 @@ Future<void> deleteMediaItem({
       }
     }
 
-    print('Media item ${mediaItem.id} deleted (file: $deleteFile)');
+    if (kDebugMode) print('Media item ${mediaItem.id} deleted (file: $deleteFile)');
   } catch (e) {
-    print('Error deleting media item: $e');
+    if (kDebugMode) print('Error deleting media item: $e');
     rethrow;
   }
 }

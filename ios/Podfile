@@ -42,6 +42,20 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
 
+  # Limit permission_handler to only the permissions this app actually uses.
+  # Without this, ALL permission APIs are compiled in and Apple rejects for
+  # undeclared privacy-sensitive API usage (guideline 5.1.1 / 2.5.4).
+  installer.pods_project.targets.each do |target|
+    if target.name == 'permission_handler_apple'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'PERMISSION_CAMERA=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'PERMISSION_PHOTOS=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'PERMISSION_MICROPHONE=1'
+      end
+    end
+  end
+
   # Force ALL pods/targets to iOS 15.5 to avoid auto-assigning 12.0
   installer.pods_project.targets.each do |t|
     t.build_configurations.each do |config|

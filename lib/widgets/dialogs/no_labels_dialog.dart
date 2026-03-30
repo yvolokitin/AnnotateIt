@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
@@ -258,7 +259,7 @@ class NoLabelsDialog extends StatelessWidget {
                       // Notify parent with updated labels
                       onLabelsImported(updatedLabels);
                     } catch (e) {
-                      print('Failed to set default label: ${e.toString()}');
+                      if (kDebugMode) print('Failed to set default label: ${e.toString()}');
                       // Still notify parent with original labels if setting default fails
                       onLabelsImported(labelsToImport);
                     }

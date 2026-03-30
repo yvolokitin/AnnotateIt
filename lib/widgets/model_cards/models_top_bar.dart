@@ -51,7 +51,7 @@ class ModelsTopBar extends StatelessWidget {
             onTap: () => _showBetaDetailsDialog(context),
             child: Chip(
               label: Text(
-                'Beta',
+                'Preview',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,

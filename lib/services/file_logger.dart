@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
@@ -27,7 +28,7 @@ class FileLogger {
       }
       
       if (documentsDir == null) {
-        print('[FileLogger] Could not get documents directory');
+        if (kDebugMode) print('[FileLogger] Could not get documents directory');
         return null;
       }
       
@@ -50,11 +51,11 @@ class FileLogger {
       await _writeToFile('[${DateTime.now()}] AnnotateIt logging started\n');
       
       _isInitialized = true;
-      print('[FileLogger] Initialized successfully. Log file: $_logFilePath');
+      if (kDebugMode) print('[FileLogger] Initialized successfully. Log file: $_logFilePath');
       
       return _logFilePath;
     } catch (e) {
-      print('[FileLogger] Failed to initialize: $e');
+      if (kDebugMode) print('[FileLogger] Failed to initialize: $e');
       return null;
     }
   }
@@ -86,7 +87,7 @@ class FileLogger {
       await _writeToFile(logLine);
     } catch (e) {
       // Silently fail to avoid recursive logging issues
-      print('[FileLogger] Failed to write log: $e');
+      if (kDebugMode) print('[FileLogger] Failed to write log: $e');
     }
   }
   
@@ -95,7 +96,7 @@ class FileLogger {
     try {
       await _logFile!.writeAsString(content, mode: FileMode.append);
     } catch (e) {
-      print('[FileLogger] Failed to write to file: $e');
+      if (kDebugMode) print('[FileLogger] Failed to write to file: $e');
     }
   }
   
@@ -115,7 +116,7 @@ class FileLogger {
       final directory = path.dirname(_logFilePath!);
       await Process.run('explorer', [directory]);
     } catch (e) {
-      print('[FileLogger] Failed to open log file location: $e');
+      if (kDebugMode) print('[FileLogger] Failed to open log file location: $e');
     }
   }
   
@@ -143,7 +144,7 @@ class FileLogger {
       await _logFile!.writeAsString('');
       await _writeToFile('[${DateTime.now()}] Log file cleared\n');
     } catch (e) {
-      print('[FileLogger] Failed to clear log file: $e');
+      if (kDebugMode) print('[FileLogger] Failed to clear log file: $e');
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../../utils/theme.dart';
@@ -295,8 +296,8 @@ class ChangeProjectTypeDialogState extends State<ChangeProjectTypeDialog> with S
         }
 
       } catch (e, stack) {
-        debugPrint('Error during project type migration: $e');
-        debugPrint(stack.toString());
+        if (kDebugMode) debugPrint('Error during project type migration: $e');
+        if (kDebugMode) debugPrint(stack.toString());
 
         if (mounted) {
           _rotationController.stop();

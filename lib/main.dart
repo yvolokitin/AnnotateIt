@@ -1,4 +1,5 @@
 import 'dart:io';
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
@@ -47,32 +48,29 @@ void main() async {
   try {
     logFilePath = await FileLogger.instance.initialize();
   } catch (e) {
-    print('[main] Failed to initialize file logger: $e');
+    if (kDebugMode) print('[main] Failed to initialize file logger: $e');
   }
 
-  // Setup logging with both console and file output
-  Logger.root.level = Level.ALL;
+  Logger.root.level = kReleaseMode ? Level.WARNING : Level.ALL;
   Logger.root.onRecord.listen((record) {
-    // Console output (existing)
-    print(
-      '${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}',
-    );
-    if (record.error != null) {
-      print('Error: ${record.error}');
-    }
-    if (record.stackTrace != null) {
-      print('StackTrace: ${record.stackTrace}');
+    if (kDebugMode) {
+      print(
+        '${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}',
+      );
+      if (record.error != null) {
+        print('Error: ${record.error}');
+      }
+      if (record.stackTrace != null) {
+        print('StackTrace: ${record.stackTrace}');
+      }
     }
 
-    // File output (new)
     try {
       if (UserSession.instance.isInitialized &&
           UserSession.instance.getUser().saveApplicationLogInFile) {
         FileLogger.instance.writeLogRecord(record);
       }
-    } catch (_) {
-      // If UserSession isn't ready yet or any error occurs, skip file logging.
-    }
+    } catch (_) {}
   });
 
   final log = Logger('main');
@@ -231,13 +229,12 @@ class AnnotateItAppState extends State<AnnotateItApp> {
         // Explicitly set the locale to the user's language preference
         _locale = Locale(userLanguage);
       });
-      print('App locale updated to: $userLanguage');
+      if (kDebugMode) print('App locale updated to: $userLanguage');
     } else {
       setState(() {
-        // If no language preference, reset locale to use system default
         _locale = null;
       });
-      print('App locale reset to system default');
+      if (kDebugMode) print('App locale reset to system default');
     }
   }
 

@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -230,7 +232,7 @@ class ProjectDatabase {
         whereArgs: [projectId],
       );
 
-      print('dataset.id ${dataset.id} for $projectName created');
+      if (kDebugMode) print('dataset.id ${dataset.id} for $projectName created');
 
       // Return a new complete Project object
       return project.copyWith(id: projectId, defaultDatasetId: dataset.id);

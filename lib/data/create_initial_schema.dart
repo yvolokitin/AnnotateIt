@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -54,7 +55,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       path.join(rootPath, datasetImportFolder),
     ).create(recursive: true);
   } catch (e) {
-    print('Warning: Could not create datasets directory: $e');
+    if (kDebugMode) print('Warning: Could not create datasets directory: $e');
   }
 
   // Create folders if they don't exist - with error handling
@@ -63,7 +64,7 @@ Future<void> createInitialSchema(Database db, int version) async {
       path.join(rootPath, datasetExportFolder),
     ).create(recursive: true);
   } catch (e) {
-    print('Warning: Could not create exports directory: $e');
+    if (kDebugMode) print('Warning: Could not create exports directory: $e');
   }
 
   try {
@@ -71,13 +72,13 @@ Future<void> createInitialSchema(Database db, int version) async {
       path.join(rootPath, thumbnailFolder),
     ).create(recursive: true);
   } catch (e) {
-    print('Warning: Could not create thumbnails directory: $e');
+    if (kDebugMode) print('Warning: Could not create thumbnails directory: $e');
   }
 
   try {
     await Directory(path.join(rootPath, modelsFolder)).create(recursive: true);
   } catch (e) {
-    print('Warning: Could not create models directory: $e');
+    if (kDebugMode) print('Warning: Could not create models directory: $e');
   }
 
   final now = DateTime.now().toIso8601String();

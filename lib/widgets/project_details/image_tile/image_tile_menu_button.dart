@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../gen_l10n/app_localizations.dart';
@@ -96,7 +97,7 @@ class ImageTileMenuButton extends StatelessWidget {
             );
             
             if (deleted != null && deleted.isNotEmpty) {
-              debugPrint('Image deleted: ${media.mediaItem.filePath}');
+              if (kDebugMode) debugPrint('Image deleted: ${media.mediaItem.filePath}');
               onDeleted?.call();
             }
             break;

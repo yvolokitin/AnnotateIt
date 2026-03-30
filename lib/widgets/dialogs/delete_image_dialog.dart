@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../models/media_item.dart';
@@ -47,10 +48,10 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
           // Delete only from DB, keep physical files intact
           try {
             await DatasetDatabase.instance.deleteMediaItemWithAnnotations(mediaItem.id!);
-            debugPrint('Deleted from DB only: ${mediaItem.filePath}');
+            if (kDebugMode) debugPrint('Deleted from DB only: ${mediaItem.filePath}');
             _successfullyDeleted.add(mediaItem.filePath);
           } catch (e) {
-            debugPrint('Failed to delete DB record for: ${mediaItem.filePath}\n$e');
+            if (kDebugMode) debugPrint('Failed to delete DB record for: ${mediaItem.filePath}\n$e');
           }
           continue;
         }
@@ -62,11 +63,11 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
         if (await file.exists()) {
           try {
             await file.delete();
-            debugPrint('Successfully deleted: ${mediaItem.filePath}');
+            if (kDebugMode) debugPrint('Successfully deleted: ${mediaItem.filePath}');
             fileDeleted = true;
             _successfullyDeleted.add(mediaItem.filePath);
           } catch (e) {
-            debugPrint('Failed to delete file: ${mediaItem.filePath}\n$e');
+            if (kDebugMode) debugPrint('Failed to delete file: ${mediaItem.filePath}\n$e');
           }
         }
 
@@ -75,7 +76,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
           try {
             await DatasetDatabase.instance.deleteMediaItemWithAnnotations(mediaItem.id!);
           } catch (e) {
-            debugPrint('Failed to delete DB record for: ${mediaItem.filePath}\n$e');
+            if (kDebugMode) debugPrint('Failed to delete DB record for: ${mediaItem.filePath}\n$e');
             _successfullyDeleted.remove(mediaItem.filePath);
           }
         }
@@ -96,7 +97,7 @@ class _DeleteImageDialogState extends State<DeleteImageDialog> {
         }
       }
     } catch (e, stack) {
-      debugPrint('Error in deletion process: $e\n$stack');
+      if (kDebugMode) debugPrint('Error in deletion process: $e\n$stack');
       if (mounted) {
         Navigator.of(context).pop();
         await AlertErrorDialog.show(

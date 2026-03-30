@@ -1,4 +1,6 @@
- import 'dart:ui';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 
 import '../annotation.dart';
 
@@ -65,11 +67,11 @@ abstract class Shape {
         case 'circle':
           return CircleShape.fromJson(json);
         default:
-          print('[Shape] Unknown annotation type: ${annotation.annotationType}');
+          if (kDebugMode) print('[Shape] Unknown annotation type: ${annotation.annotationType}');
           return null;
       }
     } catch (e) {
-      print('[Shape] Failed to parse annotation: $e');
+      if (kDebugMode) print('[Shape] Failed to parse annotation: $e');
       return null;
     }
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/media_item.dart';
@@ -46,7 +47,7 @@ class _SetImageIconDialogState extends State<SetImageIconDialog> {
       }
     } catch (e) {
       setState(() => _hasError = true);
-      debugPrint('Thumbnail generation failed: $e');
+      if (kDebugMode) debugPrint('Thumbnail generation failed: $e');
     } finally {
       if (mounted) setState(() => _isGenerating = false);
     }

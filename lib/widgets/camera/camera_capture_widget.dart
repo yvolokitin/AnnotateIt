@@ -379,7 +379,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             return;
           }
         } catch (e) {
-          print('Failed to launch Windows Camera app: $e');
+          if (kDebugMode) print('Failed to launch Windows Camera app: $e');
           
           // Show an error dialog and offer to use gallery picker instead
           final bool proceedWithGallery = await showDialog<bool>(

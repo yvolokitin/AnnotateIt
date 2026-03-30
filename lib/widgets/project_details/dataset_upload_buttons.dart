@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart' as img;
@@ -282,7 +283,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       widget.onUploadingChanged(false);
       widget.onUploadSuccess();
     } catch (e) {
-      print("_uploadMedia: Upload error: $e");
+      if (kDebugMode) print("_uploadMedia: Upload error: $e");
       widget.onUploadingChanged(false);
       widget.onUploadError?.call();
       if (mounted) {
@@ -304,7 +305,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       final line =
           '[VIDEO_IMPORT] ' + DateTime.now().toIso8601String() + ' ' + msg;
       _logs.add(line);
-      print(line);
+      if (kDebugMode) print(line);
     }
 
     try {
@@ -1215,8 +1216,8 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         );
       }
     } catch (e, st) {
-      print('_uploadVideoAsFrames error: ' + e.toString());
-      print(st.toString());
+      if (kDebugMode) print('_uploadVideoAsFrames error: ' + e.toString());
+      if (kDebugMode) print(st.toString());
       widget.onUploadingChanged(false);
       widget.onUploadError?.call();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1369,7 +1370,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         widget.onUploadingChanged(false);
       }
     } catch (e) {
-      print("_openCamera: Camera error: $e");
+      if (kDebugMode) print("_openCamera: Camera error: $e");
       widget.onUploadingChanged(false);
       widget.onUploadError?.call();
 

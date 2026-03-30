@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -264,7 +265,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             }
           } catch (e) {
             // Log and continue; image save succeeded even if annotation cleanup failed
-            debugPrint('Failed to delete annotations for media item: $e');
+            if (kDebugMode) debugPrint('Failed to delete annotations for media item: $e');
           }
           
           // Properly dispose of the old image before removing it from the cache

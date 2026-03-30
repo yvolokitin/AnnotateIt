@@ -880,7 +880,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           context,
           'ML Kit Not Supported',
           'ML Kit image labeling is not supported on this platform.',
-          tips: 'ML Kit is only available on Android and iOS devices.',
+          tips: 'ML Kit is only available on mobile devices.',
         );
         return;
       }
@@ -900,7 +900,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       if (!_samBetaNotified) {
         AppSnackbar.show(
           context,
-          'SAM is integrated in Beta quality. Results may be inaccurate and performance may vary.',
+          'SAM is in preview. Results may be inaccurate and performance may vary.',
           saveToDb: false,
         );
         _samBetaNotified = true;

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 
@@ -197,7 +198,7 @@ class DatasetImportProjectCreation {
 
     final dir = Directory(datasetPath);
     if (!await dir.exists()) {
-      print("ERROR: Dataset folder not found: $datasetPath");
+      if (kDebugMode) print("ERROR: Dataset folder not found: $datasetPath");
       throw Exception("Dataset folder not found: $datasetPath");
     }
 
@@ -217,13 +218,13 @@ class DatasetImportProjectCreation {
 
         final ext = p.extension(path).toLowerCase().replaceAll('.', '');
         if (!allowedExtensions.contains(ext)) {
-          print("Skipped unsupported file: $path");
+          if (kDebugMode) print("Skipped unsupported file: $path");
           continue;
         }
 
         final fileLength = await entity.length();
         if (fileLength < 100) {
-          print("Skipped tiny/corrupt file (<100 bytes): $path");
+          if (kDebugMode) print("Skipped tiny/corrupt file (<100 bytes): $path");
           continue;
         }
 
@@ -238,9 +239,9 @@ class DatasetImportProjectCreation {
               throw Exception('Image dimensions are invalid');
             }
             firstImagePath = path;
-            print("First valid image for thumbnail: $firstImagePath");
+            if (kDebugMode) print("First valid image for thumbnail: $firstImagePath");
           } catch (e) {
-            print("Invalid image file skipped (cannot decode): $path\n$e");
+            if (kDebugMode) print("Invalid image file skipped (cannot decode): $path\n$e");
             continue;
           }
         }
@@ -250,15 +251,15 @@ class DatasetImportProjectCreation {
     }
 
     final total = mediaFiles.length;
-    print("Scan complete: $folderCount folders, $fileCount files found.");
-    print("Total media files to insert: $total");
+    if (kDebugMode) print("Scan complete: $folderCount folders, $fileCount files found.");
+    if (kDebugMode) print("Total media files to insert: $total");
 
     if (total == 0) {
       throw Exception("No valid media files found. Nothing to insert.");
     }
 
     final extractMetadata = total <= 5000; // ⚠️ Threshold logic here
-    print("Metadata extraction: ${extractMetadata ? 'ENABLED' : 'DISABLED'}");
+    if (kDebugMode) print("Metadata extraction: ${extractMetadata ? 'ENABLED' : 'DISABLED'}");
 
     int current = 0;
     onProgress(0, total);
@@ -315,7 +316,7 @@ class DatasetImportProjectCreation {
       }
     }
 
-    print("Finished inserting $total media files into dataset $datasetId");
+    if (kDebugMode) print("Finished inserting $total media files into dataset $datasetId");
     return firstImagePath;
   }
 
@@ -324,7 +325,7 @@ class DatasetImportProjectCreation {
     required List<String> labelNames,
   }) async {
     if (labelNames.isEmpty) {
-      print("No labels to add.");
+      if (kDebugMode) print("No labels to add.");
       return [];
     }
 
@@ -365,7 +366,7 @@ class DatasetImportProjectCreation {
       insertedLabels.add(label.copyWith(id: labelId));
     }
 
-    print("Added ${insertedLabels.length} labels to project $projectId");
+    if (kDebugMode) print("Added ${insertedLabels.length} labels to project $projectId");
     return insertedLabels;
   }
 

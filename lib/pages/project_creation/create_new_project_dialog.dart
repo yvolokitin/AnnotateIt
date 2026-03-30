@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../gen_l10n/app_localizations.dart';
@@ -329,7 +330,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         Navigator.pop(context, 'refresh');
 
       } catch (e, stack) {
-        debugPrint('Error while creating project: $e\n$stack');
+        if (kDebugMode) debugPrint('Error while creating project: $e\n$stack');
 
         AlertErrorDialog.show(
           context,

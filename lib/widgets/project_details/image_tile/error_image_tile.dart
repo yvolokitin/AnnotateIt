@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../gen_l10n/app_localizations.dart';
@@ -117,7 +118,7 @@ class _ErrorImageTileState extends State<ErrorImageTile> {
                             ),
                           );
                           if (deleted != null && deleted.isNotEmpty) {
-                            debugPrint('Image deleted: \\${widget.media.mediaItem.filePath}');
+                            if (kDebugMode) debugPrint('Image deleted: \\${widget.media.mediaItem.filePath}');
                             widget.onRefreshNeeded?.call();
                           }
                           break;

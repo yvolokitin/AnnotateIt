@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/shape/shape.dart';
@@ -85,7 +86,7 @@ class CanvasPainter extends CustomPainter {
             );
           }
         } else {
-          debugPrint('Shape is null for annotation: ${annotation.id}');
+          if (kDebugMode) debugPrint('Shape is null for annotation: ${annotation.id}');
         }
       }
     }

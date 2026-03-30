@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
 import 'shape.dart';
 
 /// A shape representing a rotated rectangle.
@@ -23,7 +25,7 @@ class RotatedRectShape extends Shape {
     if (!json.containsKey('angle')) missing.add('angle');
 
     if (missing.isNotEmpty) {
-      print('[RotatedRectShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
+      if (kDebugMode) print('[RotatedRectShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
       return null;
     }
 
@@ -36,7 +38,7 @@ class RotatedRectShape extends Shape {
         (json['angle'] as num).toDouble(),
       );
     } catch (e) {
-      print('[RotatedRectShape] Failed to parse fields. Error: $e. Raw: $json');
+      if (kDebugMode) print('[RotatedRectShape] Failed to parse fields. Error: $e. Raw: $json');
       return null;
     }
   }

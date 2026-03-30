@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/notification.dart' as NotificationModel;
@@ -51,7 +52,7 @@ class AppSnackbar {
       await NotificationDatabase.instance.create(notification);
     } catch (e) {
       // Silently fail to avoid recursive notification issues
-      print('Failed to save notification to database: $e');
+      if (kDebugMode) print('Failed to save notification to database: $e');
     }
   }
 

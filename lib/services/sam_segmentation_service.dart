@@ -76,10 +76,10 @@ class SamSegmentationService {
           encoderUrl: urls.encoder,
           decoderUrl: urls.decoder,
         );
-        debugPrint('[SAM] initialize variant='+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
+        if (kDebugMode) debugPrint('[SAM] initialize variant='+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
       } catch (e) {
         _webSamReady = false;
-        debugPrint('[SAM] initialize failed variant='+_currentVariant.toString()+', error='+e.toString());
+        if (kDebugMode) debugPrint('[SAM] initialize failed variant='+_currentVariant.toString()+', error='+e.toString());
       }
     }
   }
@@ -103,10 +103,10 @@ class SamSegmentationService {
           encoderUrl: urls.encoder,
           decoderUrl: urls.decoder,
         );
-        debugPrint('[SAM] setModelVariant to '+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
+        if (kDebugMode) debugPrint('[SAM] setModelVariant to '+_currentVariant.toString()+', encoder='+urls.encoder+', decoder='+urls.decoder+', ready='+_webSamReady.toString());
       } catch (e) {
         _webSamReady = false;
-        debugPrint('[SAM] setModelVariant failed '+_currentVariant.toString()+', error='+e.toString());
+        if (kDebugMode) debugPrint('[SAM] setModelVariant failed '+_currentVariant.toString()+', error='+e.toString());
       }
     }
   }
@@ -142,7 +142,7 @@ class SamSegmentationService {
           tapY1024,
         );
         if (mask == null || mask.length != 256 * 256) {
-          debugPrint('[SAM] Decoder mask invalid (mask==null: '+(mask==null).toString()+', len: '+(mask==null?0:mask.length).toString()+'). Falling back to heuristic.');
+          if (kDebugMode) debugPrint('[SAM] Decoder mask invalid (mask==null: '+(mask==null).toString()+', len: '+(mask==null?0:mask.length).toString()+'). Falling back to heuristic.');
           return _fallbackEllipse(image: image, center: tapPoint);
         }
 

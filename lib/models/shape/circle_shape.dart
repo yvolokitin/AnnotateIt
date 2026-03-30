@@ -1,4 +1,7 @@
 import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+
 import 'shape.dart';
 
 /// A circle shape defined by a center point and radius.
@@ -17,7 +20,7 @@ class CircleShape extends Shape {
     if (!json.containsKey('r')) missing.add('r');
 
     if (missing.isNotEmpty) {
-      print('[CircleShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
+      if (kDebugMode) print('[CircleShape] Warning: Missing fields: ${missing.join(', ')}. Skipping shape. Raw: $json');
       return null;
     }
 
@@ -28,7 +31,7 @@ class CircleShape extends Shape {
         (json['r'] as num).toDouble(),
       );
     } catch (e) {
-      print('[CircleShape] Failed to parse fields. Error: $e. Raw: $json');
+      if (kDebugMode) print('[CircleShape] Failed to parse fields. Error: $e. Raw: $json');
       return null;
     }
   }

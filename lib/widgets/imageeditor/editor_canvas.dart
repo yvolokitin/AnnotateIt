@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -41,7 +42,7 @@ class EditorCanvas extends StatefulWidget {
       // This is a workaround to access the private method
       return await (state as dynamic).getCroppedImage();
     } catch (e) {
-      print('Error getting cropped image: $e');
+      if (kDebugMode) print('Error getting cropped image: $e');
       return null;
     }
   }
@@ -53,7 +54,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return null;
       return (state as dynamic).getCropRectInImageCoordinates();
     } catch (e) {
-      print('Error getting crop rect: $e');
+      if (kDebugMode) print('Error getting crop rect: $e');
       return null;
     }
   }
@@ -65,7 +66,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).rotateLeft();
     } catch (e) {
-      print('Error rotating left: $e');
+      if (kDebugMode) print('Error rotating left: $e');
     }
   }
 
@@ -75,7 +76,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).rotateRight();
     } catch (e) {
-      print('Error rotating right: $e');
+      if (kDebugMode) print('Error rotating right: $e');
     }
   }
 
@@ -85,7 +86,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).flipHorizontal();
     } catch (e) {
-      print('Error flipping horizontal: $e');
+      if (kDebugMode) print('Error flipping horizontal: $e');
     }
   }
 
@@ -95,7 +96,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).flipVertical();
     } catch (e) {
-      print('Error flipping vertical: $e');
+      if (kDebugMode) print('Error flipping vertical: $e');
     }
   }
 
@@ -106,7 +107,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).zoomIn();
     } catch (e) {
-      print('Error zooming in: $e');
+      if (kDebugMode) print('Error zooming in: $e');
     }
   }
 
@@ -116,7 +117,7 @@ class EditorCanvas extends StatefulWidget {
       if (state == null) return;
       (state as dynamic).zoomOut();
     } catch (e) {
-      print('Error zooming out: $e');
+      if (kDebugMode) print('Error zooming out: $e');
     }
   }
   

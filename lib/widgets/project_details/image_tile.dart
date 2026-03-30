@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../pages/annotator_page.dart';
@@ -148,7 +149,7 @@ class _ImageTileState extends State<ImageTile> {
                     media: widget.mediaItem,
                     onDuplicate: (withAnnotations) => widget.onImageDuplicated?.call(widget.mediaItem, withAnnotations),
                     onProjectThumbnailUpdate: (thumbnailPath) {
-                      print('Thumbnail updated: $thumbnailPath');
+                      if (kDebugMode) print('Thumbnail updated: $thumbnailPath');
                     },
                     onAnnotate: () async {
                       final result = await Navigator.push(
