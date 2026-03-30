@@ -341,45 +341,71 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   void _createPolygonAnnotation() async {
     if (_polygonPoints.length < 3) return;
 
-    // Create a copy of the points list to ensure we don't modify the original
     List<Offset> finalPoints = List<Offset>.from(_polygonPoints);
 
-    // Ensure the polygon is properly closed by making the last point exactly match the first point
-    // This guarantees that all points are connected in the final polygon
     if ((finalPoints.last - finalPoints.first).distance > 0.1) {
       finalPoints.add(finalPoints.first);
     }
 
-    final newAnnotation =
+    final now = DateTime.now();
+    var newAnnotation =
         Annotation(
-            id: DateTime.now().millisecondsSinceEpoch,
+            id: null,
             mediaItemId: widget.mediaItemId,
             labelId: widget.selectedLabel.id!,
             annotationType: 'polygon',
             data: {
               'points': finalPoints.map((p) => [p.dx, p.dy]).toList(),
             },
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
+            createdAt: now,
+            updatedAt: now,
           )
           ..name = widget.selectedLabel.name
           ..color = widget.selectedLabel.toColor();
+
+    if (UserSession.instance.autoSaveAnnotations) {
+      try {
+        final insertedId = await _annotationRepository.insertAnnotation(
+          newAnnotation,
+        );
+        newAnnotation = newAnnotation.copyWith()..name = newAnnotation.name..color = newAnnotation.color;
+        newAnnotation = Annotation(
+          id: insertedId,
+          mediaItemId: newAnnotation.mediaItemId,
+          labelId: newAnnotation.labelId,
+          annotationType: newAnnotation.annotationType,
+          data: newAnnotation.data,
+          confidence: newAnnotation.confidence,
+          annotatorId: newAnnotation.annotatorId,
+          comment: newAnnotation.comment,
+          status: newAnnotation.status,
+          version: newAnnotation.version,
+          createdAt: newAnnotation.createdAt,
+          updatedAt: newAnnotation.updatedAt,
+        )..name = newAnnotation.name..color = newAnnotation.color;
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save polygon annotation: $e'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+    }
 
     setState(() {
       _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
       widget.onAnnotationSelected?.call(newAnnotation);
 
-      // Reset polygon drawing state
       _polygonPoints = [];
       _currentPolygonPoint = null;
       _isPolygonComplete = false;
     });
 
     widget.onAnnotationUpdated?.call(newAnnotation);
-
-    if (UserSession.instance.autoSaveAnnotations) {
-      await _annotationRepository.insertAnnotation(newAnnotation);
-    }
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -546,9 +572,10 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       final rect = Rect.fromPoints(_drawingStart!, _drawingCurrent!);
 
       if (rect.width > 4 && rect.height > 4) {
-        final newAnnotation =
+        final now = DateTime.now();
+        var newAnnotation =
             Annotation(
-                id: DateTime.now().millisecondsSinceEpoch,
+                id: null,
                 mediaItemId: widget.mediaItemId,
                 labelId: widget.selectedLabel.id!,
                 annotationType: 'bbox',
@@ -558,12 +585,42 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                   'width': rect.width,
                   'height': rect.height,
                 },
-                // annotator: UserSession.instance.getUser().id!,
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
+                createdAt: now,
+                updatedAt: now,
               )
               ..name = widget.selectedLabel.name
               ..color = widget.selectedLabel.toColor();
+
+        if (UserSession.instance.autoSaveAnnotations) {
+          try {
+            final insertedId = await _annotationRepository.insertAnnotation(
+              newAnnotation,
+            );
+            newAnnotation = Annotation(
+              id: insertedId,
+              mediaItemId: newAnnotation.mediaItemId,
+              labelId: newAnnotation.labelId,
+              annotationType: newAnnotation.annotationType,
+              data: newAnnotation.data,
+              confidence: newAnnotation.confidence,
+              annotatorId: newAnnotation.annotatorId,
+              comment: newAnnotation.comment,
+              status: newAnnotation.status,
+              version: newAnnotation.version,
+              createdAt: newAnnotation.createdAt,
+              updatedAt: newAnnotation.updatedAt,
+            )..name = newAnnotation.name..color = newAnnotation.color;
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to save bbox annotation: $e'),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          }
+        }
 
         setState(() {
           _localAnnotations = List.of(_localAnnotations)..add(newAnnotation);
@@ -571,10 +628,6 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
         });
 
         widget.onAnnotationUpdated?.call(newAnnotation);
-
-        if (UserSession.instance.autoSaveAnnotations) {
-          await _annotationRepository.insertAnnotation(newAnnotation);
-        }
       }
 
       _drawingStart = null;
@@ -811,6 +864,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                         strokeWidth: widget.strokeWidth,
                         cornerSize: widget.cornerSize,
                         showAnnotationNames: widget.showAnnotationNames,
+                        showClassifications: true,
                         drawingRect:
                             (_drawingStart != null && _drawingCurrent != null)
                                 ? Rect.fromPoints(

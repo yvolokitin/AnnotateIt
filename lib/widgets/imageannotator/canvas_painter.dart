@@ -14,7 +14,7 @@ class CanvasPainter extends CustomPainter {
   final Annotation? selectedAnnotation;
   final bool showAnnotationNames;
 
-  final bool show_classifications = false;
+  final bool showClassifications;
   final Rect? drawingRect;
   final Color? drawingRectColor;
   
@@ -31,6 +31,7 @@ class CanvasPainter extends CustomPainter {
     required this.strokeWidth,
     required this.cornerSize,    
     required this.showAnnotationNames,
+    this.showClassifications = false,
     this.selectedAnnotation,
     this.drawingRect,
     this.drawingRectColor,
@@ -53,8 +54,7 @@ class CanvasPainter extends CustomPainter {
       // print('annotation.annotationType ${annotation.annotationType}');
       // Datumaro and CVAT use type = "label" for classification.
       if (annotation.annotationType == 'classification' || annotation.annotationType == 'label') {
-        // Handle classification annotations differently
-        if (show_classifications) {
+        if (showClassifications) {
           _paintClassificationAnnotation(canvas, size, annotation);
         }
         
@@ -425,6 +425,9 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       oldDelegate.selectedAnnotation?.id != selectedAnnotation?.id ||
       oldDelegate.opacity != opacity ||
       oldDelegate.scale != scale ||
+      oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.cornerSize != cornerSize ||
+      oldDelegate.showClassifications != showClassifications ||
       oldDelegate.drawingRect != drawingRect ||
       oldDelegate.showAnnotationNames != showAnnotationNames ||
       polygonChanged ||

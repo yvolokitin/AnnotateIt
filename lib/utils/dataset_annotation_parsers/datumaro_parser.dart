@@ -76,7 +76,7 @@ class DatumaroParser {
       for (final label in projectLabels) label.name.toLowerCase(): label
     };
 
-    int addedCount = 0;
+    final batch = <Annotation>[];
     final Map<int, int> labelCount = {};
     final DateTime timestamp = DateTime.now();
     final projectTypeLower = projectType.toLowerCase();
@@ -100,7 +100,6 @@ class DatumaroParser {
         return;
       }
 
-      // Assign color if missing
       if (label.color == null || label.color == '#000000') {
         final hexColor = labelIndex != null && labelColors.containsKey(labelIndex)
             ? labelColors[labelIndex]!
@@ -114,7 +113,7 @@ class DatumaroParser {
 
       if (projectTypeLower.contains('detection') && type == 'bbox') {
         final data = ann['data'] ?? ann;
-        await annotationDb.insertAnnotation(Annotation(
+        batch.add(Annotation(
           id: null,
           mediaItemId: mediaItem.id!,
           labelId: label.id!,
@@ -125,12 +124,11 @@ class DatumaroParser {
           createdAt: timestamp,
           updatedAt: timestamp,
         ));
-        addedCount++;
         labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
 
       } else if (projectTypeLower.contains('segmentation') && type == 'polygon') {
         final data = ann['points'] ?? ann['data'] ?? ann;
-        await annotationDb.insertAnnotation(Annotation(
+        batch.add(Annotation(
           id: null,
           mediaItemId: mediaItem.id!,
           labelId: label.id!,
@@ -141,33 +139,12 @@ class DatumaroParser {
           createdAt: timestamp,
           updatedAt: timestamp,
         ));
-        addedCount++;
         labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
 
       } else if (projectTypeLower.contains('classification') && type == 'label') {
-        // For binary classification, only allow one of the first two labels
         if (projectTypeLower.contains('binary')) {
           if (labelIndex == 0 || labelIndex == 1) {
-            await annotationDb.insertAnnotation(Annotation(
-              id: null,
-              mediaItemId: mediaItem.id!,
-              labelId: label.id!,
-              annotationType: 'classification',
-              data: {}, // classification doesn't need geometry
-              confidence: (ann['confidence'] as num?)?.toDouble(),
-              annotatorId: annotatorId,
-              createdAt: timestamp,
-              updatedAt: timestamp,
-            ));
-            addedCount++;
-          } else {
-            logAndSkip('Binary classification allows only first two labels. Skipping labelId $labelIndex in ${mediaItem.filePath}');
-          }
-
-        // Multi-class: only allow the first classification per image
-        } else if (projectTypeLower.contains('multi-class')) {
-          if ((labelCount[mediaItem.id!] ?? 0) == 0) {
-            await annotationDb.insertAnnotation(Annotation(
+            batch.add(Annotation(
               id: null,
               mediaItemId: mediaItem.id!,
               labelId: label.id!,
@@ -178,15 +155,30 @@ class DatumaroParser {
               createdAt: timestamp,
               updatedAt: timestamp,
             ));
-            addedCount++;
+          } else {
+            logAndSkip('Binary classification allows only first two labels. Skipping labelId $labelIndex in ${mediaItem.filePath}');
+          }
+
+        } else if (projectTypeLower.contains('multi-class')) {
+          if ((labelCount[mediaItem.id!] ?? 0) == 0) {
+            batch.add(Annotation(
+              id: null,
+              mediaItemId: mediaItem.id!,
+              labelId: label.id!,
+              annotationType: 'classification',
+              data: {},
+              confidence: (ann['confidence'] as num?)?.toDouble(),
+              annotatorId: annotatorId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            ));
             labelCount[mediaItem.id!] = 1;
           } else {
             logAndSkip('Multi-class classification allows only one label per image. Skipping extra label in ${mediaItem.filePath}');
           }
 
-        // Multi-label: allow multiple labels per image
         } else if (projectTypeLower.contains('multi-label')) {
-          await annotationDb.insertAnnotation(Annotation(
+          batch.add(Annotation(
             id: null,
             mediaItemId: mediaItem.id!,
             labelId: label.id!,
@@ -197,18 +189,16 @@ class DatumaroParser {
             createdAt: timestamp,
             updatedAt: timestamp,
           ));
-          addedCount++;
         } else {
           logAndSkip('Unrecognized classification type "$projectType" in ${mediaItem.filePath}');
         }
 
       } else if (projectTypeLower.contains('detection') && type == 'polygon' && convertPolygonsToBbox) {
-        // Convert polygon to bounding box for detection projects
         try {
           final polygonData = ann['points'] ?? ann['data'] ?? ann;
           final bboxData = _convertPolygonToBbox(polygonData);
           
-          await annotationDb.insertAnnotation(Annotation(
+          batch.add(Annotation(
             id: null,
             mediaItemId: mediaItem.id!,
             labelId: label.id!,
@@ -219,7 +209,6 @@ class DatumaroParser {
             createdAt: timestamp,
             updatedAt: timestamp,
           ));
-          addedCount++;
           labelCount[label.id!] = (labelCount[label.id!] ?? 0) + 1;
           
           _logger.info('[Datumaro] Converted polygon to bbox for detection project in ${mediaItem.filePath}');
@@ -285,12 +274,16 @@ class DatumaroParser {
       _logger.warning('[Datumaro] unknown format: missing "items" or "annotations" key');
     }
 
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
     for (final entry in labelCount.entries) {
       _logger.info('[Datumaro] labelId ${entry.key} -> ${entry.value} annotations');
     }
 
-    _logger.info('[Datumaro] added $addedCount annotations from ${annotationFile.path}');
-    return addedCount;
+    _logger.info('[Datumaro] added ${batch.length} annotations from ${annotationFile.path}');
+    return batch.length;
   }
 
   static String _randomHexColor() {

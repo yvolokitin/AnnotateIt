@@ -1,9 +1,11 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:google_ml_kit/google_ml_kit.dart' as ml_kit;
 
 import '../data/labels_database.dart';
@@ -99,7 +101,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   double currentCornerSize = 8.0;
 
   final Map<int, AnnotatedLabeledMedia> _mediaCache = {};
-  final Map<int, ui.Image> _imageCache = {};
+  final LinkedHashMap<int, ui.Image> _imageCache = LinkedHashMap<int, ui.Image>();
   // Track invalid media items (like videos) that can't be loaded as images
   final Map<int, String> _invalidMediaCache = {};
   // Common video file extensions
@@ -514,7 +516,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
           try {
             // Add the label to the project
-            final newLabel = await _addLabelToProjectInternal(label.label);
+            final newLabel = await _addLabelToProject(label.label, showNotification: false);
             if (newLabel != null) {
               addedLabels.add(newLabel);
               existingLabelNames.add(label.label.toLowerCase());
@@ -637,20 +639,22 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     }
   }
 
-  /// Limits the image cache size by removing oldest entries when the cache exceeds maxSize.
-  /// This helps prevent memory issues with large datasets.
-  ///
-  /// @param maxSize The maximum number of images to keep in the cache
-  void _limitCacheSize(int maxSize) {
-    if (_imageCache.length > maxSize) {
-      final keysToRemove = _imageCache.keys.toList().sublist(
-        0,
-        _imageCache.length - maxSize,
-      );
-      for (final key in keysToRemove) {
-        _imageCache[key]?.dispose();
-        _imageCache.remove(key);
-      }
+  static const int _maxImageCacheSize = 5;
+
+  /// Promotes [index] to most-recently-used in the LRU image cache.
+  void _touchImageCache(int index) {
+    final image = _imageCache.remove(index);
+    if (image != null) {
+      _imageCache[index] = image;
+    }
+  }
+
+  /// Evicts least-recently-used entries when cache exceeds the limit.
+  void _limitCacheSize() {
+    while (_imageCache.length > _maxImageCacheSize) {
+      final oldestKey = _imageCache.keys.first;
+      _imageCache[oldestKey]?.dispose();
+      _imageCache.remove(oldestKey);
     }
   }
 
@@ -692,7 +696,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     );
     if (_videoExtensions.contains(fileExtension)) {
       // Mark this as an invalid media item (video)
-      final fileName = filePath.substring(filePath.lastIndexOf('\\') + 1);
+      final fileName = p.basename(filePath);
       _invalidMediaCache[index] =
           'Video files are not supported for annotation: $fileName';
       if (mounted) setState(() {});
@@ -705,8 +709,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       final frame = await codec.getNextFrame();
       _imageCache[index] = frame.image;
 
-      // Limit cache size to prevent memory issues with large datasets
-      _limitCacheSize(5);
+      _limitCacheSize();
     } catch (e) {
       // Handle other invalid image formats or corrupted files
       _invalidMediaCache[index] = 'Invalid image data: ${e.toString()}';
@@ -1188,32 +1191,29 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     );
   }
 
-  /// Add a new label to the project and return the created label
-  Future<Label?> _addLabelToProjectInternal(String labelName) async {
+  /// Add a new label to the project and return the created label.
+  /// If [showNotification] is true, a SnackBar or error dialog is shown.
+  Future<Label?> _addLabelToProject(String labelName, {bool showNotification = true}) async {
     try {
-      // Generate a random color for the new label
       final random = Random();
-      final r = random.nextInt(200) + 55; // Avoid too dark colors
+      final r = random.nextInt(200) + 55;
       final g = random.nextInt(200) + 55;
       final b = random.nextInt(200) + 55;
       final color =
           '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
 
-      // Create a new label
       final newLabel = Label(
-        id: -1, // Will be assigned by the database
+        id: -1,
         projectId: widget.project.id!,
         name: labelName,
         color: color,
         labelOrder: (widget.project.labels?.length ?? 0) + 1,
       );
 
-      // Save the label to the database
       final labelDb = LabelsDatabase.instance;
       final labelId = await labelDb.insertLabel(newLabel);
 
       if (labelId != -1) {
-        // Create a complete label with the assigned ID
         final completeLabel = Label(
           id: labelId,
           projectId: newLabel.projectId,
@@ -1225,7 +1225,6 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           createdAt: DateTime.now(),
         );
 
-        // Update the project's labels in memory
         setState(() {
           final updatedLabels = List<Label>.from(widget.project.labels ?? []);
           updatedLabels.add(completeLabel);
@@ -1233,62 +1232,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
           widget.project.labels?.addAll(updatedLabels);
         });
 
-        return completeLabel;
-      }
-      return null;
-    } catch (e) {
-      _logger.severe('Error adding label to project', e);
-      return null;
-    }
-  }
-
-  /// Add a new label to the project
-  Future<void> _addLabelToProject(String labelName) async {
-    try {
-      // Generate a random color for the new label
-      final random = Random();
-      final r = random.nextInt(200) + 55; // Avoid too dark colors
-      final g = random.nextInt(200) + 55;
-      final b = random.nextInt(200) + 55;
-      final color =
-          '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
-
-      // Create a new label
-      final newLabel = Label(
-        id: -1, // Will be assigned by the database
-        projectId: widget.project.id!,
-        name: labelName,
-        color: color,
-        labelOrder: (widget.project.labels?.length ?? 0) + 1,
-      );
-
-      // Save the label to the database
-      final labelDb = LabelsDatabase.instance;
-      final labelId = await labelDb.insertLabel(newLabel);
-
-      if (labelId != -1) {
-        // Create a complete label with the assigned ID
-        final completeLabel = Label(
-          id: labelId,
-          projectId: newLabel.projectId,
-          name: newLabel.name,
-          color: newLabel.color,
-          labelOrder: newLabel.labelOrder,
-          isDefault: false,
-          description: null,
-          createdAt: DateTime.now(),
-        );
-
-        // Update the project's labels in memory
-        setState(() {
-          final updatedLabels = List<Label>.from(widget.project.labels ?? []);
-          updatedLabels.add(completeLabel);
-          widget.project.labels?.clear();
-          widget.project.labels?.addAll(updatedLabels);
-        });
-
-        // Show success message
-        if (mounted) {
+        if (showNotification && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Added label "$labelName" to project'),
@@ -1296,16 +1240,20 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
             ),
           );
         }
+
+        return completeLabel;
       }
+      return null;
     } catch (e) {
       _logger.severe('Error adding label to project', e);
-      if (mounted) {
+      if (showNotification && mounted) {
         await AlertErrorDialog.show(
           context,
           'Failed to Add Label',
           'An error occurred while adding the label: ${e.toString()}',
         );
       }
+      return null;
     }
   }
 
@@ -1339,6 +1287,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                       itemBuilder: (context, index) {
                         final media = _mediaCache[index];
                         final image = _imageCache[index];
+                        if (image != null) _touchImageCache(index);
                         final errorMessage = _invalidMediaCache[index];
 
                         // Show loading indicator if media is not loaded yet

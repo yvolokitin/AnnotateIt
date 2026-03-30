@@ -58,7 +58,7 @@ class COCOParser {
     };
 
     final projectTypeLower = projectType.toLowerCase();
-    int count = 0;
+    final batch = <Annotation>[];
 
     for (var ann in annotations) {
       final imageId = ann['image_id'] as int?;
@@ -68,10 +68,8 @@ class COCOParser {
         continue;
       }
 
-      // Try exact match
       MediaItem? mediaItem = mediaItemsMap[fileName];
 
-      // Fallback: try to find by endsWith match (ignoring folder paths)
       if (mediaItem == null) {
         final possibleMatches = mediaItemsMap.entries.where(
           (entry) => entry.key.toLowerCase().endsWith(fileName.toLowerCase()),
@@ -96,26 +94,26 @@ class COCOParser {
         continue;
       }
 
-      // Decide how to insert annotation based on project type
+      final now = DateTime.now();
+
       if (projectTypeLower.contains('segmentation')) {
         final segmentation = ann['segmentation'];
         final hasValidPolygon = segmentation is List && segmentation.isNotEmpty;
 
         if (hasValidPolygon) {
-          await annotationDb.insertAnnotation(Annotation(
+          batch.add(Annotation(
             mediaItemId: mediaItem.id!,
             labelId: labelId,
             annotationType: 'polygon',
             data: {
-              'points': List<num>.from(segmentation.first), // Use first polygon
+              'points': List<num>.from(segmentation.first),
             },
             confidence: (ann['score'] as num?)?.toDouble(),
             annotatorId: annotatorId,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
+            createdAt: now,
+            updatedAt: now,
           ));
-          _logger.finer('[COCO] Inserted polygon annotation for "$fileName"');
-          count++;
+          _logger.finer('[COCO] Prepared polygon annotation for "$fileName"');
         } else {
           _logger.warning('[COCO] Missing or invalid segmentation for image $fileName — skipping');
         }
@@ -126,7 +124,7 @@ class COCOParser {
           continue;
         }
 
-        await annotationDb.insertAnnotation(Annotation(
+        batch.add(Annotation(
           mediaItemId: mediaItem.id!,
           labelId: labelId,
           annotationType: 'bbox',
@@ -138,17 +136,20 @@ class COCOParser {
           },
           confidence: (ann['score'] as num?)?.toDouble(),
           annotatorId: annotatorId,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+          createdAt: now,
+          updatedAt: now,
         ));
-        _logger.finer('[COCO] Inserted bbox annotation for "$fileName"');
-        count++;
+        _logger.finer('[COCO] Prepared bbox annotation for "$fileName"');
       } else {
         _logger.warning('[COCO] Unknown projectType "$projectType" — skipping annotation for $fileName');
       }
     }
 
-    _logger.info('[COCO] Added $count annotations from ${annotationsFile.path}');
-    return count;
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
+    _logger.info('[COCO] Added ${batch.length} annotations from ${annotationsFile.path}');
+    return batch.length;
   }
 }

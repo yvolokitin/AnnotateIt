@@ -34,7 +34,7 @@ class YOLOParser {
       for (int i = 0; i < projectLabels.length; i++) i: projectLabels[i],
     };
 
-    int added = 0;
+    final batch = <Annotation>[];
     await for (var file in labelsDir.list()) {
       if (file is! File || !file.path.endsWith('.txt')) continue;
 
@@ -59,7 +59,6 @@ class YOLOParser {
 
         Label label = labelIndexMap[labelIndex]!;
 
-        // Assign a random color if the label doesn't have a proper one
         if (label.color == '#000000') {
           final randomColor = _randomHexColor();
           label = label.copyWith(color: randomColor);
@@ -68,6 +67,8 @@ class YOLOParser {
             '[YOLO] assigned color $randomColor to label "${label.name}"',
           );
         }
+
+        final now = DateTime.now();
 
         if (projectTypeLower.contains('detection')) {
           if (parts.length != 5) continue;
@@ -105,48 +106,61 @@ class YOLOParser {
             continue;
           }
 
-          await annotationDb.insertAnnotation(
-            Annotation(
-              mediaItemId: mediaItem.id!,
-              labelId: label.id,
-              annotationType: 'bbox',
-              data: {'x': x, 'y': y, 'width': width, 'height': height},
-              confidence: null,
-              annotatorId: annotatorId,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-          );
-          added++;
+          batch.add(Annotation(
+            mediaItemId: mediaItem.id!,
+            labelId: label.id,
+            annotationType: 'bbox',
+            data: {'x': x, 'y': y, 'width': width, 'height': height},
+            confidence: null,
+            annotatorId: annotatorId,
+            createdAt: now,
+            updatedAt: now,
+          ));
         } else if (projectTypeLower.contains('segmentation')) {
           if (parts.length < 6 || (parts.length - 1) % 2 != 0) {
             _logger.warning('[YOLO] invalid polygon annotation in $name');
             continue;
           }
 
-          final points = <double>[];
-          for (int i = 1; i < parts.length; i++) {
-            final value = double.tryParse(parts[i]);
-            if (value == null) {
-              _logger.warning('[YOLO] invalid polygon point in $name');
-              continue;
-            }
-            points.add(value);
+          final imageWidth = mediaItem.width?.toDouble();
+          final imageHeight = mediaItem.height?.toDouble();
+          if (imageWidth == null ||
+              imageHeight == null ||
+              imageWidth <= 0 ||
+              imageHeight <= 0) {
+            _logger.warning(
+              '[YOLO] missing media dimensions for ${mediaItem.filePath}; skipping polygon import',
+            );
+            continue;
           }
 
-          await annotationDb.insertAnnotation(
-            Annotation(
-              mediaItemId: mediaItem.id!,
-              labelId: label.id,
-              annotationType: 'polygon',
-              data: {'points': points},
-              confidence: null,
-              annotatorId: annotatorId,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-          );
-          added++;
+          final points = <List<double>>[];
+          bool valid = true;
+          for (int i = 1; i < parts.length - 1; i += 2) {
+            final xNorm = double.tryParse(parts[i]);
+            final yNorm = double.tryParse(parts[i + 1]);
+            if (xNorm == null || yNorm == null) {
+              _logger.warning('[YOLO] invalid polygon point in $name');
+              valid = false;
+              break;
+            }
+            points.add([
+              (xNorm * imageWidth).clamp(0.0, imageWidth),
+              (yNorm * imageHeight).clamp(0.0, imageHeight),
+            ]);
+          }
+          if (!valid || points.length < 3) continue;
+
+          batch.add(Annotation(
+            mediaItemId: mediaItem.id!,
+            labelId: label.id,
+            annotationType: 'polygon',
+            data: {'points': points},
+            confidence: null,
+            annotatorId: annotatorId,
+            createdAt: now,
+            updatedAt: now,
+          ));
         } else {
           _logger.warning(
             '[YOLO] skipping unsupported project type: $projectType',
@@ -155,8 +169,12 @@ class YOLOParser {
       }
     }
 
-    _logger.info('[YOLO] added $added annotations');
-    return added;
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
+    _logger.info('[YOLO] added ${batch.length} annotations');
+    return batch.length;
   }
 
   static String _randomHexColor() {

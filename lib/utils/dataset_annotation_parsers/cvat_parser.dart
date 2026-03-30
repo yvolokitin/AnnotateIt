@@ -33,7 +33,7 @@ class CVATParser {
       for (var label in projectLabels) label.name.toLowerCase(): label
     };
 
-    int addedCount = 0;
+    final batch = <Annotation>[];
     final files = annotationsDir
         .listSync()
         .whereType<File>()
@@ -58,7 +58,6 @@ class CVATParser {
 
         final now = DateTime.now();
 
-        // BBox annotations
         if (projectTypeLower.contains('detection')) {
           final boxes = image.findElements('box');
           for (final box in boxes) {
@@ -66,7 +65,6 @@ class CVATParser {
             final label = labelName != null ? labelMap[labelName.toLowerCase()] : null;
             if (label == null || label.id == null) continue;
 
-            // Assign random color if not set
             if (label.color == '#000000') {
               final hexColor = _randomHexColor();
               final updated = label.copyWith(color: hexColor);
@@ -82,7 +80,7 @@ class CVATParser {
 
             if (xtl == null || ytl == null || xbr == null || ybr == null) continue;
 
-            await annotationDb.insertAnnotation(Annotation(
+            batch.add(Annotation(
               mediaItemId: mediaItem.id!,
               labelId: label.id!,
               annotationType: 'bbox',
@@ -97,11 +95,9 @@ class CVATParser {
               createdAt: now,
               updatedAt: now,
             ));
-            addedCount++;
           }
         }
 
-        // Polygon annotations
         if (projectTypeLower.contains('segmentation')) {
           final polygons = image.findElements('polygon');
           for (final poly in polygons) {
@@ -125,7 +121,7 @@ class CVATParser {
                 .map((pair) => pair.trim().split(',').map(double.parse).toList())
                 .toList();
 
-            await annotationDb.insertAnnotation(Annotation(
+            batch.add(Annotation(
               mediaItemId: mediaItem.id!,
               labelId: label.id!,
               annotationType: 'polygon',
@@ -135,14 +131,17 @@ class CVATParser {
               createdAt: now,
               updatedAt: now,
             ));
-            addedCount++;
           }
         }
       }
     }
 
-    _logger.info('[CVAT] Added $addedCount annotations from ${annotationsDir.path}');
-    return addedCount;
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
+    _logger.info('[CVAT] Added ${batch.length} annotations from ${annotationsDir.path}');
+    return batch.length;
   }
 
   static String _randomHexColor() {

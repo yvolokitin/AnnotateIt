@@ -35,7 +35,7 @@ class LabelMeParser {
       for (final label in projectLabels) label.name.toLowerCase(): label
     };
 
-    int addedCount = 0;
+    final batch = <Annotation>[];
     final files = annotationsDir
         .listSync()
         .whereType<File>()
@@ -84,25 +84,24 @@ class LabelMeParser {
 
         if (pointList.isEmpty) continue;
 
+        final now = DateTime.now();
+
         if (projectTypeLower.contains('segmentation') || (shape['shape_type'] == 'polygon')) {
           if (pointList.length < 3) {
             _logger.warning('[LabelMe] Skipping polygon with <3 points in $imagePath');
             continue;
           }
 
-          final annotation = Annotation(
+          batch.add(Annotation(
             mediaItemId: mediaItem.id!,
             labelId: label.id!,
             annotationType: 'polygon',
             data: {'points': pointList},
             confidence: null,
             annotatorId: annotatorId,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          await annotationDb.insertAnnotation(annotation);
-          addedCount++;
+            createdAt: now,
+            updatedAt: now,
+          ));
         } else if (projectTypeLower.contains('detection') || shape['shape_type'] == 'rectangle' || pointList.length == 2) {
           final x1 = pointList[0]['x'] as num;
           final y1 = pointList[0]['y'] as num;
@@ -114,7 +113,7 @@ class LabelMeParser {
           final width = (x1 - x2).abs();
           final height = (y1 - y2).abs();
 
-          final annotation = Annotation(
+          batch.add(Annotation(
             mediaItemId: mediaItem.id!,
             labelId: label.id!,
             annotationType: 'bbox',
@@ -126,20 +125,21 @@ class LabelMeParser {
             },
             confidence: null,
             annotatorId: annotatorId,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          await annotationDb.insertAnnotation(annotation);
-          addedCount++;
+            createdAt: now,
+            updatedAt: now,
+          ));
         } else {
           _logger.warning('[LabelMe] Unsupported shape in $imagePath');
         }
       }
     }
 
-    _logger.info('[LabelMe] Added $addedCount annotations from ${annotationsDir.path}');
-    return addedCount;
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
+    _logger.info('[LabelMe] Added ${batch.length} annotations from ${annotationsDir.path}');
+    return batch.length;
   }
 
   static String _randomHexColor() {

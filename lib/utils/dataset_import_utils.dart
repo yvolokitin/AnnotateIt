@@ -374,7 +374,7 @@ Future<Directory> extractZipToAppFolder(
   );
   await outputDir.create(recursive: true);
 
-  final bytes = zipFile.readAsBytesSync();
+  final bytes = await zipFile.readAsBytes();
   if (bytes.isEmpty) throw Exception("ZIP file is empty.");
   zip.Archive archive;
   try {

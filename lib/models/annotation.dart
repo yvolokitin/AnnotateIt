@@ -85,7 +85,7 @@ class Annotation {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'media_item_id': mediaItemId,
       'label_id': labelId,
       'annotation_type': annotationType,

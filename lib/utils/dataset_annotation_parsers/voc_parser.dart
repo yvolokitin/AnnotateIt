@@ -40,7 +40,7 @@ class VOCParser {
     };
 
     final projectTypeLower = projectType.toLowerCase();
-    int addedCount = 0;
+    final batch = <Annotation>[];
 
     final files = annotationsDir
         .listSync()
@@ -76,7 +76,6 @@ class VOCParser {
           continue;
         }
 
-        // Assign random color if needed
         if (label.color == '#000000') {
           final newColor = _randomHexColor();
           label = label.copyWith(color: newColor);
@@ -91,7 +90,8 @@ class VOCParser {
         final ymax = double.tryParse(bndbox.findElements('ymax').first.text) ?? 0;
 
         if (projectTypeLower.contains('detection')) {
-          final annotation = Annotation(
+          final now = DateTime.now();
+          batch.add(Annotation(
             mediaItemId: mediaItem.id!,
             labelId: label.id!,
             annotationType: 'bbox',
@@ -103,20 +103,21 @@ class VOCParser {
             },
             confidence: null,
             annotatorId: annotatorId,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          await annotationDb.insertAnnotation(annotation);
-          addedCount++;
+            createdAt: now,
+            updatedAt: now,
+          ));
         } else {
           _logger.warning('[VOC] Skipping non-detection object in $filename');
         }
       }
     }
 
-    _logger.info('[VOC] Added $addedCount annotations from ${annotationsDir.path}');
-    return addedCount;
+    if (batch.isNotEmpty) {
+      await annotationDb.insertAnnotationsBatch(batch);
+    }
+
+    _logger.info('[VOC] Added ${batch.length} annotations from ${annotationsDir.path}');
+    return batch.length;
   }
 
   static String _randomHexColor() {

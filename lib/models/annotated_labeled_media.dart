@@ -37,7 +37,7 @@ class AnnotatedLabeledMedia {
   }
 
   /// Get all annotations for a given label ID.
-  List<Annotation> getAnnotationsByLabelId(String labelId) {
+  List<Annotation> getAnnotationsByLabelId(int labelId) {
     return annotations.where((a) => a.labelId == labelId).toList();
   }
 
@@ -49,7 +49,7 @@ class AnnotatedLabeledMedia {
   }
 
   /// Check if this item contains a specific label.
-  bool containsLabel(String labelId) {
+  bool containsLabel(int labelId) {
     return labels.any((label) => label.id == labelId);
   }
 
