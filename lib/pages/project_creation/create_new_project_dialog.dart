@@ -37,10 +37,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   String selectedTab = 'Detection';
   List<Label> labels = [];
-
   int currentStep = 0;
 
-  /// Returns the task selected for the current tab.
   String get selectedTaskType => taskTypePerTab[selectedTab] ?? '';
 
   @override
@@ -48,8 +46,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
     super.initState();
     nameController.text = widget.initialName ?? '';
     selectedTab = widget.initialTab ?? 'Detection';
-
-    // Initialize initial values if provided
     if (widget.initialTab != null && widget.initialType != null) {
       taskTypePerTab[widget.initialTab!] = widget.initialType!;
     }
@@ -63,108 +59,148 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth >= 1600;
-    final isTablet = screenWidth >= 900 && screenWidth < 1600;
-
+    final screenWidth = MediaQuery.of(context).size.width;
     final l10n = AppLocalizations.of(context)!;
+
+    final isDesktop = screenWidth >= 1200;
+    final isTablet = screenWidth >= 700 && screenWidth < 1200;
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final dialogWidth =
+            isDesktop ? constraints.maxWidth * 0.85 : constraints.maxWidth;
+        final dialogHeight =
+            isDesktop ? constraints.maxHeight * 0.9 : constraints.maxHeight;
+        final borderRadius = isDesktop ? 20.0 : 0.0;
 
-        final dialogPadding = isLargeScreen
-            ? const EdgeInsets.all(60)
+        final hPad = isDesktop
+            ? 48.0
             : isTablet
-                ? const EdgeInsets.all(24)
-                : const EdgeInsets.all(12);
+                ? 24.0
+                : 16.0;
+        final vPad = isDesktop
+            ? 32.0
+            : isTablet
+                ? 20.0
+                : 12.0;
 
-        final dialogWidth = constraints.maxWidth * (isLargeScreen ? 0.9 : 1.0);
-        final dialogHeight = constraints.maxHeight * (isLargeScreen ? 0.9 : 1.0);
+        final titleFs = isDesktop
+            ? 24.0
+            : isTablet
+                ? 22.0
+                : 18.0;
+        final subtitleFs = isDesktop
+            ? 15.0
+            : isTablet
+                ? 14.0
+                : 12.0;
 
         return Dialog(
           insetPadding: EdgeInsets.zero,
           backgroundColor: AppColors.darkCard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-          child: SizedBox(
-            width: dialogWidth,
-            height: dialogHeight,
-            child: Padding(
-              padding: dialogPadding,
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: screenWidth>1400 ? 40 : 10),
-                    child: Column(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: SizedBox(
+              width: dialogWidth,
+              height: dialogHeight,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+                child: Column(
+                  children: [
+                    // ── Header row ──
+                    Row(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
+                        // Icon + title
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.headerGradient,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.create_new_folder_rounded,
+                            size: isDesktop ? 26 : 22,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [                              
-                                  Icon(
-                                    Icons.create_new_folder_rounded,
-                                    size: isLargeScreen ? 34 : 30,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    l10n.createProjectTitle,
-                                    style: TextStyle(
-                                      fontSize: isLargeScreen ? 26 : 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ]
-                              ),
-                              const SizedBox(height: 4),
-                              if (screenWidth>445)...[
-                                Row(
-                                  children: [                              
-                                    Text(
-                                      currentStep == 0
-                                        ? l10n.createProjectStepOneSubtitle
-                                        : l10n.createProjectStepTwoSubtitle,
-                                      style: TextStyle(
-                                        fontSize: isLargeScreen ? 22 : (screenWidth>660) ? 18 : 12,
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white24,
-                                      ),
-                                    ),
-                                  ],
+                              Text(
+                                l10n.createProjectTitle,
+                                style: TextStyle(
+                                  fontSize: titleFs,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.3,
                                 ),
-                              ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                currentStep == 0
+                                    ? l10n.createProjectStepOneSubtitle
+                                    : l10n.createProjectStepTwoSubtitle,
+                                style: TextStyle(
+                                  fontSize: subtitleFs,
+                                  color: Colors.white38,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ],
                           ),
                         ),
-
-                        SizedBox(height: screenWidth>1200 ? 12 : (screenWidth>650) ? 6 : 2),
-                        const Divider(color: Colors.white70),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.all(screenWidth>1200 ? 15 : 4),
-                            child: currentStep == 0 ? _buildStepOne() : _buildStepTwo(),
-                          ),
+                        // Step indicator
+                        _buildStepIndicator(),
+                        const SizedBox(width: 8),
+                        // Close button
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded,
+                              color: Colors.white54),
+                          tooltip: l10n.buttonClose,
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-
-                        SizedBox(height: screenWidth>1200 ? 12 : (screenWidth>650) ? 6 : 2),
-                        _buildBottomButtons(),
                       ],
                     ),
-                  ),
 
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white70),
-                      tooltip: l10n.buttonClose,
-                      onPressed: () => Navigator.of(context).pop(),
+                    SizedBox(height: vPad * 0.4),
+                    Container(
+                      height: 1,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withAlpha(0),
+                            Colors.white.withAlpha(20),
+                            Colors.white.withAlpha(0),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: vPad * 0.3),
+
+                    // ── Content ──
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: currentStep == 0
+                            ? _buildStepOne()
+                            : _buildStepTwo(),
+                      ),
+                    ),
+
+                    SizedBox(height: vPad * 0.3),
+
+                    // ── Bottom buttons ──
+                    _buildBottomButtons(context, l10n),
+                  ],
+                ),
               ),
             ),
           ),
@@ -173,8 +209,33 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
     );
   }
 
+  // ── Step indicator: pill dots ──
+  Widget _buildStepIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(2, (i) {
+        final isActive = currentStep == i;
+        final isPast = currentStep > i;
+        return Padding(
+          padding: EdgeInsets.only(left: i > 0 ? 6 : 0),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: isActive ? 28 : 10,
+            height: 10,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              gradient: (isActive || isPast) ? AppColors.headerGradient : null,
+              color: (isActive || isPast) ? null : Colors.white.withAlpha(31),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
   Widget _buildStepOne() {
     return CreateNewProjectStepTaskSelection(
+      key: const ValueKey('step1'),
       nameController: nameController,
       selectedTaskType: selectedTaskType,
       onTaskSelectionChanged: _setSelectedTabAndTask,
@@ -183,6 +244,7 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
   Widget _buildStepTwo() {
     return CreateNewProjectStepLabels(
+      key: const ValueKey('step2'),
       projectId: 0,
       projectType: selectedTaskType,
       labels: labels,
@@ -190,54 +252,83 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
         setState(() {
           labels = List<Label>.from(updatedLabels);
         });
-      },  
+      },
     );
   }
 
-  Widget _buildBottomButtons() {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildBottomButtons(BuildContext context, AppLocalizations l10n) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final btnFs = screenWidth > 1200
+        ? 16.0
+        : screenWidth > 700
+            ? 15.0
+            : 14.0;
+    final btnPadH = screenWidth > 700 ? 24.0 : 16.0;
+    final btnPadV = screenWidth > 700 ? 14.0 : 10.0;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Cancel
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: btnPadH, vertical: btnPadV),
+          ),
           child: Text(
             l10n.buttonCancel,
-            style: TextStyle(
-              color: Colors.white54,
-            ),
+            style: TextStyle(color: Colors.white38, fontSize: btnFs),
           ),
         ),
+
         Row(
           children: [
-            if (currentStep > 0)...[
+            // Back
+            if (currentStep > 0)
               TextButton(
                 onPressed: () => setState(() => currentStep--),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: btnPadH, vertical: btnPadV),
+                ),
                 child: Text(
                   l10n.dialogBack,
-                  style: TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(color: Colors.white54, fontSize: btnFs),
+                ),
+              ),
+            const SizedBox(width: 8),
+
+            // Next / Finish
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppColors.headerGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withAlpha(51),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _handleStepButtonPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: EdgeInsets.symmetric(
+                      horizontal: btnPadH + 8, vertical: btnPadV),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ),
-            ],
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: _handleStepButtonPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.darkCard,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  side: BorderSide(color: AppColors.accent, width: 2),
-                ),
-              ),
-              child: Text(
-                currentStep == 0 ? l10n.dialogNext : l10n.buttonFinish,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                child: Text(
+                  currentStep == 0 ? l10n.dialogNext : l10n.buttonFinish,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: btnFs,
+                  ),
                 ),
               ),
             ),
@@ -262,7 +353,8 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
     }
 
     if (currentStep == 1) {
-      final isBinary = selectedTaskType.toLowerCase() == 'binary classification';
+      final isBinary =
+          selectedTaskType.toLowerCase() == 'binary classification';
       if (isBinary && labels.length > 2) {
         AlertErrorDialog.show(
           context,
@@ -276,7 +368,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
     if (currentStep == 0) {
       setState(() => currentStep++);
-
     } else {
       try {
         final currentUser = UserSession.instance.getUser();
@@ -290,27 +381,26 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
           ownerId: currentUser.id ?? -1,
         );
 
-        final fullProject = await ProjectDatabase.instance.createProject(newProject);
-        // Check if user has enabled "set first label as default" preference
+        final fullProject =
+            await ProjectDatabase.instance.createProject(newProject);
         final setFirstLabelAsDefault = currentUser.labelsSetFirstAsDefault;
-        
-        // Create a list of labels with the new project ID
+
         List<Label> labelsWithNewProjectId = labels
-          .map((label) => label.copyWith(projectId: fullProject.id!))
-          .toList();
-          
-        // If there are labels and user preference is enabled, set the first label as default
+            .map((label) => label.copyWith(projectId: fullProject.id!))
+            .toList();
+
         if (labelsWithNewProjectId.isNotEmpty && setFirstLabelAsDefault) {
           labelsWithNewProjectId = labelsWithNewProjectId.map((label) {
-            // Set the first label as default, all others as non-default
-            return label.copyWith(isDefault: label == labelsWithNewProjectId.first);
+            return label.copyWith(
+                isDefault: label == labelsWithNewProjectId.first);
           }).toList();
         }
 
-        await LabelsDatabase.instance.updateProjectLabels(fullProject.id!, labelsWithNewProjectId);
+        await LabelsDatabase.instance
+            .updateProjectLabels(fullProject.id!, labelsWithNewProjectId);
 
-        // fetch updated labels with correct IDs
-        final updatedLabels = await LabelsDatabase.instance.fetchLabelsByProject(fullProject.id!);
+        final updatedLabels =
+            await LabelsDatabase.instance.fetchLabelsByProject(fullProject.id!);
 
         if (!mounted) return;
         await Navigator.push(
@@ -324,7 +414,6 @@ class CreateNewProjectDialogState extends State<CreateNewProjectDialog> {
 
         if (!mounted) return;
         Navigator.pop(context, 'refresh');
-
       } catch (e, stack) {
         if (kDebugMode) debugPrint('Error while creating project: $e\n$stack');
 

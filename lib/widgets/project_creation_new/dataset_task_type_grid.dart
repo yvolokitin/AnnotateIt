@@ -5,120 +5,202 @@ class DatasetTaskTypeGrid extends StatelessWidget {
   final String? selectedTaskType;
   final ValueChanged<String> onTaskSelected;
   final List<Map<String, String>> tasks;
-  final int? maxCrossAxisCount;
-  final double? aspectRatio;
-  final double imageAspectRatio;
 
   const DatasetTaskTypeGrid({
     super.key,
     this.selectedTaskType,
     required this.onTaskSelected,
     required this.tasks,
-    this.maxCrossAxisCount,
-    this.aspectRatio,
-    this.imageAspectRatio = 16 / 9,
   });
 
   @override
   Widget build(BuildContext context) {
-    // final theme = Theme.of(context);
-    // final isDark = theme.brightness == Brightness.dark;
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Responsive grid calculation
-        final width = constraints.maxWidth;
-        final crossAxisCount = maxCrossAxisCount ?? 
-            (width > 1200 ? 3 : width > 600 ? 2 : 1);
-            
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+        final rawCols = w > 1200 ? 3 : w > 600 ? 2 : 1;
+        final crossAxisCount = rawCols.clamp(1, tasks.length);
+        const double spacing = 14;
+
+        final rows = (tasks.length / crossAxisCount).ceil();
+        final cardWidth =
+            (w - (crossAxisCount - 1) * spacing) / crossAxisCount;
+        final fitHeight = (h - (rows - 1) * spacing) / rows;
+
+        // If cards fit comfortably, fill the space; otherwise allow scroll.
+        const double minCardH = 190.0;
+        final fitsOnScreen = fitHeight >= minCardH;
+        final cardHeight = fitsOnScreen ? fitHeight : minCardH;
+        final childAR = cardWidth / cardHeight;
+
         return GridView.builder(
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
+          physics: fitsOnScreen
+              ? const NeverScrollableScrollPhysics()
+              : const ClampingScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: aspectRatio ?? (width > 600 ? 1 : 1.2),
+            mainAxisSpacing: spacing,
+            crossAxisSpacing: spacing,
+            childAspectRatio: childAR,
           ),
           itemCount: tasks.length,
           itemBuilder: (context, index) {
             final task = tasks[index];
-            // final isSelected = selectedTaskType == task['title'];
-            final isSelected = selectedTaskType == task['value'];
-
-            return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: isSelected
-                    ? AppColors.accent
-                    : AppColors.darkSurface,
-                  width: 2,
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                // onTap: () => onTaskSelected(task['title']!),
-                onTap: () => onTaskSelected(task['value']!),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: imageAspectRatio,
-                      child: Image.asset(
-                        task['image']!,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                isSelected
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_off,
-                                size: 20,
-                                color: isSelected 
-                                  ? AppColors.accent 
-                                  : Colors.white70,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  task['title']!,
-                                  style: TextStyle(
-                                    fontSize: width>1200 ? 20 : 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            task['description']!,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: width>1200 ? 16 : 10,
-                            ),
-                            maxLines: width > 600 ? 2 : 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return _TaskCard(
+              task: task,
+              isSelected: selectedTaskType == task['value'],
+              onTap: () => onTaskSelected(task['value']!),
             );
           },
         );
       },
+    );
+  }
+}
+
+class _TaskCard extends StatefulWidget {
+  final Map<String, String> task;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TaskCard({
+    required this.task,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_TaskCard> createState() => _TaskCardState();
+}
+
+class _TaskCardState extends State<_TaskCard> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: _hovering ? AppColors.darkCardHover : AppColors.darkCard,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: widget.isSelected
+                  ? AppColors.accent
+                  : _hovering
+                      ? Colors.white.withAlpha(51)
+                      : Colors.white.withAlpha(15),
+              width: widget.isSelected ? 2.0 : 1.0,
+            ),
+            boxShadow: [
+              if (widget.isSelected)
+                BoxShadow(
+                  color: AppColors.accent.withAlpha(38),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              if (_hovering && !widget.isSelected)
+                BoxShadow(
+                  color: Colors.black.withAlpha(77),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(13),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Image area — takes ~60% of card, cropped to fill
+                Expanded(
+                  flex: 3,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        widget.task['image']!,
+                        fit: BoxFit.cover,
+                      ),
+                      if (widget.isSelected)
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                AppColors.accent.withAlpha(0),
+                                AppColors.accent.withAlpha(38),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // Text area — takes ~40%, adapts to available space
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              widget.isSelected
+                                  ? Icons.check_circle_rounded
+                                  : Icons.radio_button_off_rounded,
+                              size: 18,
+                              color: widget.isSelected
+                                  ? AppColors.accent
+                                  : Colors.white38,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                widget.task['title']!,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Text(
+                            widget.task['description']!,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                              height: 1.3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
