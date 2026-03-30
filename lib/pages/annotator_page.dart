@@ -131,6 +131,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   bool _isProcessingSAM = false;
   bool _samBetaNotified = false;
 
+  // The image-coordinate point where the user clicked while SAM is processing.
+  // Shown as a crosshair on the canvas so the user gets instant visual feedback.
+  Offset? _samPendingPoint;
+
   // Selected SAM model key: 'mobile' or 'sam2_hiera_base_plus'
   String _samModelKey = 'mobile';
 
@@ -299,7 +303,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       return;
     }
 
-    setState(() => _isProcessingSAM = true);
+    setState(() {
+      _isProcessingSAM = true;
+      _samPendingPoint = imagePoint;
+    });
 
     try {
       final polygon = await _samService.generateMaskPolygon(
@@ -308,11 +315,13 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       );
 
       if (polygon.isEmpty) {
-        await AlertErrorDialog.show(
-          context,
-          'SAM',
-          'Could not generate a mask for the selected point.',
-        );
+        if (mounted) {
+          AppSnackbar.show(
+            context,
+            'SAM could not generate a mask for the selected point.',
+            saveToDb: false,
+          );
+        }
         return;
       }
 
@@ -415,14 +424,19 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
         });
       }
     } catch (e) {
-      await AlertErrorDialog.show(
-        context,
-        'SAM Failed',
-        'An error occurred while generating the annotation: ${e.toString()}',
-      );
+      if (mounted) {
+        AppSnackbar.show(
+          context,
+          'SAM error: ${e.toString()}',
+          saveToDb: false,
+        );
+      }
     } finally {
       if (mounted) {
-        setState(() => _isProcessingSAM = false);
+        setState(() {
+          _isProcessingSAM = false;
+          _samPendingPoint = null;
+        });
       }
     }
   }
@@ -1276,10 +1290,11 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                         if (image != null) _touchImageCache(index);
                         final errorMessage = _invalidMediaCache[index];
 
-                        // Show loading indicator if media is not loaded yet
                         if (media == null) {
-                          // Ensure media starts loading for this page (handles wrap-around jumps)
-                          _loadMedia(index);
+                          // Schedule the async load outside of build via post-frame callback
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) _loadMedia(index);
+                          });
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
@@ -1351,10 +1366,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                           );
                         }
 
-                        // Show loading indicator if image is not loaded yet
                         if (image == null) {
-                          // Decode/load image for already-loaded media
-                          _loadImage(index, media.mediaItem.filePath, mediaItemId: media.mediaItem.id);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) _loadImage(index, media.mediaItem.filePath, mediaItemId: media.mediaItem.id);
+                          });
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
@@ -1442,6 +1457,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                         selectedLabel: selectedLabel,
                                         selectedAnnotation: _selectedAnnotation,
                                         requestedZoom: _currentZoom,
+                                        samPendingPoint: _samPendingPoint,
                                         onZoomChanged: (zoom) {
                                           if (!mounted) return;
                                           if ((_currentZoom - zoom).abs() <
@@ -1524,8 +1540,8 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                   ),
                 ],
               ),
-              // Global processing overlay
-              if (_isProcessingSAM || _isProcessingMlKit)
+              // Blocking overlay only for ML Kit (SAM uses inline feedback)
+              if (_isProcessingMlKit)
                 Positioned.fill(
                   child: AbsorbPointer(
                     absorbing: true,

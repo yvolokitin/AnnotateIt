@@ -37,6 +37,9 @@ class AnnotatorCanvas extends StatefulWidget {
   // Optional: allow parent to request a specific zoom level (1.0 = 100%)
   final double? requestedZoom;
 
+  // Image-coordinate point where a SAM click is pending (shown as crosshair)
+  final Offset? samPendingPoint;
+
   final ValueChanged<double>? onZoomChanged;
   final ValueChanged<Annotation>? onAnnotationUpdated;
   final ValueChanged<Annotation?>? onAnnotationSelected;
@@ -60,6 +63,7 @@ class AnnotatorCanvas extends StatefulWidget {
     required this.selectedLabel,
     this.selectedAnnotation,
     this.requestedZoom,
+    this.samPendingPoint,
     this.onZoomChanged,
     this.onAnnotationUpdated,
     this.onAnnotationSelected,
@@ -908,6 +912,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                         cornerSize: widget.cornerSize,
                         showAnnotationNames: widget.showAnnotationNames,
                         showClassifications: true,
+                        samPendingPoint: widget.samPendingPoint,
                         drawingRect:
                             (_drawingStart != null && _drawingCurrent != null)
                                 ? Rect.fromPoints(

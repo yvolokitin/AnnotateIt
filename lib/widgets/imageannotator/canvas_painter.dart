@@ -24,6 +24,9 @@ class CanvasPainter extends CustomPainter {
   final Offset? currentPolygonPoint;
   final Color? polygonColor;
 
+  // SAM pending click indicator (image coordinates)
+  final Offset? samPendingPoint;
+
   CanvasPainter({
     required this.image,
     required this.annotations,
@@ -39,6 +42,7 @@ class CanvasPainter extends CustomPainter {
     this.polygonPoints,
     this.currentPolygonPoint,
     this.polygonColor,
+    this.samPendingPoint,
   });
 
   @override
@@ -216,6 +220,52 @@ class CanvasPainter extends CustomPainter {
         }
       }
     }
+
+    // SAM pending click crosshair
+    if (samPendingPoint != null) {
+      _paintSamCrosshair(canvas, samPendingPoint!);
+    }
+  }
+
+  void _paintSamCrosshair(Canvas canvas, Offset center) {
+    final r = 14.0 / scale;
+    final lineLen = 10.0 / scale;
+    final gap = 4.0 / scale;
+    final sw = 2.0 / scale;
+
+    // Outer glow ring
+    final glowPaint = Paint()
+      ..color = AppColors.accent.withAlpha(90)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = sw * 2.5;
+    canvas.drawCircle(center, r, glowPaint);
+
+    // Main ring
+    final ringPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = sw;
+    canvas.drawCircle(center, r, ringPaint);
+
+    // Crosshair lines (with gap in the center)
+    final linePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = sw
+      ..strokeCap = StrokeCap.round;
+    // Top
+    canvas.drawLine(Offset(center.dx, center.dy - r - lineLen), Offset(center.dx, center.dy - gap), linePaint);
+    // Bottom
+    canvas.drawLine(Offset(center.dx, center.dy + gap), Offset(center.dx, center.dy + r + lineLen), linePaint);
+    // Left
+    canvas.drawLine(Offset(center.dx - r - lineLen, center.dy), Offset(center.dx - gap, center.dy), linePaint);
+    // Right
+    canvas.drawLine(Offset(center.dx + gap, center.dy), Offset(center.dx + r + lineLen, center.dy), linePaint);
+
+    // Center dot
+    final dotPaint = Paint()
+      ..color = AppColors.accent
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 3.0 / scale, dotPaint);
   }
 
 
@@ -429,6 +479,7 @@ void _paintClassificationAnnotation(Canvas canvas, Size size, Annotation annotat
       oldDelegate.showClassifications != showClassifications ||
       oldDelegate.drawingRect != drawingRect ||
       oldDelegate.showAnnotationNames != showAnnotationNames ||
+      oldDelegate.samPendingPoint != samPendingPoint ||
       polygonChanged ||
       currentPointChanged;
   }
