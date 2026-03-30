@@ -326,11 +326,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rename => 'Rename';
 
   @override
-  String get betaDialogTitle => 'Segmentation models (Beta)';
+  String get betaDialogTitle => 'Segmentation models (Preview)';
 
   @override
   String get betaDialogMessage =>
-      'Why do SAM Mobile, SAM2 Hiera Base+ and SAM2 Hiera Large often look similar?\n\nNon-Web builds (Windows/macOS/Linux/Android/iOS): real SAM inference is not enabled yet. The app falls back to a content-aware heuristic (seeded region growing + contour extraction). Changing the model does not change this heuristic, so results are similar.\n\nWeb builds: real ONNX inference is used when the model loads successfully, but results are still post-processed the same way: decoder mask at 256×256 → thresholding (Otsu), component filtering to the tap, hole filling, smoothing, and polygon simplification. This can remove fine details and make models look closer than expected.\n\nKnown limitations in this Beta:\n • Single-point prompts only (no boxes/multi-point cues).\n • Image is preprocessed to 1024px and decoder mask is 256×256 → detail loss on tiny objects/edges.\n • Thresholding/smoothing can over/under-segment depending on image contrast/noise.\n • On non-Web platforms, model switching mainly affects labels/UI, not the actual segmentation backend.';
+      'Why do SAM Mobile, SAM2 Hiera Base+ and SAM2 Hiera Large often look similar?\n\nNon-Web builds (Windows/macOS/Linux/Android/iOS): real SAM inference is not enabled yet. The app falls back to a content-aware heuristic (seeded region growing + contour extraction). Changing the model does not change this heuristic, so results are similar.\n\nWeb builds: real ONNX inference is used when the model loads successfully, but results are still post-processed the same way: decoder mask at 256×256 → thresholding (Otsu), component filtering to the tap, hole filling, smoothing, and polygon simplification. This can remove fine details and make models look closer than expected.\n\nKnown limitations in this preview:\n • Single-point prompts only (no boxes/multi-point cues).\n • Image is preprocessed to 1024px and decoder mask is 256×256 → detail loss on tiny objects/edges.\n • Thresholding/smoothing can over/under-segment depending on image contrast/noise.\n • On non-Web platforms, model switching mainly affects labels/UI, not the actual segmentation backend.';
 
   @override
   String get betaDialogTips =>

@@ -330,11 +330,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rename => 'Hernoemen';
 
   @override
-  String get betaDialogTitle => 'Segmentatiemodellen (Bèta)';
+  String get betaDialogTitle => 'Segmentatiemodellen (Preview)';
 
   @override
   String get betaDialogMessage =>
-      'Waarom lijken SAM Mobile, SAM2 Hiera Base+ en SAM2 Hiera Large vaak op elkaar?\n\nNiet-webbuilds (Windows/macOS/Linux/Android/iOS): echte SAM-inference is nog niet ingeschakeld. De app valt terug op een inhoudsgestuurde heuristiek (seeded region growing + contourextractie). Een ander model kiezen verandert deze heuristiek niet, dus de resultaten zijn vergelijkbaar.\n\nWebbuilds: echte ONNX-inference wordt gebruikt wanneer het model succesvol laadt, maar de resultaten worden nog steeds op dezelfde manier naverwerkt: decodermasker op 256×256 → drempeling (Otsu), componentfiltering naar de tik, gaten vullen, gladstrijken en polygonsimplificatie. Dit kan fijne details wegnemen en modellen dichter bij elkaar laten lijken dan verwacht.\n\nBekende beperkingen in deze bèta:\n • Alleen eenpuntsprompts (geen kaders/multipuntaanwijzingen).\n • Afbeelding wordt voorbewerkt naar 1024 px en het decodermasker is 256×256 → detailverlies bij zeer kleine objecten/randen.\n • Drempeling/gladstrijken kan over- of ondersegmenteren afhankelijk van contrast/ruis.\n • Op niet-webplatforms beïnvloedt modelschakelen vooral labels/UI, niet de daadwerkelijke segmentatie-backend.';
+      'Waarom lijken SAM Mobile, SAM2 Hiera Base+ en SAM2 Hiera Large vaak op elkaar?\n\nNiet-webbuilds (Windows/macOS/Linux/Android/iOS): echte SAM-inference is nog niet ingeschakeld. De app valt terug op een inhoudsgestuurde heuristiek (seeded region growing + contourextractie). Een ander model kiezen verandert deze heuristiek niet, dus de resultaten zijn vergelijkbaar.\n\nWebbuilds: echte ONNX-inference wordt gebruikt wanneer het model succesvol laadt, maar de resultaten worden nog steeds op dezelfde manier naverwerkt: decodermasker op 256×256 → drempeling (Otsu), componentfiltering naar de tik, gaten vullen, gladstrijken en polygonsimplificatie. Dit kan fijne details wegnemen en modellen dichter bij elkaar laten lijken dan verwacht.\n\nBekende beperkingen in deze preview:\n • Alleen eenpuntsprompts (geen kaders/multipuntaanwijzingen).\n • Afbeelding wordt voorbewerkt naar 1024 px en het decodermasker is 256×256 → detailverlies bij zeer kleine objecten/randen.\n • Drempeling/gladstrijken kan over- of ondersegmenteren afhankelijk van contrast/ruis.\n • Op niet-webplatforms beïnvloedt modelschakelen vooral labels/UI, niet de daadwerkelijke segmentatie-backend.';
 
   @override
   String get betaDialogTips =>
