@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/platform_utils.dart';
+import '../../utils/theme.dart';
 import '../../models/project.dart';
 import "../../utils/date_utils.dart";
 
@@ -8,8 +9,8 @@ import 'project_icon.dart';
 
 class ProjectTile extends StatefulWidget {
   final Project project;
-  final VoidCallback onMorePressed; // Callback for more options
-  final VoidCallback? onTap; // Callback on update list of projects
+  final VoidCallback onMorePressed;
+  final VoidCallback? onTap;
 
   ProjectTile({
     super.key,
@@ -31,23 +32,23 @@ class ProjectTileState extends State<ProjectTile> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final double thumbnailHeight = (screenWidth > 1100) ? 180 : (screenWidth > 860) ? 160 : (screenWidth > 650) ? 140 : 110;
-    final double thumbnailWidth = (screenWidth > 1100) ? 350 : (screenWidth > 860) ? 280 : (screenWidth > 650) ? 180: 140;
+    final double thumbnailWidth = (screenWidth > 1100) ? 350 : (screenWidth > 860) ? 280 : (screenWidth > 650) ? 180 : 140;
 
     final double nameFontSize = PlatformUtils.isIOS
-      ? (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 14.0)
-      : (screenWidth > 1100 ? 24.0 : screenWidth > 860 ? 20.0 : 18.0);
+        ? (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 14.0)
+        : (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 19.0 : 16.0);
     final double typeFontSize = PlatformUtils.isIOS
-      ? (screenWidth > 1100 ? 20.0 : screenWidth > 860 ? 16.0 : 14.0)
-      : (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 16.0);
+        ? (screenWidth > 1100 ? 20.0 : screenWidth > 860 ? 16.0 : 14.0)
+        : (screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0);
     final double dateFontSize = PlatformUtils.isIOS
-      ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
-      : (screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0);
+        ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
+        : (screenWidth > 1100 ? 15.0 : screenWidth > 860 ? 14.0 : 12.0);
     final double verticalSpacing = PlatformUtils.isIOS
-      ? (screenWidth > 1100 ? 5.0 : screenWidth > 860 ? 3.0 : 2.0)
-      : (screenWidth > 1100 ? 6.0 : screenWidth > 860 ? 4.0 : 2.0);
+        ? (screenWidth > 1100 ? 5.0 : screenWidth > 860 ? 3.0 : 2.0)
+        : (screenWidth > 1100 ? 6.0 : screenWidth > 860 ? 4.0 : 2.0);
     final double labelFontSize = PlatformUtils.isIOS
-      ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
-      : (screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0);
+        ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
+        : (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0);
 
     return MouseRegion(
       cursor: _isMouseDown
@@ -60,96 +61,107 @@ class ProjectTileState extends State<ProjectTile> {
         onPointerUp: (_) => setState(() => _isMouseDown = false),
         onPointerCancel: (_) => setState(() => _isMouseDown = false),
         child: GestureDetector(
-        onTap: widget.onTap,
-        child: Card(
-          color: Colors.grey.shade800,
-          margin: EdgeInsets.symmetric(
-            horizontal: (screenWidth>1200) ? 24 : 12,
-            vertical: (screenWidth>1200) ? 8 : 4,
-          ),
-          elevation: _isHovered ? 8 : 3,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: _isHovered ? Colors.red : Colors.transparent,
-              width: 1,
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            margin: EdgeInsets.symmetric(
+              horizontal: (screenWidth > 1200) ? 24 : 12,
+              vertical: (screenWidth > 1200) ? 6 : 4,
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(0.0),
+            decoration: BoxDecoration(
+              color: _isHovered ? AppColors.darkCardHover : AppColors.darkCard,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _isHovered
+                    ? AppColors.accent.withOpacity(0.5)
+                    : Colors.white.withOpacity(0.06),
+                width: 1,
+              ),
+              boxShadow: _isHovered
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accent.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Thumbnail (Left Side)
                 Container(
                   width: thumbnailWidth,
                   height: thumbnailHeight,
                   decoration: BoxDecoration(
-                    color: Colors.grey[850], // Background color
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
+                    color: AppColors.darkSurface,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
                     ),
                   ),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
+                      topLeft: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
                     ),
                     child: ProjectIcon(iconPath: widget.project.icon),
                   ),
                 ),
-                SizedBox(width: screenWidth>650 ? 12 : 6),
+                SizedBox(width: screenWidth > 650 ? 14 : 8),
 
-                // Project Details: Title @ Type, Updated and creation Dates, Labels
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.all(screenWidth>650 ? 10.0 : 4.0),
+                    padding: EdgeInsets.all(screenWidth > 650 ? 12.0 : 6.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Project Name (line 1)
                         Text(
                           widget.project.name,
                           style: TextStyle(
                             fontSize: nameFontSize,
-                            fontFamily: 'CascadiaCode',
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
+                            letterSpacing: -0.2,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
 
-                        // Project Type (line 2)
+                        const SizedBox(height: 2),
                         Text(
-                          "@ ${widget.project.type}",
+                          widget.project.type,
                           style: TextStyle(
                             fontSize: typeFontSize,
-                            fontFamily: 'CascadiaCode',
-                            color: Colors.white70,
+                            color: AppColors.accentOrange.withOpacity(0.85),
+                            fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
 
                         SizedBox(height: verticalSpacing),
-                        if (screenWidth<650)...[
+                        if (screenWidth < 650) ...[
                           Text(
-                            "U: ${formatDate(widget.project.lastUpdated)}",
+                            "Updated ${formatDate(widget.project.lastUpdated)}",
                             style: TextStyle(
-                              color: Colors.white60,
-                              fontFamily: 'CascadiaCode',
+                              color: Colors.white.withOpacity(0.45),
                               fontSize: dateFontSize,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "C: ${formatDate(widget.project.creationDate)}",
+                            "Created ${formatDate(widget.project.creationDate)}",
                             style: TextStyle(
-                              color: Colors.white60,
-                              fontFamily: 'CascadiaCode',
+                              color: Colors.white.withOpacity(0.45),
                               fontSize: dateFontSize,
                             ),
                             maxLines: 1,
@@ -157,24 +169,23 @@ class ProjectTileState extends State<ProjectTile> {
                           ),
                         ],
 
-                        if (screenWidth>=650)...[
-                          // Updated / Created (line 3)
+                        if (screenWidth >= 650) ...[
                           Text(
-                            "Updated: ${formatDate(widget.project.lastUpdated)} / Created: ${formatDate(widget.project.creationDate)}",
+                            "Updated ${formatDate(widget.project.lastUpdated)}  ·  Created ${formatDate(widget.project.creationDate)}",
                             style: TextStyle(
-                              color: Colors.white60,
-                              fontFamily: 'CascadiaCode',
+                              color: Colors.white.withOpacity(0.45),
                               fontSize: dateFontSize,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 2,
-                            height: 32,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Container(
+                              height: 1,
+                              color: Colors.white.withOpacity(0.08),
+                            ),
                           ),
-                          // to show Labels Section with colored tags in
                           LabelList(
                             labels: widget.project.labels ?? [],
                             projectName: widget.project.name,
@@ -183,15 +194,17 @@ class ProjectTileState extends State<ProjectTile> {
                           ),
                         ],
                       ],
-                    ), // Column
-                  ), // Padding
+                    ),
+                  ),
                 ),
 
-                // Right Side (Progress Indicator + More Options)
                 Column(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.more_vert, color: Colors.white),
+                      icon: Icon(
+                        Icons.more_horiz_rounded,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
                       onPressed: widget.onMorePressed,
                     ),
                   ],
@@ -200,7 +213,6 @@ class ProjectTileState extends State<ProjectTile> {
             ),
           ),
         ),
-      ),
       ),
     );
   }

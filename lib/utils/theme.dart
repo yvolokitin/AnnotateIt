@@ -1,13 +1,39 @@
 import "package:flutter/material.dart";
 
+/// Palette derived from the app icon's purple → red → orange gradient.
+class AppColors {
+  AppColors._();
+
+  // Gradient stops
+  static const gradientStart  = Color(0xFF9B30C0); // purple
+  static const gradientMid    = Color(0xFFE04444); // warm red
+  static const gradientEnd    = Color(0xFFF5A623); // amber/orange
+
+  // Accents
+  static const accent         = Color(0xFFE04444); // primary warm red
+  static const accentPurple   = Color(0xFFB05CE6); // purple highlight
+  static const accentOrange   = Color(0xFFF0943A); // orange highlight
+
+  // Dark-theme surfaces (warm undertone)
+  static const darkBg         = Color(0xFF0F1119);
+  static const darkSurface    = Color(0xFF1A1F2C);
+  static const darkCard       = Color(0xFF1E2332);
+  static const darkCardHover  = Color(0xFF262D3E);
+  static const darkRail       = Color(0xFF151922);
+
+  static const headerGradient = LinearGradient(
+    colors: [gradientStart, gradientMid, gradientEnd],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+}
+
 TextStyle getTextStyle({
   required double fontSize,
   Color color = Colors.black,
   FontWeight fontWeight = FontWeight.w300,
 }) {
   return TextStyle(
-    fontFamily: "CascadiaCode",
-    fontStyle: FontStyle.normal,
     fontWeight: fontWeight,
     fontSize: fontSize,
     color: color,
@@ -40,7 +66,6 @@ ThemeData createTheme({
   required Color surfaceColor,
   required Color onBackgroundColor,
   required Color onSurfaceColor,
-  Color outline = Colors.transparent,
 }) {
   return ThemeData(
     useMaterial3: false,
@@ -50,12 +75,12 @@ ThemeData createTheme({
     scaffoldBackgroundColor: backgroundColor,
     colorScheme: ColorScheme(
       brightness: brightness,
-      primary: const Color(0xFF1095C1),
+      primary: AppColors.accent,
       onPrimary: Colors.white,
-      secondary: const Color(0xFF1095C1),
+      secondary: AppColors.accentOrange,
       onSecondary: Colors.white,
-      tertiary: const Color(0xFF5B5B5B),
-      error: Colors.red,
+      tertiary: AppColors.accentPurple,
+      error: const Color(0xFFEF5350),
       onError: Colors.white,
       background: backgroundColor,
       onBackground: onBackgroundColor,
@@ -69,49 +94,52 @@ ThemeData createTheme({
     textTheme: getTextTheme(onBackgroundColor, Colors.white),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: outline),
+        side: BorderSide(color: onSurfaceColor.withOpacity(0.2)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 3),
+        borderSide: BorderSide(color: onSurfaceColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(10),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 3),
+        borderSide: BorderSide(color: onSurfaceColor.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(10),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 3),
+        borderSide: BorderSide(color: AppColors.accent, width: 1.5),
+        borderRadius: BorderRadius.circular(10),
       ),
     ),
     buttonTheme: ButtonThemeData(
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.red, width: 3),
+        borderRadius: BorderRadius.circular(10),
       ),
     ),
     cardTheme: CardThemeData(
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.red, width: 3),
+        borderRadius: BorderRadius.circular(14),
       ),
+      color: AppColors.darkCard,
+      elevation: 0,
     ),
   );
 }
 
 ThemeData lightTheme = createTheme(
   brightness: Brightness.light,
-  backgroundColor: Colors.white,
-  surfaceColor: const Color(0xFFE2E2E2),
-  onBackgroundColor: const Color(0xFF373737),
-  onSurfaceColor: const Color(0xFF373737),
-  outline: Colors.red,
+  backgroundColor: const Color(0xFFF8F8FA),
+  surfaceColor: const Color(0xFFE8E8EC),
+  onBackgroundColor: const Color(0xFF2A2A2A),
+  onSurfaceColor: const Color(0xFF2A2A2A),
 );
 
 ThemeData darkTheme = createTheme(
   brightness: Brightness.dark,
-  backgroundColor: const Color(0xFF11191F),
-  surfaceColor: const Color(0xFF293036),
+  backgroundColor: AppColors.darkBg,
+  surfaceColor: AppColors.darkSurface,
   onBackgroundColor: Colors.white,
   onSurfaceColor: Colors.white,
-  outline: Colors.red,
 );
 
 bool useDarkTheme = true;
@@ -123,34 +151,27 @@ final Map<String, ThemeData> themeRegistry = {
   "dark": darkTheme,
 };
 
-// Function to switch themes dynamically
 void switchTheme(bool isDarkMode) {
   useDarkTheme = isDarkMode;
 }
 
 
-// Semantic color extensions to enrich the palette across the app
 extension AppColorSchemeExt on ColorScheme {
-  // Muted text/icons for secondary emphasis
-  Color get muted => onSurface.withOpacity(0.7);
+  Color get muted => onSurface.withOpacity(0.55);
 
-  // Informational/primary accent (harmonizes with existing blue primary)
   Color get info => brightness == Brightness.light
-      ? const Color(0xFF1E88E5) // Blue 600
-      : const Color(0xFF64B5F6); // Blue 300
+      ? const Color(0xFF1E88E5)
+      : const Color(0xFF64B5F6);
 
-  // Success/positive actions
   Color get success => brightness == Brightness.light
-      ? const Color(0xFF2E7D32) // Green 800
-      : const Color(0xFF81C784); // Green 300
+      ? const Color(0xFF2E7D32)
+      : const Color(0xFF81C784);
 
-  // Warning/attention
   Color get warning => brightness == Brightness.light
-      ? const Color(0xFFF9A825) // Amber 700
-      : const Color(0xFFFFE082); // Amber 200
+      ? const Color(0xFFF9A825)
+      : const Color(0xFFFFE082);
 
-  // Purple accent (used for AI/pre-label type actions)
   Color get purple => brightness == Brightness.light
-      ? const Color(0xFF8E24AA) // Purple 600
-      : const Color(0xFFBA68C8); // Purple 300
+      ? const Color(0xFF8E24AA)
+      : const Color(0xFFBA68C8);
 }

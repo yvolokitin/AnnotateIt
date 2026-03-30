@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class MainMenuBottomDrawerMenu extends StatelessWidget {
   final int selectedIndex;
@@ -15,51 +16,62 @@ class MainMenuBottomDrawerMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    Widget _boxedIcon(IconData iconData, {bool active = false}) {
-      final Color borderColor = active ? Colors.red : Colors.transparent;
-      final Color iconColor = active ? Colors.red : Colors.white70;
-      return Container(
-        // padding: const EdgeInsets.all(6.0),
+    Widget boxedIcon(IconData iconData, {bool active = false}) {
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0),
-          // border: Border.all(color: borderColor, width: active ? 2.0 : 0.0),
+          borderRadius: BorderRadius.circular(12),
+          color: active ? AppColors.accent.withOpacity(0.12) : Colors.transparent,
         ),
-        child: Icon(iconData, color: iconColor),
+        child: Icon(
+          iconData,
+          color: active ? AppColors.accent : Colors.white.withOpacity(0.45),
+        ),
       );
     }
 
-    return BottomNavigationBar(
-      currentIndex: selectedIndex,
-      onTap: onItemSelected,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.red,
-      unselectedItemColor: Colors.white70,
-      backgroundColor: Colors.transparent, // Colors.grey[950],
-      iconSize: 28,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      items: [
-        BottomNavigationBarItem(
-          icon: _boxedIcon(Icons.cases_outlined, active: false),
-          activeIcon: _boxedIcon(Icons.cases_outlined, active: true),
-          label: l10n.menuProjects,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.darkRail,
+        border: Border(
+          top: BorderSide(color: Colors.white.withOpacity(0.06)),
         ),
-        BottomNavigationBarItem(
-          icon: _boxedIcon(Icons.memory_rounded, active: false),
-          activeIcon: _boxedIcon(Icons.memory_rounded, active: true),
-          label: l10n.menuModels,
-        ),
-        BottomNavigationBarItem(
-          icon: _boxedIcon(Icons.account_circle_outlined, active: false),
-          activeIcon: _boxedIcon(Icons.account_circle_outlined, active: true),
-          label: l10n.menuAccount,
-        ),
-        BottomNavigationBarItem(
-          icon: _boxedIcon(Icons.error_outline_rounded, active: false),
-          activeIcon: _boxedIcon(Icons.error_outline_rounded, active: true),
-          label: l10n.menuAbout,
-        ),
-      ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: selectedIndex,
+        onTap: onItemSelected,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppColors.accent,
+        unselectedItemColor: Colors.white.withOpacity(0.45),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconSize: 24,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: [
+          BottomNavigationBarItem(
+            icon: boxedIcon(Icons.cases_outlined),
+            activeIcon: boxedIcon(Icons.cases_outlined, active: true),
+            label: l10n.menuProjects,
+          ),
+          BottomNavigationBarItem(
+            icon: boxedIcon(Icons.memory_rounded),
+            activeIcon: boxedIcon(Icons.memory_rounded, active: true),
+            label: l10n.menuModels,
+          ),
+          BottomNavigationBarItem(
+            icon: boxedIcon(Icons.account_circle_outlined),
+            activeIcon: boxedIcon(Icons.account_circle_outlined, active: true),
+            label: l10n.menuAccount,
+          ),
+          BottomNavigationBarItem(
+            icon: boxedIcon(Icons.info_outline_rounded),
+            activeIcon: boxedIcon(Icons.info_outline_rounded, active: true),
+            label: l10n.menuAbout,
+          ),
+        ],
+      ),
     );
   }
 }

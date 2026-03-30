@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/theme.dart';
 
 class MainMenuDrawerItem extends StatelessWidget {
   final IconData icon;
@@ -16,36 +17,39 @@ class MainMenuDrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color baseRed = Colors.red;
-    final Color lighterRed = baseRed.withAlpha(26); // 10% of 255
     final screenWidth = MediaQuery.of(context).size.width;
 
     return InkWell(
       onTap: onTap,
       child: Stack(
         children: [
-          Container(
-            height: screenWidth>1600 ? 100 : 80,
-            padding: const EdgeInsets.symmetric(horizontal: 40),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: screenWidth > 1600 ? 90 : 72,
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             decoration: BoxDecoration(
-              color: isSelected ? lighterRed : Colors.transparent,
+              color: isSelected
+                  ? AppColors.accent.withOpacity(0.08)
+                  : Colors.transparent,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   icon,
-                  size: screenWidth>1600 ? 30 : 26,
-                  color: isSelected ? Colors.red : Colors.white
+                  size: screenWidth > 1600 ? 26 : 24,
+                  color: isSelected
+                      ? AppColors.accent
+                      : Colors.white.withOpacity(0.6),
                 ),
                 const SizedBox(width: 16),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: screenWidth>1600 ? 28 : 24,
-                    color: Colors.white,
-                    fontFamily: 'CascadiaCode',
-                    fontWeight: FontWeight.normal,
+                    fontSize: screenWidth > 1600 ? 20 : 17,
+                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.75),
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    letterSpacing: -0.2,
                   ),
                 ),
               ],
@@ -58,8 +62,18 @@ class MainMenuDrawerItem extends StatelessWidget {
               top: 0,
               bottom: 0,
               child: Container(
-                width: 10,
-                color: Colors.red,
+                width: 3,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.accentPurple, AppColors.accent],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(3),
+                    bottomLeft: Radius.circular(3),
+                  ),
+                ),
               ),
             ),
         ],

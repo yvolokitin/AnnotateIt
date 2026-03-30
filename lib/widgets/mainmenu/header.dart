@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/notification_database.dart';
+import '../../utils/theme.dart';
 import '../dialogs/notifications_dialog.dart';
 import 'exported_datasets_dialog.dart';
 
@@ -38,7 +39,6 @@ class AppHeaderState extends State<AppHeader> {
       context: context,
       builder: (context) => const NotificationsDialog(),
     );
-    // Refresh notification count after dialog is closed
     _loadUnreadNotificationCount();
   }
 
@@ -50,9 +50,55 @@ class AppHeaderState extends State<AppHeader> {
   }
 
   double _getHeaderHeight(double width) {
-    if (width >= 1600) return 88; // large screens
-    if (width >= 1200) return 72; // medium screens
-    return 56; // small screens
+    if (width >= 1600) return 72;
+    if (width >= 1200) return 64;
+    return 56;
+  }
+
+  Widget _buildNotificationBadge({required double iconSize}) {
+    return Stack(
+      children: [
+        IconButton(
+          onPressed: _showNotifications,
+          icon: Icon(
+            Icons.notifications_none_rounded,
+            size: iconSize,
+            color: Colors.white.withOpacity(0.9),
+          ),
+          tooltip: 'Notifications',
+        ),
+        if (_unreadNotificationCount > 0)
+          Positioned(
+            right: 6,
+            top: 6,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                _unreadNotificationCount > 99
+                    ? '99+'
+                    : _unreadNotificationCount.toString(),
+                style: const TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   @override
@@ -62,169 +108,97 @@ class AppHeaderState extends State<AppHeader> {
 
     return Container(
       height: headerHeight,
-      color: Colors.red,
+      decoration: const BoxDecoration(
+        gradient: AppColors.headerGradient,
+      ),
       child: screenWidth < 800
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Left: folder icon
                 IconButton(
                   onPressed: _showExportedDatasetsDialog,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.folder_zip_outlined,
-                    size: 24,
-                    color: Colors.white,
+                    size: 22,
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
-
-                // Center: app title
                 Expanded(
                   child: Center(
-                    child: Text(
-                      'AnnotateIt',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'CascadiaCode',
-                        color: Colors.white,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.asset(
+                            'assets/icons/annotateit.jpg',
+                            height: 28,
+                            width: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'AnnotateIt',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-
-                // Right: notifications with unread badge
                 Container(
                   margin: const EdgeInsets.only(right: 4),
-                  child: Stack(
-                    children: [
-                      IconButton(
-                        onPressed: _showNotifications,
-                        icon: const Icon(
-                          Icons.article_outlined,
-                          size: 24,
-                          color: Colors.white,
-                        ),
-                        tooltip: 'Notifications',
-                      ),
-                      if (_unreadNotificationCount > 0)
-                        Positioned(
-                          right: 6,
-                          top: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: _buildNotificationBadge(iconSize: 22),
                 ),
               ],
             )
           : Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (screenWidth>1600)
-                  const SizedBox(width: 20),
+                SizedBox(width: screenWidth > 1600 ? 20 : 12),
 
-                Container(
-                  width: 71,
-                  height: headerHeight,
-                  padding: EdgeInsets.all(screenWidth>1600 ? 2 : 10),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      right: BorderSide(
-                        color: Colors.transparent,
-                        width: 1,
-                      ),
-                    ),
-                  ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
-                    'assets/logo/annotateit_white.png',
-                    height: headerHeight,
+                    'assets/icons/annotateit.jpg',
+                    height: headerHeight - 20,
+                    width: headerHeight - 20,
                   ),
                 ),
 
                 const Spacer(),
 
-                // Title text positioned on the right
                 Container(
                   height: headerHeight,
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth>600 ? 12 : 4),
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth > 600 ? 16 : 8),
                   child: Text(
-                    screenWidth>1600 ? "AnnotateIt - Vision Annotations" : 'AnnotateIt',
+                    screenWidth > 1600
+                        ? 'AnnotateIt — Vision Annotations'
+                        : 'AnnotateIt',
                     style: TextStyle(
-                      fontSize: screenWidth>1600 ? 30 : (screenWidth>1200 ? 24 : 20),
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'CascadiaCode',
+                      fontSize: screenWidth > 1600 ? 26 : (screenWidth > 1200 ? 22 : 18),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
                       color: Colors.white,
                     ),
                   ),
                 ),
 
-                // Notification icon with ring indicator
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Stack(
-                    children: [
-                      IconButton(
-                        onPressed: _showNotifications,
-                        icon: Icon(
-                          // Icons.mail_outline_rounded,
-                          Icons.article_outlined,
-                          size: screenWidth > 1200 ? 28 : 24,
-                          color: Colors.white,
-                        ),
-                        tooltip: 'Notifications',
-                      ),
-                      if (_unreadNotificationCount > 0)
-                        Positioned(
-                          right: 6,
-                          top: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              _unreadNotificationCount > 99 ? '99+' : _unreadNotificationCount.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
+                  child: _buildNotificationBadge(
+                    iconSize: screenWidth > 1200 ? 26 : 22,
                   ),
                 ),
 
-                SizedBox(width: screenWidth>500 ? 16 : 4),
+                SizedBox(width: screenWidth > 500 ? 12 : 4),
               ],
             ),
     );

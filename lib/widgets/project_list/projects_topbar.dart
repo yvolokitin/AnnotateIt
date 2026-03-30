@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
+import '../../utils/theme.dart';
 
 class ProjectsTopBar extends StatelessWidget {
   final bool sortDetection, sortClassification, sortSegmentation;
@@ -24,11 +25,46 @@ class ProjectsTopBar extends StatelessWidget {
     required this.onCreateProject,
     required this.onCreateFromDataset,
     required this.onCreateFromExport,
-
     required this.onSortDetection,
     required this.onSortClassification,
     required this.onSortSegmentation,
   });
+
+  Widget _filterChip({
+    required bool active,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 42,
+          height: 42,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            color: active
+                ? AppColors.accent.withOpacity(0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: active
+                  ? AppColors.accent.withOpacity(0.4)
+                  : Colors.white.withOpacity(0.08),
+              width: 1,
+            ),
+          ),
+          child: Icon(
+            icon,
+            color: active ? AppColors.accent : Colors.white.withOpacity(0.5),
+            size: 22,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,107 +73,67 @@ class ProjectsTopBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: (screenWidth > 1200) ? 16 : (screenWidth>=700) ? 6 : 2,
-        vertical: (screenWidth > 1200) ? 22 : (screenWidth>=700) ? 12 : 4,
+        horizontal: (screenWidth > 1200) ? 20 : (screenWidth >= 700) ? 10 : 6,
+        vertical: (screenWidth > 1200) ? 18 : (screenWidth >= 700) ? 12 : 6,
       ),
       child: Row(
         children: [
-          SizedBox(width: screenWidth>=700 ? 10 : 0),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: onSortDetection,
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: sortDetection ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Icon(
-                  Icons.crop_free_rounded,
-                  color: sortDetection ? Colors.white : Colors.white70,
-                  size: 30,
-                ),
-              ),
-            ),
+          SizedBox(width: screenWidth >= 700 ? 8 : 0),
+          _filterChip(
+            active: sortDetection,
+            icon: Icons.crop_free_rounded,
+            onTap: onSortDetection,
+          ),
+          SizedBox(width: screenWidth >= 700 ? 4 : 0),
+          _filterChip(
+            active: sortClassification,
+            icon: Icons.category_outlined,
+            onTap: onSortClassification,
+          ),
+          _filterChip(
+            active: sortSegmentation,
+            icon: Icons.extension_outlined,
+            onTap: onSortSegmentation,
           ),
 
-          SizedBox(width: screenWidth>=700 ? 10 : 0),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: onSortClassification,
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: sortClassification ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Icon(
-                  Icons.category_outlined,
-                  color: sortClassification ? Colors.white : Colors.white70,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: onSortSegmentation,
-              child: Container(
-                width: 48,
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: sortSegmentation ? Colors.grey[850] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Icon(
-                  Icons.extension_outlined,
-                  color: sortSegmentation ? Colors.white : Colors.white70,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-
-          if (screenWidth>300)...[
+          if (screenWidth > 300) ...[
             const Spacer(),
           ],
 
           PopupMenuButton<String>(
-            icon: const Icon(Icons.swap_vert, color: Colors.white70),
+            icon: Icon(Icons.swap_vert, color: Colors.white.withOpacity(0.5)),
             onSelected: onSortSelected,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white70, width: 1),
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
             ),
+            color: AppColors.darkCard,
             itemBuilder: (context) => [
-              PopupMenuItem(value: "Custom order", child: Text(l10n.menuSortCustomOrder, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "Last updated", child: Text(l10n.menuSortLastUpdated, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "Newest-Oldest", child: Text(l10n.menuSortNewestOldest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "Oldest-Newest", child: Text(l10n.menuSortOldestNewest, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "Project Type", child: Text(l10n.menuSortProjectType, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "A-Z", child: Text(l10n.menuSortAZ, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
-              PopupMenuItem(value: "Z-A", child: Text(l10n.menuSortZA, style: TextStyle(fontFamily: 'CascadiaCode', fontWeight: FontWeight.normal))),
+              PopupMenuItem(value: "Custom order", child: Text(l10n.menuSortCustomOrder, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "Last updated", child: Text(l10n.menuSortLastUpdated, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "Newest-Oldest", child: Text(l10n.menuSortNewestOldest, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "Oldest-Newest", child: Text(l10n.menuSortOldestNewest, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "Project Type", child: Text(l10n.menuSortProjectType, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "A-Z", child: Text(l10n.menuSortAZ, style: const TextStyle(fontWeight: FontWeight.w400))),
+              PopupMenuItem(value: "Z-A", child: Text(l10n.menuSortZA, style: const TextStyle(fontWeight: FontWeight.w400))),
             ],
           ),
 
-          SizedBox(width: screenWidth>=700 ? 20 : 10),
+          SizedBox(width: screenWidth >= 700 ? 16 : 8),
+
+          // Create button with gradient
           Container(
             decoration: BoxDecoration(
-              color: Colors.redAccent,
-              borderRadius: BorderRadius.circular(30),
+              gradient: const LinearGradient(
+                colors: [AppColors.accent, AppColors.accentOrange],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha((0.3 * 255).toInt()),
-                  blurRadius: 6,
+                  color: AppColors.accent.withOpacity(0.25),
+                  blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -147,56 +143,56 @@ class ProjectsTopBar extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: onCreateProject,
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(24),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth < 500 ? 10 : 16, vertical: screenWidth < 500 ? 3.5 : 5),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth < 500 ? 12 : 18,
+                      vertical: screenWidth < 500 ? 6 : 8,
+                    ),
                     child: Tooltip(
                       message: l10n.menuCreateNewProject,
                       waitDuration: const Duration(milliseconds: 500),
                       child: (screenWidth < 500)
-                          ? Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: (screenWidth >= 700 ? 24 : 22) * 0.7,
-                            )
+                          ? const Icon(Icons.add_rounded, color: Colors.white, size: 20)
                           : Text(
                               l10n.menuCreateNewProject,
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: screenWidth >= 700 ? 22 : 18,
-                                  fontFamily: 'CascadiaCode',
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: screenWidth >= 700 ? 16 : 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.2,
+                              ),
                             ),
                     ),
                   ),
                 ),
                 Container(
                   width: 1,
-                  height: screenWidth < 500 ? 21 : 30,
-                  color: Colors.white,
+                  height: screenWidth < 500 ? 20 : 26,
+                  color: Colors.white.withOpacity(0.3),
                 ),
-                const SizedBox(width: 7),
                 PopupMenuButton<int>(
-                  color: const Color(0xFF2E2E2E),
+                  color: AppColors.darkCard,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: const BorderSide(color: Colors.white70, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
                   ),
-                  icon: screenWidth < 500 ? null : const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  icon: screenWidth < 500
+                      ? null
+                      : const Icon(Icons.arrow_drop_down_rounded, color: Colors.white),
                   child: (screenWidth < 500)
                       ? Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
-                          child: Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.white,
-                            size: (screenWidth >= 700 ? 24 : 22) * 0.7,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          child: const Icon(Icons.arrow_drop_down_rounded, color: Colors.white, size: 18),
                         )
                       : null,
                   offset: const Offset(-10, 47),
                   onSelected: (value) {
-                    if (value == 0) { onCreateProject(); }
-                    else { onCreateFromDataset(); }
+                    if (value == 0) {
+                      onCreateProject();
+                    } else {
+                      onCreateFromDataset();
+                    }
                   },
                   itemBuilder: (context) => [
                     PopupMenuItem<int>(
@@ -205,9 +201,8 @@ class ProjectsTopBar extends StatelessWidget {
                         l10n.menuCreateNewProject,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: screenWidth>=700 ? 22 : 18,
-                          fontFamily: 'CascadiaCode',
-                          fontWeight: FontWeight.normal
+                          fontSize: screenWidth >= 700 ? 16 : 14,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -217,9 +212,8 @@ class ProjectsTopBar extends StatelessWidget {
                         l10n.menuCreateFromDataset,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: screenWidth>=700 ? 22 : 18,
-                          fontFamily: 'CascadiaCode',
-                          fontWeight: FontWeight.normal
+                          fontSize: screenWidth >= 700 ? 16 : 14,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -228,7 +222,7 @@ class ProjectsTopBar extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: screenWidth>1200 ? 20 : 4),
+          SizedBox(width: screenWidth > 1200 ? 16 : 4),
         ],
       ),
     );

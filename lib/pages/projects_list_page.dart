@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import '../gen_l10n/app_localizations.dart';
 import '../utils/theme.dart';
 
+
 import '../session/user_session.dart';
 import "../data/project_database.dart";
 import "../models/project.dart";
@@ -241,13 +242,12 @@ class ProjectsListPageState extends State<ProjectsListPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
+              CircularProgressIndicator(color: AppColors.accent),
               const SizedBox(height: 12),
               Text(
                 l10n.loadingProjects,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.muted,
-                  fontFamily: 'CascadiaCode',
                 ),
               ),
             ],
@@ -393,141 +393,96 @@ class ProjectsListPageState extends State<ProjectsListPage> {
     );
   }
 
-  // Function to show Edit / Change type and Delete options
   void _showProjectOptions(BuildContext context, Project project) {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.darkCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  leading: Icon(
-                    Icons.edit_note_outlined,
-                    color: Theme.of(context).colorScheme.info,
-                    size: 30,
+                Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  title: Text(
-                    l10n.editProjectTitle,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
-                      color: Theme.of(context).colorScheme.info
-                    ),
-                  ),
+                ),
+                _buildOptionTile(
+                  context,
+                  icon: Icons.edit_note_outlined,
+                  label: l10n.editProjectTitle,
+                  color: Theme.of(context).colorScheme.info,
                   onTap: () {
                     Navigator.pop(context);
                     _editProjectName(project);
                   },
                 ),
-
-                ListTile(
-                  leading: Icon(
-                    Icons.build_circle_outlined,
-                    color: Theme.of(context).colorScheme.warning,
-                    size: 30,
-                  ),
-                  title: Text(
-                    l10n.changeProjectTypeTitle,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
-                      color: Theme.of(context).colorScheme.warning,
-                      ),
-                  ),
+                _buildOptionTile(
+                  context,
+                  icon: Icons.build_circle_outlined,
+                  label: l10n.changeProjectTypeTitle,
+                  color: Theme.of(context).colorScheme.warning,
                   onTap: () {
                     Navigator.pop(context);
                     _handleChangeProjectType(project);
                   },
                 ),
-
-                ListTile(
-                  leading: Icon(
-                    Icons.save_alt_rounded,
-                    color: Theme.of(context).colorScheme.success,
-                    size: 30,
-                  ),
-                  title: Text(
-                    l10n.exportProjectAsDataset,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
-                      color: Theme.of(context).colorScheme.success,
-                    ),
-                  ),
+                _buildOptionTile(
+                  context,
+                  icon: Icons.save_alt_rounded,
+                  label: l10n.exportProjectAsDataset,
+                  color: Theme.of(context).colorScheme.success,
                   onTap: () {
                     Navigator.pop(context);
                     _handleExportProject(project);
                   },
                 ),
-
-                // Unified: Pre-label Project (platform-aware, classification and detection projects)
-                if (project.type.toLowerCase().contains('classification') || project.type.toLowerCase().contains('detection')) ...[
-                  ListTile(
-                    leading: Icon(
-                      Icons.auto_awesome,
-                      color: Theme.of(context).colorScheme.purple,
-                      size: 30,
-                    ),
-                    title: Text(
-                      l10n.preLabelProject, // 'Pre-label Project',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.normal,
-                        fontFamily: 'CascadiaCode',
-                        color: Theme.of(context).colorScheme.purple,
-                      ),
-                    ),
-                    onTap: () async {
+                if (project.type.toLowerCase().contains('classification') ||
+                    project.type.toLowerCase().contains('detection'))
+                  _buildOptionTile(
+                    context,
+                    icon: Icons.auto_awesome,
+                    label: l10n.preLabelProject,
+                    color: Theme.of(context).colorScheme.purple,
+                    onTap: () {
                       Navigator.pop(context);
                       _handlePreLabelProject(project);
                     },
                   ),
-                ],
-
-                ListTile(
-                  leading: Icon(
-                    Icons.delete_sweep_outlined,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 30,
-                  ),
-                  title: Text(
-                    l10n.deleteProjectTitle,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'CascadiaCode',
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
+                _buildOptionTile(
+                  context,
+                  icon: Icons.delete_outline_rounded,
+                  label: l10n.deleteProjectTitle,
+                  color: Theme.of(context).colorScheme.error,
                   onTap: () {
-                      final currentContext = context;
-                      Navigator.pop(context);
-                      Future.delayed(Duration.zero, () {
-                        showDialog(
-                          context: currentContext,
-                          builder: (_) => DeleteProjectDialog(
-                            project: project,
-                            onConfirmed: () {
-                              // Refresh the list after deletion
-                              loadProjectsWithLabels();
-                            },
-                            onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
-                              if (dontAskAgain) {
-                                await UserSession.instance.setProjectSkipDeleteConfirm(true);
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    );
+                    final currentContext = context;
+                    Navigator.pop(context);
+                    Future.delayed(Duration.zero, () {
+                      showDialog(
+                        context: currentContext,
+                        builder: (_) => DeleteProjectDialog(
+                          project: project,
+                          onConfirmed: () {
+                            loadProjectsWithLabels();
+                          },
+                          onOptionsSelected: (deleteFromDisk, dontAskAgain) async {
+                            if (dontAskAgain) {
+                              await UserSession.instance.setProjectSkipDeleteConfirm(true);
+                            }
+                          },
+                        ),
+                      );
+                    });
                   },
                 ),
               ],
@@ -535,6 +490,28 @@ class ProjectsListPageState extends State<ProjectsListPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildOptionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      leading: Icon(icon, color: color, size: 26),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }

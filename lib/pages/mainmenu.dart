@@ -59,29 +59,24 @@ class MainPageState extends State<MainPage> {
                   children: [
                     // Full drawer for large screens
                     if (screenWidth >= 1600)
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 95,
-                              width: double.infinity,
-                              color: Colors.grey[850],
-                            ),
-
-                            Expanded(
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: MainMenuAppDrawer(
-                                  fullMode: true,
-                                  selectedIndex: selectedIndex,
-                                  onItemSelected: _onItemTapped,
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 24),
+                              Expanded(
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: MainMenuAppDrawer(
+                                    fullMode: true,
+                                    selectedIndex: selectedIndex,
+                                    onItemSelected: _onItemTapped,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
 
                     // NavigationRail for medium screens
                     if (screenWidth >= 800 && screenWidth < 1600)
