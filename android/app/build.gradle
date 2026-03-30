@@ -9,13 +9,13 @@ def flutterVersionName = (project.findProperty("flutter.versionName") ?: "1.0")
 
 android {
     namespace "ai.annotateit"
-    compileSdk 35
+    compileSdk 36
     ndkVersion "27.0.12077973"
 
     defaultConfig {
         applicationId "ai.annotateit"
-        minSdkVersion flutter.minSdkVersion
-        targetSdk 35
+        minSdkVersion 26
+        targetSdk 36
         versionCode flutterVersionCode
         versionName flutterVersionName
     }
