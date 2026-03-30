@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -151,8 +152,14 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   int _lastResetCount = 0;
   double prevScale = 1;
 
-  Matrix4 matrix = Matrix4.identity()..scale(0.9);
+  final ValueNotifier<Matrix4> _transformNotifier =
+      ValueNotifier(Matrix4.identity()..scale(0.9));
+  Matrix4 get matrix => _transformNotifier.value;
+  set matrix(Matrix4 m) => _transformNotifier.value = m;
   Matrix4 inverse = Matrix4.identity();
+
+  double _lastPaintedScale = 0.9;
+  Timer? _scaleUpdateTimer;
 
   // Resize handle indices: 0=top-left, 1=top-right, 2=bottom-right, 3=bottom-left
   int? _activeResizeHandle;
@@ -248,9 +255,8 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
       _lastResetCount = widget.resetZoomCount;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() {
-          matrix = setTransformToFit(_modifiedImage ?? widget.image);
-        });
+        matrix = setTransformToFit(_modifiedImage ?? widget.image);
+        setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
         widget.onZoomChanged?.call(matrix.getMaxScaleOnAxis());
       });
     }
@@ -554,9 +560,8 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {
-        matrix = setTransformToFit(widget.image);
-      });
+      matrix = setTransformToFit(widget.image);
+      setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
       notifyZoomChanged(matrix.getMaxScaleOnAxis());
     });
   }
@@ -590,14 +595,20 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     inverse.copyInverse(matrix);
     final position = inverse * localPosition;
     final mScale = 1 - scale;
-    setState(() {
-      matrix *= Matrix4(
-        scale, 0, 0, 0,
-        0, scale, 0, 0,
-        0, 0, scale, 0,
-        mScale * position.x, mScale * position.y, 0, 1);
-    });
+    matrix = matrix * Matrix4(
+      scale, 0, 0, 0,
+      0, scale, 0, 0,
+      0, 0, scale, 0,
+      mScale * position.x, mScale * position.y, 0, 1);
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
+    _scheduleScaleUpdate();
+  }
+
+  void _scheduleScaleUpdate() {
+    _scaleUpdateTimer?.cancel();
+    _scaleUpdateTimer = Timer(const Duration(milliseconds: 120), () {
+      if (mounted) setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
+    });
   }
 
   // Programmatic zoom controls
@@ -696,12 +707,9 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
   
   void _handlePointerDown(PointerDownEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // Navigation mode: enable middle-mouse panning
       if ((event.buttons & kMiddleMouseButton) != 0) {
-        setState(() {
-          _isMiddlePanning = true;
-          _lastPanPosition = event.localPosition;
-        });
+        _isMiddlePanning = true;
+        _lastPanPosition = event.localPosition;
         return;
       }
       return;
@@ -730,16 +738,15 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
 
   void _handlePointerMove(PointerMoveEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // Navigation mode - middle mouse panning
       if (_isMiddlePanning) {
         final last = _lastPanPosition;
         if (last != null) {
           final dx = event.localPosition.dx - last.dx;
           final dy = event.localPosition.dy - last.dy;
-          setState(() {
-            matrix.translate(dx, dy);
-            _lastPanPosition = event.localPosition;
-          });
+          _lastPanPosition = event.localPosition;
+          final m = matrix.clone();
+          m.translate(dx, dy);
+          matrix = m;
         } else {
           _lastPanPosition = event.localPosition;
         }
@@ -898,12 +905,9 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
 
   void _handlePointerUp(PointerUpEvent event) {
     if (widget.editorAction == EditorAction.navigation) {
-      // End middle-mouse panning
       if (_isMiddlePanning) {
-        setState(() {
-          _isMiddlePanning = false;
-          _lastPanPosition = null;
-        });
+        _isMiddlePanning = false;
+        _lastPanPosition = null;
       }
       return;
     }
@@ -1102,6 +1106,8 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     _rotationController?.dispose();
     _flipXController?.dispose();
     _flipYController?.dispose();
+    _scaleUpdateTimer?.cancel();
+    _transformNotifier.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -1111,7 +1117,9 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (f) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          setState(() => matrix = setTransformToFit(widget.image));
+          if (!mounted) return;
+          matrix = setTransformToFit(widget.image);
+          setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
         });
         return false;
       },
@@ -1165,7 +1173,8 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
                     onTapDown: _handleTapDown,
                     onScaleStart: (_) => prevScale = 1,
                     onDoubleTap: () {
-                      setState(() => matrix = setTransformToFit(widget.image));
+                      matrix = setTransformToFit(widget.image);
+                      setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
                       notifyZoomChanged(matrix.getMaxScaleOnAxis());
                     },
                     onScaleUpdate: (d) {
@@ -1173,13 +1182,19 @@ class _EditorCanvasState extends State<EditorCanvas> with TickerProviderStateMix
                       prevScale = d.scale;
                       scaleCanvas(Vector3(d.localFocalPoint.dx, d.localFocalPoint.dy, 0), scale);
                     },
-                    child: RepaintBoundary(
-                      child: Transform(
-                        transform: matrix,
+                    child: ValueListenableBuilder<Matrix4>(
+                      valueListenable: _transformNotifier,
+                      builder: (context, currentMatrix, child) {
+                        return Transform(
+                          transform: currentMatrix,
+                          child: child,
+                        );
+                      },
+                      child: RepaintBoundary(
                         child: CustomPaint(
                           painter: EditorPainter(
                             image: _modifiedImage ?? widget.image,
-                            scale: matrix.getMaxScaleOnAxis(),
+                            scale: _lastPaintedScale,
                             cropRect: widget.editorAction == EditorAction.crop ? _cropRectInImageSpace() : null,
                             brightness: _brightness,
                             contrast: _contrast,

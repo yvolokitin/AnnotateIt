@@ -82,10 +82,19 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   int _lastResetCount = 0;
   double prevScale = 1;
 
-  Matrix4 matrix = Matrix4.identity()..scale(0.9);
+  // The transform is stored in a ValueNotifier so zoom/pan updates only
+  // rebuild the lightweight Transform widget, not the expensive CustomPaint.
+  final ValueNotifier<Matrix4> _transformNotifier =
+      ValueNotifier(Matrix4.identity()..scale(0.9));
+  Matrix4 get matrix => _transformNotifier.value;
+  set matrix(Matrix4 m) => _transformNotifier.value = m;
   Matrix4 inverse = Matrix4.identity();
 
-  // Throttle zoom change notifications to parent to avoid frequent heavy rebuilds
+  // Scale value the painter uses for handle/text sizing. Updated on a
+  // debounce so continuous scroll doesn't force expensive repaints.
+  double _lastPaintedScale = 0.9;
+  Timer? _scaleUpdateTimer;
+
   Timer? _zoomNotifyTimer;
   double? _queuedZoom;
   static const Duration _zoomNotifyInterval = Duration(milliseconds: 16);
@@ -121,9 +130,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {
-        matrix = setTransformToFit(widget.image);
-      });
+      matrix = setTransformToFit(widget.image);
+      setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
       notifyZoomChanged(matrix.getMaxScaleOnAxis());
     });
   }
@@ -140,9 +148,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       _lastResetCount = widget.resetZoomCount;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() {
-          matrix = setTransformToFit(widget.image);
-        });
+        matrix = setTransformToFit(widget.image);
+        setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
         notifyZoomChanged(matrix.getMaxScaleOnAxis());
       });
     }
@@ -213,32 +220,40 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     inverse.copyInverse(matrix);
     final position = inverse * localPosition;
     final mScale = 1 - scale;
-    setState(() {
-      matrix *= Matrix4(
-        scale,
-        0,
-        0,
-        0,
-        0,
-        scale,
-        0,
-        0,
-        0,
-        0,
-        scale,
-        0,
-        mScale * position.x,
-        mScale * position.y,
-        0,
-        1,
-      );
-    });
+    matrix = matrix * Matrix4(
+      scale,
+      0,
+      0,
+      0,
+      0,
+      scale,
+      0,
+      0,
+      0,
+      0,
+      scale,
+      0,
+      mScale * position.x,
+      mScale * position.y,
+      0,
+      1,
+    );
     notifyZoomChanged(matrix.getMaxScaleOnAxis());
+    _scheduleScaleUpdate();
+  }
+
+  void _scheduleScaleUpdate() {
+    _scaleUpdateTimer?.cancel();
+    _scaleUpdateTimer = Timer(const Duration(milliseconds: 120), () {
+      if (mounted) {
+        setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
+      }
+    });
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     if (event.buttons == kMiddleMouseButton) {
-      setState(() => _lastMiddleButtonPosition = event.localPosition);
+      _lastMiddleButtonPosition = event.localPosition;
       return;
     }
 
@@ -424,11 +439,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     if (event.buttons == kMiddleMouseButton &&
         _lastMiddleButtonPosition != null) {
       final delta = event.localPosition - _lastMiddleButtonPosition!;
-      setState(() {
-        _lastMiddleButtonPosition = event.localPosition;
-        final zoom = matrix.getMaxScaleOnAxis();
-        matrix.translate(delta.dx / zoom, delta.dy / zoom);
-      });
+      _lastMiddleButtonPosition = event.localPosition;
+      final zoom = matrix.getMaxScaleOnAxis();
+      final m = matrix.clone();
+      m.translate(delta.dx / zoom, delta.dy / zoom);
+      matrix = m;
       return;
     }
 
@@ -533,7 +548,7 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
 
   void _handlePointerUp(PointerUpEvent event) async {
     if (event.buttons == kMiddleMouseButton) {
-      setState(() => _lastMiddleButtonPosition = null);
+      _lastMiddleButtonPosition = null;
     }
 
     if (event.kind == PointerDeviceKind.mouse && event.buttons == 0) {
@@ -813,6 +828,8 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   @override
   void dispose() {
     _zoomNotifyTimer?.cancel();
+    _scaleUpdateTimer?.cancel();
+    _transformNotifier.dispose();
     super.dispose();
   }
 
@@ -821,7 +838,9 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (f) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          setState(() => matrix = setTransformToFit(widget.image));
+          if (!mounted) return;
+          matrix = setTransformToFit(widget.image);
+          setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
         });
         return false;
       },
@@ -850,11 +869,11 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                 onSecondaryTapDown: _handleSecondaryTapDown,
                 onScaleStart: (_) => prevScale = 1,
                 onDoubleTap: () {
-                  // Disable double-tap zoom reset in annotation modes to avoid accidental resets while drawing
                   if (widget.userAction != UserAction.bbox_annotation &&
                       widget.userAction != UserAction.sam_annotation &&
                       widget.userAction != UserAction.polygon_annotation) {
-                    setState(() => matrix = setTransformToFit(widget.image));
+                    matrix = setTransformToFit(widget.image);
+                    setState(() => _lastPaintedScale = matrix.getMaxScaleOnAxis());
                     notifyZoomChanged(matrix.getMaxScaleOnAxis());
                   }
                 },
@@ -866,21 +885,24 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
                     scale,
                   );
                 },
-                child: RepaintBoundary(
-                  child: Transform(
-                    transform: matrix,
+                child: ValueListenableBuilder<Matrix4>(
+                  valueListenable: _transformNotifier,
+                  builder: (context, currentMatrix, child) {
+                    return Transform(
+                      transform: currentMatrix,
+                      child: child,
+                    );
+                  },
+                  child: RepaintBoundary(
                     child: CustomPaint(
-                      isComplex:
-                          true, // Hint to the framework that this is a complex painting operation
+                      isComplex: true,
                       willChange:
-                          widget.userAction ==
-                          UserAction
-                              .polygon_annotation, // Hint that this will change frequently during polygon drawing
+                          widget.userAction == UserAction.polygon_annotation,
                       painter: CanvasPainter(
                         image: widget.image,
                         annotations: _localAnnotations,
                         selectedAnnotation: widget.selectedAnnotation,
-                        scale: matrix.getMaxScaleOnAxis(),
+                        scale: _lastPaintedScale,
                         opacity: widget.opacity,
                         strokeWidth: widget.strokeWidth,
                         cornerSize: widget.cornerSize,
