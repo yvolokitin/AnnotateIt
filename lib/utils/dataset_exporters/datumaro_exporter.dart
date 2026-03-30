@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import '../media_bytes_helper.dart';
 
 import '../../models/project.dart';
 import '../../models/label.dart';
@@ -71,22 +73,18 @@ class DatumaroExporter extends BaseDatasetExporter {
     for (final mediaItem in mediaItems) {
       if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
 
-      final sourceFile = File(mediaItem.filePath);
       final imageFileName = path.basename(mediaItem.filePath);
 
-      if (await sourceFile.exists()) {
-        try {
-          final bytes = await sourceFile.readAsBytes();
-          if (bytes.isNotEmpty) {
-            archive.addFile(ArchiveFile('images/$imageFileName', bytes.length, bytes));
-            _logger.fine('Added to ZIP: images/$imageFileName');
-          }
-        } catch (e) {
-          _logger.severe('Failed to read ${sourceFile.path}: $e');
+      try {
+        final bytes = await loadMediaBytes(mediaItem.filePath, mediaItemId: mediaItem.id);
+        if (bytes == null || bytes.isEmpty) {
+          _logger.warning('Image file not found: ${mediaItem.filePath}');
           continue;
         }
-      } else {
-        _logger.warning('Image file not found: ${mediaItem.filePath}');
+        archive.addFile(ArchiveFile('images/$imageFileName', bytes.length, bytes));
+        _logger.fine('Added to ZIP: images/$imageFileName');
+      } catch (e) {
+        _logger.severe('Failed to read ${mediaItem.filePath}: $e');
         continue;
       }
 

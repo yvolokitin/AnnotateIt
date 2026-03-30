@@ -913,7 +913,34 @@ Future<String> getDefaultStoragePath(
 ) async {
   final basePath = await getBasePath();
   final uniqueFolder = 'dataset_${DateTime.now().millisecondsSinceEpoch}';
+  if (kIsWeb) {
+    return '$basePath/$uniqueFolder';
+  }
   final fullPath = Directory("$basePath/$uniqueFolder");
   await fullPath.create(recursive: true);
   return fullPath.path;
+}
+
+/// Lightweight dataset type detection from file name list only (for web / in-memory).
+String detectDatasetTypeFromFileList(List<String> fileNames) {
+  final lower = fileNames.map((n) => n.toLowerCase()).toList();
+
+  if (lower.any((n) => n.contains('instances') && n.endsWith('.json')) ||
+      lower.any((n) => n.contains('annotations') && n.endsWith('.json') && !n.contains('datumaro'))) {
+    return 'COCO';
+  }
+  if (lower.any((n) => n.endsWith('.yaml') || n.endsWith('.yml')) &&
+      lower.any((n) => n.endsWith('.txt') && !n.contains('readme'))) {
+    return 'YOLO';
+  }
+  if (lower.any((n) => n.endsWith('.xml') && !n.contains('labelmap'))) {
+    if (lower.any((n) => n.contains('annotations/') && n.endsWith('.xml'))) {
+      return 'VOC';
+    }
+    return 'LabelMe';
+  }
+  if (lower.any((n) => n.contains('datumaro') && n.endsWith('.json'))) {
+    return 'Datumaro';
+  }
+  return 'Unknown';
 }

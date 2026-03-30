@@ -36,6 +36,7 @@ import '../widgets/imageannotator/user_action.dart';
 import '../widgets/app_snackbar.dart';
 import '../utils/sam_model_utils.dart';
 import '../utils/platform_utils.dart';
+import '../utils/media_bytes_helper.dart';
 import 'image_editor.dart';
 
 class AnnotatorPage extends StatefulWidget {
@@ -679,40 +680,37 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     );
     if (media != null) {
       _mediaCache[index] = media;
-      await _loadImage(index, media.mediaItem.filePath);
+      await _loadImage(index, media.mediaItem.filePath, mediaItemId: media.mediaItem.id);
       if (mounted) setState(() {});
     }
   }
 
-  Future<void> _loadImage(int index, String filePath) async {
+  Future<void> _loadImage(int index, String filePath, {int? mediaItemId}) async {
     if (_imageCache.containsKey(index) || _invalidMediaCache.containsKey(index))
       return;
 
-    final file = File(filePath);
-    if (!file.existsSync()) return;
-
     // Check if the file is a video based on its extension
-    final fileExtension = filePath.toLowerCase().substring(
-      filePath.lastIndexOf('.'),
-    );
-    if (_videoExtensions.contains(fileExtension)) {
-      // Mark this as an invalid media item (video)
-      final fileName = p.basename(filePath);
-      _invalidMediaCache[index] =
-          'Video files are not supported for annotation: $fileName';
-      if (mounted) setState(() {});
-      return;
+    final dotIndex = filePath.lastIndexOf('.');
+    if (dotIndex >= 0) {
+      final fileExtension = filePath.toLowerCase().substring(dotIndex);
+      if (_videoExtensions.contains(fileExtension)) {
+        final fileName = p.basename(filePath);
+        _invalidMediaCache[index] =
+            'Video files are not supported for annotation: $fileName';
+        if (mounted) setState(() {});
+        return;
+      }
     }
 
     try {
-      final bytes = await file.readAsBytes();
+      final bytes = await loadMediaBytes(filePath, mediaItemId: mediaItemId);
+      if (bytes == null) return;
       final codec = await ui.instantiateImageCodec(bytes);
       final frame = await codec.getNextFrame();
       _imageCache[index] = frame.image;
 
       _limitCacheSize();
     } catch (e) {
-      // Handle other invalid image formats or corrupted files
       _invalidMediaCache[index] = 'Invalid image data: ${e.toString()}';
     }
 
@@ -743,7 +741,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     } else if (!_imageCache.containsKey(index) &&
         !_invalidMediaCache.containsKey(index)) {
       // In case media is cached but image wasn't decoded yet
-      _loadImage(index, _mediaCache[index]!.mediaItem.filePath);
+      _loadImage(index, _mediaCache[index]!.mediaItem.filePath, mediaItemId: _mediaCache[index]!.mediaItem.id);
     }
 
     _preloadAdjacentImages(index);
@@ -757,7 +755,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
 
     for (final index in indicesToPreload) {
       if (_mediaCache.containsKey(index)) {
-        _loadImage(index, _mediaCache[index]!.mediaItem.filePath);
+        _loadImage(index, _mediaCache[index]!.mediaItem.filePath, mediaItemId: _mediaCache[index]!.mediaItem.id);
       } else {
         _loadMedia(index);
       }
@@ -1370,7 +1368,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                         // Show loading indicator if image is not loaded yet
                         if (image == null) {
                           // Decode/load image for already-loaded media
-                          _loadImage(index, media.mediaItem.filePath);
+                          _loadImage(index, media.mediaItem.filePath, mediaItemId: media.mediaItem.id);
                           return const Center(
                             child: CircularProgressIndicator(),
                           );

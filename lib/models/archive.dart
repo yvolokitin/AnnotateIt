@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Archive {
   final String zipFileName;
   final String datasetPath;
@@ -9,6 +11,9 @@ class Archive {
   final String? selectedTaskType;
   final List<String> labels;
 
+  /// On web, stores the raw ZIP bytes in memory (no filesystem).
+  final Uint8List? webZipBytes;
+
   Archive({
     required this.zipFileName,
     required this.datasetPath,
@@ -19,6 +24,7 @@ class Archive {
     required this.taskTypes,
     this.selectedTaskType,
     required this.labels,
+    this.webZipBytes,
   });
 
   Archive copyWith({
@@ -31,6 +37,7 @@ class Archive {
     List<String>? taskTypes,
     String? selectedTaskType,
     List<String>? labels,
+    Uint8List? webZipBytes,
   }) {
     return Archive(
       zipFileName: zipFileName ?? this.zipFileName,
@@ -42,6 +49,7 @@ class Archive {
       taskTypes: taskTypes ?? this.taskTypes,
       selectedTaskType: selectedTaskType ?? this.selectedTaskType,
       labels: labels ?? this.labels,
+      webZipBytes: webZipBytes ?? this.webZipBytes,
     );
   }
 

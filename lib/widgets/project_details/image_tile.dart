@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +53,7 @@ class _ImageTileState extends State<ImageTile> {
     for (final annotation in annotations) {
       final labelName = annotation.name?.trim();
       if (labelName != null && labelName.isNotEmpty && !uniqueLabels.containsKey(labelName)) {
-        final labelColor = annotation.color ?? Colors.grey; // fallback
+        final labelColor = annotation.color ?? Colors.grey;
         uniqueLabels[labelName] = Label(
           id: -1,
           labelOrder: 0,
@@ -69,20 +68,9 @@ class _ImageTileState extends State<ImageTile> {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(widget.mediaItem.mediaItem.filePath);
     final uniqueLabels = extractLabelsFromAnnotations(widget.mediaItem.annotations ?? []);
     final isSelected = widget.mediaItem.isSelected;
-
-    if (!file.existsSync()) {
-      final l10n = AppLocalizations.of(context)!;
-      return ErrorImageTile(
-        message: l10n.fileNotFound,
-        media: widget.mediaItem,
-        isSelected: isSelected,
-        onSelectedChanged: (value) => widget.onSelectedChanged?.call(value),
-        onRefreshNeeded: widget.onRefreshNeeded,
-      );
-    }
+    final mediaItem = widget.mediaItem.mediaItem;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -98,7 +86,8 @@ class _ImageTileState extends State<ImageTile> {
           child: Stack(
             children: [
               ImagePreview(
-                file: file,
+                filePath: mediaItem.filePath,
+                mediaItemId: mediaItem.id,
                 hovered: _hovered,
                 onTap: () async {
                   final result = await Navigator.push(
@@ -117,10 +106,6 @@ class _ImageTileState extends State<ImageTile> {
                   );
                   
                   if (result == 'refresh') {
-                    // Evict the image cache for this file to ensure fresh bytes are loaded
-                    try {
-                      await FileImage(file).evict();
-                    } catch (_) {}
                     if (widget.onRefreshNeeded != null) {
                       widget.onRefreshNeeded!();
                     }
@@ -187,10 +172,6 @@ class _ImageTileState extends State<ImageTile> {
                       );
                       
                       if (result == 'refresh') {
-                        // Evict the image cache for this file to ensure fresh bytes are loaded
-                        try {
-                          await FileImage(file).evict();
-                        } catch (_) {}
                         if (widget.onRefreshNeeded != null) {
                           widget.onRefreshNeeded!();
                         }

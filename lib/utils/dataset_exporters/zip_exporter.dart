@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -8,6 +9,7 @@ import '../../models/project.dart';
 import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/media_item.dart';
+import '../media_bytes_helper.dart';
 
 import 'base_dataset_exporter.dart';
 
@@ -69,18 +71,14 @@ class ZipExporter extends BaseDatasetExporter {
       if (mediaItem.id == null) continue;
 
       final fileName = path.basename(mediaItem.filePath);
-      final file = File(mediaItem.filePath);
-
-      if (!await file.exists()) {
-        _logger.warning('Media file not found: ${mediaItem.filePath}');
-        continue;
-      }
 
       try {
-        final bytes = await file.readAsBytes();
-        if (bytes.isNotEmpty) {
+        final bytes = await loadMediaBytes(mediaItem.filePath, mediaItemId: mediaItem.id);
+        if (bytes != null && bytes.isNotEmpty) {
           archive.addFile(ArchiveFile('images/$fileName', bytes.length, bytes));
           mediaIdToFilename[mediaItem.id!] = fileName;
+        } else {
+          _logger.warning('No data for media: ${mediaItem.filePath}');
         }
       } catch (e) {
         _logger.severe('Failed to read ${mediaItem.filePath}: $e');

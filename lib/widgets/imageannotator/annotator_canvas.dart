@@ -341,6 +341,16 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
   void _createPolygonAnnotation() async {
     if (_polygonPoints.length < 3) return;
 
+    if ((widget.selectedLabel.id ?? -1) <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a label before drawing')),
+        );
+      }
+      _polygonPoints.clear();
+      return;
+    }
+
     List<Offset> finalPoints = List<Offset>.from(_polygonPoints);
 
     if ((finalPoints.last - finalPoints.first).distance > 0.1) {
@@ -572,6 +582,16 @@ class _AnnotatorCanvasState extends State<AnnotatorCanvas> {
       final rect = Rect.fromPoints(_drawingStart!, _drawingCurrent!);
 
       if (rect.width > 4 && rect.height > 4) {
+        if ((widget.selectedLabel.id ?? -1) <= 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please select a label before drawing')),
+            );
+          }
+          _drawingStart = null;
+          _drawingCurrent = null;
+          return;
+        }
         final now = DateTime.now();
         var newAnnotation =
             Annotation(

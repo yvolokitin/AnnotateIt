@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:archive/archive_io.dart';
@@ -18,6 +20,7 @@ import '../../gen_l10n/app_localizations.dart';
 import '../../data/dataset_database.dart';
 import '../../data/annotation_database.dart';
 import '../../utils/dataset_exporters/exporter_factory.dart';
+import '../../utils/web_download_helper.dart';
 import '../../utils/theme.dart';
 
 class ExportProjectDialog extends StatefulWidget {
@@ -457,58 +460,69 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         datasetIdToFolderName: _datasetIdToFolderName,
       );
 
-      // Create zip file with retry mechanism
-      const maxRetries = 3;
-      int retryCount = 0;
-      bool success = false;
-      Exception? lastException;
-      StackTrace? lastStack;
-      
-      while (retryCount < maxRetries && !success) {
-        try {
-          _logger.info('Creating zip file (attempt ${retryCount + 1}/$maxRetries): $exportPath');
-          final zipEncoder = ZipEncoder();
-          final zipData = zipEncoder.encode(archive);
-          
-          if (zipData == null) {
-            throw Exception('Failed to encode archive: zip data is null');
-          }
-          
-          final zipFile = File(exportPath);
-          await zipFile.writeAsBytes(zipData);
-          
-          success = true;
-          _logger.info('Successfully created zip file: $exportPath');
-          
-          if (!mounted) return;
+      final zipEncoder = ZipEncoder();
+      final zipData = zipEncoder.encode(archive);
 
-          AppSnackbar.show(
-            context,
-            'Project exported successfully to ${path.basename(zipFile.path)}',
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-          );
+      if (zipData == null) {
+        throw Exception('Failed to encode archive: zip data is null');
+      }
 
-          Navigator.of(context).pop('refresh');
-        } catch (e, stack) {
-          retryCount++;
-          lastException = e is Exception ? e : Exception(e.toString());
-          lastStack = stack;
-          
-          final errorMessage = 'Failed to create zip file (attempt $retryCount/$maxRetries): $exportPath';
-          _logger.warning(errorMessage, e, stack);
-          
-          if (retryCount < maxRetries) {
-            // Wait before retrying with exponential backoff
-            await Future.delayed(Duration(milliseconds: 500 * (1 << retryCount)));
+      if (kIsWeb) {
+        _triggerWebDownload(Uint8List.fromList(zipData), filename);
+        if (!mounted) return;
+        AppSnackbar.show(
+          context,
+          'Project exported successfully as $filename',
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+        Navigator.of(context).pop('refresh');
+      } else {
+        // Native: write to filesystem with retry
+        const maxRetries = 3;
+        int retryCount = 0;
+        bool success = false;
+        Exception? lastException;
+        StackTrace? lastStack;
+
+        while (retryCount < maxRetries && !success) {
+          try {
+            _logger.info('Creating zip file (attempt ${retryCount + 1}/$maxRetries): $exportPath');
+
+            final zipFile = File(exportPath);
+            await zipFile.writeAsBytes(zipData);
+
+            success = true;
+            _logger.info('Successfully created zip file: $exportPath');
+
+            if (!mounted) return;
+
+            AppSnackbar.show(
+              context,
+              'Project exported successfully to ${path.basename(zipFile.path)}',
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+            );
+
+            Navigator.of(context).pop('refresh');
+          } catch (e, stack) {
+            retryCount++;
+            lastException = e is Exception ? e : Exception(e.toString());
+            lastStack = stack;
+
+            final errorMessage = 'Failed to create zip file (attempt $retryCount/$maxRetries): $exportPath';
+            _logger.warning(errorMessage, e, stack);
+
+            if (retryCount < maxRetries) {
+              await Future.delayed(Duration(milliseconds: 500 * (1 << retryCount)));
+            }
           }
         }
-      }
-      
-      // If all retries failed, throw the last exception
-      if (!success) {
-        _logger.severe('All attempts to create zip file failed: $exportPath', lastException, lastStack);
-        throw lastException!;
+
+        if (!success) {
+          _logger.severe('All attempts to create zip file failed: $exportPath', lastException, lastStack);
+          throw lastException!;
+        }
       }
     } catch (e, stack) {
       _logger.severe('Error while exporting project', e, stack);
@@ -543,5 +557,10 @@ class ExportProjectDialogState extends State<ExportProjectDialog> {
         setState(() => _isExporting = false);
       }
     }
+  }
+
+  void _triggerWebDownload(Uint8List bytes, String filename) {
+    if (!kIsWeb) return;
+    webDownloadBytes(bytes, filename);
   }
 }

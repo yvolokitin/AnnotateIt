@@ -55,6 +55,21 @@ class ProjectDatabase {
     }
   }
 
+  Future<void> _migrateAddMediaItemImageData(Database db) async {
+    try {
+      final columns = await db.rawQuery('PRAGMA table_info(media_items)');
+      final hasImageData = columns.any((row) => row['name'] == 'imageData');
+      if (!hasImageData) {
+        await db.execute(
+          'ALTER TABLE media_items ADD COLUMN imageData BLOB',
+        );
+        _log.info('Migration: imageData BLOB column added to media_items.');
+      }
+    } catch (e, stack) {
+      _log.severe('Migration _migrateAddMediaItemImageData failed', e, stack);
+    }
+  }
+
   Future<void> _migrateEnsureIndexes(Database db) async {
     try {
       final statements = <String>[
@@ -158,6 +173,7 @@ class ProjectDatabase {
         onOpen: (db) async {
           await _migrateAddProjectOrder(db);
           await _migrateAnnotationsSchemaAndReview(db);
+          await _migrateAddMediaItemImageData(db);
           await _migrateEnsureIndexes(db);
         },
         singleInstance: true,

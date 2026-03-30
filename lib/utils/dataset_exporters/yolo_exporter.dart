@@ -1,8 +1,10 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import '../media_bytes_helper.dart';
 
 import '../../models/project.dart';
 import '../../models/label.dart';
@@ -45,7 +47,6 @@ class YOLOExporter extends BaseDatasetExporter {
     for (final mediaItem in mediaItems) {
       if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
 
-      final file = File(mediaItem.filePath);
       final fileName = path.basename(mediaItem.filePath);
       final imageBaseName = path.basenameWithoutExtension(fileName);
       final datasetFolder = datasetIdToFolderName != null
@@ -56,16 +57,15 @@ class YOLOExporter extends BaseDatasetExporter {
           : 'images/$datasetFolder/$fileName';
 
       // Add image to archive
-      if (await file.exists()) {
-        try {
-          final bytes = await file.readAsBytes();
-          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
-        } catch (e) {
-          _logger.severe('Failed to read ${file.path}: $e');
+      try {
+        final bytes = await loadMediaBytes(mediaItem.filePath, mediaItemId: mediaItem.id);
+        if (bytes == null || bytes.isEmpty) {
+          _logger.warning('Image file not found: ${mediaItem.filePath}');
           continue;
         }
-      } else {
-        _logger.warning('Image file not found: ${file.path}');
+        archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
+      } catch (e) {
+        _logger.severe('Failed to read ${mediaItem.filePath}: $e');
         continue;
       }
 

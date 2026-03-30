@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import '../media_bytes_helper.dart';
 
 import '../../models/project.dart';
 import '../../models/label.dart';
@@ -52,20 +54,19 @@ class VOCExporter extends BaseDatasetExporter {
     for (final mediaItem in mediaItems) {
       if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
 
-      // Add image bytes
-      final file = File(mediaItem.filePath);
       final fileName = path.basename(mediaItem.filePath);
       final baseName = path.basenameWithoutExtension(fileName);
-      if (await file.exists()) {
-        try {
-          final bytes = await file.readAsBytes();
-          archive.addFile(ArchiveFile('JPEGImages/$fileName', bytes.length, bytes));
-        } catch (e) {
-          _logger.severe('Failed to read image ${file.path}: $e');
+
+      // Add image bytes
+      try {
+        final bytes = await loadMediaBytes(mediaItem.filePath, mediaItemId: mediaItem.id);
+        if (bytes == null || bytes.isEmpty) {
+          _logger.warning('Image file not found: ${mediaItem.filePath}');
           continue;
         }
-      } else {
-        _logger.warning('Image file not found: ${file.path}');
+        archive.addFile(ArchiveFile('JPEGImages/$fileName', bytes.length, bytes));
+      } catch (e) {
+        _logger.severe('Failed to read image ${mediaItem.filePath}: $e');
         continue;
       }
 

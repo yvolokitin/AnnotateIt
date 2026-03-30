@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 enum MediaType { image, video }
 
 class MediaItem {
@@ -17,6 +19,7 @@ class MediaItem {
   final String? lastAnnotator;
   final DateTime? lastAnnotatedDate;
   final int? numberOfFrames;
+  final Uint8List? imageData;
 
   MediaItem({
     this.id,
@@ -35,6 +38,7 @@ class MediaItem {
     this.lastAnnotator,
     this.lastAnnotatedDate,
     this.numberOfFrames,
+    this.imageData,
   });
 
   Map<String, dynamic> toMap() {
@@ -55,6 +59,7 @@ class MediaItem {
       'lastAnnotator': lastAnnotator,
       'lastAnnotatedDate': lastAnnotatedDate?.toIso8601String(),
       'numberOfFrames': numberOfFrames,
+      'imageData': imageData,
     };
   }
 
@@ -78,6 +83,7 @@ class MediaItem {
           ? DateTime.parse(map['lastAnnotatedDate'])
           : null,
       numberOfFrames: map['numberOfFrames'],
+      imageData: map['imageData'] as Uint8List?,
     );
   }
 
@@ -139,6 +145,7 @@ class MediaItem {
       lastAnnotator: lastAnnotator,
       lastAnnotatedDate: lastAnnotatedDate,
       numberOfFrames: numberOfFrames,
+      imageData: imageData,
     );
   }
 }

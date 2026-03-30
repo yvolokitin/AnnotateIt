@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:logging/logging.dart';
+import 'package:archive/archive.dart' as archive_lib;
 
 import '../../gen_l10n/app_localizations.dart';
 
@@ -70,9 +73,17 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip'],
+        withData: kIsWeb,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (result == null || result.files.isEmpty) return;
+
+      if (kIsWeb) {
+        final bytes = result.files.single.bytes;
+        if (bytes != null) {
+          await _processZipArchiveWeb(bytes, result.files.single.name);
+        }
+      } else if (result.files.single.path != null) {
         await _processZipArchive(File(result.files.single.path!));
       }
     } catch (e, stack) {
@@ -159,6 +170,82 @@ class _CreateFromDatasetDialogState extends State<CreateFromDatasetDialog> {
           (progress) =>
               setState(() => _processingProgress = 0.5 + progress * 0.5),
     );
+  }
+
+  /// Web-specific: extract ZIP in memory, detect dataset type, store images as BLOBs.
+  Future<void> _processZipArchiveWeb(Uint8List zipBytes, String zipName) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!mounted) return;
+
+    setState(() {
+      _isUploading = true;
+      _processingProgress = 0.0;
+      _currentStep = 2;
+      _useIsolateMode = false;
+      _archive = null;
+    });
+
+    try {
+      final decoded = archive_lib.ZipDecoder().decodeBytes(zipBytes);
+      if (!mounted) return;
+      setState(() => _processingProgress = 0.5);
+
+      final imageExtensions = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.tif', '.webp'};
+      final videoExtensions = {'.mp4', '.mov', '.avi', '.mkv'};
+
+      int imageCount = 0;
+      int videoCount = 0;
+      int annotationFileCount = 0;
+      final List<String> fileNames = [];
+
+      for (final entry in decoded) {
+        if (entry.isFile) {
+          final name = entry.name.toLowerCase();
+          final ext = name.contains('.') ? '.${name.split('.').last}' : '';
+          if (imageExtensions.contains(ext)) {
+            imageCount++;
+          } else if (videoExtensions.contains(ext)) {
+            videoCount++;
+          } else if (name.endsWith('.json') || name.endsWith('.xml') || name.endsWith('.txt') || name.endsWith('.yaml')) {
+            annotationFileCount++;
+          }
+          fileNames.add(entry.name);
+        }
+      }
+
+      String detectedType = detectDatasetTypeFromFileList(fileNames);
+      if (!mounted) return;
+      setState(() => _processingProgress = 1.0);
+
+      final webArchive = Archive(
+        zipFileName: zipName,
+        datasetPath: 'web://$zipName',
+        mediaCount: imageCount + videoCount,
+        annotationCount: 0,
+        annotatedFilesCount: annotationFileCount,
+        datasetFormat: detectedType,
+        taskTypes: [detectedType],
+        selectedTaskType: null,
+        labels: [],
+        webZipBytes: zipBytes,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _archive = webArchive;
+        _isUploading = false;
+        _currentStep = 3;
+      });
+    } catch (e, stack) {
+      _logger.warning('Failed to process ZIP file on web', e, stack);
+      if (!mounted) return;
+      _showErrorDialog(
+        l10n.datasetDialogImportFailedTitle,
+        '${l10n.datasetDialogImportFailedMessage}\n\n${e.toString()}',
+        l10n.datasetDialogImportFailedTips,
+      );
+      _resetToInitialState();
+    }
   }
 
   Future<void> _goToNextStep() async {

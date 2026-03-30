@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
@@ -211,7 +213,8 @@ class DatasetDatabase {
     int? height,
     double? duration,
     double? fps,
-    String? source, // e.g., 'uploaded', 'imported', 'url'
+    String? source,
+    Uint8List? imageData,
   }) async {
     final type =
         (ext.toLowerCase() == 'mp4' || ext.toLowerCase() == 'mov')
@@ -234,6 +237,7 @@ class DatasetDatabase {
       lastAnnotator: null,
       lastAnnotatedDate: null,
       numberOfFrames: type == MediaType.video ? numberOfFrames : null,
+      imageData: imageData,
     );
 
     final db = await database;
@@ -613,6 +617,32 @@ class DatasetDatabase {
     await db.delete(
       'annotations',
       where: 'media_item_id = ?',
+      whereArgs: [mediaItemId],
+    );
+  }
+
+  Future<Uint8List?> getMediaItemImageData(int mediaItemId) async {
+    final db = await database;
+    final result = await db.query(
+      'media_items',
+      columns: ['imageData'],
+      where: 'id = ?',
+      whereArgs: [mediaItemId],
+      limit: 1,
+    );
+    if (result.isEmpty) return null;
+    return result.first['imageData'] as Uint8List?;
+  }
+
+  Future<void> updateMediaItemImageData(
+    int mediaItemId,
+    Uint8List imageData,
+  ) async {
+    final db = await database;
+    await db.update(
+      'media_items',
+      {'imageData': imageData},
+      where: 'id = ?',
       whereArgs: [mediaItemId],
     );
   }

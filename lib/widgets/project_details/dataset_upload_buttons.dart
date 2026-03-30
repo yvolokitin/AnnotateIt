@@ -74,6 +74,11 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
   Future<void> _uploadMedia(BuildContext context) async {
     try {
+      if (kIsWeb) {
+        await _uploadMediaWeb(context);
+        return;
+      }
+
       // Pick files/photos depending on platform
       final bool isCupertino = PlatformUtils.isIOS || PlatformUtils.isMacOS;
       final List<String> selectedPaths = [];
@@ -297,6 +302,70 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         );
       }
     }
+  }
+
+  /// Web-specific upload: files have no path, only bytes.
+  Future<void> _uploadMediaWeb(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) {
+      widget.onUploadingChanged(false);
+      return;
+    }
+
+    widget.onUploadingChanged(true);
+    final total = result.files.length;
+
+    final currentUser = UserSession.instance.getUser();
+    if (currentUser.id == null) {
+      widget.onUploadError?.call();
+      return;
+    }
+
+    for (int i = 0; i < total; i++) {
+      if (widget.cancelUpload) {
+        widget.onUploadingChanged(false);
+        widget.onUploadError?.call();
+        return;
+      }
+
+      final f = result.files[i];
+      final bytes = f.bytes;
+      if (bytes == null || bytes.isEmpty) continue;
+
+      final ext = f.extension?.toLowerCase() ?? path.extension(f.name).replaceFirst('.', '').toLowerCase();
+
+      int? width;
+      int? height;
+      try {
+        final decoded = img.decodeImage(bytes);
+        if (decoded != null) {
+          width = decoded.width;
+          height = decoded.height;
+        }
+      } catch (_) {}
+
+      await DatasetDatabase.instance.insertMediaItem(
+        widget.datasetId,
+        'web://${f.name}',
+        ext.isEmpty ? 'unknown' : ext,
+        ownerId: currentUser.id!,
+        width: width,
+        height: height,
+        source: 'web_upload',
+        imageData: bytes,
+      );
+
+      widget.onFileProgress?.call(f.name, i + 1, total);
+    }
+
+    await ProjectDatabase.instance.updateProjectLastUpdated(widget.project.id!);
+    widget.onUploadingChanged(false);
+    widget.onUploadSuccess();
   }
 
   Future<void> _uploadVideoAsFrames(BuildContext context) async {

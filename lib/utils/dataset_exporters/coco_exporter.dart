@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import '../media_bytes_helper.dart';
 
 import '../../models/project.dart';
 import '../../models/label.dart';
@@ -76,23 +78,20 @@ class COCOExporter extends BaseDatasetExporter {
       if (mediaItem.type != MediaType.image || mediaItem.id == null) continue;
 
       final fileName = path.basename(mediaItem.filePath);
-      final file = File(mediaItem.filePath);
-      if (!await file.exists()) {
-        _logger.warning('Image file not found: ${mediaItem.filePath}');
-        continue;
-      }
 
       try {
-        final bytes = await file.readAsBytes();
-        if (bytes.isNotEmpty) {
-          final datasetFolder = datasetIdToFolderName != null
-              ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
-              : 'dataset';
-          final imagePathInZip = mergeDatasets
-              ? 'images/$fileName'
-              : 'images/$datasetFolder/$fileName';
-          archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
+        final bytes = await loadMediaBytes(mediaItem.filePath, mediaItemId: mediaItem.id);
+        if (bytes == null || bytes.isEmpty) {
+          _logger.warning('Image file not found: ${mediaItem.filePath}');
+          continue;
         }
+        final datasetFolder = datasetIdToFolderName != null
+            ? (datasetIdToFolderName[mediaItem.datasetId] ?? 'dataset')
+            : 'dataset';
+        final imagePathInZip = mergeDatasets
+            ? 'images/$fileName'
+            : 'images/$datasetFolder/$fileName';
+        archive.addFile(ArchiveFile(imagePathInZip, bytes.length, bytes));
       } catch (e) {
         _logger.severe('Failed to read ${mediaItem.filePath}: $e');
         continue;
