@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' show Offset, Rect;
 import 'package:intl/intl.dart';
@@ -82,7 +83,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
 
   Future<void> _saveFile(File file) async {
     try {
-      if (!(Platform.isAndroid || Platform.isIOS)) {
+      if (!(PlatformUtils.isAndroid || PlatformUtils.isIOS)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Save is available on mobile devices only')),
@@ -117,7 +118,7 @@ class _ExportedDatasetsDialogState extends State<ExportedDatasetsDialog> {
 
   Future<void> _shareFile(BuildContext originContext, File file) async {
     try {
-      if (Platform.isIOS) {
+      if (PlatformUtils.isIOS) {
         // Compute a valid, non-zero rect anchored to the invoking widget
         final ro = originContext.findRenderObject();
         Rect originRect;

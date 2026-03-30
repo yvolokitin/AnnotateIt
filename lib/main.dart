@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import "pages/mainmenu.dart";
 import "utils/theme.dart";
+import 'utils/platform_utils.dart';
 
 // Import FFI for SQLite
 import 'data/database_initializer.dart';
@@ -83,12 +84,10 @@ void main() async {
   log.info('Runtime config: ${runtimeConfig.summary()}');
 
   try {
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (PlatformUtils.isDesktop) {
       try {
-        // minimum size - Size(width, height)
-        // setWindowMinSize(const Size(300, 500));
         setWindowMinSize(const Size(768, 1024));
-        setWindowMaxSize(Size.infinite); //no max limit
+        setWindowMaxSize(Size.infinite);
       } catch (e) {
         log.warning('Could not set window size: $e');
       }
@@ -139,7 +138,7 @@ void main() async {
         log.info('Default user loaded into session');
 
         // Auto-detect FFmpeg if not configured (Windows only)
-        if (Platform.isWindows) {
+        if (PlatformUtils.isWindows) {
           try {
             final current = UserSession.instance.getUser().ffmpegPath;
             if (current == null || current.isEmpty) {

@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 
 import '../session/user_session.dart';
+import '../utils/platform_utils.dart';
 
 /// A small, non-UI service encapsulating reusable FFmpeg-related video frame
 /// extraction utilities. Widgets should depend on this service rather than
@@ -47,7 +48,7 @@ class VideoFrameExtractor {
     }
 
     // Platform-specific quick checks (avoid executing binaries on macOS where not necessary)
-    if (Platform.isMacOS) {
+    if (PlatformUtils.isMacOS) {
       // 1) User setting
       try {
         final saved = UserSession.instance.getUser().ffmpegPath;

@@ -1,6 +1,5 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
+import '../../utils/platform_utils.dart';
 import '../../models/project.dart';
 import "../../utils/date_utils.dart";
 
@@ -34,19 +33,19 @@ class ProjectTileState extends State<ProjectTile> {
     final double thumbnailHeight = (screenWidth > 1100) ? 180 : (screenWidth > 860) ? 160 : (screenWidth > 650) ? 140 : 110;
     final double thumbnailWidth = (screenWidth > 1100) ? 350 : (screenWidth > 860) ? 280 : (screenWidth > 650) ? 180: 140;
 
-    final double nameFontSize = Platform.isIOS
+    final double nameFontSize = PlatformUtils.isIOS
       ? (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 14.0)
       : (screenWidth > 1100 ? 24.0 : screenWidth > 860 ? 20.0 : 18.0);
-    final double typeFontSize = Platform.isIOS
+    final double typeFontSize = PlatformUtils.isIOS
       ? (screenWidth > 1100 ? 20.0 : screenWidth > 860 ? 16.0 : 14.0)
       : (screenWidth > 1100 ? 22.0 : screenWidth > 860 ? 18.0 : 16.0);
-    final double dateFontSize = Platform.isIOS
+    final double dateFontSize = PlatformUtils.isIOS
       ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
       : (screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0);
-    final double verticalSpacing = Platform.isIOS
+    final double verticalSpacing = PlatformUtils.isIOS
       ? (screenWidth > 1100 ? 5.0 : screenWidth > 860 ? 3.0 : 2.0)
       : (screenWidth > 1100 ? 6.0 : screenWidth > 860 ? 4.0 : 2.0);
-    final double labelFontSize = Platform.isIOS
+    final double labelFontSize = PlatformUtils.isIOS
       ? (screenWidth > 1100 ? 16.0 : screenWidth > 860 ? 14.0 : 12.0)
       : (screenWidth > 1100 ? 18.0 : screenWidth > 860 ? 16.0 : 14.0);
 

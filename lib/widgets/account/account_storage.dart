@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -70,7 +71,7 @@ class _AccountStorageState extends State<AccountStorage> {
   }
 
   Future<String?> _findFfmpegOnMac() async {
-    if (!Platform.isMacOS) return null;
+    if (!PlatformUtils.isMacOS) return null;
     try {
       final candidates = <String>[
         '/opt/homebrew/bin/ffmpeg',
@@ -79,7 +80,7 @@ class _AccountStorageState extends State<AccountStorage> {
       ];
 
       // Also scan PATH directories for 'ffmpeg'
-      final pathEnv = Platform.environment['PATH'];
+      final pathEnv = PlatformUtils.isWeb ? null : Platform.environment['PATH'];
       if (pathEnv != null && pathEnv.isNotEmpty) {
         for (final dir in pathEnv.split(':')) {
           if (dir.trim().isEmpty) continue;
@@ -163,13 +164,13 @@ class _AccountStorageState extends State<AccountStorage> {
                 try {
                   XTypeGroup? typeGroup;
                   List<XTypeGroup> groups = [];
-                  if (Platform.isWindows) {
+                  if (PlatformUtils.isWindows) {
                     typeGroup = XTypeGroup(
                       label: 'Executable',
                       extensions: ['exe'],
                     );
                     groups = <XTypeGroup>[typeGroup];
-                  } else if (Platform.isMacOS) {
+                  } else if (PlatformUtils.isMacOS) {
                     // Allow selecting Unix executables on macOS
                     typeGroup = XTypeGroup(
                       label: 'Executable',
@@ -202,7 +203,7 @@ class _AccountStorageState extends State<AccountStorage> {
                 readOnly: false,
                 enableInteractiveSelection: true,
                 decoration: InputDecoration(
-                  hintText: Platform.isWindows ? 'e.g. C:\\ffmpeg\\bin\\ffmpeg.exe' : 'ffmpeg binary path',
+                  hintText: PlatformUtils.isWindows ? 'e.g. C:\\ffmpeg\\bin\\ffmpeg.exe' : 'ffmpeg binary path',
                   hintStyle: const TextStyle(color: Colors.white38),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   enabledBorder: OutlineInputBorder(
@@ -239,7 +240,7 @@ class _AccountStorageState extends State<AccountStorage> {
 
                 try {
                   // macOS: try to auto-detect when empty or a bare command name
-                  if (Platform.isMacOS) {
+                  if (PlatformUtils.isMacOS) {
                     bool isBareName = p.isNotEmpty && !p.startsWith('/');
                     if (p.isEmpty || p == 'ffmpeg' || isBareName) {
                       final found = await _findFfmpegOnMac();
@@ -257,7 +258,7 @@ class _AccountStorageState extends State<AccountStorage> {
                   }
 
                   // On macOS, avoid executing external processes to prevent app termination.
-                  if (Platform.isMacOS) {
+                  if (PlatformUtils.isMacOS) {
                     final isValid = await _isLikelyExecutableMachO(p);
                     if (isValid) {
                       await UserSession.instance.setFfmpegPath(p);
@@ -379,7 +380,7 @@ class _AccountStorageState extends State<AccountStorage> {
               ),
             ),
             const SizedBox(height: 16),
-            if (!(Platform.isAndroid || Platform.isIOS))
+            if (!(PlatformUtils.isAndroid || PlatformUtils.isIOS))
               _buildSection(
                 'FFmpeg path (desktop only)',
                 _ffmpegPathField(isWide: isWide),
@@ -535,11 +536,11 @@ class _AccountStorageState extends State<AccountStorage> {
                 
                 while (retryCount < maxRetries && !success) {
                   try {
-                    if (Platform.isWindows) {
+                    if (PlatformUtils.isWindows) {
                       await Process.run('explorer', [folder]);
-                    } else if (Platform.isMacOS) {
+                    } else if (PlatformUtils.isMacOS) {
                       await Process.run('open', [folder]);
-                    } else if (Platform.isLinux) {
+                    } else if (PlatformUtils.isLinux) {
                       await Process.run('xdg-open', [folder]);
                     } else {
                       final uri = Uri.file(folder);

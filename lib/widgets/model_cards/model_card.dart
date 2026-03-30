@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -410,11 +411,11 @@ class _ModelCardState extends State<ModelCard> {
       if (!Directory(p).existsSync()) {
         throw Exception('Folder not found');
       }
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         await Process.run('explorer', [p]);
-      } else if (Platform.isMacOS) {
+      } else if (PlatformUtils.isMacOS) {
         await Process.run('open', [p]);
-      } else if (Platform.isLinux) {
+      } else if (PlatformUtils.isLinux) {
         await Process.run('xdg-open', [p]);
       } else {
         throw Exception('Unsupported platform');

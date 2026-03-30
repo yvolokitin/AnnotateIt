@@ -35,6 +35,7 @@ import '../widgets/imageannotator/user_action.dart';
 
 import '../widgets/app_snackbar.dart';
 import '../utils/sam_model_utils.dart';
+import '../utils/platform_utils.dart';
 import 'image_editor.dart';
 
 class AnnotatorPage extends StatefulWidget {
@@ -194,7 +195,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     _preloadInitialMedia();
 
     // Initialize ML Kit image labeler
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (PlatformUtils.isAndroid || PlatformUtils.isIOS) {
       _mlKitService.initialize(confidenceThreshold: 0.6);
     }
 
@@ -260,7 +261,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
       image.dispose();
     }
 
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (PlatformUtils.isAndroid || PlatformUtils.isIOS) {
       _mlKitService.close();
     }
 

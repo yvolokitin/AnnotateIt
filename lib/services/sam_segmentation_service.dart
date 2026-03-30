@@ -53,6 +53,10 @@ class SamSegmentationService {
   bool _closed = false;
   bool _webSamReady = false;
 
+  // Preprocessed image cache: avoids re-encoding the same image on repeated taps
+  int? _cachedImageId;
+  _Preprocessed? _cachedPreprocessed;
+
   /// Supported SAM model variants
   /// - mobile: MobileSAM
   /// - sam2HieraBasePlus: Segment Anything 2 (Hiera-Base+)
@@ -86,6 +90,8 @@ class SamSegmentationService {
 
   Future<void> close() async {
     _closed = true;
+    _cachedImageId = null;
+    _cachedPreprocessed = null;
   }
 
   SamModelVariant get currentVariant => _currentVariant;
@@ -127,7 +133,16 @@ class SamSegmentationService {
 
     if (hasRealSamSupport) {
       try {
-        final prep = await _preprocessImageTo1024(image);
+        // Reuse cached preprocessing if the image hasn't changed
+        final imageId = image.hashCode;
+        _Preprocessed? prep;
+        if (_cachedImageId == imageId && _cachedPreprocessed != null) {
+          prep = _cachedPreprocessed;
+        } else {
+          prep = await _preprocessImageTo1024(image);
+          _cachedImageId = imageId;
+          _cachedPreprocessed = prep;
+        }
         if (prep == null) return _fallbackEllipse(image: image, center: tapPoint);
         final Float32List nchw = prep.nchw;
         final double scale = prep.scale;
@@ -146,12 +161,9 @@ class SamSegmentationService {
           return _fallbackEllipse(image: image, center: tapPoint);
         }
 
-        // Build low-res grid (256x256) mapping to 1024 space via step=4
         final gh = 256;
         final gw = 256;
 
-        // Improve SAM mask -> binary: use Otsu threshold and keep only the component
-        // connected to the tapped point (in 256-grid), then fill holes and smooth.
         final tapGx = (tapX1024 / 4.0).floor().clamp(0, gw - 1).toInt();
         final tapGy = (tapY1024 / 4.0).floor().clamp(0, gh - 1).toInt();
         final _RefinedMask refined = _refineSamMask(
@@ -166,14 +178,13 @@ class SamSegmentationService {
           m: refined.m,
           gw: gw,
           gh: gh,
-          step: 4, // 256 -> 1024
+          step: 4,
           width: 1024,
           height: 1024,
           totalOn: refined.count,
         );
 
-        // Extract polygon in 1024 space and scale back to original image coords
-        final poly1024 = _marchingSquaresPolygon(lowresGrid);
+        final poly1024 = _marchingSquaresPolygon(lowresGrid, skipSmoothing: true);
         if (poly1024.isEmpty) return _fallbackEllipse(image: image, center: tapPoint);
 
         final inv = 1.0 / scale;
@@ -434,59 +445,67 @@ class SamSegmentationService {
     );
   }
 
+  List<List<bool>> _dilate3x3(List<List<bool>> src, int gw, int gh) {
+    final out = List.generate(gh, (_) => List<bool>.filled(gw, false));
+    for (int y = 0; y < gh; y++) {
+      for (int x = 0; x < gw; x++) {
+        bool anyOn = false;
+        for (int dy = -1; dy <= 1 && !anyOn; dy++) {
+          final yy = y + dy;
+          if (yy < 0 || yy >= gh) continue;
+          for (int dx = -1; dx <= 1; dx++) {
+            final xx = x + dx;
+            if (xx < 0 || xx >= gw) continue;
+            if (src[yy][xx]) { anyOn = true; break; }
+          }
+        }
+        out[y][x] = anyOn;
+      }
+    }
+    return out;
+  }
+
+  List<List<bool>> _erode3x3(List<List<bool>> src, int gw, int gh) {
+    final out = List.generate(gh, (_) => List<bool>.filled(gw, false));
+    for (int y = 0; y < gh; y++) {
+      for (int x = 0; x < gw; x++) {
+        bool allOn = true;
+        for (int dy = -1; dy <= 1 && allOn; dy++) {
+          final yy = y + dy;
+          if (yy < 0 || yy >= gh) { allOn = false; break; }
+          for (int dx = -1; dx <= 1; dx++) {
+            final xx = x + dx;
+            if (xx < 0 || xx >= gw) { allOn = false; break; }
+            if (!src[yy][xx]) { allOn = false; break; }
+          }
+        }
+        out[y][x] = allOn;
+      }
+    }
+    return out;
+  }
+
+  /// Morphological closing only (dilate then erode). Fills small gaps without
+  /// eroding thin structures the way full closing+opening does.
+  List<List<bool>> _closeMask3x3(List<List<bool>> m, int gw, int gh) {
+    final d = _dilate3x3(m, gw, gh);
+    return _erode3x3(d, gw, gh);
+  }
+
+  /// Full closing + opening for the heuristic fallback path where masks are noisier.
   List<List<bool>> _smoothMask3x3(List<List<bool>> m, int gw, int gh) {
-    // Perform closing (dilate -> erode) then opening (erode -> dilate) with 3x3 kernel
-    List<List<bool>> _dilate3x3(List<List<bool>> src) {
-      final out = List.generate(gh, (_) => List<bool>.filled(gw, false));
-      for (int y = 0; y < gh; y++) {
-        for (int x = 0; x < gw; x++) {
-          bool anyOn = false;
-          for (int dy = -1; dy <= 1 && !anyOn; dy++) {
-            final yy = y + dy;
-            if (yy < 0 || yy >= gh) continue;
-            for (int dx = -1; dx <= 1; dx++) {
-              final xx = x + dx;
-              if (xx < 0 || xx >= gw) continue;
-              if (src[yy][xx]) { anyOn = true; break; }
-            }
-          }
-          out[y][x] = anyOn;
-        }
-      }
-      return out;
-    }
-
-    List<List<bool>> _erode3x3(List<List<bool>> src) {
-      final out = List.generate(gh, (_) => List<bool>.filled(gw, false));
-      for (int y = 0; y < gh; y++) {
-        for (int x = 0; x < gw; x++) {
-          bool allOn = true;
-          for (int dy = -1; dy <= 1 && allOn; dy++) {
-            final yy = y + dy;
-            if (yy < 0 || yy >= gh) { allOn = false; break; }
-            for (int dx = -1; dx <= 1; dx++) {
-              final xx = x + dx;
-              if (xx < 0 || xx >= gw) { allOn = false; break; }
-              if (!src[yy][xx]) { allOn = false; break; }
-            }
-          }
-          out[y][x] = allOn;
-        }
-      }
-      return out;
-    }
-
-    final d = _dilate3x3(m);
-    final c = _erode3x3(d); // closing
-    final e = _erode3x3(c);
-    final o = _dilate3x3(e); // opening
+    final d = _dilate3x3(m, gw, gh);
+    final c = _erode3x3(d, gw, gh);
+    final e = _erode3x3(c, gw, gh);
+    final o = _dilate3x3(e, gw, gh);
     return o;
   }
 
   /// Refine raw 256x256 SAM mask into a clean binary grid keeping the component
-  /// connected to the user's tap. Applies Otsu threshold, connected component
-  /// selection, hole filling, and light morphology. Returns a boolean grid and
-  /// the count of on pixels.
+  /// connected to the user's tap. With sigmoid-quantized input (0..255), Otsu
+  /// thresholding produces meaningful results. Applies connected component
+  /// selection and hole filling. Morphological smoothing is applied only lightly
+  /// (single closing pass) to preserve fine mask detail from the model.
   _RefinedMask _refineSamMask({
     required List<int> mask,
     required int gw,
@@ -494,7 +513,7 @@ class SamSegmentationService {
     required int seedX,
     required int seedY,
   }) {
-    // Convert to 0..255 intensity
+    // Normalize to 0..255 intensity range
     int maxVal = 0;
     for (int i = 0; i < mask.length; i++) {
       final v = mask[i];
@@ -502,6 +521,7 @@ class SamSegmentationService {
     }
     final vals = List<int>.filled(mask.length, 0);
     if (maxVal <= 1) {
+      // Legacy binary input (0/1) – stretch to 0/255
       for (int i = 0; i < mask.length; i++) {
         vals[i] = (mask[i] * 255).clamp(0, 255);
       }
@@ -526,7 +546,7 @@ class SamSegmentationService {
       }
     }
 
-    // Choose best seed near the tapped grid coordinate by highest value within r=6
+    // Choose best seed near the tapped grid coordinate by highest confidence within r=6
     int sx = seedX.clamp(0, gw - 1);
     int sy = seedY.clamp(0, gh - 1);
     int bestX = sx, bestY = sy, bestVal = -1;
@@ -541,10 +561,9 @@ class SamSegmentationService {
     }
     sx = bestX; sy = bestY;
 
-    // If the seed isn't inside foreground with current threshold, look for nearest true cell
     if (!bin[sy][sx]) {
       bool found = false;
-      const int r2 = 8;
+      const int r2 = 10;
       int nx = sx, ny = sy;
       outer: for (int rad = 1; rad <= r2; rad++) {
         for (int dy = -rad; dy <= rad; dy++) {
@@ -558,36 +577,33 @@ class SamSegmentationService {
       if (found) { sx = nx; sy = ny; }
     }
 
-    // Keep only component connected to (sx,sy); if not in fg, fall back to >0 mask
     List<List<bool>> comp;
     if (bin[sy][sx]) {
       comp = _keepConnectedComponentFromSeed(bin, gw, gh, sx, sy);
     } else {
-      // build bin2 as >0
+      // Fallback: try a lower threshold (50% of sigmoid = value 128)
       final bin2 = List.generate(gh, (_) => List<bool>.filled(gw, false));
       for (int y = 0; y < gh; y++) {
         final off = y * gw;
         for (int x = 0; x < gw; x++) {
-          bin2[y][x] = vals[off + x] > 0;
+          bin2[y][x] = vals[off + x] >= 128;
         }
       }
       if (bin2[sy][sx]) {
         comp = _keepConnectedComponentFromSeed(bin2, gw, gh, sx, sy);
       } else {
-        // nothing around seed, return empty
         return _RefinedMask(m: List.generate(gh, (_) => List<bool>.filled(gw, false)), count: 0);
       }
     }
 
-    // Fill holes in the kept component
     comp = _fillHoles(comp, gw, gh);
 
-    // Light morphology to remove single-pixel artifacts
-    comp = _smoothMask3x3(comp, gw, gh);
+    // Only a single closing pass (dilate+erode) to smooth jagged edges
+    // without destroying fine structure. Skip opening to preserve thin features.
+    comp = _closeMask3x3(comp, gw, gh);
 
-    // Re-enforce seed component after smoothing
+    // Re-enforce seed component after morphology
     if (!comp[sy][sx]) {
-      // choose nearest true again
       bool found = false; int nx = sx, ny = sy;
       for (int rad = 1; rad <= 8 && !found; rad++) {
         for (int dy = -rad; dy <= rad && !found; dy++) {
@@ -632,8 +648,10 @@ class SamSegmentationService {
       final between = wB * wF * (mB - mF) * (mB - mF);
       if (between > maxBetween) { maxBetween = between; threshold = t; }
     }
-    // bias slightly towards foreground to avoid missing fine edges
-    return (threshold - 1).clamp(0, 255);
+    // With sigmoid-quantized input (0..255), 128 corresponds to the natural
+    // decision boundary (logit = 0 → sigmoid = 0.5 → value 128). Clamp the
+    // Otsu result to never go above 128 so we don't lose valid foreground.
+    return threshold.clamp(0, 128);
   }
 
   List<List<bool>> _keepConnectedComponentFromSeed(List<List<bool>> bin, int gw, int gh, int sx, int sy) {
@@ -683,13 +701,14 @@ class SamSegmentationService {
     return bin;
   }
 
-  /// Marching Squares on the coarse mask grid to get a polygon in image coords
-  List<Offset> _marchingSquaresPolygon(_MaskGrid grid) {
+  /// Marching Squares on the coarse mask grid to get a polygon in image coords.
+  /// When [skipSmoothing] is true the grid is used as-is (already refined by
+  /// _refineSamMask); the heuristic fallback path passes false.
+  List<Offset> _marchingSquaresPolygon(_MaskGrid grid, {bool skipSmoothing = false}) {
     final gw = grid.gw;
     final gh = grid.gh;
 
-    // Smooth mask to reduce jagged edges and small holes
-    final mm = _smoothMask3x3(grid.m, gw, gh);
+    final mm = skipSmoothing ? grid.m : _smoothMask3x3(grid.m, gw, gh);
 
     // Represent edge midpoints with integer coordinates scaled by 2 to avoid
     // floating point matching issues.

@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:path/path.dart' as path;
+import 'database_path_helper.dart';
 
 /// Creates all tables and initializes folders.
 Future<void> createInitialSchema(Database db, int version) async {
@@ -49,36 +48,15 @@ Future<void> createInitialSchema(Database db, int version) async {
   final thumbnailFolder = 'thumbnails';
   final modelsFolder = 'models';
 
-  final rootPath = await getDefaultAnnotationRootPath();
-  try {
-    await Directory(
-      path.join(rootPath, datasetImportFolder),
-    ).create(recursive: true);
-  } catch (e) {
-    if (kDebugMode) print('Warning: Could not create datasets directory: $e');
-  }
-
-  // Create folders if they don't exist - with error handling
-  try {
-    await Directory(
-      path.join(rootPath, datasetExportFolder),
-    ).create(recursive: true);
-  } catch (e) {
-    if (kDebugMode) print('Warning: Could not create exports directory: $e');
-  }
-
-  try {
-    await Directory(
-      path.join(rootPath, thumbnailFolder),
-    ).create(recursive: true);
-  } catch (e) {
-    if (kDebugMode) print('Warning: Could not create thumbnails directory: $e');
-  }
-
-  try {
-    await Directory(path.join(rootPath, modelsFolder)).create(recursive: true);
-  } catch (e) {
-    if (kDebugMode) print('Warning: Could not create models directory: $e');
+  if (!kIsWeb) {
+    final rootPath = await getDefaultAnnotationRootPath();
+    for (final folder in [datasetImportFolder, datasetExportFolder, thumbnailFolder, modelsFolder]) {
+      try {
+        await ensureDirectoryExists(path.join(rootPath, folder));
+      } catch (e) {
+        if (kDebugMode) print('Warning: Could not create $folder directory: $e');
+      }
+    }
   }
 
   final now = DateTime.now().toIso8601String();
@@ -283,9 +261,8 @@ Future<void> createInitialSchema(Database db, int version) async {
 }
 
 Future<String> getDefaultAnnotationRootPath() async {
-  final docsDir = await getApplicationDocumentsDirectory();
-  final basePath = path.join(docsDir.path, 'AnnotateIt');
-
-  await Directory(basePath).create(recursive: true);
+  final dbDir = await getAppDatabaseDirectory();
+  final basePath = path.dirname(dbDir);
+  await ensureDirectoryExists(basePath);
   return basePath;
 }

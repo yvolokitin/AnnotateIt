@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart' as vthumb;
@@ -288,18 +289,18 @@ class _MediaTileState extends State<MediaTile> {
     }
 
     try {
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         final winPath = path.windows.normalize(filePath);
         final result = await Process.run('explorer', ['/select,' + winPath]);
         if (result.exitCode != 0) {
           AppSnackbar.show(context, 'Failed to open Explorer');
         }
-      } else if (Platform.isMacOS) {
+      } else if (PlatformUtils.isMacOS) {
         final result = await Process.run('open', ['-R', filePath]);
         if (result.exitCode != 0) {
           AppSnackbar.show(context, 'Failed to reveal in Finder');
         }
-      } else if (Platform.isLinux) {
+      } else if (PlatformUtils.isLinux) {
         final dirPath = path.dirname(filePath);
         final result = await Process.run('xdg-open', [dirPath]);
         if (result.exitCode != 0) {
@@ -397,7 +398,7 @@ class _MediaTileState extends State<MediaTile> {
       final List<File> frameFiles = [];
 
       // Try video_thumbnail first on non-Windows
-      if (!Platform.isWindows) {
+      if (!PlatformUtils.isWindows) {
         try {
           final intervalMs = (1000 / extractFps).round();
           for (int i = 0; i < expectedFrames; i++) {
@@ -427,7 +428,7 @@ class _MediaTileState extends State<MediaTile> {
       }
 
       // Windows fallback or if nothing extracted
-      if (frameFiles.isEmpty && Platform.isWindows) {
+      if (frameFiles.isEmpty && PlatformUtils.isWindows) {
         final ffmpegPath = await FfmpegCheckDialog.show(
           context,
           existingVideoPath: videoPath,

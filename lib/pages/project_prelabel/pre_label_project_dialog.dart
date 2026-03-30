@@ -13,8 +13,8 @@ import '../../models/label.dart';
 import '../../models/annotation.dart';
 import '../../models/project.dart';
 import '../../services/ml_kit_image_labeling_service.dart';
-import '../../services/tflite_classification_service.dart';
-import '../../services/tflite_detection_service.dart';
+import '../../services/tflite_classification_service_barrel.dart';
+import '../../services/tflite_detection_service_barrel.dart';
 import '../../utils/color_utils.dart';
 import '../../widgets/dialogs/edit_labels_list_dialog.dart';
 import '../../utils/theme.dart';
@@ -23,6 +23,7 @@ import '../models_page.dart';
 import '../../widgets/model_cards/model_card.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../config/model_registry_urls.dart';
+import '../../utils/platform_utils.dart';
 
 class PreLabelProjectDialog extends StatefulWidget {
   final Project project;
@@ -101,7 +102,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
     // On iOS/Android, allow user to choose (start with provided initial value)
     // On other platforms, default to TFLite
     _useTFLite =
-        (Platform.isAndroid || Platform.isIOS) ? widget.useTFLite : true;
+        (PlatformUtils.isAndroid || PlatformUtils.isIOS) ? widget.useTFLite : true;
     // Start at Step 1 (preflight checks)
     // Trigger preflight checks as soon as dialog opens
     scheduleMicrotask(() {
@@ -928,7 +929,7 @@ class _PreLabelProjectDialogState extends State<PreLabelProjectDialog> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            if (Platform.isAndroid || Platform.isIOS) ...[
+                            if (PlatformUtils.isAndroid || PlatformUtils.isIOS) ...[
                               const Text(
                                 'Choose the pre-labeling backend to use:',
                                 style: TextStyle(color: Colors.white70),

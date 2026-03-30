@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import '../../utils/platform_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:camera/camera.dart';
@@ -41,7 +42,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   void initState() {
     super.initState();
     if (!kIsWeb) {
-      if (Platform.isAndroid) {
+      if (PlatformUtils.isAndroid) {
         _requestCameraPermission().then((granted) {
           if (granted) {
             _initializeCamera();
@@ -49,7 +50,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
             _showErrorDialog("Camera permission is required to take pictures.");
           }
         });
-      } else if (Platform.isIOS) {
+      } else if (PlatformUtils.isIOS) {
         // On iOS, rely on the camera plugin to request and manage permissions.
         // Avoid using permission_handler to prevent false negatives and duplicate prompts.
         _initializeCamera();
@@ -76,13 +77,13 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   Future<void> _initializeCamera() async {
     try {
       // Check if running on unsupported platforms
-      if (Platform.isLinux) {
+      if (PlatformUtils.isLinux) {
         _showErrorDialog('Camera functionality is not supported on Linux');
         return;
       }
       
       // For Windows, use image_picker instead of direct camera access
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         // Don't show error dialog immediately, just set initialized to true
         // so we can use image_picker when the user tries to take a photo
         setState(() {
@@ -102,7 +103,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
     } catch (e) {
       // For Windows, the availableCameras() call might fail with MissingPluginException
       // In that case, we'll use image_picker instead
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         setState(() {
           _isInitialized = true;
         });
@@ -142,7 +143,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   // doesn't support direct camera access without a camera delegate
   Future<void> _captureImageWithPicker(ImageSource source) async {
     try {
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         // For Windows, launch the built-in Windows Camera app
         try {
           // Show a dialog explaining the process to the user
@@ -626,7 +627,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
   Future<void> _takePicture() async {
     // For web or Windows, use image_picker with special handling
     // On Windows, this will launch the Windows Camera app via _captureImageWithPicker
-    if (kIsWeb || Platform.isWindows) {
+    if (kIsWeb || PlatformUtils.isWindows) {
       await _captureImageWithPicker(ImageSource.camera);
       return;
     }
@@ -696,7 +697,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
     final l10n = AppLocalizations.of(context)!;
     
     // Web or Windows platform UI
-    if (kIsWeb || Platform.isWindows) {
+    if (kIsWeb || PlatformUtils.isWindows) {
       // Preview mode UI
       if (_isPreviewMode && _capturedImage != null) {
         return Scaffold(
@@ -781,7 +782,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                 color: Colors.white70,
               ),
               const SizedBox(height: 20),
-              if (Platform.isWindows) ...[
+              if (PlatformUtils.isWindows) ...[
                 const Text(
                   'Take a photo with Windows Camera',
                   style: TextStyle(
@@ -848,7 +849,7 @@ class _CameraCaptureWidgetState extends State<CameraCaptureWidget> {
                   child: const Icon(Icons.camera_alt, size: 40, color: Colors.blue),
                 ),
               ),
-              if (Platform.isWindows) ...[
+              if (PlatformUtils.isWindows) ...[
                 const SizedBox(height: 20),
                 const Text(
                   'Click to launch Windows Camera',

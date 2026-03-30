@@ -1,10 +1,10 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 import '../models/user.dart';
 import '../data/user_database.dart';
+import '../data/database_path_helper.dart';
 
 /// A singleton service that manages the current logged-in or active user in memory.
 class UserSession {
@@ -47,18 +47,18 @@ class UserSession {
     final isAbs = path.isAbsolute(stored);
     if (isAbs) return path.normalize(stored);
 
-    final docsDir = await getApplicationDocumentsDirectory();
-    return path.join(docsDir.path, 'AnnotateIt', stored);
+    final dbDir = await getAppDatabaseDirectory();
+    final basePath = path.dirname(dbDir);
+    return path.join(basePath, stored);
   }
 
   Future<String> _ensureDir(String folder) async {
-    final dir = Directory(folder);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-      _logger.info('Created folder: $folder');
+    if (!kIsWeb) {
+      await ensureDirectoryExists(folder);
+      _logger.info('Ensured folder exists: $folder');
     }
     return folder;
-    }
+  }
 
   //==================================================
   // GETTERS (simple flags/values)

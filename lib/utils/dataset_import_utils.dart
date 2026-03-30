@@ -9,6 +9,7 @@ import 'package:xml/xml.dart';
 import 'package:logging/logging.dart';
 
 import '../models/archive.dart';
+import 'platform_utils.dart';
 
 import 'dataset_task_type_detector.dart';
 
@@ -656,7 +657,7 @@ Future<Archive> processZipLocally({
           .toList();
 
   return Archive(
-    zipFileName: zipFile.path.split(Platform.pathSeparator).last,
+    zipFileName: zipFile.path.split(PlatformUtils.pathSeparator).last,
     datasetPath: extractedDir.path,
     mediaCount: mediaFiles.length,
     annotationCount: stats.annotationCount,
@@ -751,7 +752,7 @@ Future<Archive> processZipLocallyWithIsolates({
     );
 
     return Archive(
-      zipFileName: zipFile.path.split(Platform.pathSeparator).last,
+      zipFileName: zipFile.path.split(PlatformUtils.pathSeparator).last,
       datasetPath: extractedPath,
       mediaCount: mediaFiles.length,
       annotationCount: stats.annotationCount,

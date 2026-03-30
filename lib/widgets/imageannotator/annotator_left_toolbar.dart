@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../utils/platform_utils.dart';
 import '../../gen_l10n/app_localizations.dart';
 
 import '../dialogs/annotations_settings_dialog.dart';
@@ -187,7 +187,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // ML Kit Image Labeling Button - only shown on Android/iOS
           // This is the AI annotation tool for mobile platforms
-          if (Platform.isAndroid || Platform.isIOS) ...[
+          if (PlatformUtils.isAndroid || PlatformUtils.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
             ToolbarButton(
               // icon: Icon(Icons.auto_awesome),

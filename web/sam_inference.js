@@ -1,7 +1,13 @@
-// Simple MobileSAM inference wrapper for Flutter Web using onnxruntime-web
+// SAM inference wrapper for Flutter Web using onnxruntime-web
 // Exposes window.SAM with init() and run() methods
 // - init(): loads encoder/decoder ONNX models
 // - run(): runs encoder and decoder given a preprocessed 1x3x1024x1024 Float32Array input and a single-point prompt
+//
+// Quality improvements over baseline:
+// - Returns sigmoid-quantized logits (0..255) instead of binary 0/1
+// - Selects the best mask from multi-mask output via IoU scores
+// - Caches encoder embeddings to avoid redundant encoder runs
+// - Performs automatic iterative refinement (re-runs decoder with previous mask)
 
 (function(){
   const W = 1024;
@@ -14,8 +20,11 @@
   let encoderSession = null;
   let decoderSession = null;
 
+  // Encoder embedding cache: avoids re-running the encoder for the same image
+  let cachedEmbedding = null;
+  let cachedInputHash = null;
+
   function pickByHint(names, hints) {
-    // Try to find a name that contains all hints (case-insensitive)
     const lower = names.map(n => n.toLowerCase());
     for (let i = 0; i < lower.length; i++) {
       const n = lower[i];
@@ -28,6 +37,18 @@
     return null;
   }
 
+  function computeInputHash(inputNCHWFloat32) {
+    // Fast hash: sample ~256 evenly spaced values and combine
+    const len = inputNCHWFloat32.length;
+    const step = Math.max(1, Math.floor(len / 256));
+    let h = 0;
+    for (let i = 0; i < len; i += step) {
+      const bits = inputNCHWFloat32[i];
+      h = (h * 31 + (bits * 1000000 | 0)) | 0;
+    }
+    return h;
+  }
+
   async function init(encoderUrl, decoderUrl) {
     if (!window.ort) {
       console.error('onnxruntime-web (ort) is not loaded.');
@@ -36,23 +57,32 @@
     const ep = ['wasm'];
     encoderSession = await ort.InferenceSession.create(encoderUrl || defaultEncoderUrl, { executionProviders: ep });
     decoderSession = await ort.InferenceSession.create(decoderUrl || defaultDecoderUrl, { executionProviders: ep });
+    cachedEmbedding = null;
+    cachedInputHash = null;
     return true;
   }
 
-  async function run(inputNCHWFloat32, origW, origH, tapX1024, tapY1024) {
-    if (!encoderSession || !decoderSession) throw new Error('SAM not initialized');
+  function findOutputByDims(results, names, targetLastTwo) {
+    for (const name of names) {
+      const tensor = results[name];
+      if (!tensor || !tensor.dims) continue;
+      const d = tensor.dims;
+      if (d.length >= 2 && d[d.length - 1] === targetLastTwo && d[d.length - 2] === targetLastTwo) {
+        return { name, tensor };
+      }
+    }
+    return null;
+  }
 
-    // Encoder I/O names (be flexible)
-    const encInName = encoderSession.inputNames[0];
-    const encOutName = encoderSession.outputNames[0];
-    const imageTensor = new ort.Tensor('float32', inputNCHWFloat32, [1,3,H,W]);
+  function sigmoid(x) {
+    if (x >= 0) {
+      return 1.0 / (1.0 + Math.exp(-x));
+    }
+    const ex = Math.exp(x);
+    return ex / (1.0 + ex);
+  }
 
-    const encFeeds = {};
-    encFeeds[encInName] = imageTensor;
-    const encResults = await encoderSession.run(encFeeds);
-    const imageEmbeddings = encResults[encOutName]; // ort.Tensor
-
-    // Decoder inputs — try to map by name hints
+  function runDecoder(imageEmbeddings, tapX, tapY, origW, origH, maskInput, hasMask) {
     const din = decoderSession.inputNames;
     const imageEmbName = pickByHint(din, ['embed']) || 'image_embeddings';
     const pCoordsName = pickByHint(din, ['point', 'coord']) || 'point_coords';
@@ -61,20 +91,14 @@
     const hasMaskName  = pickByHint(din, ['has', 'mask'])   || 'has_mask_input';
     const origSizeName = pickByHint(din, ['orig', 'size'])  || 'orig_im_size';
 
-    const pointCoords = new Float32Array([tapX1024, tapY1024]);
-    const pointLabels = new Float32Array([1]); // positive point
+    const pointCoords = new Float32Array([tapX, tapY]);
+    const pointLabels = new Float32Array([1]);
 
     const pointCoordsTensor = new ort.Tensor('float32', pointCoords, [1, 1, 2]);
     const pointLabelsTensor = new ort.Tensor('float32', pointLabels, [1, 1]);
-
-    const maskInput = new Float32Array(1 * 1 * LOWRES * LOWRES); // zeros
     const maskInputTensor = new ort.Tensor('float32', maskInput, [1, 1, LOWRES, LOWRES]);
-
-    const hasMaskInput = new Float32Array([0]);
-    const hasMaskTensor = new ort.Tensor('float32', hasMaskInput, [1]);
-
-    const origSize = new Float32Array([origH, origW]);
-    const origSizeTensor = new ort.Tensor('float32', origSize, [1, 2]);
+    const hasMaskTensor = new ort.Tensor('float32', new Float32Array([hasMask ? 1 : 0]), [1]);
+    const origSizeTensor = new ort.Tensor('float32', new Float32Array([origH, origW]), [1, 2]);
 
     const decFeeds = {};
     decFeeds[imageEmbName] = imageEmbeddings;
@@ -84,55 +108,106 @@
     decFeeds[hasMaskName] = hasMaskTensor;
     decFeeds[origSizeName] = origSizeTensor;
 
-    const decResults = await decoderSession.run(decFeeds);
+    return decoderSession.run(decFeeds);
+  }
 
-    // Pick an output that represents low-res mask logits with spatial 256x256.
-    let outName = null;
-    // Prefer a name containing 'mask' and spatial dims 256x256
-    for (const name of decoderSession.outputNames) {
-      const tensor = decResults[name];
-      if (!tensor || !tensor.dims) continue;
-      const d = tensor.dims; // e.g., [1, 1, 256, 256] or [1, 3, 256, 256]
-      if (d.length === 4 && d[d.length-1] === LOWRES && d[d.length-2] === LOWRES) {
-        outName = name;
+  function extractBestMask(decResults) {
+    const outNames = decoderSession.outputNames;
+
+    // Find the mask output (spatial LOWRES x LOWRES)
+    let maskInfo = findOutputByDims(decResults, outNames, LOWRES);
+    if (!maskInfo) {
+      const fallbackName = outNames.find(n => n.toLowerCase().includes('mask')) || outNames[0];
+      const tensor = decResults[fallbackName];
+      if (tensor) maskInfo = { name: fallbackName, tensor };
+    }
+    if (!maskInfo) return null;
+
+    const masksTensor = maskInfo.tensor;
+    const data = masksTensor.data;
+    const dims = masksTensor.dims || [];
+    const plane = LOWRES * LOWRES;
+
+    // Find IoU scores output to select the best mask
+    let iouData = null;
+    for (const name of outNames) {
+      if (name === maskInfo.name) continue;
+      const t = decResults[name];
+      if (!t || !t.dims) continue;
+      const d = t.dims;
+      const totalElems = d.reduce((a, b) => a * b, 1);
+      if (totalElems >= 2 && totalElems <= 8) {
+        iouData = { data: t.data, count: totalElems };
         break;
       }
     }
-    if (!outName) {
-      outName = decoderSession.outputNames.find(n => n.toLowerCase().includes('mask')) || decoderSession.outputNames[0];
-    }
-    const masksTensor = decResults[outName];
 
-    // Extract first mask channel as logits (1xCx256x256 or Cx256x256 or 256x256)
-    let logits;
-    if (masksTensor && masksTensor.data) {
-      const data = masksTensor.data; // TypedArray
-      const dims = masksTensor.dims || [];
-      // Compute stride to slice first 256x256 plane
-      if (dims.length === 4) {
-        const c = dims[1] || 1; // [N,C,H,W]
-        const plane = LOWRES * LOWRES;
-        logits = data.subarray(0, plane);
-      } else if (dims.length === 3) {
-        const plane = LOWRES * LOWRES; // [C,H,W]
-        logits = data.subarray(0, plane);
-      } else if (dims.length === 2 && dims[0] === LOWRES && dims[1] === LOWRES) {
-        logits = data;
-      } else {
-        // Fallback: use first 256*256 values if available
-        logits = data.subarray(0, LOWRES * LOWRES);
+    let numMasks = 1;
+    if (dims.length === 4) {
+      numMasks = dims[1] || 1;
+    } else if (dims.length === 3) {
+      numMasks = dims[0] || 1;
+    }
+
+    // Select mask with highest IoU score
+    let bestIdx = 0;
+    if (iouData && numMasks > 1) {
+      let bestScore = -Infinity;
+      const maxCheck = Math.min(numMasks, iouData.count);
+      for (let i = 0; i < maxCheck; i++) {
+        if (iouData.data[i] > bestScore) {
+          bestScore = iouData.data[i];
+          bestIdx = i;
+        }
       }
-    } else {
-      // No suitable output
-      return null;
     }
 
-    // Threshold to binary (assume logits; > 0.0 means foreground)
-    const size = LOWRES * LOWRES;
-    const binary = new Uint8Array(size);
-    for (let i = 0; i < size; i++) binary[i] = (logits[i] > 0.0) ? 1 : 0;
+    const offset = bestIdx * plane;
+    const logits = data.subarray(offset, offset + plane);
 
-    return binary; // length 65536, row-major
+    return { logits, lowResLogits: data.subarray(offset, offset + plane) };
+  }
+
+  async function run(inputNCHWFloat32, origW, origH, tapX1024, tapY1024) {
+    if (!encoderSession || !decoderSession) throw new Error('SAM not initialized');
+
+    // Check encoder embedding cache
+    const inputHash = computeInputHash(inputNCHWFloat32);
+    let imageEmbeddings;
+
+    if (cachedEmbedding && cachedInputHash === inputHash) {
+      imageEmbeddings = cachedEmbedding;
+    } else {
+      const encInName = encoderSession.inputNames[0];
+      const encOutName = encoderSession.outputNames[0];
+      const imageTensor = new ort.Tensor('float32', inputNCHWFloat32, [1, 3, H, W]);
+      const encFeeds = {};
+      encFeeds[encInName] = imageTensor;
+      const encResults = await encoderSession.run(encFeeds);
+      imageEmbeddings = encResults[encOutName];
+      cachedEmbedding = imageEmbeddings;
+      cachedInputHash = inputHash;
+    }
+
+    // --- Pass 1: initial decode with no prior mask ---
+    const emptyMask = new Float32Array(LOWRES * LOWRES);
+    const decResults1 = await runDecoder(imageEmbeddings, tapX1024, tapY1024, origW, origH, emptyMask, false);
+    const best1 = extractBestMask(decResults1);
+    if (!best1) return null;
+
+    // --- Pass 2: iterative refinement using pass-1 logits as mask_input ---
+    const decResults2 = await runDecoder(imageEmbeddings, tapX1024, tapY1024, origW, origH, best1.lowResLogits, true);
+    const best2 = extractBestMask(decResults2);
+    const finalLogits = best2 ? best2.logits : best1.logits;
+
+    // Convert logits to sigmoid-quantized 0..255 values (preserving confidence info)
+    const size = LOWRES * LOWRES;
+    const quantized = new Uint8Array(size);
+    for (let i = 0; i < size; i++) {
+      quantized[i] = Math.round(sigmoid(finalLogits[i]) * 255);
+    }
+
+    return quantized;
   }
 
   window.SAM = { init, run };

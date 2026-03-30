@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,7 +20,7 @@ class FfmpegCheckDialog {
     double? initialFps,
     Future<int> Function(String ffmpegPath, double fps)? onContinueExtract,
   }) async {
-    if (!Platform.isWindows) {
+    if (!PlatformUtils.isWindows) {
       // On non-Windows, this dialog is not required. Just return a non-null
       // value to indicate "proceed" if someone calls it by mistake.
       return 'ffmpeg';
@@ -76,7 +77,7 @@ class FfmpegCheckDialog {
             final result = await FilePicker.platform.pickFiles(
               allowMultiple: false,
               type: FileType.custom,
-              allowedExtensions: Platform.isWindows ? ['exe'] : null,
+              allowedExtensions: PlatformUtils.isWindows ? ['exe'] : null,
               dialogTitle: 'Select ffmpeg executable',
             );
             if (result != null && result.files.isNotEmpty) {
@@ -87,7 +88,7 @@ class FfmpegCheckDialog {
                 if (ver.exitCode == 0) {
                   _ffmpegPathCache = picked;
                   try {
-                    if (!Platform.isAndroid && !Platform.isIOS) {
+                    if (!PlatformUtils.isAndroid && !PlatformUtils.isIOS) {
                       await UserSession.instance.setFfmpegPath(picked);
                     }
                   } catch (_) {}

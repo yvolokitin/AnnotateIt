@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import 'database_path_helper.dart';
 
 import '../models/project.dart';
 import '../models/dataset.dart';
@@ -139,15 +138,14 @@ class ProjectDatabase {
   }
 
   Future<String> get databasePath async {
-    final supportDir = await getApplicationSupportDirectory();
-    return path.join(supportDir.path, 'AnnotateIt', kDatabaseFileName);
+    final dbDirPath = await getAppDatabaseDirectory();
+    return path.join(dbDirPath, kDatabaseFileName);
   }
 
   Future<Database> _initDB(String fileName) async {
-    final supportDir = await getApplicationSupportDirectory();
-    final dbDir = Directory(path.join(supportDir.path, 'AnnotateIt'));
-    await dbDir.create(recursive: true);
-    final returnPath = path.join(dbDir.path, fileName);
+    final dbDirPath = await getAppDatabaseDirectory();
+    await ensureDirectoryExists(dbDirPath);
+    final returnPath = path.join(dbDirPath, fileName);
     _log.info('Opening database at: $returnPath');
     try {
       return await openDatabase(

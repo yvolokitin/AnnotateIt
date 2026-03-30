@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as img;
@@ -255,12 +256,12 @@ class _ImageDetailsDialogState extends State<ImageDetailsDialog> {
         return;
       }
 
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         final windowsPath = path.replaceAll('/', '\\');
         await Process.run('explorer.exe', ['/select,', windowsPath]);
-      } else if (Platform.isMacOS) {
+      } else if (PlatformUtils.isMacOS) {
         await Process.run('open', ['-R', path]);
-      } else if (Platform.isLinux) {
+      } else if (PlatformUtils.isLinux) {
         await Process.run('xdg-open', [file.parent.path]);
       } else {
         await Process.run('xdg-open', [file.parent.path]);

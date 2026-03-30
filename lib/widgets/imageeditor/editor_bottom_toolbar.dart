@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../utils/platform_utils.dart';
 
 import '../../models/media_item.dart';
 import 'editor_icon_button.dart';
@@ -35,7 +35,7 @@ class EditorBottomToolbar extends StatefulWidget {
 class _EditorBottomToolbarState extends State<EditorBottomToolbar> {
   @override
   Widget build(BuildContext context) {
-    final String fileName = '${widget.currentMedia.filePath.split(Platform.pathSeparator).last}';
+    final String fileName = '${widget.currentMedia.filePath.split(PlatformUtils.pathSeparator).last}';
     final String percent = '${(widget.currentZoom * 100).toStringAsFixed(0)}%';
     final bool isCompact = MediaQuery.of(context).size.width < 1300;
     final bool isMinimal = MediaQuery.of(context).size.width < 860;

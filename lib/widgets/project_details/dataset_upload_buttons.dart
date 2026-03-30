@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import '../../utils/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -74,7 +75,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   Future<void> _uploadMedia(BuildContext context) async {
     try {
       // Pick files/photos depending on platform
-      final bool isCupertino = Platform.isIOS || Platform.isMacOS;
+      final bool isCupertino = PlatformUtils.isIOS || PlatformUtils.isMacOS;
       final List<String> selectedPaths = [];
       final List<String> selectedNames = [];
 
@@ -311,13 +312,13 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
     try {
       logMsg(
         'Platform: ' +
-            Platform.operatingSystem +
+            PlatformUtils.operatingSystem +
             ' ' +
-            Platform.version.split('\n').first,
+            PlatformUtils.operatingSystem,
       );
 
       // Windows-only: Use FfmpegCheckDialog to show progress and perform selection + extraction
-      if (Platform.isWindows) {
+      if (PlatformUtils.isWindows) {
         String? selectedVideoPath;
         String? framesDirPath;
         String? baseName;
@@ -563,7 +564,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
 
       // Android/iOS info dialog (built-in extraction, no FFmpeg needed)
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (PlatformUtils.isAndroid || PlatformUtils.isIOS) {
         final bool? proceedMobile = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -682,7 +683,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
 
       late String videoPath;
       late String fileName;
-      if (Platform.isIOS) {
+      if (PlatformUtils.isIOS) {
         final xfile = await PhotoPickerService.pickSingleVideo();
         if (xfile == null) {
           final pickerError = PhotoPickerService.takeLastError();
@@ -841,7 +842,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       final List<File> frameFiles = [];
 
       // On Windows, skip video_thumbnail (no plugin implementation) and rely on FFmpeg fallback below
-      if (!Platform.isWindows) {
+      if (!PlatformUtils.isWindows) {
         try {
           final probe = await VideoThumbnail.thumbnailData(
             video: videoPath,
@@ -908,7 +909,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       }
 
       int totalExtracted = frameFiles.length;
-      if (!Platform.isWindows) {
+      if (!PlatformUtils.isWindows) {
         logMsg(
           'video_thumbnail extracted frames: ' + totalExtracted.toString(),
         );
@@ -919,7 +920,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
       bool ffmpegResolved = false;
       String? ffmpegError;
       String? ffmpegPathUsed;
-      if (totalExtracted == 0 && Platform.isWindows) {
+      if (totalExtracted == 0 && PlatformUtils.isWindows) {
         logMsg(
           'No frames via video_thumbnail and running on Windows. Trying FFmpeg extraction...',
         );
@@ -965,15 +966,15 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
         // Gracefully handle platforms where extraction is not supported and show diagnostics
         widget.onUploadingChanged(false);
         final String diag = [
-          'Platform: ' + Platform.operatingSystem,
+          'Platform: ' + PlatformUtils.operatingSystem,
           'video path: ' + videoPath,
           if (controllerError != null)
             'video_player error: ' + controllerError!,
           if (firstThumbError != null)
             'video_thumbnail error: ' + firstThumbError!,
-          if (Platform.isWindows)
+          if (PlatformUtils.isWindows)
             'ffmpeg resolved: ' + (ffmpegResolved ? 'YES' : 'NO'),
-          if (Platform.isWindows && ffmpegPathUsed != null)
+          if (PlatformUtils.isWindows && ffmpegPathUsed != null)
             'ffmpeg path: ' + ffmpegPathUsed!,
           if (ffmpegError != null) ffmpegError!,
           'frames dir: ' + runDir.path,
@@ -1229,7 +1230,7 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
   Future<void> _openCamera(BuildContext context) async {
     try {
       // Check if running on Linux
-      if (Platform.isLinux) {
+      if (PlatformUtils.isLinux) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Camera functionality is not supported on Linux"),
@@ -1546,12 +1547,12 @@ class _DatasetUploadButtonsState extends State<DatasetUploadButtons> {
             screenWidth: screenWidth,
             smallScreen: smallScreen,
             onPressed:
-                Platform.isLinux
+                PlatformUtils.isLinux
                     ? null
                     : () async {
                       await _openCamera(context);
                     },
-            tooltip: Platform.isLinux ? 'Camera not supported on Linux' : null,
+            tooltip: PlatformUtils.isLinux ? 'Camera not supported on Linux' : null,
           ),
           SizedBox(width: smallScreen ? 10 : 5),
         ],

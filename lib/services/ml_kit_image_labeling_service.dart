@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 
 import '../models/annotation.dart';
 import '../models/label.dart';
+import '../utils/platform_utils.dart';
 
 /// A service that uses Google ML Kit to label images
 /// This service is only supported on Android and iOS platforms
@@ -46,7 +47,7 @@ class MLKitImageLabelingService {
     
     // Check if the current platform is supported
     // ML Kit is only supported on Android and iOS
-    if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
+    if (kIsWeb || !(PlatformUtils.isAndroid || PlatformUtils.isIOS)) {
       _logger.info('ML Kit services are not supported on this platform');
       _isInitialized = true;
       _isSupported = false;
