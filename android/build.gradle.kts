@@ -13,7 +13,7 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
-    For `DatasetUploadButtons`->`uploadMedia` on iOs and MacOs, when i select photos from galery, i do not see progress bar dialog like for Windows/Androis pltfroms. It should show progress Bar to let user understand the progress, specially it is important when many images selected     project.evaluationDependsOn(":app")
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register<Delete>("clean") {
