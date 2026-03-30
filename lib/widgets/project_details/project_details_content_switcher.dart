@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/label.dart';
 import '../../models/project.dart';
 
-import 'project_view_media_galery.dart';
+import 'project_view_media_gallery.dart';
 import 'project_view_datasets_overview.dart';
 import 'project_view_labels.dart';
 import '../../utils/theme.dart';
@@ -34,7 +34,7 @@ class _ProjectDetailsContentSwitcherState extends State<ProjectDetailsContentSwi
   
   /// Handles upload status changes from child components
   /// 
-  /// This method is called by ProjectViewMediaGalery when the upload status changes.
+  /// This method is called by ProjectViewMediaGallery when the upload status changes.
   /// It updates the local state and notifies the parent component (ProjectDetailsPage)
   /// about the change, allowing it to show a confirmation dialog when the user tries
   /// to navigate away during an active upload.
@@ -67,7 +67,7 @@ class _ProjectDetailsContentSwitcherState extends State<ProjectDetailsContentSwi
   Widget _getSelectedWidget() {
     switch (widget.selectedIndex) {
       case 0:
-        return ProjectViewMediaGalery(
+        return ProjectViewMediaGallery(
           project: widget.project,
           datasetId: widget.project.defaultDatasetId!,
           onUploadStatusChanged: _handleUploadStatusChanged,
@@ -82,7 +82,7 @@ class _ProjectDetailsContentSwitcherState extends State<ProjectDetailsContentSwi
           project: widget.project,
         );
       default:
-        return ProjectViewMediaGalery(
+        return ProjectViewMediaGallery(
           project: widget.project,
           datasetId: widget.project.defaultDatasetId!,
           onUploadStatusChanged: _handleUploadStatusChanged,

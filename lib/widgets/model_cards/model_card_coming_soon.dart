@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../../gen_l10n/app_localizations.dart';
 import '../../utils/theme.dart';
 
-class ModelCardCommingSoon extends StatelessWidget {
+class ModelCardComingSoon extends StatelessWidget {
   final String id;
   final String title;
   final String description;
   final String imageAsset;
 
-  const ModelCardCommingSoon({
+  const ModelCardComingSoon({
     super.key,
     required this.id,
     required this.title,

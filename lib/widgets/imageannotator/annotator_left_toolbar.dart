@@ -144,7 +144,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           SizedBox(height: 6),
 
           // Navigation Button
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.near_me_outlined),
             onTap: () => _selectUserAction(UserAction.navigation),
             isActive: widget.selectedAction == UserAction.navigation,
@@ -154,7 +154,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           // Bounding Box Button (conditionally shown)
           if (annotationDetection) ...[
             ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
+            AppToolbarButton(
               icon: Icon(Icons.format_shapes_rounded),
               onTap: () => _selectUserAction(UserAction.bbox_annotation),
               isActive: widget.selectedAction == UserAction.bbox_annotation,
@@ -165,7 +165,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           // Polygon Annotation Button (only for segmentation)
           if (annotationSegment) ...[
             ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
+            AppToolbarButton(
               icon: Icon(Icons.polyline_outlined),
               onTap: () => _selectUserAction(UserAction.polygon_annotation),
               isActive: widget.selectedAction == UserAction.polygon_annotation,
@@ -176,7 +176,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           // SAM Button (shown for segmentation and detection projects)
           if (annotationSegment || annotationDetection) ...[
             ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
+            AppToolbarButton(
               icon: Icon(Icons.auto_awesome_outlined),
               onTap: widget.isProcessingSAM
                 ? null
@@ -190,7 +190,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           // This is the AI annotation tool for mobile platforms
           if (PlatformUtils.isAndroid || PlatformUtils.isIOS) ...[
             ToolbarDivider(isCompact: isCompact),
-            ToolbarButton(
+            AppToolbarButton(
               // icon: Icon(Icons.auto_awesome),
               icon: CircleAvatar(
                 backgroundColor: Colors.deepPurple,
@@ -214,7 +214,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Reset Zoom Button
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.fit_screen_outlined),
             onTap: widget.onResetZoomPressed,
             tooltip: l10n.toolbarResetZoom,
@@ -222,7 +222,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Dataset Grid Toggle
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.apps_outlined),
             onTap: () {
               setState(() => showDatasetGrid = !showDatasetGrid);
@@ -234,7 +234,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Opacity Settings
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.settings),
             onTap: () => _openAnnotationsSettingsDialog(context),
             isActive: showAnnotationsSettingsDialog,
@@ -243,7 +243,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
 
           // Annotation Names Toggle
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             onTap: () => widget.onShowAnnotationNames(!widget.showAnnotationNames),
             isActive: !widget.showAnnotationNames,
             tooltip: l10n.toolbarToggleAnnotationNames,
@@ -274,7 +274,7 @@ class _AnnotatorLeftToolbarState extends State<AnnotatorLeftToolbar> {
           ),
 
           const Spacer(),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.edit_outlined),
             onTap: widget.onSwitchToEditor,
             tooltip: 'Switch to Image Editor',

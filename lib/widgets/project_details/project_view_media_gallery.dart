@@ -16,7 +16,7 @@ import '../../data/project_database.dart';
 import 'dataset_tab_content.dart';
 import 'dataset_tab_bar.dart';
 
-class ProjectViewMediaGalery extends StatefulWidget {
+class ProjectViewMediaGallery extends StatefulWidget {
   final Project project;
   final String datasetId;
 
@@ -26,7 +26,7 @@ class ProjectViewMediaGalery extends StatefulWidget {
   /// Callback to notify when upload status changes
   final void Function(bool isUploading)? onUploadStatusChanged;
 
-  const ProjectViewMediaGalery({
+  const ProjectViewMediaGallery({
     required this.project,
     required this.datasetId,
     this.onImageDuplicated,
@@ -35,10 +35,10 @@ class ProjectViewMediaGalery extends StatefulWidget {
   });
 
   @override
-  ProjectViewMediaGaleryState createState() => ProjectViewMediaGaleryState();
+  ProjectViewMediaGalleryState createState() => ProjectViewMediaGalleryState();
 }
 
-class ProjectViewMediaGaleryState extends State<ProjectViewMediaGalery>
+class ProjectViewMediaGalleryState extends State<ProjectViewMediaGallery>
     with TickerProviderStateMixin {
   Map<String, List<AnnotatedLabeledMedia>> annotatedMediaByDataset = {};
   bool _dependenciesInitialized = false;

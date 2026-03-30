@@ -50,7 +50,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           SizedBox(height: 6),
 
           // Navigation Button
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.near_me_outlined),
             onTap: () => _selectUserAction(EditorAction.navigation),
             isActive: widget.selectedAction == EditorAction.navigation,
@@ -59,7 +59,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
 
           // Reset Zoom Button
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.fit_screen_outlined),
             onTap: widget.onResetZoomPressed,
             tooltip: l10n.toolbarResetZoom,
@@ -68,7 +68,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
 
           // Crop Button
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.crop),
             onTap: () => _selectUserAction(EditorAction.crop),
             isActive: widget.selectedAction == EditorAction.crop,
@@ -77,7 +77,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
 
           // Rotation Buttons
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.rotate_left_rounded),
             onTap: () => _selectUserAction(EditorAction.rotate_left),
             isActive: widget.selectedAction == EditorAction.rotate_left,
@@ -85,7 +85,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           ),
 
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.rotate_right_rounded),
             onTap: () => _selectUserAction(EditorAction.rotate_right),
             isActive: widget.selectedAction == EditorAction.rotate_right,
@@ -94,7 +94,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           
           // Flip Buttons
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.flip),
             onTap: () => _selectUserAction(EditorAction.flip_horizontal),
             isActive: widget.selectedAction == EditorAction.flip_horizontal,
@@ -102,7 +102,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           ),
           
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.flip_camera_android),
             onTap: () => _selectUserAction(EditorAction.flip_vertical),
             isActive: widget.selectedAction == EditorAction.flip_vertical,
@@ -111,7 +111,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           
           // Brightness and Contrast
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.brightness_6),
             onTap: () => _selectUserAction(EditorAction.brightness),
             isActive: widget.selectedAction == EditorAction.brightness,
@@ -119,7 +119,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           ),
           
           ToolbarDivider(isCompact: isCompact),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.contrast),
             onTap: () => _selectUserAction(EditorAction.contrast),
             isActive: widget.selectedAction == EditorAction.contrast,
@@ -127,7 +127,7 @@ class _EditorLeftToolbarState extends State<EditorLeftToolbar> {
           ),
 
           const Spacer(),
-          ToolbarButton(
+          AppToolbarButton(
             icon: Icon(Icons.border_color_outlined),
             onTap: widget.onSwitchToAnnotator,
             tooltip: 'Switch to Annotator',

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/model_cards/model_card.dart';
 import '../widgets/model_cards/model_card_build_in.dart';
-import '../widgets/model_cards/model_card_comming_soon.dart';
+import '../widgets/model_cards/model_card_coming_soon.dart';
 import '../widgets/model_cards/models_top_bar.dart';
 import '../config/model_registry_urls.dart';
 
@@ -175,7 +175,7 @@ class _ModelPageState extends State<ModelPage> {
                         modelSize: m.modelSize,
                       );
                     } else if (m.id == 'ssd_mobilenet') {
-                      return ModelCardCommingSoon(
+                      return ModelCardComingSoon(
                         id: m.id,
                         title: m.title,
                         description: m.description,

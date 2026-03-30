@@ -60,14 +60,14 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
         children: [
           Row(
             children: [
-              AnnotatorIconButton(
+              AppIconButton(
                 onPressed: widget.onZoomOut,
                 icon: const Icon(Icons.remove, color: Colors.white70, size: 32),                
               ),
               const SizedBox(width: 8),
               Text(percent, style: const TextStyle(color: Colors.white70, fontSize: 20)),
               const SizedBox(width: 8),
-              AnnotatorIconButton(
+              AppIconButton(
                 onPressed: widget.onZoomIn,
                 icon: const Icon(Icons.add, color: Colors.white70, size: 32),
               ),
@@ -98,19 +98,19 @@ class _AnnotatorBottomToolbarState extends State<AnnotatorBottomToolbar> {
           const Spacer(),
           Row(
             children: [
-              AnnotatorIconButton(
+              AppIconButton(
                 onPressed: widget.onPrevImg,
                 icon: const Icon(Icons.keyboard_arrow_left, color: Colors.white70, size: 36),
               ),
               const SizedBox(width: 6),
-              AnnotatorIconButton(
+              AppIconButton(
                 onPressed: widget.onNextImg,
                 icon: const Icon(Icons.keyboard_arrow_right, color: Colors.white70, size: 36),
               ),
 
               if (widget.showUnknownWarning)...[
                 const SizedBox(width: 20),
-                AnnotatorIconButton(
+                AppIconButton(
                   onPressed: widget.onWarning,
                   icon: Icon(
                     Icons.error_outline_rounded,
