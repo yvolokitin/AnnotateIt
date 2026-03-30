@@ -369,11 +369,60 @@ class SamSegmentationService {
       return [r, g, b];
     }
 
-    // Seed color and dynamic region stats
-    final seed = _rgbAtGrid(sx, sy);
-    double meanR = seed[0].toDouble();
-    double meanG = seed[1].toDouble();
-    double meanB = seed[2].toDouble();
+    // Robust seed: median of 3×3 grid neighbourhood
+    final sRs = <int>[], sGs = <int>[], sBs = <int>[];
+    for (int dy = -1; dy <= 1; dy++) {
+      for (int dx = -1; dx <= 1; dx++) {
+        final c = _rgbAtGrid(
+          (sx + dx).clamp(0, gw - 1),
+          (sy + dy).clamp(0, gh - 1),
+        );
+        sRs.add(c[0]); sGs.add(c[1]); sBs.add(c[2]);
+      }
+    }
+    sRs.sort(); sGs.sort(); sBs.sort();
+    double meanR = sRs[4].toDouble();
+    double meanG = sGs[4].toDouble();
+    double meanB = sBs[4].toDouble();
+
+    // 8-neighborhood
+    const dx8 = [-1, 0, 1, -1, 1, -1, 0, 1];
+    const dy8 = [-1, -1, -1, 0, 0, 1, 1, 1];
+
+    bool _inside(int x, int y) => x >= 0 && y >= 0 && x < gw && y < gh;
+
+    // Compute edge map on grid using max-neighbour colour difference
+    final gridGrad = List.generate(gh, (_) => List<double>.filled(gw, 0.0));
+    for (int gy = 1; gy < gh - 1; gy++) {
+      for (int gx = 1; gx < gw - 1; gx++) {
+        final c = _rgbAtGrid(gx, gy);
+        double mx = 0.0;
+        for (int k = 0; k < 8; k++) {
+          final nc = _rgbAtGrid(gx + dx8[k], gy + dy8[k]);
+          final dr = (c[0] - nc[0]).toDouble();
+          final dg = (c[1] - nc[1]).toDouble();
+          final db = (c[2] - nc[2]).toDouble();
+          final d = math.sqrt(dr * dr + dg * dg + db * db);
+          if (d > mx) mx = d;
+        }
+        gridGrad[gy][gx] = mx;
+      }
+    }
+    double gridGradMax = 0.0;
+    for (int y = 0; y < gh; y++) {
+      for (int x = 0; x < gw; x++) {
+        if (gridGrad[y][x] > gridGradMax) gridGradMax = gridGrad[y][x];
+      }
+    }
+    if (gridGradMax > 0) {
+      final inv = 1.0 / gridGradMax;
+      for (int y = 0; y < gh; y++) {
+        for (int x = 0; x < gw; x++) {
+          gridGrad[y][x] *= inv;
+        }
+      }
+    }
+    const double gridGradWeight = 35.0;
 
     // BFS queue
     final qx = <int>[];
@@ -384,15 +433,9 @@ class SamSegmentationService {
     qy.add(sy);
 
     int count = 1;
-    final maxCells = (gw * gh * 0.18).floor().clamp(200, 1000000); // up to ~18% of grid
-    double baseThr = 22.0; // starting threshold (color distance to mean)
-    double maxThr = 62.0;  // cap threshold
-
-    // 8-neighborhood
-    const dx8 = [-1, 0, 1, -1, 1, -1, 0, 1];
-    const dy8 = [-1, -1, -1, 0, 0, 1, 1, 1];
-
-    bool _inside(int x, int y) => x >= 0 && y >= 0 && x < gw && y < gh;
+    final maxCells = (gw * gh * 0.20).floor().clamp(200, 1000000);
+    double baseThr = 24.0;
+    double maxThr = 58.0;
 
     double _distToMean(List<int> c) {
       final dr = c[0] - meanR;
@@ -405,14 +448,12 @@ class SamSegmentationService {
       final x = qx.removeLast();
       final y = qy.removeLast();
 
-      // Update mean towards current pixel (online mean)
       final c = _rgbAtGrid(x, y);
       final w = 1.0 / count;
       meanR = meanR + (c[0] - meanR) * w;
       meanG = meanG + (c[1] - meanG) * w;
       meanB = meanB + (c[2] - meanB) * w;
 
-      // Gradually relax threshold as region grows
       final currThr = (baseThr + (maxThr - baseThr) * (count / maxCells)).clamp(baseThr, maxThr);
 
       for (int k = 0; k < 8; k++) {
@@ -420,7 +461,9 @@ class SamSegmentationService {
         final ny = y + dy8[k];
         if (!_inside(nx, ny) || mask[ny][nx]) continue;
         final col = _rgbAtGrid(nx, ny);
-        if (_distToMean(col) <= currThr) {
+        final colorDist = _distToMean(col);
+        final gradPenalty = gridGrad[ny][nx] * gridGradWeight;
+        if (colorDist + gradPenalty <= currThr) {
           mask[ny][nx] = true;
           qx.add(nx);
           qy.add(ny);
@@ -989,12 +1032,13 @@ Future<List<Offset>> _multiScaleFallback({
 
   // Downscale to reduced RGBA
   final reduced = _downscaleRgbaBilinear(src, w, h, rw, rh);
+  final gradient = _computeGradientMap(reduced, rw, rh);
 
   // Seed at reduced coordinates
   final sx = (tapPoint.dx * scale).clamp(0.0, (rw - 1).toDouble()).round();
   final sy = (tapPoint.dy * scale).clamp(0.0, (rh - 1).toDouble()).round();
 
-  // Region grow on reduced image (flat arrays + bbox-limited)
+  // Edge-aware region grow on reduced image
   final growR = _regionGrowFlat(
     rgba: reduced,
     width: rw,
@@ -1002,6 +1046,7 @@ Future<List<Offset>> _multiScaleFallback({
     seedX: sx,
     seedY: sy,
     bboxRadius: (math.min(rw, rh) * 0.45).round().clamp(24, 512),
+    gradientMap: gradient,
   );
   if (growR == null || growR.count < 12) return <Offset>[];
 
@@ -1120,6 +1165,44 @@ Uint8List _downscaleRgbaBilinear(Uint8List src, int sw, int sh, int dw, int dh) 
   return out;
 }
 
+/// Sobel gradient magnitude on RGBA image, normalized to 0..1.
+/// Strong edges approach 1.0, flat regions approach 0.0.
+Float32List _computeGradientMap(Uint8List rgba, int width, int height) {
+  final n = width * height;
+  final gray = Float32List(n);
+  for (int i = 0; i < n; i++) {
+    final ri = i * 4;
+    gray[i] = 0.299 * rgba[ri] + 0.587 * rgba[ri + 1] + 0.114 * rgba[ri + 2];
+  }
+  final grad = Float32List(n);
+  for (int y = 1; y < height - 1; y++) {
+    for (int x = 1; x < width - 1; x++) {
+      final tl = gray[(y - 1) * width + (x - 1)];
+      final tc = gray[(y - 1) * width + x];
+      final tr = gray[(y - 1) * width + (x + 1)];
+      final ml = gray[y * width + (x - 1)];
+      final mr = gray[y * width + (x + 1)];
+      final bl = gray[(y + 1) * width + (x - 1)];
+      final bc = gray[(y + 1) * width + x];
+      final br = gray[(y + 1) * width + (x + 1)];
+      final gx = -tl + tr - 2.0 * ml + 2.0 * mr - bl + br;
+      final gy = -tl - 2.0 * tc - tr + bl + 2.0 * bc + br;
+      grad[y * width + x] = math.sqrt(gx * gx + gy * gy);
+    }
+  }
+  double maxG = 0.0;
+  for (int i = 0; i < n; i++) {
+    if (grad[i] > maxG) maxG = grad[i];
+  }
+  if (maxG > 0) {
+    final inv = 1.0 / maxG;
+    for (int i = 0; i < n; i++) {
+      grad[i] *= inv;
+    }
+  }
+  return grad;
+}
+
 class _GrowResult {
   final Uint8List mask; // 0/1 per pixel
   final int width;
@@ -1148,16 +1231,15 @@ _GrowResult? _regionGrowFlat({
   required int seedX,
   required int seedY,
   int? bboxRadius,
+  Float32List? gradientMap,
 }) {
   final int n = width * height;
-  final mask = Uint8List(n); // 0/1 visited & accepted
+  final mask = Uint8List(n);
 
   int idx(int x, int y) => (y * width + x) * 4;
   int flat(int x, int y) => y * width + x;
-
   int clampi(int v, int lo, int hi) => v < lo ? lo : (v > hi ? hi : v);
 
-  // ROI bounds (bbox-limited search)
   int minX = 0, minY = 0, maxX = width - 1, maxY = height - 1;
   if (bboxRadius != null) {
     minX = clampi(seedX - bboxRadius, 0, width - 1);
@@ -1166,61 +1248,62 @@ _GrowResult? _regionGrowFlat({
     maxY = clampi(seedY + bboxRadius, 0, height - 1);
   }
 
-  // Seed color
-  final si = idx(seedX, seedY);
-  double meanR = rgba[si].toDouble();
-  double meanG = rgba[si + 1].toDouble();
-  double meanB = rgba[si + 2].toDouble();
+  final grad = gradientMap ?? _computeGradientMap(rgba, width, height);
 
-  // Queue
+  // Robust seed: median of 3×3 neighbourhood (resistant to noise/outliers)
+  final sRs = <int>[], sGs = <int>[], sBs = <int>[];
+  for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -1; dx <= 1; dx++) {
+      final nx = clampi(seedX + dx, 0, width - 1);
+      final ny = clampi(seedY + dy, 0, height - 1);
+      final i = idx(nx, ny);
+      sRs.add(rgba[i]); sGs.add(rgba[i + 1]); sBs.add(rgba[i + 2]);
+    }
+  }
+  sRs.sort(); sGs.sort(); sBs.sort();
+  double meanR = sRs[4].toDouble();
+  double meanG = sGs[4].toDouble();
+  double meanB = sBs[4].toDouble();
+
   final qx = List<int>.filled(n, 0);
   final qy = List<int>.filled(n, 0);
   int head = 0, tail = 0;
 
-  // Thresholds (squared distances to avoid sqrt)
-  double baseThr = 22.0;
-  double maxThr = 62.0;
-  double baseThr2 = baseThr * baseThr;
-  double maxThr2 = maxThr * maxThr;
+  // Thresholds: slightly raised base (gradient handles edge control now)
+  const double baseThr = 24.0;
+  const double maxThr = 58.0;
+  const double baseThr2 = baseThr * baseThr;
+  const double maxThr2 = maxThr * maxThr;
+  // Gradient penalty — a normalized gradient of 0.3 adds 0.09*8000=720 to cost
+  const double gradWeight = 8000.0;
 
-  // Early stop cap
-  final maxCells = math.min(n, math.max(200, (n * 0.22).floor()));
+  final maxCells = math.min(n, math.max(200, (n * 0.25).floor()));
 
-  // 8-neighborhood
   const dx8 = [-1, 0, 1, -1, 1, -1, 0, 1];
   const dy8 = [-1, -1, -1, 0, 0, 1, 1, 1];
 
-  // Enqueue seed
   mask[flat(seedX, seedY)] = 1;
-  qx[tail] = seedX;
-  qy[tail] = seedY;
-  tail++;
+  qx[tail] = seedX; qy[tail] = seedY; tail++;
   int count = 1;
-
   int growMinX = seedX, growMaxX = seedX, growMinY = seedY, growMaxY = seedY;
 
   while (head < tail) {
-    final x = qx[head];
-    final y = qy[head];
-    head++;
+    final x = qx[head]; final y = qy[head]; head++;
 
-    // Update mean (online)
     final ii = idx(x, y);
     final r = rgba[ii].toDouble();
     final g = rgba[ii + 1].toDouble();
     final b = rgba[ii + 2].toDouble();
     final inv = 1.0 / count;
-    meanR = meanR + (r - meanR) * inv;
-    meanG = meanG + (g - meanG) * inv;
-    meanB = meanB + (b - meanB) * inv;
+    meanR += (r - meanR) * inv;
+    meanG += (g - meanG) * inv;
+    meanB += (b - meanB) * inv;
 
-    // Relax threshold over time (squared)
     final t = (count / maxCells).clamp(0.0, 1.0);
     final currThr2 = baseThr2 + (maxThr2 - baseThr2) * t;
 
     for (int k = 0; k < 8; k++) {
-      final nx = x + dx8[k];
-      final ny = y + dy8[k];
+      final nx = x + dx8[k]; final ny = y + dy8[k];
       if (nx < minX || ny < minY || nx > maxX || ny > maxY) continue;
       final fi = flat(nx, ny);
       if (mask[fi] != 0) continue;
@@ -1229,12 +1312,14 @@ _GrowResult? _regionGrowFlat({
       final dr = rgba[pi].toDouble() - meanR;
       final dg = rgba[pi + 1].toDouble() - meanG;
       final db = rgba[pi + 2].toDouble() - meanB;
-      final dist2 = dr * dr + dg * dg + db * db;
-      if (dist2 <= currThr2) {
+      final colorDist2 = dr * dr + dg * dg + db * db;
+
+      final gv = grad[fi];
+      final totalCost = colorDist2 + gradWeight * gv * gv;
+
+      if (totalCost <= currThr2) {
         mask[fi] = 1;
-        qx[tail] = nx;
-        qy[tail] = ny;
-        tail++;
+        qx[tail] = nx; qy[tail] = ny; tail++;
         count++;
         if (nx < growMinX) growMinX = nx;
         if (nx > growMaxX) growMaxX = nx;
@@ -1249,14 +1334,8 @@ _GrowResult? _regionGrowFlat({
   if (count < 8) return null;
 
   return _GrowResult(
-    mask: mask,
-    width: width,
-    height: height,
-    count: count,
-    minX: growMinX,
-    minY: growMinY,
-    maxX: growMaxX,
-    maxY: growMaxY,
+    mask: mask, width: width, height: height, count: count,
+    minX: growMinX, minY: growMinY, maxX: growMaxX, maxY: growMaxY,
   );
 }
 
@@ -1306,6 +1385,7 @@ List<Offset>? _refineLocalFullRes({
 
   final seedXRoi = (sx - bx0).clamp(0, roiW - 1);
   final seedYRoi = (sy - by0).clamp(0, roiH - 1);
+  final roiGrad = _computeGradientMap(roiRgba, roiW, roiH);
 
   final grow = _regionGrowFlat(
     rgba: roiRgba,
@@ -1314,6 +1394,7 @@ List<Offset>? _refineLocalFullRes({
     seedX: seedXRoi,
     seedY: seedYRoi,
     bboxRadius: (math.min(roiW, roiH) * 0.5).round(),
+    gradientMap: roiGrad,
   );
   if (grow == null || grow.count < 12) return null;
 
