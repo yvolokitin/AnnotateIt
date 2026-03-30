@@ -154,16 +154,19 @@ flutter:
           weight: 700
 
 flutter_launcher_icons:
-  image_path: "assets/ios/appstore_icon_noalpha.png"
-  min_sdk_android: 21
+  image_path: "assets/icons/annotateit.png"
+  min_sdk_android: 26
   android: true
   ios: true
+  web:
+    generate: true
+    image_path: "assets/icons/annotateit.png"
   windows:
     generate: true
-    image_path: "assets/ios/appstore_icon_noalpha.png"
+    image_path: "assets/icons/annotateit.png"
   macos:
     generate: true
-    image_path: "assets/ios/appstore_icon_noalpha.png"
+    image_path: "assets/icons/annotateit.png"
 
 version: 4.4.0+31
 msix_config:
@@ -173,7 +176,7 @@ msix_config:
   identity_name: UmnoAI.AnnotateIt
   publisher: CN=C115178E-F1D2-42DB-8DA3-3252207C04BB
   msix_version: 4.3.0.0
-  logo_path: assets/logo/annotateit_white_red.png
+  logo_path: assets/icons/annotateit.png
   sign_msix: false
   full_trust: false
   files:
@@ -194,11 +197,11 @@ flutter_native_splash:
 
   # Light mode → white bg + BLACK logo
   color: "#FFFFFF"
-  image: assets/ios/splash_logo_black.png
+  image: assets/icons/annotateit.png
 
   # Dark mode → dark bg + WHITE logo
   color_dark: "#0B0F1A"
-  image_dark: assets/ios/splash_logo_white.png
+  image_dark: assets/icons/annotateit.png
 
   # Optional (nice on iPad): keep logo centered without stretching
   ios_content_mode: center
