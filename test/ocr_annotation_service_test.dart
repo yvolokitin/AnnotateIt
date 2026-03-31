@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:annotateit/models/ai_result_envelope.dart';
 import 'package:annotateit/models/annotation_review.dart';
 import 'package:annotateit/services/ocr_annotation_service.dart';
 
@@ -46,9 +47,11 @@ void main() {
       expect(annotation.data['fullText'], 'hello world');
       expect((annotation.data['blocks'] as List).length, 1);
       final provenance = annotation.provenance!;
-      expect(provenance['engine'], 'test_engine');
+      expect(provenance['modelName'], 'test_engine');
       expect(provenance['modelVersion'], 'v1');
       expect(provenance['sourceImage'], '/tmp/image.png');
+      expect(provenance['finishReason'], 'success');
+      expect(provenance['backendType'], 'local');
     });
 
     test('supports empty OCR result safely', () async {
@@ -70,6 +73,46 @@ void main() {
 
       expect(annotation.data['fullText'], '');
       expect(annotation.data['blocks'], isEmpty);
+      final provenance = annotation.provenance!;
+      expect(provenance['finishReason'], 'empty');
+    });
+
+    test('recognizeWithEnvelope returns success envelope', () async {
+      final service = OcrAnnotationService(
+        ocrEngine: _FakeOcrEngine(
+          OcrResult(
+            fullText: 'test',
+            blocks: const [OcrTextBlock(text: 'test', bbox: Rect.fromLTWH(0, 0, 10, 10))],
+            engine: 'test_engine',
+            modelVersion: 'v1',
+          ),
+        ),
+      );
+
+      final envelope = await service.recognizeWithEnvelope('/tmp/test.png');
+      expect(envelope.isSuccess, true);
+      expect(envelope.modelName, 'test_engine');
+      expect(envelope.modelVersion, 'v1');
+      expect(envelope.backendType, AiBackendType.local);
+      expect(envelope.payload!.fullText, 'test');
+      expect(envelope.totalLatencyMs, greaterThanOrEqualTo(0));
+    });
+
+    test('recognizeWithEnvelope returns empty for no blocks', () async {
+      final service = OcrAnnotationService(
+        ocrEngine: _FakeOcrEngine(
+          const OcrResult(
+            fullText: '',
+            blocks: [],
+            engine: 'e',
+            modelVersion: 'v',
+          ),
+        ),
+      );
+
+      final envelope = await service.recognizeWithEnvelope('/tmp/empty.png');
+      expect(envelope.finishReason, AiFinishReason.empty);
+      expect(envelope.hasPayload, false);
     });
   });
 }

@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:uuid/uuid.dart';
 
+import '../models/frame_identity.dart';
 import '../session/user_session.dart';
 import '../utils/platform_utils.dart';
+import 'perf_counters.dart';
 
 /// A small, non-UI service encapsulating reusable FFmpeg-related video frame
 /// extraction utilities. Widgets should depend on this service rather than
@@ -143,6 +146,7 @@ class VideoFrameExtractor {
     void _log(String m) {
       if (log != null) log(m);
     }
+    final perfTimer = PerfCounters.instance.startTimer('frame_extraction');
     try {
       final String outPattern = path.join(framesDir, baseName + '_frame_%05d.png');
       _log('Running ffmpeg to extract frames at ' + fps.toString() + ' fps. Using: ' + ffmpegPath);
@@ -174,12 +178,93 @@ class VideoFrameExtractor {
           .whereType<File>()
           .where((f) => f.path.toLowerCase().endsWith('.png'))
           .length;
+      perfTimer.stop();
+      if (produced > 0) {
+        PerfCounters.instance.record(
+          'frame_extraction_throughput',
+          produced / (perfTimer.elapsedMs / 1000.0),
+        );
+      }
       _log('ffmpeg produced PNG files: ' + produced.toString());
       return produced > 0;
     } catch (e) {
+      perfTimer.stop();
       _log('FFmpeg execution failed: ' + e.toString());
       return false;
     }
+  }
+
+  /// Extracts frames and returns an [ExtractionResult] with a [FrameIdentity]
+  /// for every produced file.
+  ///
+  /// [videoId] identifies the source video (typically the media-item UUID).
+  /// [sourceFps] is the native fps of the video (from [VideoMetadata]).
+  /// If [sourceFps] is unknown, pass 0 and the identity will record that.
+  Future<ExtractionResult> extractFramesWithIdentity({
+    required String ffmpegPath,
+    required String videoPath,
+    required String framesDir,
+    required String baseName,
+    required double fps,
+    required String videoId,
+    double sourceFps = 0.0,
+    SamplingPolicy samplingPolicy = SamplingPolicy.fixedFps,
+    void Function(String)? log,
+  }) async {
+    final runId = const Uuid().v4();
+
+    final ok = await extractFramesWithFfmpeg(
+      ffmpegPath: ffmpegPath,
+      videoPath: videoPath,
+      framesDir: framesDir,
+      baseName: baseName,
+      fps: fps,
+      log: log,
+    );
+
+    if (!ok) {
+      return ExtractionResult(
+        extractionRunId: runId,
+        videoId: videoId,
+        samplingFps: fps,
+        sourceFps: sourceFps,
+        samplingPolicy: samplingPolicy,
+        frames: const [],
+      );
+    }
+
+    final dir = Directory(framesDir);
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.toLowerCase().endsWith('.png'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+
+    final frames = <ExtractedFrame>[];
+    for (int i = 0; i < files.length; i++) {
+      final timestampMs = fps > 0 ? (i / fps) * 1000.0 : 0.0;
+      frames.add(ExtractedFrame(
+        filePath: files[i].path,
+        identity: FrameIdentity(
+          videoId: videoId,
+          frameIndex: i,
+          timestampMs: timestampMs,
+          sourceFps: sourceFps,
+          samplingPolicy: samplingPolicy,
+          extractionRunId: runId,
+        ),
+      ));
+    }
+
+    return ExtractionResult(
+      extractionRunId: runId,
+      videoId: videoId,
+      samplingFps: fps,
+      sourceFps: sourceFps,
+      samplingPolicy: samplingPolicy,
+      frames: frames,
+    );
   }
 
   /// Delete all .png files in [framesDir].

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../services/perf_counters.dart';
 import '../../utils/theme.dart';
 
 import '../../models/shape/shape.dart';
@@ -47,6 +48,7 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final perfTimer = PerfCounters.instance.startTimer('annotation_paint');
     paintImage(
       alignment: Alignment.topLeft,
       canvas: canvas,
@@ -225,6 +227,7 @@ class CanvasPainter extends CustomPainter {
     if (samPendingPoint != null) {
       _paintSamCrosshair(canvas, samPendingPoint!);
     }
+    perfTimer.stop();
   }
 
   void _paintSamCrosshair(Canvas canvas, Offset center) {

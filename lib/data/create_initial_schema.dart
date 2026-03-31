@@ -231,6 +231,83 @@ Future<void> createInitialSchema(Database db, int version) async {
       );
     ''');
 
+  // -- Video temporal tables (Step 6) -------------------------------------------
+
+  await db.execute('''
+      CREATE TABLE video_assets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE NOT NULL,
+        media_item_id INTEGER,
+        project_id INTEGER NOT NULL,
+        file_path TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        width INTEGER NOT NULL DEFAULT 0,
+        height INTEGER NOT NULL DEFAULT 0,
+        duration_sec REAL NOT NULL DEFAULT 0.0,
+        fps_nominal REAL NOT NULL DEFAULT 0.0,
+        frame_count_estimate INTEGER NOT NULL DEFAULT 0,
+        codec TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE SET NULL,
+        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+      )
+    ''');
+
+  await db.execute('''
+      CREATE TABLE video_frames (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_asset_id INTEGER NOT NULL,
+        media_item_id INTEGER,
+        frame_index INTEGER NOT NULL,
+        timestamp_ms REAL NOT NULL DEFAULT 0.0,
+        source_fps REAL NOT NULL DEFAULT 0.0,
+        sampling_policy TEXT NOT NULL DEFAULT 'fixedFps',
+        extraction_run_id TEXT NOT NULL,
+        file_path TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(video_asset_id) REFERENCES video_assets(id) ON DELETE CASCADE,
+        FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE SET NULL
+      )
+    ''');
+
+  await db.execute('''
+      CREATE TABLE annotation_tracks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE NOT NULL,
+        video_asset_id INTEGER NOT NULL,
+        label_id INTEGER,
+        status TEXT NOT NULL DEFAULT 'active',
+        annotation_type TEXT NOT NULL DEFAULT 'bbox',
+        review_status TEXT NOT NULL DEFAULT 'draft',
+        reviewed_by INTEGER,
+        reviewed_at TEXT,
+        review_comment TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY(video_asset_id) REFERENCES video_assets(id) ON DELETE CASCADE,
+        FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE SET NULL,
+        FOREIGN KEY(reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    ''');
+
+  await db.execute('''
+      CREATE TABLE track_keyframes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        track_id INTEGER NOT NULL,
+        frame_id INTEGER NOT NULL,
+        geometry TEXT NOT NULL,
+        confidence REAL DEFAULT 1.0,
+        is_manual INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY(track_id) REFERENCES annotation_tracks(id) ON DELETE CASCADE,
+        FOREIGN KEY(frame_id) REFERENCES video_frames(id) ON DELETE CASCADE
+      )
+    ''');
+
+  // -- Indexes -----------------------------------------------------------------
+
   await db.execute(
     'CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(ownerId)',
   );
@@ -257,6 +334,67 @@ Future<void> createInitialSchema(Database db, int version) async {
   );
   await db.execute(
     'CREATE INDEX IF NOT EXISTS idx_dataset_media_folders_folder_id ON dataset_media_folders(folderId)',
+  );
+
+  // Video temporal indexes
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_video_assets_project ON video_assets(project_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_video_assets_media_item ON video_assets(media_item_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_video_frames_video_asset ON video_frames(video_asset_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_video_frames_asset_index ON video_frames(video_asset_id, frame_index)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_video_frames_run ON video_frames(extraction_run_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotation_tracks_video ON annotation_tracks(video_asset_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotation_tracks_label ON annotation_tracks(label_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_track_keyframes_track ON track_keyframes(track_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_track_keyframes_frame ON track_keyframes(frame_id)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_annotation_tracks_review ON annotation_tracks(review_status)',
+  );
+
+  // -- AI jobs table (Step 13) -------------------------------------------------
+
+  await db.execute('''
+      CREATE TABLE ai_jobs (
+        id TEXT PRIMARY KEY NOT NULL,
+        capability TEXT NOT NULL,
+        idempotency_key TEXT,
+        status TEXT NOT NULL DEFAULT 'queued',
+        progress INTEGER NOT NULL DEFAULT -1,
+        started_at TEXT,
+        finished_at TEXT,
+        error_code TEXT,
+        error_message TEXT,
+        payload TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_ai_jobs_status ON ai_jobs(status)',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_ai_jobs_capability ON ai_jobs(capability)',
+  );
+  await db.execute(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_jobs_idempotency ON ai_jobs(idempotency_key) WHERE idempotency_key IS NOT NULL',
   );
 }
 

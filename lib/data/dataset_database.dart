@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/frame_identity.dart';
 import '../models/label.dart';
 import '../models/dataset.dart';
 import '../models/media_item.dart';
@@ -215,6 +216,7 @@ class DatasetDatabase {
     double? fps,
     String? source,
     Uint8List? imageData,
+    FrameIdentity? frameIdentity,
   }) async {
     final type =
         (ext.toLowerCase() == 'mp4' || ext.toLowerCase() == 'mov')
@@ -238,6 +240,7 @@ class DatasetDatabase {
       lastAnnotatedDate: null,
       numberOfFrames: type == MediaType.video ? numberOfFrames : null,
       imageData: imageData,
+      frameIdentity: frameIdentity,
     );
 
     final db = await database;

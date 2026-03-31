@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+import '../models/ai_result_envelope.dart';
 import '../session/user_session.dart';
 
 class DetectionResult {
@@ -305,5 +306,45 @@ class TFLiteDetectionService {
     }
 
     return results;
+  }
+
+  /// Runs detection and wraps the result in an [AiResultEnvelope].
+  Future<AiResultEnvelope<List<DetectionResult>>> detectImageWithEnvelope(
+    File file, {
+    double scoreThreshold = 0.30,
+    String modelId = defaultDetectionModelId,
+  }) async {
+    final sw = Stopwatch()..start();
+    try {
+      final results = await detectImage(file, scoreThreshold: scoreThreshold);
+      sw.stop();
+
+      if (results.isEmpty) {
+        return AiResultEnvelope.empty(
+          modelName: modelId,
+          modelVersion: '1.0',
+          totalLatencyMs: sw.elapsedMilliseconds,
+          provenance: {'sourceFile': file.path},
+        );
+      }
+
+      return AiResultEnvelope.success(
+        modelName: modelId,
+        modelVersion: '1.0',
+        inferenceLatencyMs: sw.elapsedMilliseconds,
+        totalLatencyMs: sw.elapsedMilliseconds,
+        payload: results,
+        provenance: {'sourceFile': file.path},
+      );
+    } catch (e) {
+      sw.stop();
+      return AiResultEnvelope.error(
+        modelName: modelId,
+        modelVersion: '1.0',
+        totalLatencyMs: sw.elapsedMilliseconds,
+        errorMessage: e.toString(),
+        provenance: {'sourceFile': file.path},
+      );
+    }
   }
 }

@@ -34,6 +34,8 @@ import '../widgets/imageannotator/annotator_canvas.dart';
 import '../widgets/imageannotator/user_action.dart';
 
 import '../widgets/app_snackbar.dart';
+import '../widgets/timeline/timeline_scrubber.dart';
+import '../controllers/timeline_controller.dart';
 import '../utils/sam_model_utils.dart';
 import '../utils/platform_utils.dart';
 import '../utils/media_bytes_helper.dart';
@@ -139,6 +141,9 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   String _samModelKey = 'mobile';
 
   final FocusNode _focusNode = FocusNode();
+
+  // Timeline controller for video frame navigation
+  final TimelineController _timelineController = TimelineController();
 
   _MediaOperationContext? _captureCurrentMediaContext() {
     final media = _mediaCache[_currentIndex];
@@ -263,6 +268,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   void dispose() {
     _focusNode.dispose();
     _pageController.dispose();
+    _timelineController.dispose();
     for (final image in _imageCache.values) {
       image.dispose();
     }
@@ -696,6 +702,7 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
     if (media != null) {
       _mediaCache[index] = media;
       await _loadImage(index, media.mediaItem.filePath, mediaItemId: media.mediaItem.id);
+      if (index == _currentIndex) _updateTimelineForMedia(index);
       if (mounted) setState(() {});
     }
   }
@@ -746,20 +753,30 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
   void _handlePageChange(int index) {
     setState(() {
       _currentIndex = index;
-      // Clear selection when changing images
       _selectedAnnotation = null;
     });
 
-    // Ensure the current page's media is loaded when navigating (e.g., wrap-around jumps)
     if (!_mediaCache.containsKey(index)) {
       _loadMedia(index);
     } else if (!_imageCache.containsKey(index) &&
         !_invalidMediaCache.containsKey(index)) {
-      // In case media is cached but image wasn't decoded yet
       _loadImage(index, _mediaCache[index]!.mediaItem.filePath, mediaItemId: _mediaCache[index]!.mediaItem.id);
     }
 
+    _updateTimelineForMedia(index);
     _preloadAdjacentImages(index);
+  }
+
+  void _updateTimelineForMedia(int index) {
+    final media = _mediaCache[index]?.mediaItem;
+    if (media == null || !media.isVideo) return;
+
+    final frameCount = media.numberOfFrames ?? 0;
+    final fps = media.fps ?? 30.0;
+    _timelineController.configure(
+      totalFrames: frameCount > 0 ? frameCount : 1,
+      sourceFps: fps > 0 ? fps : 30.0,
+    );
   }
 
   void _preloadAdjacentImages(int currentIndex) {
@@ -1477,6 +1494,10 @@ class _AnnotatorPageState extends State<AnnotatorPage> {
                                       ),
                                     ),
                                   ),
+                                  if (media.mediaItem.isVideo)
+                                    TimelineScrubber(
+                                      controller: _timelineController,
+                                    ),
                                   AnnotatorBottomToolbar(
                                     currentZoom: _currentZoom,
                                     currentMedia: media.mediaItem,

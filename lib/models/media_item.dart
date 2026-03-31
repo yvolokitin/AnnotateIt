@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'frame_identity.dart';
+
 enum MediaType { image, video }
 
 class MediaItem {
@@ -21,6 +23,11 @@ class MediaItem {
   final int? numberOfFrames;
   final Uint8List? imageData;
 
+  /// Transient frame identity — populated when a media item represents an
+  /// extracted video frame. Not persisted in the current schema; will be
+  /// stored in dedicated tables after the DB migration (Step 6).
+  final FrameIdentity? frameIdentity;
+
   MediaItem({
     this.id,
     required this.uuid,
@@ -39,6 +46,7 @@ class MediaItem {
     this.lastAnnotatedDate,
     this.numberOfFrames,
     this.imageData,
+    this.frameIdentity,
   });
 
   Map<String, dynamic> toMap() {
@@ -146,6 +154,7 @@ class MediaItem {
       lastAnnotatedDate: lastAnnotatedDate,
       numberOfFrames: numberOfFrames,
       imageData: imageData,
+      frameIdentity: frameIdentity,
     );
   }
 }

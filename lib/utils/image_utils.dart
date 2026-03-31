@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path;
 
 import '../models/media_item.dart';
@@ -9,27 +8,33 @@ import '../models/annotated_labeled_media.dart';
 
 import '../data/dataset_database.dart';
 import '../data/annotation_database.dart';
+import '../services/perf_counters.dart';
 import '../session/user_session.dart';
+import 'compute_helpers.dart';
 
 Future<File?> generateThumbnailFromImage(File imageFile, String projectId) async {
   try {
-    // read original image and decode
-    final originalBytes = await imageFile.readAsBytes();
-    final originalImage = img.decodeImage(originalBytes);
-    if (originalImage == null) return null;
+    final timer = PerfCounters.instance.startTimer('thumbnail_generation');
 
-    // resize for thumbnail to use less space from original image
-    final thumbnailImage = img.copyResize(originalImage, width: 460);
-    final thumbnailBytes = img.encodeJpg(thumbnailImage);
+    final originalBytes = await imageFile.readAsBytes();
+    final thumbnailBytes = await decodeAndResizeInIsolate(
+      originalBytes,
+      targetWidth: 460,
+      jpegQuality: 85,
+    );
+    if (thumbnailBytes == null) {
+      timer.stop();
+      return null;
+    }
 
     final thumbnailsFolder = await UserSession.instance.getCurrentUserThumbnailFolder();
     final thumbnailsDir = Directory(thumbnailsFolder);
 
-    // save thumbnail in the file system
     final thumbnailPath = path.join(thumbnailsDir.path, '$projectId.jpg');
     final thumbnailFile = File(thumbnailPath);
     await thumbnailFile.writeAsBytes(thumbnailBytes);
 
+    timer.stop();
     if (kDebugMode) print('Thumbnail created at: $thumbnailPath');
     return thumbnailFile;
 

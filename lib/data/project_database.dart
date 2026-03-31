@@ -145,6 +145,210 @@ class ProjectDatabase {
     }
   }
 
+  /// Migration: add video_assets, video_frames, annotation_tracks, and
+  /// track_keyframes tables for temporal video annotation workflow.
+  ///
+  /// Rollback: DROP TABLE IF EXISTS track_keyframes, annotation_tracks,
+  ///           video_frames, video_assets  (reverse dependency order).
+  Future<void> _migrateVideoTemporalTables(Database db) async {
+    try {
+      // Check if migration already applied (video_assets is the anchor table).
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='video_assets'",
+      );
+      if (tables.isNotEmpty) return;
+
+      _log.info('Migration: creating video temporal tables…');
+
+      // -- 1. video_assets: source video file and its probed metadata.
+      // Rollback: DROP TABLE IF EXISTS video_assets;
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS video_assets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          uuid TEXT UNIQUE NOT NULL,
+          media_item_id INTEGER,
+          project_id INTEGER NOT NULL,
+          file_path TEXT NOT NULL,
+          file_name TEXT NOT NULL,
+          width INTEGER NOT NULL DEFAULT 0,
+          height INTEGER NOT NULL DEFAULT 0,
+          duration_sec REAL NOT NULL DEFAULT 0.0,
+          fps_nominal REAL NOT NULL DEFAULT 0.0,
+          frame_count_estimate INTEGER NOT NULL DEFAULT 0,
+          codec TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE SET NULL,
+          FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+      ''');
+
+      // -- 2. video_frames: each extracted frame linked to a video_asset via
+      //    the FrameIdentity contract (videoId, frameIndex, timestampMs, etc.).
+      // Rollback: DROP TABLE IF EXISTS video_frames;
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS video_frames (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          video_asset_id INTEGER NOT NULL,
+          media_item_id INTEGER,
+          frame_index INTEGER NOT NULL,
+          timestamp_ms REAL NOT NULL DEFAULT 0.0,
+          source_fps REAL NOT NULL DEFAULT 0.0,
+          sampling_policy TEXT NOT NULL DEFAULT 'fixedFps',
+          extraction_run_id TEXT NOT NULL,
+          file_path TEXT,
+          created_at TEXT NOT NULL,
+          FOREIGN KEY(video_asset_id) REFERENCES video_assets(id) ON DELETE CASCADE,
+          FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE SET NULL
+        )
+      ''');
+
+      // -- 3. annotation_tracks: temporal annotation tracks spanning frames.
+      // Rollback: DROP TABLE IF EXISTS annotation_tracks;
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS annotation_tracks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          uuid TEXT UNIQUE NOT NULL,
+          video_asset_id INTEGER NOT NULL,
+          label_id INTEGER,
+          status TEXT NOT NULL DEFAULT 'active',
+          annotation_type TEXT NOT NULL DEFAULT 'bbox',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY(video_asset_id) REFERENCES video_assets(id) ON DELETE CASCADE,
+          FOREIGN KEY(label_id) REFERENCES labels(id) ON DELETE SET NULL
+        )
+      ''');
+
+      // -- 4. track_keyframes: user-set anchor points within a track; geometry
+      //    is JSON (bbox, polygon, etc.) to be interpolated between keyframes.
+      // Rollback: DROP TABLE IF EXISTS track_keyframes;
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS track_keyframes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          track_id INTEGER NOT NULL,
+          frame_id INTEGER NOT NULL,
+          geometry TEXT NOT NULL,
+          confidence REAL DEFAULT 1.0,
+          is_manual INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY(track_id) REFERENCES annotation_tracks(id) ON DELETE CASCADE,
+          FOREIGN KEY(frame_id) REFERENCES video_frames(id) ON DELETE CASCADE
+        )
+      ''');
+
+      // -- 5. Indexes for temporal query patterns.
+      // Rollback: indexes are dropped automatically with their tables.
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_video_assets_project ON video_assets(project_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_video_assets_media_item ON video_assets(media_item_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_video_frames_video_asset ON video_frames(video_asset_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_video_frames_asset_index ON video_frames(video_asset_id, frame_index)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_video_frames_run ON video_frames(extraction_run_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_annotation_tracks_video ON annotation_tracks(video_asset_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_annotation_tracks_label ON annotation_tracks(label_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_track_keyframes_track ON track_keyframes(track_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_track_keyframes_frame ON track_keyframes(frame_id)');
+
+      _log.info('Migration: video temporal tables created successfully.');
+    } catch (e, stack) {
+      _log.severe('Migration _migrateVideoTemporalTables failed', e, stack);
+    }
+  }
+
+  /// Migration: add review workflow columns to annotation_tracks.
+  ///
+  /// Adds review_status, reviewed_by, reviewed_at, review_comment columns
+  /// for the draft → proposed → accepted/rejected lifecycle.
+  ///
+  /// Rollback: these are nullable/defaulted columns; no data loss on rollback
+  /// but the columns would remain (SQLite does not support DROP COLUMN < 3.35).
+  Future<void> _migrateTrackReviewColumns(Database db) async {
+    try {
+      final columns = await db.rawQuery(
+        'PRAGMA table_info(annotation_tracks)',
+      );
+      if (columns.isEmpty) return; // table doesn't exist yet
+
+      bool hasColumn(String name) =>
+          columns.any((row) => row['name'] == name);
+
+      if (!hasColumn('review_status')) {
+        await db.execute(
+          "ALTER TABLE annotation_tracks ADD COLUMN review_status TEXT NOT NULL DEFAULT 'draft'",
+        );
+      }
+      if (!hasColumn('reviewed_by')) {
+        await db.execute(
+          'ALTER TABLE annotation_tracks ADD COLUMN reviewed_by INTEGER',
+        );
+      }
+      if (!hasColumn('reviewed_at')) {
+        await db.execute(
+          'ALTER TABLE annotation_tracks ADD COLUMN reviewed_at TEXT',
+        );
+      }
+      if (!hasColumn('review_comment')) {
+        await db.execute(
+          'ALTER TABLE annotation_tracks ADD COLUMN review_comment TEXT',
+        );
+      }
+
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_annotation_tracks_review ON annotation_tracks(review_status)',
+      );
+
+      _log.info('Migration: track review columns ensured.');
+    } catch (e, stack) {
+      _log.severe('Migration _migrateTrackReviewColumns failed', e, stack);
+    }
+  }
+
+  /// Migration: create the ai_jobs persistence table.
+  ///
+  /// Rollback: DROP TABLE IF EXISTS ai_jobs;
+  Future<void> _migrateAiJobsTable(Database db) async {
+    try {
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='ai_jobs'",
+      );
+      if (tables.isNotEmpty) return;
+
+      _log.info('Migration: creating ai_jobs table…');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ai_jobs (
+          id TEXT PRIMARY KEY NOT NULL,
+          capability TEXT NOT NULL,
+          idempotency_key TEXT,
+          status TEXT NOT NULL DEFAULT 'queued',
+          progress INTEGER NOT NULL DEFAULT -1,
+          started_at TEXT,
+          finished_at TEXT,
+          error_code TEXT,
+          error_message TEXT,
+          payload TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ai_jobs_status ON ai_jobs(status)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ai_jobs_capability ON ai_jobs(capability)',
+      );
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_jobs_idempotency ON ai_jobs(idempotency_key) WHERE idempotency_key IS NOT NULL',
+      );
+
+      _log.info('Migration: ai_jobs table created successfully.');
+    } catch (e, stack) {
+      _log.severe('Migration _migrateAiJobsTable failed', e, stack);
+    }
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
 
@@ -175,6 +379,9 @@ class ProjectDatabase {
           await _migrateAnnotationsSchemaAndReview(db);
           await _migrateAddMediaItemImageData(db);
           await _migrateEnsureIndexes(db);
+          await _migrateVideoTemporalTables(db);
+          await _migrateTrackReviewColumns(db);
+          await _migrateAiJobsTable(db);
         },
         singleInstance: true,
       );

@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../models/ai_result_envelope.dart';
 import '../session/user_session.dart';
 
 class ClassificationResult {
@@ -539,5 +540,51 @@ class TFLiteClassificationService {
       return chosen.sublist(0, maxResults);
     }
     return chosen;
+  }
+
+  /// Runs classification and wraps the result in an [AiResultEnvelope].
+  Future<AiResultEnvelope<List<ClassificationResult>>>
+      classifyImageWithEnvelope(
+    File file, {
+    double confidenceThreshold = 0.6,
+    int maxResults = 10,
+    String modelId = defaultClassificationModelId,
+  }) async {
+    final sw = Stopwatch()..start();
+    try {
+      final results = await classifyImageMulti(
+        file,
+        confidenceThreshold: confidenceThreshold,
+        maxResults: maxResults,
+      );
+      sw.stop();
+
+      if (results.isEmpty) {
+        return AiResultEnvelope.empty(
+          modelName: modelId,
+          modelVersion: '1.0',
+          totalLatencyMs: sw.elapsedMilliseconds,
+          provenance: {'sourceFile': file.path},
+        );
+      }
+
+      return AiResultEnvelope.success(
+        modelName: modelId,
+        modelVersion: '1.0',
+        inferenceLatencyMs: sw.elapsedMilliseconds,
+        totalLatencyMs: sw.elapsedMilliseconds,
+        payload: results,
+        provenance: {'sourceFile': file.path},
+      );
+    } catch (e) {
+      sw.stop();
+      return AiResultEnvelope.error(
+        modelName: modelId,
+        modelVersion: '1.0',
+        totalLatencyMs: sw.elapsedMilliseconds,
+        errorMessage: e.toString(),
+        provenance: {'sourceFile': file.path},
+      );
+    }
   }
 }
