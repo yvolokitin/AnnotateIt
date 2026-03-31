@@ -157,20 +157,23 @@ class _ModelCardState extends State<ModelCard> {
   @override
   void initState() {
     super.initState();
-    _checkAlreadyDownloaded();
+    if (!PlatformUtils.isWeb) {
+      _checkAlreadyDownloaded();
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Revalidate download status when dependencies change (e.g., on page return)
-    _checkAlreadyDownloaded();
+    if (!PlatformUtils.isWeb) {
+      _checkAlreadyDownloaded();
+    }
   }
 
   @override
   void didUpdateWidget(covariant ModelCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the model id or URLs change, re-check the files on disk
+    if (PlatformUtils.isWeb) return;
     if (oldWidget.id != widget.id ||
         oldWidget.urlEncoder != widget.urlEncoder ||
         oldWidget.urlDecoder != widget.urlDecoder ||
@@ -434,6 +437,17 @@ class _ModelCardState extends State<ModelCard> {
 
   Future<void> _downloadModel() async {
     if (_downloading) return;
+
+    if (PlatformUtils.isWeb) {
+      AppSnackbar.show(
+        context,
+        'Model download is not available on web. Please use the desktop app to download models.',
+        backgroundColor: Colors.orangeAccent,
+        textColor: Colors.black,
+        saveToDb: false,
+      );
+      return;
+    }
 
     if (!_hasDownloadSources) {
       AppSnackbar.show(
@@ -732,8 +746,7 @@ class _ModelCardState extends State<ModelCard> {
     final radius = BorderRadius.circular(16);
     final darkGreen = Colors.lightGreen[900]!;
 
-    // Ensure we re-check status after rebuilds (e.g., returning to page)
-    if (!_postFrameCheckScheduled) {
+    if (!PlatformUtils.isWeb && !_postFrameCheckScheduled) {
       _postFrameCheckScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -846,6 +859,25 @@ class _ModelCardState extends State<ModelCard> {
                           style: theme.textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                      ] else if (PlatformUtils.isWeb) ...[
+                        Row(
+                          children: [
+                            Icon(Icons.cloud_off_rounded,
+                                color: Colors.white.withValues(alpha: 0.35),
+                                size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Download available on desktop app',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.45),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ] else if (_downloaded) ...[
                         Row(

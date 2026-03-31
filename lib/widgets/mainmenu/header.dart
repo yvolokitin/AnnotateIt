@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/notification_database.dart';
@@ -49,12 +50,6 @@ class AppHeaderState extends State<AppHeader> {
     );
   }
 
-  double _getHeaderHeight(double width) {
-    if (width >= 1600) return 72;
-    if (width >= 1200) return 64;
-    return 56;
-  }
-
   Widget _buildNotificationBadge({required double iconSize}) {
     return Stack(
       children: [
@@ -63,7 +58,7 @@ class AppHeaderState extends State<AppHeader> {
           icon: Icon(
             Icons.notifications_none_rounded,
             size: iconSize,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.55),
           ),
           tooltip: 'Notifications',
         ),
@@ -74,12 +69,13 @@ class AppHeaderState extends State<AppHeader> {
             child: Container(
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.accent,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
+                    color: AppColors.accent.withValues(alpha: 0.4),
+                    blurRadius: 6,
+                    spreadRadius: 1,
                   ),
                 ],
               ),
@@ -89,7 +85,7 @@ class AppHeaderState extends State<AppHeader> {
                     ? '99+'
                     : _unreadNotificationCount.toString(),
                 style: const TextStyle(
-                  color: AppColors.accent,
+                  color: Colors.white,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -104,103 +100,176 @@ class AppHeaderState extends State<AppHeader> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final headerHeight = _getHeaderHeight(screenWidth);
+    final isCompact = screenWidth < 800;
 
-    return Container(
-      height: headerHeight,
-      decoration: const BoxDecoration(
-        gradient: AppColors.headerGradient,
-      ),
-      child: screenWidth < 800
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Thin gradient accent strip
+        Container(
+          height: 3,
+          decoration: const BoxDecoration(
+            gradient: AppColors.headerGradient,
+          ),
+        ),
+
+        // Dark header bar
+        Container(
+          height: isCompact ? 48 : 52,
+          color: AppColors.darkRail,
+          padding: EdgeInsets.symmetric(horizontal: isCompact ? 12 : 16),
+          child: Row(
+            children: [
+              // Logo + wordmark together
+              _buildBranding(isCompact: isCompact, screenWidth: screenWidth),
+
+              const Spacer(),
+
+              // Exported datasets button (desktop only)
+              if (!isCompact)
+                _HeaderIconButton(
+                  icon: Icons.folder_zip_outlined,
+                  tooltip: 'Exported datasets',
                   onPressed: _showExportedDatasetsDialog,
-                  icon: Icon(
-                    Icons.folder_zip_outlined,
-                    size: 22,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
                 ),
-                Expanded(
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.asset(
-                            'assets/icons/annotateit.jpg',
-                            height: 28,
-                            width: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'AnnotateIt',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+
+              const SizedBox(width: 2),
+
+              // Notifications
+              _buildNotificationBadge(iconSize: 20),
+
+              // Debug badge
+              if (kDebugMode) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentOrange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.accentOrange.withValues(alpha: 0.4),
+                      width: 1,
                     ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(right: 4),
-                  child: _buildNotificationBadge(iconSize: 22),
-                ),
-              ],
-            )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(width: screenWidth > 1600 ? 20 : 12),
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    'assets/icons/annotateit.jpg',
-                    height: headerHeight - 20,
-                    width: headerHeight - 20,
-                  ),
-                ),
-
-                const Spacer(),
-
-                Container(
-                  height: headerHeight,
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth > 600 ? 16 : 8),
                   child: Text(
-                    screenWidth > 1600
-                        ? 'AnnotateIt — Vision Annotations'
-                        : 'AnnotateIt',
+                    'DEV',
                     style: TextStyle(
-                      fontSize: screenWidth > 1600 ? 26 : (screenWidth > 1200 ? 22 : 18),
+                      fontSize: 9,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
-                      color: Colors.white,
+                      letterSpacing: 0.8,
+                      color: AppColors.accentOrange.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
-
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: _buildNotificationBadge(
-                    iconSize: screenWidth > 1200 ? 26 : 22,
-                  ),
-                ),
-
-                SizedBox(width: screenWidth > 500 ? 12 : 4),
               ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBranding({
+    required bool isCompact,
+    required double screenWidth,
+  }) {
+    final iconSize = isCompact ? 26.0 : 30.0;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Icon with gradient glow ring
+        Container(
+          width: iconSize + 4,
+          height: iconSize + 4,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: const LinearGradient(
+              colors: [AppColors.gradientStart, AppColors.accent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+          ),
+          padding: const EdgeInsets.all(1.5),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.5),
+            child: Image.asset(
+              'assets/icons/annotateit.jpg',
+              height: iconSize,
+              width: iconSize,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 10),
+
+        // Wordmark
+        Text(
+          screenWidth > 1600 ? 'AnnotateIt' : 'AnnotateIt',
+          style: TextStyle(
+            fontSize: isCompact ? 16 : 18,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            color: Colors.white.withValues(alpha: 0.92),
+          ),
+        ),
+
+        // Subtitle on very wide screens
+        if (screenWidth > 1600) ...[
+          const SizedBox(width: 8),
+          Container(
+            width: 1,
+            height: 16,
+            color: Colors.white.withValues(alpha: 0.15),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Vision Annotations',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: Colors.white.withValues(alpha: 0.4),
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(
+              icon,
+              size: 20,
+              color: Colors.white.withValues(alpha: 0.45),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
